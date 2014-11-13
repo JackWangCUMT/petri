@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IA_Robot", "IA_Robot\IA_Robot.csproj", "{44093B74-2725-4C42-9FD8-A8246E04275B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{44093B74-2725-4C42-9FD8-A8246E04275B}.Debug|x86.ActiveCfg = Debug|x86
+		{44093B74-2725-4C42-9FD8-A8246E04275B}.Debug|x86.Build.0 = Debug|x86
+		{44093B74-2725-4C42-9FD8-A8246E04275B}.Release|x86.ActiveCfg = Release|x86
+		{44093B74-2725-4C42-9FD8-A8246E04275B}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = IA_Robot\IA_Robot.csproj
+	EndGlobalSection
+EndGlobal
