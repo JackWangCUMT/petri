@@ -16,6 +16,7 @@
 #include <vector>
 #include <future>
 #include "KillableThread.h"
+#include "Callable.h"
 
 template<typename _ReturnType>
 class ThreadPool {
