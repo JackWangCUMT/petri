@@ -21,7 +21,7 @@ namespace Petri
 			}
 
 			if(this.exitPoint == null)
-				throw new Exception("No Exit node found in the saved statechart!");
+				throw new Exception("No Exit node found in the saved Petri net!");
 		}
 
 		public ExitPoint ExitPoint {

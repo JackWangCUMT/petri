@@ -85,7 +85,9 @@ namespace Petri
 
 			if(fc.Run() == (int)ResponseType.Accept) {
 				this.path = fc.Filename;
-				Window.Title = System.IO.Path.GetFileName(fc.Filename);
+				if(!this.path.EndsWith(".petri"))
+					this.path += ".petri";
+				Window.Title = System.IO.Path.GetFileName(this.path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
 				fc.Destroy();
 			}
 			else {
@@ -211,7 +213,7 @@ namespace Petri
 
 					stateChart = new RootPetriNet(this, elem.Element("PetriNet"));
 					stateChart.Canonize();
-					Window.Title = System.IO.Path.GetFileName(path);
+					Window.Title = System.IO.Path.GetFileName(this.path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
 					this.Dirty = true;
 					Controller.Modified = false;
 				}
@@ -221,7 +223,7 @@ namespace Petri
 				d.AddButton("OK", ResponseType.Cancel);
 				d.Run();
 				d.Destroy();
-				Console.WriteLine("Error during statechart loading: {0}", e.Message);
+				Console.WriteLine("Error during Petri net loading: {0}", e.Message);
 
 				if(oldPetriNet != null) {
 					// The document was already open and the user-requested restore failed for some reason. What could we do?

@@ -77,7 +77,7 @@ namespace Petri
 				});
 
 			var filter = new FileFilter();
-			filter.AddPattern("*.stct");
+			filter.AddPattern("*.petri");
 			fc.AddFilter(filter);
 
 			if(fc.Run() == (int)ResponseType.Accept) {
@@ -89,7 +89,7 @@ namespace Petri
 					}
 				}
 
-				// Reuse last virgin document which was created (typically the first one created on program launch)
+				// Reuse last blank document which was created (typically the first one created on program launch)
 				if(documents.Count > 0 && !documents[documents.Count - 1].Dirty) {
 					documents[documents.Count - 1].Path = fc.Filename;
 					documents[documents.Count - 1].Restore();
