@@ -60,7 +60,8 @@ namespace Statechart
 
 		protected override bool OnButtonPressEvent(Gdk.EventButton ev)
 		{
-			if(ev.Type == Gdk.EventType.ButtonPress/* || ev.Type == Gdk.EventType.TwoButtonPress*/) {
+			if(ev.Type == Gdk.EventType.ButtonPress) {
+				// The Windows version of GTK# currently doesn't detect TwoButtonPress events, so here is a lame simulation of it.
 				if(/*ev.Type == Gdk.EventType.TwoButtonPress || */(lastClickPosition.X == ev.X && lastClickPosition.Y == ev.Y && (DateTime.Now - lastClickDate).TotalMilliseconds < 500)) {
 					lastClickPosition.X = -12345;
 					if(ev.Button == 1) {

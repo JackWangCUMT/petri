@@ -184,15 +184,11 @@ namespace Statechart
 
 			public static string RegexPattern {
 				get {
-					// Matches C++ template specialization of a type (which may contain (), <>, :, letters, numbers, white spaces…
-					// Probably not complete due to horrible syntax disambiguation needed…
-					string templatePattern = @"([ ]*<([^>]*>[ ]*([> ]|::[ ]*[a-zA-Z0-9_()]*)*))?";
-
 					// Matches const and volatile qualifiers as well as pointer and reference specifiers
-					string constVolatilePattern = @"(((const|volatile))*[ ]*[&\* ]*)*";
+					string constVolatilePattern = @"(((const|volatile))*[ ]*[&\* ?]*)*";
 
 					// Matches the cv-qualifiers, the potential virtual, the type name, its template specialization, again cv-qualifiers (may be found before or after the type…)
-					string typePattern = @"[ ]*(?<type>(" + constVolatilePattern + @"(virtual[ ]+)?[:a-zA-Z_][:a-zA-Z0-9_]*" + templatePattern + constVolatilePattern + @"))";
+					string typePattern = @"[ ]*(?<type>(" + constVolatilePattern + @"(virtual[ ]+)?[:a-zA-Z_][:a-zA-Z0-9_]*" + Parser.TemplatePattern + constVolatilePattern + @"))";
 					return typePattern;
 				}
 			}

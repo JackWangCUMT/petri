@@ -331,19 +331,19 @@ namespace Statechart
 		ConditionBase newCondition, oldCondition;
 	}
 
-	public class InvokationChangeAction : GuiAction {
-		public InvokationChangeAction(Action a, Cpp.FunctionInvokation i) {
+	public class InvocationChangeAction : GuiAction {
+		public InvocationChangeAction(Action a, Cpp.FunctionInvocation i) {
 			action = a;
-			oldInvokation = a.Function;
-			this.newInvokation = i;
+			oldInvocation = a.Function;
+			this.newInvocation = i;
 		}
 
 		public override void Apply() {
-			action.Function = newInvokation;
+			action.Function = newInvocation;
 		}
 
 		public override GuiAction Reverse() {
-			return new InvokationChangeAction(action, oldInvokation); 
+			return new InvocationChangeAction(action, oldInvocation); 
 		}
 
 		public override object Focus {
@@ -359,7 +359,7 @@ namespace Statechart
 		}
 
 		Action action;
-		Cpp.FunctionInvokation newInvokation, oldInvokation;
+		Cpp.FunctionInvocation newInvocation, oldInvocation;
 	}
 
 	public class AddTransitionAction : GuiAction {

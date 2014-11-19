@@ -32,11 +32,21 @@ namespace Statechart
 			foreach(var f in ff) {
 				Console.WriteLine(f.Signature);
 			}
-			var f2 = ff[7];
-			var i = new Cpp.MethodInvokation((Cpp.Method)f2, new Cpp.LitteralExpression("patata"), true, new Cpp.LitteralExpression("myVec"));
+			var s = Cpp.Expression.CreateFromString<Cpp.Expression>("c3(b+c)* \"huhuihuhiu\" - f4('g'[456+3])", null, ff);
+			Console.WriteLine(s.MakeUserReadable());
+			var s2 = Cpp.Expression.CreateFromString<Cpp.Expression>("a<(b+3)*4", null, ff);
+			Console.WriteLine(s2.MakeUserReadable());
+			var s3 = Cpp.Expression.CreateFromString<Cpp.Expression>("getA().AA::init2(42<c3(42+7))", null, ff);
+			Console.WriteLine(s3.MakeUserReadable());
+			return;*/
+
+			/*var f2 = ff[7];
+			var i = new Cpp.MethodInvocation((Cpp.Method)f2, new Cpp.LitteralExpression("patata"), true, new Cpp.LitteralExpression("myVec"));
 			Console.WriteLine(i.MakeUserReadable());
 			var expr = Cpp.Expression.CreateFromString<Cpp.Expression>("(::f2()).AA::print(f3(\"fjioejo\", 42))", null, ff);
-			Console.WriteLine(expr.MakeUserReadable());*/
+			Console.WriteLine(expr.MakeUserReadable());
+			return*/
+
 			Application.Init();
 
 			var doc = new Document("");

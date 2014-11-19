@@ -17,7 +17,7 @@ namespace Statechart
 		public class Function
 		{
 			// With 'enclosing', you can create a static method, or a namespace-enclosed function
-			public Function(Type returnType, Scope enclosing, string name)
+			public Function(Type returnType, Scope enclosing, string name, bool template)
 			{
 				this.ReturnType = returnType;
 				this.Name = name.Trim();
@@ -32,6 +32,11 @@ namespace Statechart
 			}
 
 			public string Name {
+				get;
+				private set;
+			}
+
+			public bool Template {
 				get;
 				private set;
 			}
@@ -88,13 +93,13 @@ namespace Statechart
 			
 			public static string StaticInlinePattern {
 				get {
-					return "((?<static>((static)?)) ?(inline)?)";
+					return "((?<static>((static)?)) ?(inline)?) ";
 				}
 			}
 
 			public static string FunctionPattern {
 				get {
-					return @"^" + Function.StaticInlinePattern + " ?" + Type.RegexPattern + @" ?" + Parser.NamePattern + " ?" + Function.ParameterPattern;// + Parser.DeclarationEndPattern;
+					return @"^(" + Function.StaticInlinePattern + " )?" + Type.RegexPattern + @" ?" + Parser.NamePattern + " ?" + Function.ParameterPattern;// + Parser.DeclarationEndPattern;
 				}
 			}
 
@@ -106,7 +111,7 @@ namespace Statechart
 		}
 
 		public class Method : Function {
-			public Method(Type classType, Type returnType, string name, string attrib) : base(returnType, Scope.MakeFromClass(classType), name) {
+			public Method(Type classType, Type returnType, string name, string attrib, bool template) : base(returnType, Scope.MakeFromClass(classType), name, template) {
 				Attributes = attrib;
 				Class = classType;
 			}
@@ -136,7 +141,7 @@ namespace Statechart
 
 			public static string MethodPattern {
 				get {
-					return @"^" + Function.StaticInlinePattern + " ?" + Type.RegexPattern + @" ?" + Parser.NamePattern + " ?" + Function.ParameterPattern + " ?" + AttributesPattern + " ?";// + Parser.DeclarationEndPattern;
+					return @"^(" + Function.StaticInlinePattern + " )?" + Type.RegexPattern + @" " + Parser.NamePattern + " ?" + Function.ParameterPattern + " ?" + AttributesPattern + " ?";// + Parser.DeclarationEndPattern;
 				}
 			}
 

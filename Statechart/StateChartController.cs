@@ -16,11 +16,11 @@ namespace Statechart
 			cppActions = new List<Cpp.Function>();
 			cppConditions = new List<Cpp.Function>();
 
-			var timeout = new Cpp.Function(new Cpp.Type("Timeout", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "Timeout");
+			var timeout = new Cpp.Function(new Cpp.Type("Timeout", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "Timeout", false);
 			timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>", Cpp.Scope.EmptyScope()), "timeout"));
 			cppConditions.Add(timeout);
 
-			var defaultAction = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "defaultAction");
+			var defaultAction = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "defaultAction", false);
 			defaultAction.AddParam(new Cpp.Param(new Cpp.Type("Action *", Cpp.Scope.EmptyScope()), "action"));
 			cppActions.Insert(0, defaultAction);
 
@@ -309,7 +309,7 @@ namespace Statechart
 									a.Function = a.DefaultAction();
 								}
 								else if(val == manual) {
-									EditInvokation(a, val == manual, objectList, objectIndentation, editorFields);
+									EditInvocation(a, val == manual, objectList, objectIndentation, editorFields);
 								}
 								else {
 									var f = cppActions.Find(delegate(Cpp.Function ff) {
@@ -321,21 +321,21 @@ namespace Statechart
 										for(int i = 0; i < f.Parameters.Count; ++i) {
 											pp.Add(new Cpp.EmptyExpression());
 										}
-										Cpp.FunctionInvokation invokation;
+										Cpp.FunctionInvocation invocation;
 										if(f is Cpp.Method) {
-											invokation = new Cpp.MethodInvokation(f as Cpp.Method, new Cpp.EmptyExpression(), false, pp.ToArray());
+											invocation = new Cpp.MethodInvocation(f as Cpp.Method, new Cpp.EmptyExpression(), false, pp.ToArray());
 										}
 										else {
-											invokation = new Cpp.FunctionInvokation(f, pp.ToArray());
+											invocation = new Cpp.FunctionInvocation(f, pp.ToArray());
 										}
-										PostAction(ModifLocation.Function, new InvokationChangeAction(a, invokation));
-										EditInvokation(a, val == manual, objectList, objectIndentation, editorFields);
+										PostAction(ModifLocation.Function, new InvocationChangeAction(a, invocation));
+										EditInvocation(a, val == manual, objectList, objectIndentation, editorFields);
 									}
 								}
 							}
 						};
 
-						EditInvokation(a, activeFunction == manual, objectList, objectIndentation, editorFields);
+						EditInvocation(a, activeFunction == manual, objectList, objectIndentation, editorFields);
 					}
 				}
 				else if(value is InnerStateChart) {
@@ -369,7 +369,7 @@ namespace Statechart
 					var condition = CreateWidget<Entry>(objectList, objectIndentation, 0, t.Condition.MakeUserReadable());
 					condition.FocusOutEvent += (obj, eventInfo) => {
 						try {
-							var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, t, CppConditions));
+							var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, t, AllFunctions));
 							PostAction(ModifLocation.Condition, cond);
 						}
 						catch(Exception e) {
@@ -397,7 +397,7 @@ namespace Statechart
 
 		private enum ModifLocation {None, EntityChange, Name, RequiredTokens, Active, Function, Condition, Param0}; 
 	
-		private void EditInvokation(Action a, bool manual, List<Widget> objectList, List<int> objectIndentation, List<Widget> editorFields) {
+		private void EditInvocation(Action a, bool manual, List<Widget> objectList, List<int> objectIndentation, List<Widget> editorFields) {
 			foreach(var e in editorFields) {
 				int i = objectList.IndexOf(e);
 				objectList.Remove(e);
@@ -408,16 +408,16 @@ namespace Statechart
 			if(!a.IsDefault()) {
 				if(manual) {
 					CreateWidget<Label>(objectList, objectIndentation, 0, "Invocation de l'action :");
-					var invokation = CreateWidget<Entry>(objectList, objectIndentation, 0, a.Function.MakeUserReadable());
-					editorFields.Add(invokation);
-					invokation.FocusOutEvent += (obj, eventInfo) => {
-						Cpp.FunctionInvokation funcInvokation = null;
+					var invocation = CreateWidget<Entry>(objectList, objectIndentation, 0, a.Function.MakeUserReadable());
+					editorFields.Add(invocation);
+					invocation.FocusOutEvent += (obj, eventInfo) => {
+						Cpp.FunctionInvocation funcInvocation = null;
 						try {
-							funcInvokation = Cpp.Expression.CreateFromString<Cpp.FunctionInvokation>((obj as Entry).Text, a, this.AllFunctions);
-							if(!funcInvokation.Function.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()))) {
-								throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvokation.Function.ReturnType.ToString() + " trouvé.");
+							funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, this.AllFunctions);
+							if(!funcInvocation.Function.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()))) {
+								throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
 							}
-							PostAction(ModifLocation.Function, new InvokationChangeAction(a, funcInvokation));
+							PostAction(ModifLocation.Function, new InvocationChangeAction(a, funcInvocation));
 						}
 						catch(Exception ex) {
 							MessageDialog d = new MessageDialog(document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "L'expression spécifiée est invalide (" + ex.Message + ").");
@@ -431,7 +431,7 @@ namespace Statechart
 				}
 				else {
 					if(a.Function.Function is Cpp.Method) {
-						var method = a.Function as Cpp.MethodInvokation;
+						var method = a.Function as Cpp.MethodInvocation;
 						var editorHeader = CreateWidget<Label>(objectList, objectIndentation, 20, "Objet *this de type " + method.Function.Enclosing.ToString() + " :");
 						editorFields.Add(editorHeader);
 
@@ -448,7 +448,7 @@ namespace Statechart
 										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, this.AllFunctions));
 								}
 							}
-							PostAction(ModifLocation.Function, new InvokationChangeAction(a, new Cpp.MethodInvokation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, this.AllFunctions), false, args.ToArray())));
+							PostAction(ModifLocation.Function, new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, this.AllFunctions), false, args.ToArray())));
 						};
 					}
 					for(int i = 0; i < a.Function.Function.Parameters.Count; ++i) {
@@ -469,14 +469,14 @@ namespace Statechart
 										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, this.AllFunctions));
 								}
 							}
-							Cpp.FunctionInvokation invokation;
+							Cpp.FunctionInvocation invocation;
 							if(a.Function.Function is Cpp.Method) {
-								invokation = new Cpp.MethodInvokation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, this.AllFunctions), false, args.ToArray());
+								invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, this.AllFunctions), false, args.ToArray());
 							}
 							else {
-								invokation = new Cpp.FunctionInvokation(a.Function.Function, args.ToArray());
+								invocation = new Cpp.FunctionInvocation(a.Function.Function, args.ToArray());
 							}
-							PostAction(ModifLocation.Function, new InvokationChangeAction(a, invokation));
+							PostAction(ModifLocation.Function, new InvocationChangeAction(a, invocation));
 						};
 					}
 				}

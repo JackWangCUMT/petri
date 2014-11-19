@@ -173,6 +173,14 @@ namespace Statechart
 				}
 			}
 
+			public static string TemplatePattern {
+				get {
+					// Matches C++ template specialization of a type (which may contain (), <>, :, letters, numbers, white spaces…
+					// Probably not complete due to horrible syntax disambiguation needed…
+					return @"(?<template>([ ]*<([^>]*>[ ]*([> ]|::[ ]*[a-zA-Z0-9_()]*)*))?)";
+				}
+			}
+
 			public static string DeclarationEndPattern {
 				get {
 					return @" ?(;|{)[.]*";
@@ -195,7 +203,7 @@ namespace Statechart
 				System.Text.RegularExpressions.Match match = Function.Regex.Match(l);
 
 				if(match.Success) {
-					Function function = new Function(new Type(match.Groups["type"].Value, Cpp.Scope.EmptyScope()), enclosing, match.Groups["name"].Value);
+					Function function = new Function(new Type(match.Groups["type"].Value, Cpp.Scope.EmptyScope()), enclosing, match.Groups["name"].Value, match.Groups["template"].Value != "");
 
 					Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + NamePattern + ")?");
 					string[] parameters = match.Groups["parameters"].Value.Split(',');
@@ -220,7 +228,7 @@ namespace Statechart
 				var match = Method.Regex.Match(l);
 
 				if(match.Success) {
-					var meth = new Method(classType, new Type(match.Groups["type"].Value, Cpp.Scope.EmptyScope()), match.Groups["name"].Value, match.Groups["attributes"].Value);
+					var meth = new Method(classType, new Type(match.Groups["type"].Value, Cpp.Scope.EmptyScope()), match.Groups["name"].Value, match.Groups["attributes"].Value, match.Groups["template"].Value != "");
 
 					Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + NamePattern + ")?");
 					string[] parameters = match.Groups["parameters"].Value.Split(',');

@@ -20,7 +20,7 @@ namespace Statechart
 		}
 
 		public Action(Document doc, StateChart parent, XElement descriptor, IEnumerable<Cpp.Function> functions) : base(doc, parent, descriptor) {
-			this.Function = Cpp.Expression.CreateFromString<Cpp.FunctionInvokation>(descriptor.Attribute("Function").Value, this, functions);
+			this.Function = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>(descriptor.Attribute("Function").Value, this, functions);
 		}
 
 		public override XElement GetXml() {
@@ -34,13 +34,13 @@ namespace Statechart
 			element.SetAttributeValue("Function", this.Function.MakeUserReadable());
 		}
 
-		public Cpp.FunctionInvokation DefaultAction() {
-			var f = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "defaultAction");
+		public Cpp.FunctionInvocation DefaultAction() {
+			var f = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "defaultAction", false);
 			f.AddParam(new Cpp.Param(new Cpp.Type("Action *", Cpp.Scope.EmptyScope()), "action"));
-			return new Statechart.Cpp.FunctionInvokation(f, new Statechart.Cpp.EntityExpression(this, "this")); 
+			return new Statechart.Cpp.FunctionInvocation(f, new Statechart.Cpp.EntityExpression(this, "this")); 
 		}
 
-		public Cpp.FunctionInvokation Function {
+		public Cpp.FunctionInvocation Function {
 			get {
 				return function;
 			}
@@ -72,7 +72,7 @@ namespace Statechart
 			source += "stateChart->addAction(" + this.CppName + ", " + ((this.Active && (this.Parent is RootStateChart)) ? "true" : "false") + ");";
 		}
 
-		Cpp.FunctionInvokation function;
+		Cpp.FunctionInvocation function;
 	}
 }
 

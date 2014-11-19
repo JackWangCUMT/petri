@@ -4,8 +4,8 @@ using System.Collections.Generic;
 namespace Statechart
 {
 	namespace Cpp {
-		public class FunctionInvokation : Expression {
-			public FunctionInvokation(Function function, params Expression[] arguments) : base(Cpp.Operator.Name.FunCall) {
+		public class FunctionInvocation : Expression {
+			public FunctionInvocation(Function function, params Expression[] arguments) : base(Cpp.Operator.Name.FunCall) {
 				if(arguments.Length != function.Parameters.Count) {
 					throw new Exception("Invalid arguments count");
 				}
@@ -27,10 +27,6 @@ namespace Statechart
 			public Cpp.Function Function {
 				get;
 				private set;
-			}
-
-			public virtual LogicalOperator Operator2() {
-				return LogicalOperator.None;
 			}
 
 			public override string MakeCpp() {
@@ -55,8 +51,8 @@ namespace Statechart
 			}
 		}
 
-		public class MethodInvokation : FunctionInvokation {
-			public MethodInvokation(Method function, Expression that, bool indirection, params Expression[] arguments) : base(function, arguments) {
+		public class MethodInvocation : FunctionInvocation {
+			public MethodInvocation(Method function, Expression that, bool indirection, params Expression[] arguments) : base(function, arguments) {
 				this.This = that;
 				this.Indirection = indirection;
 			}
