@@ -19,7 +19,9 @@
 #include <thread>
 #include <deque>
 #include "Log.h"
-#include "PetriUtils.h"
+#include "Commun.h"
+
+using namespace std::chrono_literals;
 
 class Action;
 class Transition;

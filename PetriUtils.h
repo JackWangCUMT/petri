@@ -11,7 +11,7 @@
 #include <functional>
 #include "Log.h"
 #include "Condition.h"
-#include "Commun.h"
+#include "Petri.h"
 
 using namespace std::chrono_literals;
 
@@ -84,6 +84,11 @@ namespace PetriUtils {
 	};
 }
 
-#include "Petri.h"
+namespace PetriUtils {
+	ResultatAction defaultAction(Action *a) {
+		logInfo("Action " + a->name() + ", ID " + std::to_string(a->ID()) + " exécutée.");
+		return ResultatAction::REUSSI;
+	}
+}
 
 #endif

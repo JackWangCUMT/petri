@@ -178,7 +178,7 @@ namespace Petri
 			}
 		}
 
-		public override void GenerateCpp(Cpp.Generator source, IDManager lastID) {
+		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			string bName = this.Before.CppName;
 			string aName = this.After.CppName;
 
@@ -213,6 +213,8 @@ namespace Petri
 			source += this.CppName + "->setName(\"" + this.Name + "\");";
 			source += this.CppName + "->setID(" + this.ID.ToString() + ");";
 			source += bName + "->addTransition(" + this.CppName + ");";
+
+			return "";
 		}
 
 		private State before;

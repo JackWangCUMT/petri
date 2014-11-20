@@ -64,7 +64,7 @@ namespace Petri
 					if(commentStart == -1)
 						s2 += c;
 				}
-				s2 = s;
+				s = s2;
 
 				// Removing leading and trailling whitespaces 
 				while(s.Contains("\n "))
@@ -116,9 +116,9 @@ namespace Petri
 					if(l == "{")
 						++braces;
 					else if(l == "}") {
-						--braces;
 						if(currentScope.Count > 1 && currentScope.Peek().Item2 == braces)
 							currentScope.Pop();
+						--braces;
 					}
 
 					var match = Regex.Match(l, ClassDeclaration);
@@ -126,13 +126,12 @@ namespace Petri
 						Visibility vis = Visibility.Public;
 						if(l.StartsWith("class"))
 							vis = Visibility.Private;
-
-						currentScope.Push(Tuple.Create(Scope.MakeFromClass(new Type(match.Groups["name"].Value, currentScope.Peek().Item1)), braces, vis));
+						currentScope.Push(Tuple.Create(Scope.MakeFromClass(new Type(match.Groups["name"].Value, currentScope.Peek().Item1)), braces + 1, vis));
 					}
 
 					match = Regex.Match(l, NamespaceDeclaration);
 					if(match.Success) {
-						currentScope.Push(Tuple.Create(Scope.MakeFromScopes(currentScope.Peek().Item1, Scope.MakeFromNamespace(match.Groups["name"].Value, currentScope.Peek().Item1)), braces, Visibility.Public));
+						currentScope.Push(Tuple.Create(Scope.MakeFromScopes(currentScope.Peek().Item1, Scope.MakeFromNamespace(match.Groups["name"].Value, currentScope.Peek().Item1)), braces + 1, Visibility.Public));
 					}
 
 					// If we are in a class, change the visibility of its members according to their visibility specifiers
@@ -151,16 +150,19 @@ namespace Petri
 						}
 					}
 
-					if(currentScope.Count == 1 || currentScope.Peek().Item1.IsNamespace || (l.Contains("static") && currentScope.Peek().Item3 == Visibility.Public)) {
-						var function = ParseFunction(l, currentScope.Peek().Item1, filename);
-						if(function != null) {
-							functions.Add(function);
+					// Make sure that we don't go inside a function or method body
+ 					if(braces == currentScope.Peek().Item2) {
+						if(currentScope.Count == 1 || currentScope.Peek().Item1.IsNamespace || (l.Contains("static") && currentScope.Peek().Item3 == Visibility.Public)) {
+							var function = ParseFunction(l, currentScope.Peek().Item1, filename);
+							if(function != null) {
+								functions.Add(function);
+							}
 						}
-					}
-					else if(currentScope.Peek().Item3 == Visibility.Public) {
-						var m = ParseMethod(l, filename, currentScope.Peek().Item1.Class);
-						if(m != null)
-							functions.Add(m);
+						else if(currentScope.Peek().Item3 == Visibility.Public) {
+							var m = ParseMethod(l, filename, currentScope.Peek().Item1.Class);
+							if(m != null)
+								functions.Add(m);
+						}
 					}
 				}
 

@@ -202,7 +202,7 @@ namespace Petri
 
 				var list = new List<string>();
 				string defaultFunction = "Afficher ID + Nom action";
-				string manual = ("Manuel…");
+				string manual = "Manuel…";
 				list.Add(defaultFunction);
 				list.Add(manual);
 				foreach(var func in document.Controller.CppActions) {
@@ -264,31 +264,31 @@ namespace Petri
 			}
 			editorFields.Clear();
 
-			if(!a.IsDefault()) {
-				if(manual) {
-					CreateWidget<Label>(objectList, objectIndentation, 0, "Invocation de l'action :");
-					var invocation = CreateWidget<Entry>(objectList, objectIndentation, 0, a.Function.MakeUserReadable());
-					editorFields.Add(invocation);
-					invocation.FocusOutEvent += (obj, eventInfo) => {
-						Cpp.FunctionInvocation funcInvocation = null;
-						try {
-							funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, document.Controller.AllFunctions);
-							if(!funcInvocation.Function.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()))) {
-								throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
-							}
-							PostAction(ModifLocation.Function, new InvocationChangeAction(a, funcInvocation));
+			if(manual) {
+				CreateWidget<Label>(objectList, objectIndentation, 0, "Invocation de l'action :");
+				var invocation = CreateWidget<Entry>(objectList, objectIndentation, 0, a.Function.MakeUserReadable());
+				editorFields.Add(invocation);
+				invocation.FocusOutEvent += (obj, eventInfo) => {
+					Cpp.FunctionInvocation funcInvocation = null;
+					try {
+						funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, document.Controller.AllFunctions);
+						if(!funcInvocation.Function.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()))) {
+							throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
 						}
-						catch(Exception ex) {
-							MessageDialog d = new MessageDialog(document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "L'expression spécifiée est invalide (" + ex.Message + ").");
-							d.AddButton("Annuler", ResponseType.Cancel);
-							d.Run();
-							d.Destroy();
+						PostAction(ModifLocation.Function, new InvocationChangeAction(a, funcInvocation));
+					}
+					catch(Exception ex) {
+						MessageDialog d = new MessageDialog(document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "L'expression spécifiée est invalide (" + ex.Message + ").");
+						d.AddButton("Annuler", ResponseType.Cancel);
+						d.Run();
+						d.Destroy();
 
-							(obj as Entry).Text = a.Function.MakeUserReadable();
-						}
-					};
-				}
-				else {
+						(obj as Entry).Text = a.Function.MakeUserReadable();
+					}
+				};
+			}
+			else {
+				if(!a.IsDefault()) {
 					if(a.Function.Function is Cpp.Method) {
 						var method = a.Function as Cpp.MethodInvocation;
 						var editorHeader = CreateWidget<Label>(objectList, objectIndentation, 20, "Objet *this de type " + method.Function.Enclosing.ToString() + " :");

@@ -36,7 +36,7 @@ namespace Petri
 			}
 		}
 
-		public override void GenerateCpp(Cpp.Generator source, IDManager lastID) {
+		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			string name = this.EntryPointName;
 
 			// Adding an entry point
@@ -51,6 +51,8 @@ namespace Petri
 			source += "stateChart->addAction(" + name + ", " + "false" + ");";
 
 			base.GenerateCpp(source, lastID);
+
+			return "";
 		}
 
 		ExitPoint exitPoint;

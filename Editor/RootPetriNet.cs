@@ -61,15 +61,21 @@ namespace Petri
 			return source;
 		}
 
-		public override void GenerateCpp(Cpp.Generator source, IDManager lastID) {
+		public string GetHash() {
+			var source = new Cpp.Generator();
+
+			var hash = this.GenerateCpp(source, new IDManager(Document.LastEntityID));
+
+			return hash;
+		}
+
+		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			source.AddHeader("\"PetriUtils.h\"");
 			foreach(var s in Document.Controller.Headers) {
 				source.AddHeader("\"" + s + "\"");
 			}
 
 			source += "namespace MyPetriNet {";
-
-			source += "ResultatAction defaultAction(Action *a) {\nlogInfo(\"Action \" + a->name() + \", ID \" + std::to_string(a->ID()) + \" exécutée.\");\nreturn ResultatAction::REUSSI;\n}\n";
 
 			source += "inline std::unique_ptr<PetriNet> create() {";
 			source += "auto stateChart = std::make_unique<PetriNet>();";
@@ -83,7 +89,17 @@ namespace Petri
 
 			source += "}"; // create()
 
+			string toHash = source.Value;
+
+			System.Security.Cryptography.SHA1 sha = new System.Security.Cryptography.SHA1CryptoServiceProvider(); 
+			// This is one implementation of the abstract class SHA1.
+			string hash = BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(toHash)));
+
+			source += "inline std::string getHash() {\nreturn \"" + hash + "\";\n}";
+
 			source += "}"; // namespace <State Chart Name>
+
+			return hash;
 		}
 
 		// Use this to scale down the IDs of Actions (resp. Transitions) to 0...N, with N = number of Actions (resp. Transitions)

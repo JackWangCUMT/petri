@@ -37,9 +37,13 @@ namespace Petri
 		}
 
 		public Cpp.FunctionInvocation DefaultAction() {
-			var f = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "defaultAction", false);
+			return new Petri.Cpp.FunctionInvocation(Action.DefaultFunction(), new Petri.Cpp.EntityExpression(this, "this")); 
+		}
+
+		public static Cpp.Function DefaultFunction() {
+			var f = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope()), "defaultAction", false);
 			f.AddParam(new Cpp.Param(new Cpp.Type("Action *", Cpp.Scope.EmptyScope()), "action"));
-			return new Petri.Cpp.FunctionInvocation(f, new Petri.Cpp.EntityExpression(this, "this")); 
+			return f;
 		}
 
 		public Cpp.FunctionInvocation Function {
@@ -61,10 +65,10 @@ namespace Petri
 
 		public bool IsDefault()
 		{
-			return this.Function.Function.Name == "defaultAction";
+			return this.Function.Function.Name == "defaultAction" && this.Function.Function.Enclosing.Equals(Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope()));
 		}
 
-		public override void GenerateCpp(Cpp.Generator source, IDManager lastID) {
+		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			source += "auto " + this.CppName + " = std::make_shared<Action>();";
 			source += this.CppName + "->setAction(" + this.Function.MakeCpp() + ");";
 			source += this.CppName + "->setRequiredTokens(" + this.RequiredTokens.ToString() + ");";
@@ -72,6 +76,8 @@ namespace Petri
 			source += this.CppName + "->setName(\"" + this.Parent.Name + "_" + this.Name + "\");";
 			source += this.CppName + "->setID(" + this.ID.ToString() + ");";
 			source += "stateChart->addAction(" + this.CppName + ", " + ((this.Active && (this.Parent is RootPetriNet)) ? "true" : "false") + ");";
+
+			return "";
 		}
 
 		Cpp.FunctionInvocation function;

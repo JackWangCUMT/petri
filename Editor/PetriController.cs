@@ -20,9 +20,9 @@ namespace Petri
 			timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>", Cpp.Scope.EmptyScope()), "timeout"));
 			cppConditions.Add(timeout);
 
-			var defaultAction = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "defaultAction", false);
-			defaultAction.AddParam(new Cpp.Param(new Cpp.Type("Action *", Cpp.Scope.EmptyScope()), "action"));
+			var defaultAction = Action.DefaultFunction();
 			cppActions.Insert(0, defaultAction);
+			allFunctions.Insert(0, defaultAction);
 
 			this.headers = new List<string>();
 			editor = EntityEditor.GetEditor(null, doc);

@@ -139,7 +139,7 @@ namespace Petri
 			}
 		}
 
-		public override void GenerateCpp(Cpp.Generator source, IDManager lastID) {
+		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			foreach(State s in this.States) {
 				s.GenerateCpp(source, lastID);
 			}
@@ -150,14 +150,8 @@ namespace Petri
 			}
 
 			source += "\n";
-
-			/*foreach(var s in this.States) {
-				if(s is InnerPetriNet)
-					continue;
-
-				// this is RootPetriNet: the active states
-				source += "stateChart->addAction(" + s.CppName + ", " + ((s.Active && this is RootPetriNet) ? "true" : "false") + ");";
-			}*/
+		
+			return "";
 		}
 
 		// Recursively gets all of the Action/PetriNet

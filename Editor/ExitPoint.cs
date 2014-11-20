@@ -49,7 +49,7 @@ namespace Petri
 			return false;
 		}
 
-		public override void GenerateCpp(Cpp.Generator source, IDManager lastID) {
+		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			source += "auto " + this.CppName + " = std::make_shared<Action>();";
 			source += this.CppName + "->setAction(" + "make_callable_ptr([](){ return ResultatAction::REUSSI; })" + ");";
 			source += this.CppName + "->setRequiredTokens(" + this.RequiredTokens.ToString() + ");";
@@ -57,6 +57,8 @@ namespace Petri
 			source += this.CppName + "->setName(\"" + this.Parent.Name + "_" + this.Name + "\");";
 			source += this.CppName + "->setID(" + this.ID.ToString() + ");";
 			source += "stateChart->addAction(" + this.CppName + ", " + "false" + ");";
+
+			return "";
 		}
 	}
 }
