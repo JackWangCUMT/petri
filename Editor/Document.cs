@@ -174,7 +174,7 @@ namespace Petri
 				}
 			}
 
-			window.Drawing.EditedPetriNet = null;
+			window.PetriView.EditedPetriNet = null;
 			Controller.EditedObject = null;
 
 			var oldPetriNet = stateChart;
@@ -237,9 +237,9 @@ namespace Petri
 				}
 			}
 			Controller.PetriNet = stateChart;
-			window.Drawing.EditedPetriNet = stateChart;
+			window.PetriView.EditedPetriNet = stateChart;
 
-			window.Drawing.Redraw();
+			window.PetriView.Redraw();
 		}
 
 		public void SaveCpp()

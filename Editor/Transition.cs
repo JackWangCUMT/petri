@@ -22,7 +22,7 @@ namespace Petri
 			//this.After.AddTransitionBefore(this);
 
 			this.shiftAgainstAxis = new PointD(0, 0);
-			this.shiftAmplitude = Drawing.Norm(this.Direction());
+			this.shiftAmplitude = PetriView.Norm(this.Direction());
 
 			base.Position = new PointD(0, 0);
 
@@ -81,7 +81,7 @@ namespace Petri
 
 		public void UpdatePosition()
 		{
-			double norm = Drawing.Norm(this.Direction());
+			double norm = PetriView.Norm(this.Direction());
 			PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
 			this.Position = new PointD(center.X + shiftAgainstAxis.X * norm / ((shiftAmplitude > 1e-3) ? shiftAmplitude : 1), center.Y + shiftAgainstAxis.Y * norm / ((shiftAmplitude > 1e-3) ? shiftAmplitude : 1));
 			Document.Controller.Modified = true;
@@ -114,7 +114,7 @@ namespace Petri
 
 				// Prevents access during construction
 				if(this.After != null) {
-					shiftAmplitude = Drawing.Norm(this.Direction());
+					shiftAmplitude = PetriView.Norm(this.Direction());
 					PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
 					shiftAgainstAxis = new PointD(value.X - center.X, value.Y - center.Y);
 					Document.Controller.Modified = true;

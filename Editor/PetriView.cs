@@ -7,7 +7,7 @@ using System.Linq;
 namespace Petri
 {
 	[System.ComponentModel.ToolboxItem(true)]
-	public class Drawing : Gtk.DrawingArea
+	public class PetriView : Gtk.DrawingArea
 	{
 
 		public enum CurrentAction
@@ -19,7 +19,7 @@ namespace Petri
 			SelectionRect
 		}
 
-		public Drawing (Document doc)
+		public PetriView(Document doc)
 		{
 			document = doc;
 			currentAction = CurrentAction.None;
@@ -334,6 +334,8 @@ namespace Petri
 
 			needsRedraw = false;
 
+			double minX = 0, minY = 0;
+
 			using(Cairo.Context context = Gdk.CairoHelper.Create(this.GdkWindow)) {
 				context.LineWidth = 4;
 				context.MoveTo(0, 0);
@@ -356,6 +358,11 @@ namespace Petri
 				}
 
 				foreach(var t in EditedPetriNet.Transitions) {
+					if(t.Position.X > minX)
+						minX = t.Position.X;
+					if(t.Position.Y > minY)
+						minY = t.Position.Y;
+
 					Color c = new Color(0.1, 0.6, 1, 1);
 					double lineWidth = 2;
 					double arrowScale = 12;
@@ -377,11 +384,11 @@ namespace Petri
 					double radB = t.Before.Radius;
 					double radA = t.After.Radius;
 
-					if(Drawing.Norm(direction) > radB) {
-						direction = Drawing.Normalized(direction);
+					if(PetriView.Norm(direction) > radB) {
+						direction = PetriView.Normalized(direction);
 						PointD destination = new PointD(t.After.Position.X - direction.X * radA, t.After.Position.Y - direction.Y * radA);
 
-						direction = Drawing.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
+						direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
 						PointD origin = new PointD(t.Before.Position.X + direction.X * radB, t.Before.Position.Y + direction.Y * radB);
 
 						context.MoveTo(origin);
@@ -390,14 +397,14 @@ namespace Petri
 						PointD c2 = new PointD(t.Position.X, t.Position.Y);
 
 						PointD direction2 = new PointD(destination.X - t.Position.X, destination.Y - t.Position.Y);
-						direction2 = Drawing.Normalized(direction2);
+						direction2 = PetriView.Normalized(direction2);
 
 						context.CurveTo(c1, c2, new PointD(destination.X - 0.99 * direction2.X * arrowScale, destination.Y - 0.99 * direction2.Y * arrowScale));
 
 						context.Stroke();
 
-						direction = Drawing.Normalized(destination.X - t.Position.X, destination.Y - t.Position.Y);
-						Drawing.DrawArrow(context, direction, destination, arrowScale);
+						direction = PetriView.Normalized(destination.X - t.Position.X, destination.Y - t.Position.Y);
+						PetriView.DrawArrow(context, direction, destination, arrowScale);
 					}
 
 					PointD point = new PointD(t.Position.X, t.Position.Y);
@@ -430,6 +437,11 @@ namespace Petri
 				}
 
 				foreach(var a in EditedPetriNet.States) {
+					if(a.Position.X > minX)
+						minX = a.Position.X;
+					if(a.Position.Y > minY)
+						minY = a.Position.Y;
+
 					Color color = new Color(0, 0, 0, 1);
 					double lineWidth = 3;
 
@@ -493,8 +505,8 @@ namespace Petri
 					}
 
 					PointD direction = new PointD(deltaClick.X - SelectedEntity.Position.X, deltaClick.Y - SelectedEntity.Position.Y);
-					if(Drawing.Norm(direction) > (SelectedEntity as State).Radius) {
-						direction = Drawing.Normalized(direction);
+					if(PetriView.Norm(direction) > (SelectedEntity as State).Radius) {
+						direction = PetriView.Normalized(direction);
 
 						PointD origin = new PointD(SelectedEntity.Position.X + direction.X * (SelectedEntity as State).Radius, SelectedEntity.Position.Y + direction.Y * (SelectedEntity as State).Radius);
 						PointD destination = deltaClick;
@@ -507,7 +519,7 @@ namespace Petri
 						context.MoveTo(origin);
 						context.LineTo(new PointD(destination.X - 0.99 * direction.X * arrowLength, destination.Y - 0.99 * direction.Y * arrowLength));
 						context.Stroke();
-						Drawing.DrawArrow(context, direction, destination, arrowLength);
+						PetriView.DrawArrow(context, direction, destination, arrowLength);
 					}
 				}
 				else if(currentAction == CurrentAction.SelectionRect) {
@@ -534,6 +546,15 @@ namespace Petri
 				context.SetSourceRGBA(0.7, 0.7, 0.7, 1);
 				context.Stroke();
 			}
+
+			minX += 50;
+			minY += 50;
+
+			int prevX, prevY;
+			this.GetSizeRequest(out prevX, out prevY);
+			this.SetSizeRequest((int)minX, (int)minY);
+			if(Math.Abs(minX - prevX) > 10 || Math.Abs(minX - prevY) > 10)
+				this.Redraw();
 
 			return true;
 		}
@@ -567,7 +588,7 @@ namespace Petri
 
 		public static PointD Normalized(PointD vec)
 		{
-			double norm = Drawing.Norm(vec);
+			double norm = PetriView.Norm(vec);
 			if(norm < 1e-3) {
 				return new PointD(0, 0);
 			}
@@ -577,7 +598,7 @@ namespace Petri
 
 		public static PointD Normalized(double x, double y)
 		{
-			return Drawing.Normalized(new PointD(x, y));
+			return PetriView.Normalized(new PointD(x, y));
 		}
 
 		private static void DrawArrow(Context context, PointD direction, PointD position, double scaleAlongAxis)

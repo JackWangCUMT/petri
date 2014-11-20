@@ -3,16 +3,18 @@ Fonctions builtin ?
 
 Autocomplétion des expressions
 
-Défilement pour les grands graphes
 Gestion des timeouts
-
-Création de la classe EntityEditor
 
 Gestion des modifications des headers en cours de route par un programme extérieur
 	En cas de changements incompatibles, proposer une résolution à la main ?
 
 Débuggeur graphique
-	Version du code C++ généré
-
+	Version/hash du code C++ généré qui garantit qu'on débugge bien le bon code
+	Invocation du compilateur C++ depuis l'éditeur de réseaux de Petri
+	Chargement dynamique de la lib générée par l'exécutable C++
+	Thread de supervision du runtime
+		Arrêt et remplacement à chaud du code
+		Pause/Relance de l'exécution du code (comment ?)
+			Socket de communication debugger/debuggé
 
 Commenter le code :3

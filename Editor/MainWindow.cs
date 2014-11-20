@@ -48,27 +48,41 @@ namespace Petri
 			//this.paned = new HPaned();
 			//vbox.PackStart(paned, true, true, 0);
 
-			drawing = new Drawing(doc);
-			drawing.CanFocus = true;
-			drawing.CanDefault = true;
-			drawing.AddEvents ((int) 
+			petriView = new PetriView(doc);
+			petriView.CanFocus = true;
+			petriView.CanDefault = true;
+			petriView.AddEvents ((int) 
 				(Gdk.EventMask.ButtonPressMask    
 					|Gdk.EventMask.ButtonReleaseMask    
 					|Gdk.EventMask.KeyPressMask    
 					|Gdk.EventMask.PointerMotionMask));
+
+			ScrolledWindow scrolledWindow = new ScrolledWindow();
+			scrolledWindow.SetPolicy(PolicyType.Never, PolicyType.Automatic);
+
+			Viewport viewport = new Viewport();
+
+			viewport.Add(petriView);
+
+			petriView.SizeRequested += (o, args) => {
+				viewport.WidthRequest = viewport.Child.Requisition.Width;
+			};
+
+			scrolledWindow.Add(viewport);
+
 			//paned.Position = Configuration.GraphWidth;
 			//paned.Pack1(drawing, true, true);
-			hbox.PackStart(drawing, true, true, 0);
+			hbox.PackStart(scrolledWindow, true, true, 0);
 			editor = new Fixed();
 			//paned.Pack2(editor, true, true);
 			hbox.PackEnd(editor, false, false, 0);
 
 			this.FocusInEvent += (o, args) => {
 				document.Controller.UpdateMenuItems();
-				Drawing.FocusIn();
+				PetriView.FocusIn();
 			};
 			this.FocusOutEvent += (o, args) => {
-				Drawing.FocusOut();
+				PetriView.FocusOut();
 			};
 
 			this.BuildMenus();
@@ -100,9 +114,9 @@ namespace Petri
 			}
 		}
 
-		public Drawing Drawing {
+		public PetriView PetriView {
 			get {
-				return drawing;
+				return petriView;
 			}
 		}
 
@@ -327,10 +341,9 @@ namespace Petri
 
 		Document document;
 
-
 		VBox vbox;
 		HBox hbox;
-		Drawing drawing;
+		PetriView petriView;
 		HBox toolbar;
 		Fixed editor;
 		Button manageHeaders, cpp;

@@ -21,7 +21,7 @@ namespace Petri
 			else if(e is ExitPoint) {
 				editor = new ExitPointEditor(e as ExitPoint, doc);
 			}
-			else if(doc.Window.Drawing.MultipleSelection) {
+			else if(doc.Window.PetriView.MultipleSelection) {
 				editor = new MultipleEditor(doc);
 			}
 			else {
@@ -47,7 +47,7 @@ namespace Petri
 			if(document.Controller != null)
 				document.Controller.UpdateMenuItems();
 
-			if(!document.Window.Drawing.MultipleSelection && e != null) {
+			if(!document.Window.PetriView.MultipleSelection && e != null) {
 				var label = CreateWidget<Label>(objectList, objectIndentation, 0, "ID de l'entité : " + e.ID.ToString());
 				label.Markup = "<span color=\"grey\">" + label.Text + "</span>";
 			}
@@ -113,7 +113,7 @@ namespace Petri
 				w.Show();
 			}
 
-			document.Window.Drawing.Redraw();
+			document.Window.PetriView.Redraw();
 		}
 
 		// Here's a way to signal that we want all the previous GuiActions stored before to be posted as one.
