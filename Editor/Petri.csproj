@@ -6,7 +6,7 @@
     <ProjectTypeGuids>{948B3504-5B70-4649-8FE4-BDE1FB46EC69};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <ProjectGuid>{B36436E7-0E17-4C0E-A664-E9E4B4D77942}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Statechart</RootNamespace>
+    <RootNamespace>Petri</RootNamespace>
     <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
     <AssemblyName>Petri</AssemblyName>
     <SuppressXamMacUpsell>True</SuppressXamMacUpsell>
@@ -88,6 +88,7 @@
     <Compile Include="InnerPetriNet.cs" />
     <Compile Include="PetriNet.cs" />
     <Compile Include="PetriController.cs" />
+    <Compile Include="EntityEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Todo.txt" />
