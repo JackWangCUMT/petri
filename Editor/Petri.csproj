@@ -58,51 +58,42 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
-    <Folder Include="Cpp\" />
+    <Folder Include="src\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <Compile Include="Action.cs" />
-    <Compile Include="Condition.cs" />
-    <Compile Include="Configuration.cs" />
-    <Compile Include="CppGenerator.cs" />
-    <Compile Include="Entity.cs" />
-    <Compile Include="ExitPoint.cs" />
-    <Compile Include="MainWindow.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="State.cs" />
-    <Compile Include="Transition.cs" />
-    <Compile Include="IgeMacMenuGlobal.cs" />
-    <Compile Include="UndoManager.cs" />
-    <Compile Include="Document.cs" />
-    <Compile Include="HeadersManager.cs" />
-    <Compile Include="Cpp\Cpp.cs" />
-    <Compile Include="Cpp\Function.cs" />
-    <Compile Include="Cpp\Parser.cs" />
-    <Compile Include="Cpp\FunctionInvokation.cs" />
-    <Compile Include="Cpp\Type.cs" />
-    <Compile Include="Cpp\Expression.cs" />
-    <Compile Include="Cpp\Operator.cs" />
-    <Compile Include="RootPetriNet.cs" />
-    <Compile Include="InnerPetriNet.cs" />
-    <Compile Include="PetriNet.cs" />
-    <Compile Include="PetriController.cs" />
-    <Compile Include="EntityEditor.cs" />
-    <Compile Include="PetriView.cs" />
-  </ItemGroup>
   <ItemGroup>
     <None Include="Todo.txt" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Info.plist" />
   </ItemGroup>
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <Policies>
-          <DotNetNamingPolicy DirectoryNamespaceAssociation="Flat" ResourceNamePolicy="FileFormatDefault" />
-        </Policies>
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
+  <ItemGroup>
+    <Compile Include="src\Application\Configuration.cs" />
+    <Compile Include="src\Application\IgeMacMenuGlobal.cs" />
+    <Compile Include="src\Application\Program.cs" />
+    <Compile Include="src\Cpp\Cpp.cs" />
+    <Compile Include="src\Cpp\Expression.cs" />
+    <Compile Include="src\Cpp\Function.cs" />
+    <Compile Include="src\Cpp\FunctionInvokation.cs" />
+    <Compile Include="src\Cpp\Operator.cs" />
+    <Compile Include="src\Cpp\Parser.cs" />
+    <Compile Include="src\Cpp\Type.cs" />
+    <Compile Include="src\Document\CppGenerator.cs" />
+    <Compile Include="src\Document\Document.cs" />
+    <Compile Include="src\Document\EntityEditor.cs" />
+    <Compile Include="src\Document\HeadersManager.cs" />
+    <Compile Include="src\Document\MainWindow.cs" />
+    <Compile Include="src\Document\PetriController.cs" />
+    <Compile Include="src\Document\PetriView.cs" />
+    <Compile Include="src\Document\UndoManager.cs" />
+    <Compile Include="src\Model\Action.cs" />
+    <Compile Include="src\Model\Condition.cs" />
+    <Compile Include="src\Model\Entity.cs" />
+    <Compile Include="src\Model\ExitPoint.cs" />
+    <Compile Include="src\Model\InnerPetriNet.cs" />
+    <Compile Include="src\Model\PetriNet.cs" />
+    <Compile Include="src\Model\RootPetriNet.cs" />
+    <Compile Include="src\Model\State.cs" />
+    <Compile Include="src\Model\Transition.cs" />
+  </ItemGroup>
 </Project>

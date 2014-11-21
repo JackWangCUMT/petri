@@ -9,7 +9,6 @@ Gestion des modifications des headers en cours de route par un programme extéri
 	En cas de changements incompatibles, proposer une résolution à la main ?
 
 Débuggeur graphique
-	Version/hash du code C++ généré qui garantit qu'on débugge bien le bon code
 	Invocation du compilateur C++ depuis l'éditeur de réseaux de Petri
 	Chargement dynamique de la lib générée par l'exécutable C++
 	Thread de supervision du runtime
