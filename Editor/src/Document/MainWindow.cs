@@ -38,10 +38,13 @@ namespace Petri
 
 			cpp = new Button(new Label("Générer C++…"));
 			manageHeaders = new Button(new Label("Ouvrir un .h…"));
+			compile = new Button(new Label("Compiler le code généré…"));
 			cpp.Clicked += this.OnClick;
 			manageHeaders.Clicked += this.OnClick;
+			compile.Clicked += this.OnClick;
 			toolbar.PackStart(cpp, false, false, 0);
 			toolbar.PackStart(manageHeaders, false, false, 0);
+			toolbar.PackStart(compile, false, false, 0);
 
 			this.hbox = new HBox(false, 0);
 			vbox.PackStart(hbox, true, true, 0);
@@ -173,6 +176,9 @@ namespace Petri
 			}
 			else if(sender == this.manageHeaders) {
 				document.ManageHeaders();
+			}
+			else if(sender == this.compile) {
+				document.Compile();
 			}
 		}
 
@@ -346,7 +352,7 @@ namespace Petri
 		PetriView petriView;
 		HBox toolbar;
 		Fixed editor;
-		Button manageHeaders, cpp;
+		Button manageHeaders, cpp, compile;
 		MenuBar menuBar;
 
 		MenuItem quitItem;

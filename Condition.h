@@ -9,6 +9,7 @@
 #define IA_Pe_tri_Condition_h
 
 #include <chrono>
+#include "Callable.h"
 
 struct ConditionBase : CallableBool {
 	virtual bool operator()() {

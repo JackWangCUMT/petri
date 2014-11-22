@@ -75,7 +75,7 @@ namespace Petri
 
 			source += this.CppName + "->setName(\"" + this.Parent.Name + "_" + this.Name + "\");";
 			source += this.CppName + "->setID(" + this.ID.ToString() + ");";
-			source += "stateChart->addAction(" + this.CppName + ", " + ((this.Active && (this.Parent is RootPetriNet)) ? "true" : "false") + ");";
+			source += "petriNet->addAction(" + this.CppName + ", " + ((this.Active && (this.Parent is RootPetriNet)) ? "true" : "false") + ");";
 
 			return "";
 		}

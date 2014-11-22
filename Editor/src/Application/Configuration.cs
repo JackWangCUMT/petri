@@ -72,21 +72,6 @@ namespace Petri
 			}
 		}
 
-		[ConfigurationProperty("exportPath",
-			DefaultValue = "",
-			IsRequired = true)]
-		public static string ExportPath
-		{
-			get
-			{
-				return (string)Get()["exportPath"];
-			}
-			set
-			{
-				Get()["exportPath"] = value;
-			}
-		}
-
 		[ConfigurationProperty("savePath",
 			DefaultValue = "",
 			IsRequired = true)]

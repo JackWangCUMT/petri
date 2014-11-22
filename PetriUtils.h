@@ -5,10 +5,11 @@
 //  Created by Rémi on 12/11/2014.
 //
 
-#ifndef IA_Pe_tri_StateChartUtils_h
-#define IA_Pe_tri_StateChartUtils_h
+#ifndef IA_Pe_tri_PetriUtils_h
+#define IA_Pe_tri_PetriUtils_h
 
 #include <functional>
+#include <memory>
 #include "Log.h"
 #include "Condition.h"
 #include "Petri.h"
@@ -85,7 +86,7 @@ namespace PetriUtils {
 }
 
 namespace PetriUtils {
-	ResultatAction defaultAction(Action *a) {
+	inline ResultatAction defaultAction(Action *a) {
 		logInfo("Action " + a->name() + ", ID " + std::to_string(a->ID()) + " exécutée.");
 		return ResultatAction::REUSSI;
 	}

@@ -109,6 +109,9 @@ namespace Petri
 
 				var doc = new XDocument();
 				var root = new XElement("Document");
+
+				root.Add(settings.GetXml());
+
 				var winConf = new XElement("Window");
 				{
 					int w, h, x, y;
@@ -129,13 +132,13 @@ namespace Petri
 				doc.Add(root);
 				root.Add(winConf);
 				root.Add(headers);
-				root.Add(stateChart.GetXml());
+				root.Add(petriNet.GetXml());
 
 				// Write to a temporary file to avoid corrupting the existing document on error
 				tempFileName = System.IO.Path.GetTempFileName();
-				XmlWriterSettings settings = new XmlWriterSettings();
-				settings.Indent = true;
-				XmlWriter writer = XmlWriter.Create(tempFileName, settings);
+				XmlWriterSettings xsettings = new XmlWriterSettings();
+				xsettings.Indent = true;
+				XmlWriter writer = XmlWriter.Create(tempFileName, xsettings);
 
 				doc.Save(writer);
 				writer.Flush();
@@ -177,12 +180,14 @@ namespace Petri
 			window.PetriView.EditedPetriNet = null;
 			Controller.EditedObject = null;
 
-			var oldPetriNet = stateChart;
+			var oldPetriNet = petriNet;
 
 			this.ResetID();
+			settings = null;
+
 			try {
 				if(path == "") {
-					stateChart = new RootPetriNet(this);
+					petriNet = new RootPetriNet(this);
 					int docID = 1;
 					string prefix = "Sans titre ";
 					foreach(var d in MainClass.Documents) {
@@ -202,6 +207,8 @@ namespace Petri
 
 					var elem = document.FirstNode as XElement;
 
+					settings = DocumentSettings.CreateSettings(this, elem.Element("Settings"));
+
 					var winConf = elem.Element("Window");
 					Window.Move(int.Parse(winConf.Attribute("X").Value), int.Parse(winConf.Attribute("Y").Value));
 					Window.Resize(int.Parse(winConf.Attribute("W").Value), int.Parse(winConf.Attribute("H").Value));
@@ -211,8 +218,8 @@ namespace Petri
 						Controller.AddHeader(e.Attribute("File").Value);
 					}
 
-					stateChart = new RootPetriNet(this, elem.Element("PetriNet"));
-					stateChart.Canonize();
+					petriNet = new RootPetriNet(this, elem.Element("PetriNet"));
+					petriNet.Canonize();
 					Window.Title = System.IO.Path.GetFileName(this.path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
 					this.Dirty = true;
 					Controller.Modified = false;
@@ -231,13 +238,16 @@ namespace Petri
 				}
 				else {
 					// If it is a fresh opening, just get back to an empty state.
-					stateChart = new RootPetriNet(this);
+					petriNet = new RootPetriNet(this);
 					Controller.Modified = false;
 					this.Dirty = false;
 				}
 			}
-			Controller.PetriNet = stateChart;
-			window.PetriView.EditedPetriNet = stateChart;
+			if(settings == null) {
+				settings = DocumentSettings.GetDefaultSettings(this);
+			}
+			Controller.PetriNet = petriNet;
+			window.PetriView.EditedPetriNet = petriNet;
 
 			window.PetriView.Redraw();
 		}
@@ -245,24 +255,46 @@ namespace Petri
 		public void SaveCpp()
 		{
 			var fc = new Gtk.FileChooserDialog("Enregistrer le code généré sous…", window,
-				FileChooserAction.Save,
+				FileChooserAction.SelectFolder,
 				new object[]{"Annuler",ResponseType.Cancel,
 					"Enregistrer",ResponseType.Accept});
-
-			if(Configuration.ExportPath.Length > 0) {
-				fc.SetCurrentFolder(System.IO.Directory.GetParent(Configuration.ExportPath).FullName);
-				fc.CurrentName = System.IO.Path.GetFileName(Configuration.ExportPath);
+			
+			if(this.settings.OutputPath.Length > 0) {
+				fc.SetCurrentFolder(this.settings.OutputPath);
 			}
 
 			fc.DoOverwriteConfirmation = true;
 
 			if(fc.Run() == (int)ResponseType.Accept) {
-				var cppGen = stateChart.GenerateCpp();
-				cppGen.Write(fc.Filename);
-				Configuration.ExportPath = fc.Filename;
+				var cppGen = petriNet.GenerateCpp();
+				cppGen.Item1.AddHeader("\"" + System.IO.Path.Combine(fc.Filename, settings.Name) + ".h\"");
+				cppGen.Item1.Write(System.IO.Path.Combine(fc.Filename, settings.Name) + ".cpp");
+
+				var generator = new Cpp.Generator();
+				generator.AddHeader("\"PetriUtils.h\"");
+
+				generator += "#ifndef PETRI_" + cppGen.Item2 + "_H";
+				generator += "#define PETRI_" + cppGen.Item2 + "_H";
+
+				generator += "namespace " + Settings.Name + " {";
+				generator += "std::unique_ptr<PetriNet> create();";
+				generator += "std::string getHash();";
+				generator += "}"; // namespace
+
+				generator += "#endif"; // ifndef header guard
+				System.IO.File.WriteAllText(System.IO.Path.Combine(fc.Filename, settings.Name) + ".h", generator.Value);
+			
+				this.settings.OutputPath = fc.Filename;
+				Controller.Modified = true;
 			}
 
 			fc.Destroy();
+		}
+
+		public void Compile() {
+			var c = new CppCompiler(this);
+			var o = c.Compile();
+			Console.WriteLine(o);
 		}
 
 		public void ManageHeaders() {
@@ -282,11 +314,18 @@ namespace Petri
 			this.LastEntityID = 0;
 		}
 
+		public DocumentSettings Settings {
+			get {
+				return settings;
+			}
+		}
+
 		string path;
 		MainWindow window;
 		PetriController controller;
-		RootPetriNet stateChart;
+		RootPetriNet petriNet;
 		HeadersManager headersManager;
+		DocumentSettings settings;
 	}
 }
 

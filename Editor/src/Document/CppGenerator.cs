@@ -34,9 +34,8 @@ namespace Petri
 				return gen;
 			}
 
-			public void Indent()
+			public static string Indent(string val)
 			{
-				string val = this.Body;
 				val = val.Replace("\t", "");
 
 				string newVal = "";
@@ -64,13 +63,13 @@ namespace Petri
 						}
 					}
 
-					string newLine = this.GetNTab(currentIndent + firstIndent) + line;
+					string newLine = GetNTab(currentIndent + firstIndent) + line;
 					currentIndent += deltaNext;
 
 					newVal += newLine + "\n";
 				}
 
-				this.Body = newVal;
+				return newVal;
 			}
 
 			public void Write(string filename)
@@ -80,7 +79,7 @@ namespace Petri
 
 			public string Value {
 				get {
-					this.Indent();
+					Body = Indent(Body);
 					return this.Headers + "\n" + this.Body + "\n";
 				}
 			}
@@ -95,7 +94,7 @@ namespace Petri
 				set;
 			}
 
-			private string GetNTab(int n)
+			private static string GetNTab(int n)
 			{
 				string s = "";
 				for(int i = 0; i < n; ++i) {

@@ -48,7 +48,7 @@ namespace Petri
 			source += name + "->setRequiredTokens(" + RequiredTokens.ToString() + ");";
 			source += name + "->setID(" + lastID.Consume() + ");";
 
-			source += "stateChart->addAction(" + name + ", " + "false" + ");";
+			source += "petriNet->addAction(" + name + ", " + "false" + ");";
 
 			base.GenerateCpp(source, lastID);
 
