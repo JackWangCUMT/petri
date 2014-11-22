@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectTypeGuids>{948B3504-5B70-4649-8FE4-BDE1FB46EC69};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ProjectGuid>{B36436E7-0E17-4C0E-A664-E9E4B4D77942}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Petri</RootNamespace>
+    <StartupObject>Petri.MainClass</StartupObject>
+    <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
+    <AssemblyName>Petri</AssemblyName>
+    <SuppressXamMacUpsell>True</SuppressXamMacUpsell>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <StartupObject>Statechart.MainClass</StartupObject>
+    <UseSGen>false</UseSGen>
+    <ConsolePause>false</ConsolePause>
+    <EnableCodeSigning>false</EnableCodeSigning>
+    <CreatePackage>false</CreatePackage>
+    <EnablePackageSigning>false</EnablePackageSigning>
+    <IncludeMonoRuntime>false</IncludeMonoRuntime>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <StartupObject>Statechart.MainClass</StartupObject>
+    <UseSGen>false</UseSGen>
+    <IncludeMonoRuntime>false</IncludeMonoRuntime>
+    <EnablePackageSigning>false</EnablePackageSigning>
+    <CreatePackage>false</CreatePackage>
+    <EnableCodeSigning>false</EnableCodeSigning>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="MonoMac" />
+    <Reference Include="atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="Mono.Cairo" />
+    <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="Mono.Posix" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+    <Folder Include="src\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Todo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Info.plist" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\Application\Configuration.cs" />
+    <Compile Include="src\Application\IgeMacMenuGlobal.cs" />
+    <Compile Include="src\Application\Program.cs" />
+    <Compile Include="src\Cpp\Cpp.cs" />
+    <Compile Include="src\Cpp\Expression.cs" />
+    <Compile Include="src\Cpp\Function.cs" />
+    <Compile Include="src\Cpp\Operator.cs" />
+    <Compile Include="src\Cpp\Parser.cs" />
+    <Compile Include="src\Cpp\Type.cs" />
+    <Compile Include="src\Document\CppGenerator.cs" />
+    <Compile Include="src\Document\Document.cs" />
+    <Compile Include="src\Document\EntityEditor.cs" />
+    <Compile Include="src\Document\HeadersManager.cs" />
+    <Compile Include="src\Document\MainWindow.cs" />
+    <Compile Include="src\Document\PetriController.cs" />
+    <Compile Include="src\Document\PetriView.cs" />
+    <Compile Include="src\Document\UndoManager.cs" />
+    <Compile Include="src\Model\Action.cs" />
+    <Compile Include="src\Model\Condition.cs" />
+    <Compile Include="src\Model\Entity.cs" />
+    <Compile Include="src\Model\ExitPoint.cs" />
+    <Compile Include="src\Model\InnerPetriNet.cs" />
+    <Compile Include="src\Model\PetriNet.cs" />
+    <Compile Include="src\Model\RootPetriNet.cs" />
+    <Compile Include="src\Model\State.cs" />
+    <Compile Include="src\Model\Transition.cs" />
+    <Compile Include="src\Document\DocumentSettings.cs" />
+    <Compile Include="src\Document\CppCompiler.cs" />
+    <Compile Include="src\Cpp\FunctionInvocation.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

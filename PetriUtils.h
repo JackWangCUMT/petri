@@ -14,6 +14,7 @@
 #include "Log.h"
 #include "Condition.h"
 #include "Petri.h"
+#include "PetriDebug.h"
 
 using namespace std::chrono_literals;
 

@@ -172,4 +172,26 @@ auto make_callable_ptr(CallableType &&c, Args &&...args) {
 
 using CallableBool = CallableBase<bool>;
 
+template<typename T>
+struct CallableTimeout {
+public:
+	CallableTimeout(T id) : _id(id) { }
+
+	T ID() const {
+		return _id;
+	}
+
+	void setID(T id) {
+		_id = id;
+	}
+
+	template<typename ReturnType>
+	ReturnType operator()(CallableBase<ReturnType> &callable) {
+		callable();
+	}
+
+private:
+	T _id;
+};
+
 #endif

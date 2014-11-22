@@ -24,166 +24,16 @@
 using namespace std::chrono_literals;
 
 class Action;
-class Transition;
 
-template<typename T>
-struct CallableTimeout {
-public:
-	CallableTimeout(T id) : _id(id) { }
-
-	T ID() const {
-		return _id;
-	}
-
-	void setID(T id) {
-		_id = id;
-	}
-
-	template<typename ReturnType>
-	ReturnType operator()(CallableBase<ReturnType> &callable) {
-		callable();
-	}
-
-private:
-	T _id;
-};
-
-class Transition : public CallableTimeout<std::uint64_t> {
-public:
-	Transition(Action &previous, Action &next) : CallableTimeout(0), _previous(previous), _next(next) {}
-
-	bool isFulfilled(ResultatAction resultatAction) const {
-		_result = resultatAction;
-
-		return _test->isFulfilled();
-	}
-
-	void willTest() {
-		_test->willTest();
-	}
-
-	void didTest() {
-		_test->didTest();
-	}
-
-	ConditionBase const &condition() const {
-		return *_test;
-	}
-
-	void setCondition(ConditionBase const &test) {
-		_test = std::static_pointer_cast<ConditionBase>(test.copy_ptr());
-	}
-
-	void setCondition(std::shared_ptr<ConditionBase> const &test) {
-		_test = std::static_pointer_cast<ConditionBase>(test);
-	}
-
-	std::shared_ptr<ConditionBase> compareResult(ResultatAction const &r) const {
-		return make_condition_ptr<Condition>(make_callable(&Transition::checkResult, std::cref(_result), r));
-	}
-
-	Action &previous() {
-		return _previous;
-	}
-
-	Action &next() {
-		return _next;
-	}
-
-	std::string const &name() const {
-		return _name;
-	}
-
-	void setName(std::string const &name) {
-		_name = name;
-	}
-
-	std::chrono::nanoseconds delayBetweenEvaluation() const {
-		return _delayBetweenEvaluation;
-	}
-
-	void setDelayBetweenEvaluation(std::chrono::nanoseconds ms) {
-		_delayBetweenEvaluation = ms;
-	}
-
-	std::atomic<ResultatAction> const &mutableResult() const {
-		return _result;
-	}
-
-private:
-	static bool checkResult(std::atomic<ResultatAction> const &r1, ResultatAction const &r2) {
-		return r1 == r2;
-	}
-
-	std::shared_ptr<ConditionBase> _test;
-	Action &_previous;
-	Action &_next;
-	std::string _name;
-	mutable std::atomic<ResultatAction> _result;
-
-	// Default delay between evaluation
-	std::chrono::nanoseconds _delayBetweenEvaluation = 10ms;
-};
-
-class Action : public CallableTimeout<std::uint64_t> {
-public:
-	Action() : CallableTimeout(0), _action(nullptr), _requiredTokens(1) {}
-	Action(CallableBase<ResultatAction> const &action) : CallableTimeout(0), _action(action.copy_ptr()), _requiredTokens(1) {}
-
-	void addTransition(std::shared_ptr<Transition> &t) {
-		_transitions.push_back(t);
-	}
-
-	CallableBase<ResultatAction> &action() {
-		return *_action;
-	}
-
-	void setAction(CallableBase<ResultatAction> const &action) {
-		_action = action.copy_ptr();
-	}
-
-	void setAction(std::shared_ptr<CallableBase<ResultatAction>> const &action) {
-		_action = action;
-	}
-
-	std::size_t requiredTokens() const {
-		return _requiredTokens;
-	}
-
-	void setRequiredTokens(std::size_t requiredTokens) {
-		_requiredTokens = requiredTokens;
-	}
-
-	std::atomic_ulong &currentTokens() {
-		return _currentTokens;
-	}
-
-	std::string const &name() const {
-		return _name;
-	}
-
-	void setName(std::string const &name) {
-		_name = name;
-	}
-
-	std::list<std::shared_ptr<Transition>> &transitions() {
-		return _transitions;
-	}
-
-private:
-	std::list<std::shared_ptr<Transition>> _transitions;
-	std::shared_ptr<CallableBase<ResultatAction>> _action;
-	std::string _name;
-	std::size_t _requiredTokens;
-	std::atomic_ulong _currentTokens;
-};
+#include "Transition.h"
+#include "Action.h"
 
 class PetriNet {
 	enum {InitialThreadsActions = 0};
 public:
 	PetriNet() : _actionsPool(InitialThreadsActions) {}
 
-	~PetriNet() {
+	virtual ~PetriNet() {
 		this->stop();
 		if(_statesManager.joinable())
 			_statesManager.join();
@@ -201,7 +51,6 @@ public:
 			// We allow the initially active states to be actually enabled
 			_states.back().get()->currentTokens() = _states.back().get()->requiredTokens();
 			++_activeStates;
-			//logDebug7("active states:", _activeStates);
 			_toBeActivated.insert(_states.back().get());
 		}
 	}
@@ -210,21 +59,20 @@ public:
 		return _running;
 	}
 
-	void run() {
+	virtual void run() {
 		if(_running) {
 			throw std::runtime_error("Already running!");
 		}
 
 		if(_toBeActivated.empty()) {
-			//throw std::runtime_error("No active state!");
-			return;
+			throw std::runtime_error("No active state!");
 		}
 
 		_running = true;
 		_statesManager = std::thread(&PetriNet::manageStates, this);
 	}
 
-	void stop() {
+	virtual void stop() {
 		if(this->running()) {
 			_running = false;
 
@@ -237,17 +85,13 @@ public:
 		}
 	}
 
-private:
+protected:
 	using ClockType = std::conditional<std::chrono::high_resolution_clock::is_steady, std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
 
-	void executeState(Action &a) {
+	virtual void executeState(Action &a) {
 		// Lock later, during the reaction to a fulfilled transition
 		std::unique_lock<std::mutex> activationLock(_activationMutex, std::defer_lock);
 		ResultatAction res = a.action()();
-
-		/*static std::atomic_int nb(0);
-		++nb;
-		synchronizedOutput(std::to_string(nb));*/
 
 		std::vector<std::pair<decltype(a.transitions().begin()), bool>> conditionsResult;
 		conditionsResult.reserve(a.transitions().size());
@@ -288,8 +132,6 @@ private:
 					if(_toBeActivated.insert(&a).second)
 						++_activeStates;
 
-					//logInfo("Pushing state for activation: " + a.name());
-					//logInfo("tba: " + std::to_string(_toBeActivated.size()));
 					deactivate = true;
 				}
 			}
@@ -308,12 +150,11 @@ private:
 		activationLock.lock();
 		_toBeDisabled.push(&a);
 		activationLock.unlock();
-		//logInfo("Pushing state for deactivation: " + a.name());
-		//logInfo("tbd: " + std::to_string(_toBeDisabled.size()));
+
 		_activationCondition.notify_all();
 	}
 
-	void manageStates() {
+	virtual void manageStates() {
 		while(_running) {
 			std::unique_lock<std::mutex> lk(_activationMutex);
 			_activationCondition.wait(lk, [this]() { return !_toBeActivated.empty() || !_toBeDisabled.empty() || !_running; });
@@ -322,12 +163,8 @@ private:
 				return;
 
 			while(!_toBeDisabled.empty()) {
-				//--_activeStates[_toBeDisabled.front()];
-				//logInfo("Disabling state: ", _toBeDisabled.front()->name());
 				_toBeDisabled.pop();
 				--_activeStates;
-				//logDebug5("active states:", _activeStates);
-				//logInfo("tbd: " + std::to_string(_toBeDisabled.size()));
 			}
 
 			for(auto it = _toBeActivated.begin(); it != _toBeActivated.end(); ) {
@@ -340,14 +177,13 @@ private:
 					}
 
 					a.currentTokens() -= a.requiredTokens();
-					//logInfo("Adding new state: ", a.name(), " ", _toBeActivated.size());
+
 					_actionsPool.addTask(make_callable_ptr(&PetriNet::executeState, *this, std::ref(a)));
 					it = _toBeActivated.erase(it);
 				}
 				else {
 					++it;
 				}
-				//logInfo("tba: " + std::to_string(_toBeActivated.size()));
 			}
 			lk.unlock();
 
@@ -363,8 +199,6 @@ private:
 			}
 		}
 	}
-
-	//std::unordered_map<Action *, size_t> _activeStates;
 
 	std::thread _statesManager;
 	std::condition_variable _activationCondition;

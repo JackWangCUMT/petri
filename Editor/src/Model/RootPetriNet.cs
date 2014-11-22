@@ -75,25 +75,37 @@ namespace Petri
 				source.AddHeader("\"" + s + "\"");
 			}
 
-			source += "#define EXPORT __attribute__((visibility(\"default\"))) extern \"C\"\n";
-
-			source += "EXPORT void *" + Document.Settings.Name + "_create() {";
-			source += "auto petriNet = std::make_unique<PetriNet>();";
-			source += "\n";
-
-			base.GenerateCpp(source, lastID);
+			source += "#define EXPORT __attribute__((visibility(\"default\"))) extern \"C\"";
 
 			source += "";
 
-			source += "return petriNet.release();";
-
-			source += "}"; // create()
+			source += "static void fill(PetriNet &petriNet) {";
+			base.GenerateCpp(source, lastID);
+			source += "}"; // fill()
 
 			string toHash = source.Value;
 
 			System.Security.Cryptography.SHA1 sha = new System.Security.Cryptography.SHA1CryptoServiceProvider(); 
 			// This is one implementation of the abstract class SHA1.
 			string hash = BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(toHash))).Replace("-", "");
+
+			source += "";
+
+			source += "EXPORT void *" + Document.Settings.Name + "_create() {";
+			source += "auto petriNet = std::make_unique<PetriNet>();";
+			source += "fill(*petriNet);";
+			source += "return petriNet.release();";
+			source += "}"; // create()
+
+			source += "";
+
+			source += "EXPORT void *" + Document.Settings.Name + "_createDebug(std::uint16_t port, char const *host) {";
+			source += "auto petriNet = std::make_unique<PetriDebug>(port, host);";
+			source += "fill(*petriNet);";
+			source += "return petriNet.release();";
+			source += "}"; // create()
+
+			source += "";
 
 			source += "EXPORT char const *" + Document.Settings.Name + "_getHash() {";
 			source += "return \"" + hash + "\";";

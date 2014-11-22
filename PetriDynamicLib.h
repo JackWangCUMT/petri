@@ -15,18 +15,21 @@ public:
 	CLASS_NAME(CLASS_NAME const &pn) = delete;
 	CLASS_NAME &operator=(CLASS_NAME const &pn) = delete;
 
-	CLASS_NAME(CLASS_NAME &&pn) : _libHandle(pn._libHandle), _createPtr(pn._createPtr), _hashPtr(pn._hashPtr) {
+	CLASS_NAME(CLASS_NAME &&pn) : _libHandle(pn._libHandle), _createPtr(pn._createPtr), _createDebugPtr(pn._createDebugPtr), _hashPtr(pn._hashPtr) {
 		pn._libHandle = nullptr;
 		pn._createPtr = nullptr;
+		pn._createDebugPtr = nullptr;
 		pn._hashPtr = nullptr;
 	}
 	CLASS_NAME &operator=(CLASS_NAME &&pn) {
 		_libHandle = nullptr;
 		_createPtr = nullptr;
+		_createDebugPtr = nullptr;
 		_hashPtr = nullptr;
 
 		std::swap(_libHandle, pn._libHandle);
 		std::swap(_createPtr, pn._createPtr);
+		std::swap(_createDebugPtr, pn._createDebugPtr);
 		std::swap(_hashPtr, pn._hashPtr);
 
 		return *this;
@@ -43,6 +46,15 @@ public:
 		}
 
 		void *ptr = _createPtr();
+		return std::unique_ptr<PetriNet>(static_cast<PetriNet *>(ptr));
+	}
+
+	std::unique_ptr<PetriNet> createDebug(std::uint16_t port, char const *host) {
+		if(!this->loaded()) {
+			throw std::runtime_error("Dynamic library not loaded!");
+		}
+
+		void *ptr = _createDebugPtr(port, host);
 		return std::unique_ptr<PetriNet>(static_cast<PetriNet *>(ptr));
 	}
 
@@ -63,6 +75,7 @@ public:
 			throw std::runtime_error("Unable to load the dynamic library!");
 		}
 		_createPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_create"));
+		_createDebugPtr = reinterpret_cast<void *(*)(std::uint16_t, char const *)>(dlsym(_libHandle, PREFIX "_createDebug"));
 		_hashPtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, PREFIX "_getHash"));
 	}
 
@@ -71,6 +84,7 @@ public:
 			dlclose(_libHandle);
 		_libHandle = nullptr;
 		_createPtr = nullptr;
+		_createDebugPtr = nullptr;
 		_hashPtr = nullptr;
 		this->load();
 	}
@@ -82,5 +96,6 @@ public:
 private:
 	void *_libHandle = nullptr;
 	void *(*_createPtr)() = nullptr;
+	void *(*_createDebugPtr)(std::uint16_t, char const *) = nullptr;
 	char const *(*_hashPtr)() = nullptr;
 };

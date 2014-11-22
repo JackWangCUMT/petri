@@ -58,7 +58,7 @@ namespace Petri
 		private DocumentSettings(Document doc, XElement elem) {
 			document = doc;
 
-			IncludePaths = new List<string>();
+			IncludePaths = new List<Tuple<string, bool>>();
 			LibPaths = new List<string>();
 			Libs = new List<string>();
 			CompilerFlags = new List<string>();
@@ -91,7 +91,7 @@ namespace Petri
 				node = elem.Element("IncludePaths");
 				if(node != null) {
 					foreach(var e in node.Elements()) {
-						IncludePaths.Add(e.Attribute("Path").Value);
+						IncludePaths.Add(Tuple.Create(e.Attribute("Path").Value, bool.Parse(e.Attribute("Recursive").Value)));
 					}
 				}
 
@@ -111,7 +111,8 @@ namespace Petri
 			}
 		}
 
-		public List<string> IncludePaths {
+		// The bool stands for "recursive or not"
+		public List<Tuple<string, bool>> IncludePaths {
 			get;
 			private set;
 		}
@@ -152,7 +153,14 @@ namespace Petri
 				}
 
 				foreach(var i in IncludePaths) {
-					val += "-I'" + i + "' ";
+					// Recursive?
+					if(i.Item2) {
+						var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
+						foreach(var dir in directories) {
+							val += "-I'" + dir + "' ";
+						}
+					}
+					val += "-I'" + i.Item1 + "' ";
 				}
 				val += "-I" + OutputPath + " ";
 
