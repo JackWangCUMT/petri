@@ -274,18 +274,21 @@ namespace Petri
 				generator.AddHeader("\"PetriUtils.h\"");
 
 				generator += "#ifndef PETRI_" + cppGen.Item2 + "_H";
-				generator += "#define PETRI_" + cppGen.Item2 + "_H";
+				generator += "#define PETRI_" + cppGen.Item2 + "_H\n";
 
-				generator += "namespace " + Settings.Name + " {";
-				generator += "std::unique_ptr<PetriNet> create();";
-				generator += "std::string getHash();";
-				generator += "}"; // namespace
+				generator += "#define CLASS_NAME MyPetriNet";
+				generator += "#define PREFIX \"" + settings.Name + "\"";
+				generator += "#define LIB_PATH \"" + System.IO.Path.Combine(fc.Filename, settings.Name) + ".so" + "\"\n";
+
+				generator += "#include \"PetriDynamicLib.h\"\n";
 
 				generator += "#endif"; // ifndef header guard
+
 				System.IO.File.WriteAllText(System.IO.Path.Combine(fc.Filename, settings.Name) + ".h", generator.Value);
 			
+				string old = settings.OutputPath;
 				this.settings.OutputPath = fc.Filename;
-				Controller.Modified = true;
+				Controller.Modified = old != settings.OutputPath;
 			}
 
 			fc.Destroy();

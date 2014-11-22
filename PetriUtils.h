@@ -10,6 +10,7 @@
 
 #include <functional>
 #include <memory>
+#include <dlfcn.h>
 #include "Log.h"
 #include "Condition.h"
 #include "Petri.h"

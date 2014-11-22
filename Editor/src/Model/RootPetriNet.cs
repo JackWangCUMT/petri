@@ -75,9 +75,9 @@ namespace Petri
 				source.AddHeader("\"" + s + "\"");
 			}
 
-			source += "namespace " + Document.Settings.Name + " {";
+			source += "#define EXPORT __attribute__((visibility(\"default\"))) extern \"C\"\n";
 
-			source += "std::unique_ptr<PetriNet> create() {";
+			source += "EXPORT void *" + Document.Settings.Name + "_create() {";
 			source += "auto petriNet = std::make_unique<PetriNet>();";
 			source += "\n";
 
@@ -85,7 +85,7 @@ namespace Petri
 
 			source += "";
 
-			source += "return petriNet;";
+			source += "return petriNet.release();";
 
 			source += "}"; // create()
 
@@ -93,13 +93,13 @@ namespace Petri
 
 			System.Security.Cryptography.SHA1 sha = new System.Security.Cryptography.SHA1CryptoServiceProvider(); 
 			// This is one implementation of the abstract class SHA1.
-			string hash = BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(toHash)));
+			string hash = BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(toHash))).Replace("-", "");
 
-			source += "std::string getHash() {\nreturn \"" + hash + "\";\n}";
+			source += "EXPORT char const *" + Document.Settings.Name + "_getHash() {";
+			source += "return \"" + hash + "\";";
+			source += "}";
 
-			source += "}"; // namespace
-
-			return hash.Replace("-", "");
+			return hash;
 		}
 
 		// Use this to scale down the IDs of Actions (resp. Transitions) to 0...N, with N = number of Actions (resp. Transitions)

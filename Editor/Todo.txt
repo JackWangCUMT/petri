@@ -8,11 +8,10 @@ Gestion des timeouts
 Gestion des modifications des headers en cours de route par un programme extérieur
 	En cas de changements incompatibles, proposer une résolution à la main ?
 
-Invocation du compilateur C++ depuis l'éditeur de réseaux de Petri
+Invocation du compilateur C++ depuis l'éditeur de réseaux de Petri OK
 	Affichage des erreurs de compilation dans l'éditeur
 
 Débuggeur graphique
-	Chargement dynamique de la lib générée par l'exécutable C++
 	Thread de supervision du runtime
 		Arrêt et remplacement à chaud du code
 		Pause/Relance de l'exécution du code (comment ?)
