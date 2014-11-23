@@ -84,7 +84,7 @@ namespace Petri
 			double norm = PetriView.Norm(this.Direction());
 			PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
 			this.Position = new PointD(center.X + Shift.X * norm / ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1), center.Y + Shift.Y * norm / ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1));
-			Document.Controller.Modified = true;
+			Document.Modified = true;
 		}
 
 		public State Before {
@@ -109,7 +109,7 @@ namespace Petri
 					ShiftAmplitude = PetriView.Norm(this.Direction());
 					PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
 					Shift = new PointD(value.X - center.X, value.Y - center.Y);
-					Document.Controller.Modified = true;
+					Document.Modified = true;
 				}
 			}
 		}

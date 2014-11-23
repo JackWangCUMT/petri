@@ -55,7 +55,7 @@ namespace Petri
 				if(this.IsDefault())
 					function = this.DefaultAction();
 					
-				Document.Controller.Modified = true;
+				Document.Modified = true;
 			}
 		}
 

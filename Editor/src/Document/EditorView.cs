@@ -40,7 +40,7 @@ namespace Petri
 			if(ev.Button == 1) {
 				// Add new action
 				if(this.selectedEntities.Count == 0) {
-					document.Controller.PostAction(new AddStateAction(new Action(this.EditedPetriNet.Document, EditedPetriNet, false, new PointD(ev.X, ev.Y))/*, new List<Transition>()*/));
+					document.PostAction(new AddStateAction(new Action(this.EditedPetriNet.Document, EditedPetriNet, false, new PointD(ev.X, ev.Y))/*, new List<Transition>()*/));
 					hoveredItem = SelectedEntity;
 				}
 				else if(this.selectedEntities.Count == 1) {
@@ -150,7 +150,7 @@ namespace Petri
 							e.Position = new PointD(e.Position.X + backToPrevious.X, e.Position.Y + backToPrevious.Y);
 							actions.Add(new MoveAction(e, new PointD(-backToPrevious.X, -backToPrevious.Y)));
 						}
-						document.Controller.PostAction(new GuiActionList(actions, actions.Count > 1 ? "Déplacer les entités" : "Déplacer l'entité"));
+						document.PostAction(new GuiActionList(actions, actions.Count > 1 ? "Déplacer les entités" : "Déplacer l'entité"));
 					}
 				}
 				currentAction = CurrentAction.None;
@@ -158,7 +158,7 @@ namespace Petri
 			else if(currentAction == CurrentAction.CreatingTransition && ev.Button == 1) {
 				currentAction = CurrentAction.None;
 				if(hoveredItem != null && hoveredItem is State) {
-					document.Controller.PostAction(new AddTransitionAction(new Transition(EditedPetriNet.Document, EditedPetriNet, SelectedEntity as State, hoveredItem as State), true));
+					document.PostAction(new AddTransitionAction(new Transition(EditedPetriNet.Document, EditedPetriNet, SelectedEntity as State, hoveredItem as State), true));
 				}
 
 				this.Redraw();
@@ -169,7 +169,7 @@ namespace Petri
 				this.ResetSelection();
 				foreach(var e in selectedFromRect)
 					selectedEntities.Add(e);
-				document.Controller.UpdateSelection();
+				document.EditorController.UpdateSelection();
 
 				selectedFromRect.Clear();
 			}
@@ -184,7 +184,7 @@ namespace Petri
 			if(currentAction == CurrentAction.MovingAction || currentAction == CurrentAction.MovingTransition) {
 				if(currentAction == CurrentAction.MovingAction) {
 					selectedEntities.RemoveWhere(item => item is Transition);
-					document.Controller.UpdateSelection();
+					document.EditorController.UpdateSelection();
 				}
 				else {
 					SelectedEntity = motionReference;
@@ -260,7 +260,7 @@ namespace Petri
 				}
 			}
 			else if(selectedEntities.Count > 0 && currentAction == CurrentAction.None && (ev.Key == Gdk.Key.Delete || ev.Key == Gdk.Key.BackSpace)) {
-				document.Controller.PostAction(document.Controller.RemoveSelection());
+				document.PostAction(document.EditorController.RemoveSelection());
 			}
 			else if(ev.Key == Gdk.Key.Shift_L || ev.Key == Gdk.Key.Shift_R) {
 				shiftDown = true;
@@ -394,7 +394,7 @@ namespace Petri
 					selectedEntities.Clear();
 					if(value != null)
 						selectedEntities.Add(value);
-					document.Controller.UpdateSelection();
+					document.EditorController.UpdateSelection();
 				}
 			}
 		}
@@ -420,12 +420,12 @@ namespace Petri
 
 		void AddToSelection(Entity e) {
 			selectedEntities.Add(e);
-			document.Controller.UpdateSelection();
+			document.EditorController.UpdateSelection();
 		}
 
 		void RemoveFromSelection(Entity e) {
 			selectedEntities.Remove(e);
-			document.Controller.UpdateSelection();
+			document.EditorController.UpdateSelection();
 		}
 
 		public void ResetSelection() {

@@ -64,7 +64,7 @@ namespace Petri
 
 		private void BuildList() {
 			headersStore.Clear();
-			foreach(string h in document.Controller.Headers) {
+			foreach(string h in document.Headers) {
 				headersStore.AppendValues(h);
 			}
 
@@ -77,7 +77,7 @@ namespace Petri
 
 			for (int i  = treePath.Length; i > 0; i--) {
 				headersStore.GetIter(out iter, treePath[(i - 1)]);
-				if(!document.Controller.RemoveHeader(headersStore.GetValue(iter, 0) as string)) {
+				if(!document.RemoveHeader(headersStore.GetValue(iter, 0) as string)) {
 					MessageDialog d = new MessageDialog(window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Le header est utilisé dans le document. Il n'a pas été supprimé.");
 					d.AddButton("Annuler", ResponseType.Cancel);
 					d.Run();
@@ -103,7 +103,7 @@ namespace Petri
 					"Ouvrir",ResponseType.Accept});
 
 			if(fc.Run() == (int)ResponseType.Accept) {
-				document.Controller.AddHeader(fc.Filename);
+				document.AddHeader(fc.Filename);
 			}
 			fc.Destroy();
 

@@ -100,6 +100,7 @@
     <Compile Include="src\Document\EditorView.cs" />
     <Compile Include="src\Document\Debugger\DebugView.cs" />
     <Compile Include="src\Document\EditorController.cs" />
+    <Compile Include="src\Document\Controller.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

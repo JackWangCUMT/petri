@@ -44,9 +44,6 @@ namespace Petri
 
 			this.PostAction(ModifLocation.EntityChange, null);
 
-			if(document.Controller != null)
-				document.Controller.UpdateMenuItems();
-
 			if(!document.Window.PetriView.MultipleSelection && e != null) {
 				var label = CreateWidget<Label>(objectList, objectIndentation, 0, "ID de l'entité : " + e.ID.ToString());
 				label.Markup = "<span color=\"grey\">" + label.Text + "</span>";
@@ -146,7 +143,7 @@ namespace Petri
 
 		protected void PostActions() {
 			var wrapper = new GuiActionList(actions, actions[0].Description);
-			document.Controller.PostAction(wrapper);
+			document.PostAction(wrapper);
 			actions.Clear();
 		}
 
@@ -205,7 +202,7 @@ namespace Petri
 				string manual = "Manuel…";
 				list.Add(defaultFunction);
 				list.Add(manual);
-				foreach(var func in document.Controller.CppActions) {
+				foreach(var func in document.CppActions) {
 					if(func.Name != "defaultAction" && func.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope())))
 						list.Add(func.Signature);
 				}
@@ -229,7 +226,7 @@ namespace Petri
 							EditInvocation(a, val == manual, objectList, objectIndentation, editorFields);
 						}
 						else {
-							var f = document.Controller.CppActions.Find(delegate(Cpp.Function ff) {
+							var f = document.CppActions.Find(delegate(Cpp.Function ff) {
 								return ff.Signature == val;
 							});
 
@@ -271,7 +268,7 @@ namespace Petri
 				invocation.FocusOutEvent += (obj, eventInfo) => {
 					Cpp.FunctionInvocation funcInvocation = null;
 					try {
-						funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, document.Controller.AllFunctions);
+						funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, document.AllFunctions);
 						if(!funcInvocation.Function.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()))) {
 							throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
 						}
@@ -304,10 +301,10 @@ namespace Petri
 									if((w as Entry).Text == "this")
 										args.Add(new Cpp.EntityExpression(a, "this"));
 									else
-										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, document.Controller.AllFunctions));
+										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, document.AllFunctions));
 								}
 							}
-							this.PostAction(ModifLocation.Function, new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, document.Controller.AllFunctions), false, args.ToArray())));
+							this.PostAction(ModifLocation.Function, new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, document.AllFunctions), false, args.ToArray())));
 						};
 					}
 					for(int i = 0; i < a.Function.Function.Parameters.Count; ++i) {
@@ -325,12 +322,12 @@ namespace Petri
 									if((w as Entry).Text == "this")
 										args.Add(new Cpp.EntityExpression(a, "this"));
 									else
-										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, document.Controller.AllFunctions));
+										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, document.AllFunctions));
 								}
 							}
 							Cpp.FunctionInvocation invocation;
 							if(a.Function.Function is Cpp.Method) {
-								invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, document.Controller.AllFunctions), false, args.ToArray());
+								invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, document.AllFunctions), false, args.ToArray());
 							}
 							else {
 								invocation = new Cpp.FunctionInvocation(a.Function.Function, args.ToArray());
@@ -357,7 +354,7 @@ namespace Petri
 			var condition = CreateWidget<Entry>(objectList, objectIndentation, 0, t.Condition.MakeUserReadable());
 			condition.FocusOutEvent += (obj, eventInfo) => {
 				try {
-					var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, t, document.Controller.AllFunctions));
+					var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, t, document.AllFunctions));
 					PostAction(ModifLocation.Condition, cond);
 				}
 				catch(Exception e) {

@@ -2,39 +2,47 @@
 using System.Xml.Linq;
 using System.Xml;
 using Gtk;
+using System.Collections.Generic;
 
 namespace Petri
 {
 	public class Document {
 		public Document(string path) {
-			window = new MainWindow(this);
-			controller = new PetriController(this);
+			Window = new MainWindow(this);
 
-			this.path = path;
+			this.UndoManager = new UndoManager();
+			this.Headers = new List<string>();
+			CppActions = new List<Cpp.Function>();
+			AllFunctions = new List<Cpp.Function>();
+			CppConditions = new List<Cpp.Function>();
+
+			EditorController = new EditorController(this);
+			this.CurrentController = EditorController;
+
+			this.Path = path;
 			this.Blank = true;
 			this.Restore();
-			window.PresentWindow();
+			Window.PresentWindow();
 		}
 
 		public MainWindow Window {
-			get {
-				return window;
-			}
+			get;
+			private set;
 		}
 
-		public PetriController Controller {
-			get {
-				return controller;
-			}
+		public EditorController EditorController {
+			get;
+			private set;
+		}
+
+		public Controller CurrentController {
+			get;
+			private set;
 		}
 
 		public string Path {
-			get {
-				return path;
-			}
-			set {
-				path = value;
-			}
+			get;
+			set;
 		}
 
 		public bool Blank {
@@ -42,8 +50,110 @@ namespace Petri
 			set;
 		}
 
+		public void PostAction(GuiAction a) {
+			Modified = true;
+			UndoManager.PostAction(a);
+			UpdateUndo();
+			Window.PetriView.Redraw();
+		}
+
+		public void Undo() {
+			UndoManager.Undo();
+			var focus = UndoManager.NextRedo.Focus;
+			CurrentController.ManageFocus(focus);
+
+			UpdateUndo();
+			Window.PetriView.Redraw();
+		}
+
+		public void Redo() {
+			UndoManager.Redo();
+			var focus = UndoManager.NextUndo.Focus;
+			CurrentController.ManageFocus(focus);
+
+			UpdateUndo();
+			Window.PetriView.Redraw();
+		}
+
+		public List<string> Headers {
+			get;
+			private set;
+		}
+
+		public void AddHeader(string header) {
+			if(header.Length == 0 || Headers.Contains(header))
+				return;
+
+			if(header.Length > 0) {
+				var functions = Cpp.Parser.Parse(header);
+				foreach(var func in functions) {
+					if(func.ReturnType.Equals("ResultatAction")) {
+						CppActions.Add(func);
+					}
+					else if(func.ReturnType.Equals("bool")) {
+						CppConditions.Add(func);
+					}
+					AllFunctions.Add(func);
+				}
+			}
+
+			Headers.Add(header);
+
+			Modified = true;
+		}
+
+		// Performs the removal if possible
+		public bool RemoveHeader(string header) {
+			if(PetriNet.UsesHeader(header))
+				return false;
+
+			CppActions.RemoveAll(a => a.Header == header);
+			CppConditions.RemoveAll(c => c.Header == header);
+			Headers.Remove(header);
+
+			Modified = true;
+
+			return true;
+		}
+
+		public List<Cpp.Function> CppConditions {
+			get;
+			private set;
+		}
+
+		public List<Cpp.Function> AllFunctions {
+			get;
+			private set;
+		}
+
+		public List<Cpp.Function> CppActions {
+			get;
+			private set;
+		}
+
+		public RootPetriNet PetriNet {
+			get;
+			set;
+		}
+
+		public bool Modified {
+			get {
+				return modified;
+			}
+			set {
+				modified = value;
+				if(value == true)
+					this.Blank = false;
+
+				// We require the current undo stack to represent an unmodified state
+				if(value == false) {
+					guiActionToMatchSave = UndoManager.NextUndo;
+				}
+			}
+		}
+
 		public bool CloseAndConfirm() {
-			if(Controller.Modified) {
+			if(Modified) {
 				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "Souhaitez-vous enregistrer les modifications apportées au graphe ? Vos modifications seront perdues si vous ne les enregistrez pas.");
 				d.AddButton("Ne pas enregistrer", ResponseType.No);
 				d.AddButton("Annuler", ResponseType.Cancel);
@@ -71,7 +181,7 @@ namespace Petri
 		}
 
 		public void SaveAs() {
-			var fc = new Gtk.FileChooserDialog("Enregistrer le graphe sous…", window,
+			var fc = new Gtk.FileChooserDialog("Enregistrer le graphe sous…", Window,
 				FileChooserAction.Save,
 				new object[]{"Annuler",ResponseType.Cancel,
 					"Enregistrer",ResponseType.Accept});
@@ -84,10 +194,10 @@ namespace Petri
 			fc.DoOverwriteConfirmation = true;
 
 			if(fc.Run() == (int)ResponseType.Accept) {
-				this.path = fc.Filename;
-				if(!this.path.EndsWith(".petri"))
-					this.path += ".petri";
-				Window.Title = System.IO.Path.GetFileName(this.path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
+				this.Path = fc.Filename;
+				if(!this.Path.EndsWith(".petri"))
+					this.Path += ".petri";
+				Window.Title = System.IO.Path.GetFileName(this.Path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
 				fc.Destroy();
 			}
 			else {
@@ -102,7 +212,7 @@ namespace Petri
 		{
 			string tempFileName = "";
 			try {
-				if(path == "") {
+				if(Path == "") {
 					this.SaveAs();
 					return;
 				}
@@ -124,7 +234,7 @@ namespace Petri
 				}
 
 				var headers = new XElement("Headers");
-				foreach(var h in Controller.Headers) {
+				foreach(var h in Headers) {
 					var hh = new XElement("Header");
 					hh.SetAttributeValue("File", h);
 					headers.Add(hh);
@@ -132,7 +242,7 @@ namespace Petri
 				doc.Add(root);
 				root.Add(winConf);
 				root.Add(headers);
-				root.Add(petriNet.GetXml());
+				root.Add(PetriNet.GetXml());
 
 				// Write to a temporary file to avoid corrupting the existing document on error
 				tempFileName = System.IO.Path.GetTempFileName();
@@ -149,13 +259,13 @@ namespace Petri
 				System.IO.File.Move(tempFileName, this.Path);
 				tempFileName = "";
 
-				Controller.Modified = false;
+				Modified = false;
 			}
 			catch(Exception e) {
 				if(tempFileName.Length > 0)
 					System.IO.File.Delete(tempFileName);
 
-				MessageDialog d = new MessageDialog(window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Une erreur est survenue lors de l'enregistrement : " + e.ToString());
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Une erreur est survenue lors de l'enregistrement : " + e.ToString());
 				d.AddButton("OK", ResponseType.Cancel);
 				d.Run();
 				d.Destroy();
@@ -164,8 +274,8 @@ namespace Petri
 
 		public void Restore()
 		{
-			if(Controller.Modified) {
-				MessageDialog d = new MessageDialog(window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, "Souhaitez-vous revenir à la dernière version enregistrée du graphe ? Vos modifications seront perdues.");
+			if(Modified) {
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, "Souhaitez-vous revenir à la dernière version enregistrée du graphe ? Vos modifications seront perdues.");
 				d.AddButton("Annuler", ResponseType.Cancel);
 				d.AddButton("Revenir", ResponseType.Accept);
 
@@ -177,17 +287,17 @@ namespace Petri
 				}
 			}
 
-			window.PetriView.EditedPetriNet = null;
-			Controller.EditedObject = null;
+			Window.PetriView.EditedPetriNet = null;
+			EditorController.EditedObject = null;
 
-			var oldPetriNet = petriNet;
+			var oldPetriNet = PetriNet;
 
 			this.ResetID();
 			settings = null;
 
 			try {
-				if(path == "") {
-					petriNet = new RootPetriNet(this);
+				if(Path == "") {
+					PetriNet = new RootPetriNet(this);
 					int docID = 1;
 					string prefix = "Sans titre ";
 					foreach(var d in MainClass.Documents) {
@@ -199,11 +309,11 @@ namespace Petri
 						}
 					}
 					Window.Title = prefix + docID.ToString();
-					Controller.Modified = false;
+					Modified = false;
 					Blank = true;
 				}
 				else {
-					var document = XDocument.Load(path);
+					var document = XDocument.Load(Path);
 
 					var elem = document.FirstNode as XElement;
 
@@ -215,18 +325,18 @@ namespace Petri
 
 					var node = elem.Element("Headers");
 					foreach(var e in node.Elements()) {
-						Controller.AddHeader(e.Attribute("File").Value);
+						this.AddHeader(e.Attribute("File").Value);
 					}
 
-					petriNet = new RootPetriNet(this, elem.Element("PetriNet"));
-					petriNet.Canonize();
-					Window.Title = System.IO.Path.GetFileName(this.path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
+					PetriNet = new RootPetriNet(this, elem.Element("PetriNet"));
+					PetriNet.Canonize();
+					Window.Title = System.IO.Path.GetFileName(this.Path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
 					this.Blank = false;
-					Controller.Modified = false;
+					Modified = false;
 				}
 			}
 			catch(Exception e) {
-				MessageDialog d = new MessageDialog(window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Une erreur est survenue lors de du chargement du document : " + e.ToString());
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Une erreur est survenue lors de du chargement du document : " + e.ToString());
 				d.AddButton("OK", ResponseType.Cancel);
 				d.Run();
 				d.Destroy();
@@ -238,23 +348,22 @@ namespace Petri
 				}
 				else {
 					// If it is a fresh opening, just get back to an empty state.
-					petriNet = new RootPetriNet(this);
-					Controller.Modified = false;
+					PetriNet = new RootPetriNet(this);
+					Modified = false;
 					this.Blank = true;
 				}
 			}
 			if(settings == null) {
 				settings = DocumentSettings.GetDefaultSettings(this);
 			}
-			Controller.PetriNet = petriNet;
-			window.PetriView.EditedPetriNet = petriNet;
+			Window.PetriView.EditedPetriNet = PetriNet;
 
-			window.PetriView.Redraw();
+			Window.PetriView.Redraw();
 		}
 
 		public void SaveCpp()
 		{
-			var fc = new Gtk.FileChooserDialog("Enregistrer le code généré sous…", window,
+			var fc = new Gtk.FileChooserDialog("Enregistrer le code généré sous…", Window,
 				FileChooserAction.SelectFolder,
 				new object[]{"Annuler",ResponseType.Cancel,
 					"Enregistrer",ResponseType.Accept});
@@ -266,7 +375,7 @@ namespace Petri
 			fc.DoOverwriteConfirmation = true;
 
 			if(fc.Run() == (int)ResponseType.Accept) {
-				var cppGen = petriNet.GenerateCpp();
+				var cppGen = PetriNet.GenerateCpp();
 				cppGen.Item1.AddHeader("\"" + System.IO.Path.Combine(fc.Filename, settings.Name) + ".h\"");
 				cppGen.Item1.Write(System.IO.Path.Combine(fc.Filename, settings.Name) + ".cpp");
 
@@ -288,7 +397,7 @@ namespace Petri
 			
 				string old = settings.OutputPath;
 				this.settings.OutputPath = fc.Filename;
-				Controller.Modified = old != settings.OutputPath;
+				Modified = old != settings.OutputPath;
 			}
 
 			fc.Destroy();
@@ -325,12 +434,33 @@ namespace Petri
 			}
 		}
 
-		string path;
-		MainWindow window;
-		PetriController controller;
-		RootPetriNet petriNet;
+		public UndoManager UndoManager {
+			get;
+			private set;
+		}
+
+		private void UpdateUndo() {
+			// If we fall back to the state we consider unmodified, let it be considered so
+			Modified = UndoManager.NextUndo != this.guiActionToMatchSave;
+
+			Window.RevertItem.Sensitive = this.Modified;
+
+			this.UpdateMenuItems();
+
+			(Window.UndoItem.Child as Label).Text = "Annuler" + (UndoManager.NextUndo != null ? " " + UndoManager.NextUndoDescription : "");
+			(Window.RedoItem.Child as Label).Text = "Rétablir" + (UndoManager.NextRedo != null ? " " + UndoManager.NextRedoDescription : "");
+		}
+
+		public void UpdateMenuItems() {
+			CurrentController.UpdateMenuItems();
+			Window.UndoItem.Sensitive = UndoManager.NextUndo != null;
+			Window.RedoItem.Sensitive = UndoManager.NextRedo != null;
+		}
+
+		GuiAction guiActionToMatchSave = null;
 		HeadersManager headersManager;
 		DocumentSettings settings;
+		bool modified;
 	}
 }
 

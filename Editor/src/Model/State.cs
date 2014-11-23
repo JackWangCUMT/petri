@@ -57,13 +57,11 @@ namespace Petri
 		public void AddTransitionBefore(Transition t)
 		{
 			TransitionsBefore.Add(t);
-			Document.Controller.Modified = true;
 		}
 
 		public void AddTransitionAfter(Transition t)
 		{
 			TransitionsAfter.Add(t);
-			Document.Controller.Modified = true;
 		}
 
 		public void RemoveTransitionBefore(Transition t) {
@@ -91,7 +89,7 @@ namespace Petri
 					}
 				}
 
-				Document.Controller.Modified = true;
+				Document.Modified = true;
 			}
 		}
 

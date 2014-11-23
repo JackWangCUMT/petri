@@ -5,12 +5,10 @@ using System.Linq;
 
 namespace Petri
 {
-	public class PetriController
+	public class EditorController : Controller
 	{
-		public PetriController(Document doc) {
+		public EditorController(Document doc) {
 			document = doc;
-			this.PetriNet = null;
-			undoManager = new UndoManager();
 
 			allFunctions = new List<Cpp.Function>();
 			cppActions = new List<Cpp.Function>();
@@ -24,118 +22,11 @@ namespace Petri
 			cppActions.Insert(0, defaultAction);
 			allFunctions.Insert(0, defaultAction);
 
-			this.headers = new List<string>();
 			editor = EntityEditor.GetEditor(null, doc);
 			this.UpdateMenuItems();
 		}
 
-		public void PostAction(GuiAction a) {
-			Modified = true;
-			undoManager.PostAction(a);
-			UpdateUndo();
-			document.Window.PetriView.Redraw();
-		}
-
-		public void Undo() {
-			undoManager.Undo();
-			var focus = undoManager.NextRedo.Focus;
-			ManageFocus(focus);
-
-			UpdateUndo();
-			document.Window.PetriView.Redraw();
-		}
-
-		public void Redo() {
-			undoManager.Redo();
-			var focus = undoManager.NextUndo.Focus;
-			ManageFocus(focus);
-
-			UpdateUndo();
-			document.Window.PetriView.Redraw();
-		}
-
-		public void AddHeader(string header) {
-			if(header.Length == 0 || Headers.Contains(header))
-				return;
-
-			if(header.Length > 0) {
-				var functions = Cpp.Parser.Parse(header);
-				foreach(var func in functions) {
-					if(func.ReturnType.Equals("ResultatAction")) {
-						cppActions.Add(func);
-					}
-					else if(func.ReturnType.Equals("bool")) {
-						cppConditions.Add(func);
-					}
-					allFunctions.Add(func);
-				}
-			}
-
-			Headers.Add(header);
-
-			Modified = true;
-		}
-
-		// Performs the removal if possible
-		public bool RemoveHeader(string header) {
-			if(PetriNet.UsesHeader(header))
-				return false;
-
-			CppActions.RemoveAll(a => a.Header == header);
-			CppConditions.RemoveAll(c => c.Header == header);
-			Headers.Remove(header);
-
-			Modified = true;
-
-			return true;
-		}
-
-		public List<Cpp.Function> CppConditions {
-			get {
-				return cppConditions;
-			}
-		}
-
-		public List<Cpp.Function> AllFunctions {
-			get {
-				return allFunctions;
-			}
-		}
-
-		public List<Cpp.Function> CppActions {
-			get {
-				return cppActions;
-			}
-		}
-
-		public RootPetriNet PetriNet {
-			get;
-			set;
-		}
-
-		public bool Modified {
-			get {
-				return modified;
-			}
-			set {
-				modified = value;
-				if(value == true)
-					this.document.Blank = false;
-
-				// We require the current undo stack to represent an unmodified state
-				if(value == false) {
-					guiActionToMatchSave = undoManager.NextUndo;
-				}
-			}
-		}
-
-		public List<string> Headers {
-			get {
-				return headers;
-			}
-		}
-
-		public void Copy() {
+		public override void Copy() {
 			if(document.Window.PetriView.SelectedEntities.Count > 0) {
 				MainClass.Clipboard = new HashSet<Entity>(CloneEntities(document.Window.PetriView.SelectedEntities, document));
 
@@ -143,10 +34,10 @@ namespace Petri
 			}
 		}
 
-		public void Paste() {
+		public override void Paste() {
 			if(MainClass.Clipboard.Count > 0) {
 				var action = PasteAction();
-				this.PostAction(action);
+				document.PostAction(action);
 
 				var pasted = action.Focus as List<Entity>;
 				document.Window.PetriView.SelectedEntities.Clear();
@@ -155,10 +46,10 @@ namespace Petri
 			}
 		}
 
-		public void Cut() {
+		public override void Cut() {
 			if(document.Window.PetriView.SelectedEntities.Count > 0) {
 				Copy();
-				this.PostAction(new GuiActionWrapper(this.RemoveSelection(), "Couper les entités"));
+				document.PostAction(new GuiActionWrapper(this.RemoveSelection(), "Couper les entités"));
 			}
 		}
 
@@ -195,7 +86,7 @@ namespace Petri
 			return new GuiActionList(deleteEntities, "Supprimer les entités");
 		}
 
-		public void SelectAll() {
+		public override void SelectAll() {
 			var selected = document.Window.PetriView.SelectedEntities;
 			selected.Clear();
 			foreach(var s in document.Window.PetriView.EditedPetriNet.States) {
@@ -217,12 +108,10 @@ namespace Petri
 			}
 		}
 
-		public void UpdateMenuItems() {
+		public override void UpdateMenuItems() {
 			document.Window.CopyItem.Sensitive = document.Window.PetriView.SelectedEntities.Count > 0;
 			document.Window.CutItem.Sensitive = document.Window.PetriView.SelectedEntities.Count > 0;
 			document.Window.PasteItem.Sensitive = MainClass.Clipboard.Count > 0;
-			document.Window.UndoItem.Sensitive = undoManager.NextUndo != null;
-			document.Window.RedoItem.Sensitive = undoManager.NextRedo != null;
 		}
 
 		public Entity EditedObject {
@@ -233,19 +122,7 @@ namespace Petri
 				editor = EntityEditor.GetEditor(value, document);
 			}
 		}
-
-		private void UpdateUndo() {
-			// If we fall back to the state we consider unmodified, let it be considered so
-			this.modified = this.undoManager.NextUndo != this.guiActionToMatchSave;
-
-			document.Window.RevertItem.Sensitive = this.modified;
-
-			this.UpdateMenuItems();
-
-			(document.Window.UndoItem.Child as Label).Text = "Annuler" + (undoManager.NextUndo != null ? " " + undoManager.NextUndoDescription : "");
-			(document.Window.RedoItem.Child as Label).Text = "Rétablir" + (undoManager.NextRedo != null ? " " + undoManager.NextRedoDescription : "");
-		}
-			
+					
 		private GuiAction PasteAction() {
 			var actionList = new List<GuiAction>();
 
@@ -319,7 +196,7 @@ namespace Petri
 			return cloned;
 		}
 
-		private void ManageFocus(object focus) {
+		public override void ManageFocus(object focus) {
 			if(focus is List<Entity>) {
 				document.Window.PetriView.SelectedEntities.Clear();
 				document.Window.PetriView.SelectedEntities.UnionWith(focus as List<Entity>);
@@ -349,9 +226,6 @@ namespace Petri
 		List<Cpp.Function> allFunctions;
 		List<Cpp.Function> cppActions;
 		List<Cpp.Function> cppConditions;
-		List<string> headers;
-		UndoManager undoManager;
-		GuiAction guiActionToMatchSave = null;
 		bool modified = false;
 	}
 }

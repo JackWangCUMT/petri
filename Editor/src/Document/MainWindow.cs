@@ -81,7 +81,7 @@ namespace Petri
 			hbox.PackEnd(editor, false, false, 0);
 
 			this.FocusInEvent += (o, args) => {
-				document.Controller.UpdateMenuItems();
+				document.UpdateMenuItems();
 				PetriView.FocusIn();
 			};
 			this.FocusOutEvent += (o, args) => {
@@ -199,22 +199,22 @@ namespace Petri
 				document.Restore();
 			}
 			else if(sender == undoItem) {
-				document.Controller.Undo();
+				document.Undo();
 			}
 			else if(sender == redoItem) {
-				document.Controller.Redo();
+				document.Redo();
 			}
 			else if(sender == copyItem) {
-				document.Controller.Copy();
+				document.CurrentController.Copy();
 			}
 			else if(sender == cutItem) {
-				document.Controller.Cut();
+				document.CurrentController.Cut();
 			}
 			else if(sender == pasteItem) {
-				document.Controller.Paste();
+				document.CurrentController.Paste();
 			}
 			else if(sender == selectAllItem) {
-				document.Controller.SelectAll();
+				document.CurrentController.SelectAll();
 			}
 			else if(sender == openItem) {
 				MainClass.OpenDocument();

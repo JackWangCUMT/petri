@@ -263,7 +263,7 @@ namespace Petri
 
 		public RootPetriNet RootPetriNet {
 			get {
-				return document.Controller.PetriNet;
+				return document.PetriNet;
 			}
 		}
 
@@ -272,7 +272,7 @@ namespace Petri
 				return editedPetriNet;
 			}
 			set {
-				document.Controller.EditedObject = null;
+				document.EditorController.EditedObject = null;
 				editedPetriNet = value;
 			}
 		}

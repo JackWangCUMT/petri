@@ -12,7 +12,7 @@ namespace Petri
 			states = new List<State>();
 			transitions = new List<Transition>();
 
-			Document.Controller.Modified = false;
+			Document.Modified = false;
 			this.Radius = 30;
 		}
 
@@ -31,7 +31,7 @@ namespace Petri
 			}
 
 			foreach(var e in descriptor.Element("Transitions").Elements("Transition")) {
-				var t = new Transition(doc, this, e, statesTable, Document.Controller.AllFunctions);
+				var t = new Transition(doc, this, e, statesTable, Document.AllFunctions);
 				this.AddTransition(t);
 				t.Before.AddTransitionAfter(t);
 				t.After.AddTransitionBefore(t);

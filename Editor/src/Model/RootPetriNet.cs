@@ -9,12 +9,12 @@ namespace Petri
 	{
 		public RootPetriNet(Document doc) : base(doc, null, true, new Cairo.PointD(0, 0))
 		{
-			Document.Controller.Modified = false;
+			Document.Modified = false;
 		}
 
 		public RootPetriNet(Document doc, XElement descriptor) : base(doc, null, descriptor)
 		{
-			Document.Controller.Modified = false;
+			Document.Modified = false;
 		}
 
 		public override bool Active {
@@ -71,7 +71,7 @@ namespace Petri
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			source.AddHeader("\"PetriUtils.h\"");
-			foreach(var s in Document.Controller.Headers) {
+			foreach(var s in Document.Headers) {
 				source.AddHeader("\"" + s + "\"");
 			}
 
@@ -131,7 +131,7 @@ namespace Petri
 				++Document.LastEntityID;
 			}
 
-			Document.Controller.Modified = true;
+			Document.Modified = true;
 		}
 
 		private Document document;
