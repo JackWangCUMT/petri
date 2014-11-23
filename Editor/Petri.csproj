@@ -59,6 +59,7 @@
   <ItemGroup>
     <Folder Include="Resources\" />
     <Folder Include="src\" />
+    <Folder Include="src\Document\Debugger\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Todo.txt" />
@@ -96,6 +97,9 @@
     <Compile Include="src\Document\DocumentSettings.cs" />
     <Compile Include="src\Document\CppCompiler.cs" />
     <Compile Include="src\Cpp\FunctionInvocation.cs" />
+    <Compile Include="src\Document\Debugger\DebugServer.cs" />
+    <Compile Include="src\Document\EditorView.cs" />
+    <Compile Include="src\Document\Debugger\DebugView.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

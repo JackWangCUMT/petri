@@ -51,7 +51,7 @@ namespace Petri
 			//this.paned = new HPaned();
 			//vbox.PackStart(paned, true, true, 0);
 
-			petriView = new PetriView(doc);
+			petriView = new EditorView(doc);
 			petriView.CanFocus = true;
 			petriView.CanDefault = true;
 			petriView.AddEvents ((int) 
@@ -117,7 +117,7 @@ namespace Petri
 			}
 		}
 
-		public PetriView PetriView {
+		public EditorView PetriView {
 			get {
 				return petriView;
 			}
@@ -349,7 +349,7 @@ namespace Petri
 
 		VBox vbox;
 		HBox hbox;
-		PetriView petriView;
+		EditorView petriView;
 		HBox toolbar;
 		Fixed editor;
 		Button manageHeaders, cpp, compile;

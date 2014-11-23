@@ -297,7 +297,9 @@ namespace Petri
 		public void Compile() {
 			var c = new CppCompiler(this);
 			var o = c.Compile();
-			Console.WriteLine(o);
+			if(o != "") {
+				// TODO: manage errors output
+			}
 		}
 
 		public void ManageHeaders() {
