@@ -13,7 +13,6 @@ Invocation du compilateur C++ depuis l'éditeur de réseaux de Petri OK
 
 Débuggeur graphique
 	Thread de supervision du runtime
-		Arrêt et remplacement à chaud du code
 		Pause/Relance de l'exécution du code (comment ?)
 			Socket de communication debugger/debuggé
 

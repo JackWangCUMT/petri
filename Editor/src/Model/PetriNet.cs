@@ -77,7 +77,6 @@ namespace Petri
 		public void AddState(State a)
 		{
 			states.Add(a);
-			Document.Controller.Modified = true;
 		}
 
 		public void AddTransition(Transition t)
@@ -113,8 +112,6 @@ namespace Petri
 		public void RemoveState(State a)
 		{
 			states.Remove(a);
-
-			Document.Controller.Modified = true;
 		}
 
 		public void RemoveTransition(Transition t)
@@ -123,8 +120,6 @@ namespace Petri
 			t.After.RemoveTransitionBefore(t);
 
 			transitions.Remove(t);
-
-			Document.Controller.Modified = true;
 		}
 
 		public List<State> States {

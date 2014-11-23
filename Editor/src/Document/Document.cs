@@ -11,7 +11,7 @@ namespace Petri
 			controller = new PetriController(this);
 
 			this.path = path;
-			this.Dirty = false;
+			this.Blank = true;
 			this.Restore();
 			window.PresentWindow();
 		}
@@ -37,7 +37,7 @@ namespace Petri
 			}
 		}
 
-		public bool Dirty {
+		public bool Blank {
 			get;
 			set;
 		}
@@ -200,7 +200,7 @@ namespace Petri
 					}
 					Window.Title = prefix + docID.ToString();
 					Controller.Modified = false;
-					Dirty = false;
+					Blank = true;
 				}
 				else {
 					var document = XDocument.Load(path);
@@ -221,7 +221,7 @@ namespace Petri
 					petriNet = new RootPetriNet(this, elem.Element("PetriNet"));
 					petriNet.Canonize();
 					Window.Title = System.IO.Path.GetFileName(this.path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
-					this.Dirty = true;
+					this.Blank = false;
 					Controller.Modified = false;
 				}
 			}
@@ -240,7 +240,7 @@ namespace Petri
 					// If it is a fresh opening, just get back to an empty state.
 					petriNet = new RootPetriNet(this);
 					Controller.Modified = false;
-					this.Dirty = false;
+					this.Blank = true;
 				}
 			}
 			if(settings == null) {

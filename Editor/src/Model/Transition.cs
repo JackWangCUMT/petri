@@ -10,8 +10,8 @@ namespace Petri
 	{
 		public Transition(Document doc, PetriNet s, State before, State after) : base(doc, s)
 		{
-			this.before = before;
-			this.after = after;
+			this.Before = before;
+			this.After = after;
 
 			this.Name = ID.ToString();
 
@@ -21,8 +21,8 @@ namespace Petri
 			//this.Before.AddTransitionAfter(this);
 			//this.After.AddTransitionBefore(this);
 
-			this.shiftAgainstAxis = new PointD(0, 0);
-			this.shiftAmplitude = PetriView.Norm(this.Direction());
+			this.Shift = new PointD(0, 0);
+			this.ShiftAmplitude = PetriView.Norm(this.Direction());
 
 			base.Position = new PointD(0, 0);
 
@@ -32,8 +32,8 @@ namespace Petri
 		}
 
 		public Transition(Document doc, PetriNet parent, XElement descriptor, IDictionary<UInt64, State> statesTable, List<Cpp.Function> conditions) : base(doc, parent, descriptor) {
-			this.before = statesTable[UInt64.Parse(descriptor.Attribute("BeforeID").Value)];
-			this.after = statesTable[UInt64.Parse(descriptor.Attribute("AfterID").Value)];
+			this.Before = statesTable[UInt64.Parse(descriptor.Attribute("BeforeID").Value)];
+			this.After = statesTable[UInt64.Parse(descriptor.Attribute("AfterID").Value)];
 
 			//this.before.AddTransitionAfter(this);
 			//this.after.AddTransitionBefore(this);
@@ -76,33 +76,25 @@ namespace Petri
 
 		public PointD Direction()
 		{
-			return new PointD(after.Position.X - before.Position.X, after.Position.Y - before.Position.Y);
+			return new PointD(After.Position.X - Before.Position.X, After.Position.Y - Before.Position.Y);
 		}
 
 		public void UpdatePosition()
 		{
 			double norm = PetriView.Norm(this.Direction());
 			PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
-			this.Position = new PointD(center.X + shiftAgainstAxis.X * norm / ((shiftAmplitude > 1e-3) ? shiftAmplitude : 1), center.Y + shiftAgainstAxis.Y * norm / ((shiftAmplitude > 1e-3) ? shiftAmplitude : 1));
+			this.Position = new PointD(center.X + Shift.X * norm / ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1), center.Y + Shift.Y * norm / ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1));
 			Document.Controller.Modified = true;
 		}
 
 		public State Before {
-			get {
-				return before;
-			}
-			set {
-				before = value;
-			}
+			get;
+			set;
 		}
 
 		public State After {
-			get {
-				return after;
-			}
-			set {
-				after = value;
-			}
+			get;
+			set;
 		}
 
 		public override PointD Position {
@@ -114,62 +106,37 @@ namespace Petri
 
 				// Prevents access during construction
 				if(this.After != null) {
-					shiftAmplitude = PetriView.Norm(this.Direction());
+					ShiftAmplitude = PetriView.Norm(this.Direction());
 					PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
-					shiftAgainstAxis = new PointD(value.X - center.X, value.Y - center.Y);
+					Shift = new PointD(value.X - center.X, value.Y - center.Y);
 					Document.Controller.Modified = true;
 				}
 			}
 		}
 
 		public double Width {
-			get {
-				return width;
-			}
-			set {
-				width = value;
-				Document.Controller.Modified = true;
-			}
+			get;
+			set;
 		}
 
 		public double Height {
-			get {
-				return height;
-			}
-			set {
-				height = value;
-				Document.Controller.Modified = true;
-			}
+			get;
+			set;
 		}
 
 		public PointD Shift {
-			get {
-				return shiftAgainstAxis;
-			}
-			set {
-				shiftAgainstAxis = value;
-				Document.Controller.Modified = true;
-			}
+			get;
+			set;
 		}
 
 		public double ShiftAmplitude {
-			get {
-				return shiftAmplitude;
-			}
-			set {
-				shiftAmplitude = value;
-				Document.Controller.Modified = true;
-			}
+			get;
+			set;
 		}
 
 		public ConditionBase Condition {
-			get {
-				return condition;
-			}
-			set {
-				condition = value;
-				Document.Controller.Modified = true;
-			}
+			get;
+			set;
 		}
 
 		public override string CppName {
@@ -216,17 +183,6 @@ namespace Petri
 
 			return "";
 		}
-
-		private State before;
-		private State after;
-
-		private PointD shiftAgainstAxis;
-		private double shiftAmplitude;
-
-		double width;
-		double height;
-
-		private ConditionBase condition;
 	}
 }
 

@@ -8,8 +8,8 @@ namespace Petri
 	public abstract class State : Entity
 	{
 		public State(Document doc, PetriNet parent, bool active, int requiredTokens, Cairo.PointD pos) : base(doc, parent) {
-			this.transitionsBefore = new List<Transition>();
-			this.transitionsAfter = new List<Transition>();
+			this.TransitionsBefore = new List<Transition>();
+			this.TransitionsAfter = new List<Transition>();
 
 			this.Parent = parent;
 			this.Active = active;
@@ -19,8 +19,8 @@ namespace Petri
 		}
 
 		public State(Document doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
-			this.transitionsBefore = new List<Transition>();
-			this.transitionsAfter = new List<Transition>();
+			this.TransitionsBefore = new List<Transition>();
+			this.TransitionsAfter = new List<Transition>();
 
 			this.Active = bool.Parse(descriptor.Attribute("Active").Value);
 			this.RequiredTokens = int.Parse(descriptor.Attribute("RequiredTokens").Value);
@@ -35,46 +35,34 @@ namespace Petri
 		}
 
 		public virtual bool Active {
-			get {
-				return active;
-			}
-			set {
-				active = value;
-				Document.Controller.Modified = true;
-			}
+			get;
+			set;
 		}
 
 		public virtual int RequiredTokens {
-			get {
-				return requiredTokens;
-			}
-			set {
-				requiredTokens = value;
-				Document.Controller.Modified = true;
-			}
+			get;
+			set;
 		}
 
 		public List<Transition> TransitionsBefore {
-			get {
-				return transitionsBefore;
-			}
+			get;
+			private set;
 		}
 
 		public List<Transition> TransitionsAfter {
-			get {
-				return transitionsAfter;
-			}
+			get;
+			private set;
 		}
 
 		public void AddTransitionBefore(Transition t)
 		{
-			transitionsBefore.Add(t);
+			TransitionsBefore.Add(t);
 			Document.Controller.Modified = true;
 		}
 
 		public void AddTransitionAfter(Transition t)
 		{
-			transitionsAfter.Add(t);
+			TransitionsAfter.Add(t);
 			Document.Controller.Modified = true;
 		}
 
@@ -108,13 +96,8 @@ namespace Petri
 		}
 
 		public double Radius {
-			get {
-				return radius;
-			}
-			set {
-				radius = value;
-				Document.Controller.Modified = true;
-			}
+			get;
+			set;
 		}
 
 		public override string CppName {
@@ -130,12 +113,6 @@ namespace Petri
 
 			return false;
 		}
-
-		private List<Transition> transitionsBefore;
-		private List<Transition> transitionsAfter;
-		private bool active;
-		double radius = 10;
-		int requiredTokens = 0;
 	}
 
 	public abstract class NonRootState : State {

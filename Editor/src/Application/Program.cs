@@ -90,7 +90,7 @@ namespace Petri
 				}
 
 				// Reuse last blank document which was created (typically the first one created on program launch)
-				if(documents.Count > 0 && !documents[documents.Count - 1].Dirty) {
+				if(documents.Count > 0 && documents[documents.Count - 1].Blank) {
 					documents[documents.Count - 1].Path = fc.Filename;
 					documents[documents.Count - 1].Restore();
 					documents[documents.Count - 1].Window.Present();

@@ -82,7 +82,6 @@
     <Compile Include="src\Document\EntityEditor.cs" />
     <Compile Include="src\Document\HeadersManager.cs" />
     <Compile Include="src\Document\MainWindow.cs" />
-    <Compile Include="src\Document\PetriController.cs" />
     <Compile Include="src\Document\PetriView.cs" />
     <Compile Include="src\Document\UndoManager.cs" />
     <Compile Include="src\Model\Action.cs" />
@@ -100,6 +99,7 @@
     <Compile Include="src\Document\Debugger\DebugServer.cs" />
     <Compile Include="src\Document\EditorView.cs" />
     <Compile Include="src\Document\Debugger\DebugView.cs" />
+    <Compile Include="src\Document\EditorController.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

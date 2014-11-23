@@ -120,7 +120,7 @@ namespace Petri
 			set {
 				modified = value;
 				if(value == true)
-					this.document.Dirty = true;
+					this.document.Blank = false;
 
 				// We require the current undo stack to represent an unmodified state
 				if(value == false) {
