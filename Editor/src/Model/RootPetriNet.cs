@@ -99,8 +99,8 @@ namespace Petri
 
 			source += "";
 
-			source += "EXPORT void *" + Document.Settings.Name + "_createDebug(std::uint16_t port, char const *host) {";
-			source += "auto petriNet = std::make_unique<PetriDebug>(port, host);";
+			source += "EXPORT void *" + Document.Settings.Name + "_createDebug() {";
+			source += "auto petriNet = std::make_unique<PetriDebug>();";
 			source += "fill(*petriNet);";
 			source += "return petriNet.release();";
 			source += "}"; // create()
