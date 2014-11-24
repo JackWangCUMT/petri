@@ -45,8 +45,8 @@ namespace Petri
 		[GLib.ConnectBefore()]
 		protected override bool OnKeyPressEvent(Gdk.EventKey ev) {
 			if(ev.Key == Gdk.Key.Escape) {
-				if(this.EditedPetriNet.Parent != null) {
-					this.EditedPetriNet = this.EditedPetriNet.Parent;
+				if(this.CurrentPetriNet.Parent != null) {
+					this.CurrentPetriNet = this.CurrentPetriNet.Parent;
 				}
 				this.Redraw();
 			}

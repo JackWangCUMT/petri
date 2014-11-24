@@ -115,14 +115,14 @@ namespace Petri
 					context.SetSourceRGBA(0.0, 0.6, 0.2, 1);
 					context.SelectFontFace("Lucida Grande", FontSlant.Normal, FontWeight.Normal);
 					context.SetFontSize(16);
-					string val = EditedPetriNet.Name;
+					string val = CurrentPetriNet.Name;
 					TextExtents te = context.TextExtents(val);
 					context.MoveTo(15 - te.XBearing, 15 - te.YBearing);
 					context.TextPath(val);
 					context.Fill();
 				}
 
-				foreach(var t in EditedPetriNet.Transitions) {
+				foreach(var t in CurrentPetriNet.Transitions) {
 					if(t.Position.X > minX)
 						minX = t.Position.X;
 					if(t.Position.Y > minY)
@@ -190,7 +190,7 @@ namespace Petri
 					context.Fill();
 				}
 
-				foreach(var a in EditedPetriNet.States) {
+				foreach(var a in CurrentPetriNet.States) {
 					if(a.Position.X > minX)
 						minX = a.Position.X;
 					if(a.Position.Y > minY)
@@ -267,7 +267,7 @@ namespace Petri
 			}
 		}
 
-		public virtual PetriNet EditedPetriNet {
+		public virtual PetriNet CurrentPetriNet {
 			get {
 				return editedPetriNet;
 			}

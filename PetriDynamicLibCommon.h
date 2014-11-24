@@ -22,11 +22,12 @@ public:
 	virtual ~PetriDynamicLibCommon() = default;
 
 	virtual std::unique_ptr<PetriNet> create() = 0;
-	virtual std::unique_ptr<PetriNet> createDebug() = 0;
+	virtual std::unique_ptr<PetriDebug> createDebug() = 0;
 
 	virtual std::string hash() const = 0;
-
 	virtual std::string name() const = 0;
+
+	virtual std::uint16_t port() const = 0;
 
 	virtual void load() = 0;
 	virtual void reload() = 0;

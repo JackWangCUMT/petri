@@ -55,6 +55,10 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
     <Reference Include="System" />
+    <Reference Include="System.Windows" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -101,6 +105,10 @@
     <Compile Include="src\Document\Debugger\DebugView.cs" />
     <Compile Include="src\Document\EditorController.cs" />
     <Compile Include="src\Document\Controller.cs" />
+    <Compile Include="src\Document\Debugger\DebugController.cs" />
+    <Compile Include="src\Document\EditorGui.cs" />
+    <Compile Include="src\Document\Debugger\DebugGui.cs" />
+    <Compile Include="src\Document\Gui.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

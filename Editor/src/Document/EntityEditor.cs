@@ -21,7 +21,7 @@ namespace Petri
 			else if(e is ExitPoint) {
 				editor = new ExitPointEditor(e as ExitPoint, doc);
 			}
-			else if(doc.Window.PetriView.MultipleSelection) {
+			else if(doc.Window.EditorGui.PetriView.MultipleSelection) {
 				editor = new MultipleEditor(doc);
 			}
 			else {
@@ -44,7 +44,7 @@ namespace Petri
 
 			this.PostAction(ModifLocation.EntityChange, null);
 
-			if(!document.Window.PetriView.MultipleSelection && e != null) {
+			if(!document.Window.EditorGui.PetriView.MultipleSelection && e != null) {
 				var label = CreateWidget<Label>(objectList, objectIndentation, 0, "ID de l'entité : " + e.ID.ToString());
 				label.Markup = "<span color=\"grey\">" + label.Text + "</span>";
 			}
@@ -87,14 +87,14 @@ namespace Petri
 
 		protected void FormatAndShow()
 		{
-			foreach(Widget w in document.Window.Editor.AllChildren) {
-				document.Window.Editor.Remove(w);
+			foreach(Widget w in document.Window.EditorGui.Editor.AllChildren) {
+				document.Window.EditorGui.Editor.Remove(w);
 			}
 
 			int lastX = 20, lastY = 0;
 			for(int i = 0; i < objectList.Count; ++i) {
 				Widget w = objectList[i];
-				document.Window.Editor.Add(w);
+				document.Window.EditorGui.Editor.Add(w);
 				if(w.GetType() == typeof(Label)) {
 					lastY += 20;
 				}
@@ -102,7 +102,7 @@ namespace Petri
 					lastY += 10;
 				}
 
-				Fixed.FixedChild w2 = ((global::Gtk.Fixed.FixedChild)(document.Window.Editor[w]));
+				Fixed.FixedChild w2 = ((global::Gtk.Fixed.FixedChild)(document.Window.EditorGui.Editor[w]));
 				w2.X = lastX + objectIndentation[i];
 				w2.Y = lastY;
 
@@ -110,7 +110,7 @@ namespace Petri
 				w.Show();
 			}
 
-			document.Window.PetriView.Redraw();
+			document.Window.EditorGui.PetriView.Redraw();
 		}
 
 		// Here's a way to signal that we want all the previous GuiActions stored before to be posted as one.

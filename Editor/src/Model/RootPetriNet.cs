@@ -79,9 +79,11 @@ namespace Petri
 
 			source += "";
 
-			source += "static void fill(PetriNet &petriNet) {";
+			source += "namespace {";
+			source += "void fill(PetriNet &petriNet) {";
 			base.GenerateCpp(source, lastID);
 			source += "}"; // fill()
+			source += "}"; // namespace
 
 			string toHash = source.Value;
 

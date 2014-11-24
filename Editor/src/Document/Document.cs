@@ -17,6 +17,8 @@ namespace Petri
 			CppConditions = new List<Cpp.Function>();
 
 			EditorController = new EditorController(this);
+			DebugController = new DebugController(this);
+
 			this.CurrentController = EditorController;
 
 			this.Path = path;
@@ -35,9 +37,24 @@ namespace Petri
 			private set;
 		}
 
+		public DebugController DebugController {
+			get;
+			private set;
+		}
+
 		public Controller CurrentController {
 			get;
 			private set;
+		}
+
+		public void SwitchToDebug() {
+			CurrentController = DebugController;
+			Window.Gui = Window.DebugGui;
+		}
+
+		public void SwitchToEditor() {
+			CurrentController = EditorController;
+			Window.Gui = Window.EditorGui;
 		}
 
 		public string Path {
@@ -54,7 +71,7 @@ namespace Petri
 			Modified = true;
 			UndoManager.PostAction(a);
 			UpdateUndo();
-			Window.PetriView.Redraw();
+			Window.EditorGui.PetriView.Redraw();
 		}
 
 		public void Undo() {
@@ -63,7 +80,7 @@ namespace Petri
 			CurrentController.ManageFocus(focus);
 
 			UpdateUndo();
-			Window.PetriView.Redraw();
+			Window.Gui.Redraw();
 		}
 
 		public void Redo() {
@@ -72,7 +89,7 @@ namespace Petri
 			CurrentController.ManageFocus(focus);
 
 			UpdateUndo();
-			Window.PetriView.Redraw();
+			Window.Gui.Redraw();
 		}
 
 		public List<string> Headers {
@@ -287,7 +304,7 @@ namespace Petri
 				}
 			}
 
-			Window.PetriView.EditedPetriNet = null;
+			Window.EditorGui.PetriView.CurrentPetriNet = null;
 			EditorController.EditedObject = null;
 
 			var oldPetriNet = PetriNet;
@@ -356,9 +373,44 @@ namespace Petri
 			if(settings == null) {
 				settings = DocumentSettings.GetDefaultSettings(this);
 			}
-			Window.PetriView.EditedPetriNet = PetriNet;
+			Window.EditorGui.PetriView.CurrentPetriNet = PetriNet;
+			Window.DebugGui.View.CurrentPetriNet = PetriNet;
 
-			Window.PetriView.Redraw();
+			this.CurrentController = this.EditorController;
+			Window.Gui = Window.EditorGui;
+		}
+
+		public void SaveCppDontAsk() {
+			if(this.settings.OutputPath.Length == 0) {
+				this.SaveCpp();
+				return;
+			}
+
+			string path = System.IO.Path.Combine(this.settings.OutputPath, settings.Name);
+
+			var cppGen = PetriNet.GenerateCpp();
+			cppGen.Item1.AddHeader("\"" + path + ".h\"");
+			cppGen.Item1.Write(path + ".cpp");
+
+			var generator = new Cpp.Generator();
+			generator.AddHeader("\"PetriUtils.h\"");
+
+			generator += "#ifndef PETRI_" + cppGen.Item2 + "_H";
+			generator += "#define PETRI_" + cppGen.Item2 + "_H\n";
+
+			generator += "#define CLASS_NAME MyPetriNet";
+			generator += "#define PREFIX \"" + settings.Name + "\"";
+			generator += "#define LIB_PATH \"" + path + ".so" + "\"\n";
+
+			generator += "#define PORT " + settings.Port;
+
+			generator += "";
+
+			generator += "#include \"PetriDynamicLib.h\"\n";
+
+			generator += "#endif"; // ifndef header guard
+
+			System.IO.File.WriteAllText(path + ".h", generator.Value);
 		}
 
 		public void SaveCpp()
@@ -375,40 +427,26 @@ namespace Petri
 			fc.DoOverwriteConfirmation = true;
 
 			if(fc.Run() == (int)ResponseType.Accept) {
-				var cppGen = PetriNet.GenerateCpp();
-				cppGen.Item1.AddHeader("\"" + System.IO.Path.Combine(fc.Filename, settings.Name) + ".h\"");
-				cppGen.Item1.Write(System.IO.Path.Combine(fc.Filename, settings.Name) + ".cpp");
-
-				var generator = new Cpp.Generator();
-				generator.AddHeader("\"PetriUtils.h\"");
-
-				generator += "#ifndef PETRI_" + cppGen.Item2 + "_H";
-				generator += "#define PETRI_" + cppGen.Item2 + "_H\n";
-
-				generator += "#define CLASS_NAME MyPetriNet";
-				generator += "#define PREFIX \"" + settings.Name + "\"";
-				generator += "#define LIB_PATH \"" + System.IO.Path.Combine(fc.Filename, settings.Name) + ".so" + "\"\n";
-
-				generator += "#include \"PetriDynamicLib.h\"\n";
-
-				generator += "#endif"; // ifndef header guard
-
-				System.IO.File.WriteAllText(System.IO.Path.Combine(fc.Filename, settings.Name) + ".h", generator.Value);
-			
 				string old = settings.OutputPath;
 				this.settings.OutputPath = fc.Filename;
 				Modified = old != settings.OutputPath;
+
+				this.SaveCppDontAsk();
 			}
 
 			fc.Destroy();
 		}
 
-		public void Compile() {
+		public bool Compile() {
 			var c = new CppCompiler(this);
 			var o = c.Compile();
 			if(o != "") {
 				// TODO: manage errors output
+				Console.WriteLine("Compilation failed!");
+				return false;
 			}
+
+			return true;
 		}
 
 		public void ManageHeaders() {

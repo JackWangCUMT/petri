@@ -27,8 +27,8 @@ namespace Petri
 		}
 
 		public override void Copy() {
-			if(document.Window.PetriView.SelectedEntities.Count > 0) {
-				MainClass.Clipboard = new HashSet<Entity>(CloneEntities(document.Window.PetriView.SelectedEntities, document));
+			if(document.Window.EditorGui.PetriView.SelectedEntities.Count > 0) {
+				MainClass.Clipboard = new HashSet<Entity>(CloneEntities(document.Window.EditorGui.PetriView.SelectedEntities, document));
 
 				this.UpdateMenuItems();
 			}
@@ -40,14 +40,14 @@ namespace Petri
 				document.PostAction(action);
 
 				var pasted = action.Focus as List<Entity>;
-				document.Window.PetriView.SelectedEntities.Clear();
-				document.Window.PetriView.SelectedEntities.UnionWith(pasted);
+				document.Window.EditorGui.PetriView.SelectedEntities.Clear();
+				document.Window.EditorGui.PetriView.SelectedEntities.UnionWith(pasted);
 				this.UpdateSelection();
 			}
 		}
 
 		public override void Cut() {
-			if(document.Window.PetriView.SelectedEntities.Count > 0) {
+			if(document.Window.EditorGui.PetriView.SelectedEntities.Count > 0) {
 				Copy();
 				document.PostAction(new GuiActionWrapper(this.RemoveSelection(), "Couper les entités"));
 			}
@@ -56,7 +56,7 @@ namespace Petri
 		public GuiAction RemoveSelection() {
 			var states = new List<State>();
 			var transitions = new HashSet<Transition>();
-			foreach(var e in document.Window.PetriView.SelectedEntities) {
+			foreach(var e in document.Window.EditorGui.PetriView.SelectedEntities) {
 				if(e is State) {
 					if(!(e is ExitPoint)) {// Do not erase exit point!
 						states.Add(e as State);
@@ -81,18 +81,18 @@ namespace Petri
 			}
 
 
-			document.Window.PetriView.ResetSelection();
+			document.Window.EditorGui.PetriView.ResetSelection();
 
 			return new GuiActionList(deleteEntities, "Supprimer les entités");
 		}
 
 		public override void SelectAll() {
-			var selected = document.Window.PetriView.SelectedEntities;
+			var selected = document.Window.EditorGui.PetriView.SelectedEntities;
 			selected.Clear();
-			foreach(var s in document.Window.PetriView.EditedPetriNet.States) {
+			foreach(var s in document.Window.EditorGui.PetriView.CurrentPetriNet.States) {
 				selected.Add(s);
 			}
-			foreach(var t in document.Window.PetriView.EditedPetriNet.Transitions) {
+			foreach(var t in document.Window.EditorGui.PetriView.CurrentPetriNet.Transitions) {
 				selected.Add(t);
 			}
 
@@ -100,8 +100,8 @@ namespace Petri
 		}
 
 		public void UpdateSelection() {
-			if(document.Window.PetriView.SelectedEntities.Count == 1) {
-				this.EditedObject = document.Window.PetriView.SelectedEntity;
+			if(document.Window.EditorGui.PetriView.SelectedEntities.Count == 1) {
+				this.EditedObject = document.Window.EditorGui.PetriView.SelectedEntity;
 			}
 			else {
 				this.EditedObject = null;
@@ -109,8 +109,8 @@ namespace Petri
 		}
 
 		public override void UpdateMenuItems() {
-			document.Window.CopyItem.Sensitive = document.Window.PetriView.SelectedEntities.Count > 0;
-			document.Window.CutItem.Sensitive = document.Window.PetriView.SelectedEntities.Count > 0;
+			document.Window.CopyItem.Sensitive = document.Window.EditorGui.PetriView.SelectedEntities.Count > 0;
+			document.Window.CutItem.Sensitive = document.Window.EditorGui.PetriView.SelectedEntities.Count > 0;
 			document.Window.PasteItem.Sensitive = MainClass.Clipboard.Count > 0;
 		}
 
@@ -136,7 +136,7 @@ namespace Petri
 
 			foreach(State s in states) {
 				// Change entity's owner
-				s.Parent = this.document.Window.PetriView.EditedPetriNet;
+				s.Parent = this.document.Window.EditorGui.PetriView.CurrentPetriNet;
 				s.Name = s.Name + " 2";
 				s.Position = new Cairo.PointD(s.Position.X + 20, s.Position.Y + 20);
 				actionList.Add(new AddStateAction(s));
@@ -144,7 +144,7 @@ namespace Petri
 
 			foreach(Transition t in transitions) {
 				// Change entity's owner
-				t.Parent = this.document.Window.PetriView.EditedPetriNet;
+				t.Parent = this.document.Window.EditorGui.PetriView.CurrentPetriNet;
 				t.Name = t.Name + " 2";
 				actionList.Add(new DoNothingAction(t)); // To select the newly pasted transitions
 			}
@@ -174,13 +174,13 @@ namespace Petri
 			var statesTable = new Dictionary<UInt64, State>();
 			foreach(State s in states) {
 				var xml = s.GetXml();
-				var newState = Entity.EntityFromXml(document, xml, document.Window.PetriView.EditedPetriNet, null) as State;
+				var newState = Entity.EntityFromXml(document, xml, document.Window.EditorGui.PetriView.CurrentPetriNet, null) as State;
 				statesTable.Add(newState.ID, newState);
 			}
 
 			foreach(Transition t in transitions) {
 				var xml = t.GetXml();
-				var newTransition = Entity.EntityFromXml(destination, xml, document.Window.PetriView.EditedPetriNet, statesTable);
+				var newTransition = Entity.EntityFromXml(destination, xml, document.Window.EditorGui.PetriView.CurrentPetriNet, statesTable);
 
 				// Reassigning an ID to the transitions to keep a unique one for each entity
 				newTransition.ID = document.LastEntityID++;
@@ -198,12 +198,12 @@ namespace Petri
 
 		public override void ManageFocus(object focus) {
 			if(focus is List<Entity>) {
-				document.Window.PetriView.SelectedEntities.Clear();
-				document.Window.PetriView.SelectedEntities.UnionWith(focus as List<Entity>);
+				document.Window.EditorGui.PetriView.SelectedEntities.Clear();
+				document.Window.EditorGui.PetriView.SelectedEntities.UnionWith(focus as List<Entity>);
 				this.UpdateSelection();
 			}
 			else
-				document.Window.PetriView.SelectedEntity = focus as Entity;
+				document.Window.EditorGui.PetriView.SelectedEntity = focus as Entity;
 		}
 
 		private static void UpdateID(State s, Document d) {
@@ -226,7 +226,6 @@ namespace Petri
 		List<Cpp.Function> allFunctions;
 		List<Cpp.Function> cppActions;
 		List<Cpp.Function> cppConditions;
-		bool modified = false;
 	}
 }
 

@@ -32,63 +32,18 @@ namespace Petri
 				this.Move(x, 2 * y / 3);
 			}
 
-			toolbar = new HBox(false, 20);
-			vbox.PackStart(toolbar, false, false, 0);
-			toolbar.HeightRequest = 40;
+			this.BuildMenus();
 
-			cpp = new Button(new Label("Générer C++…"));
-			manageHeaders = new Button(new Label("Ouvrir un .h…"));
-			compile = new Button(new Label("Compiler le code généré…"));
-			cpp.Clicked += this.OnClick;
-			manageHeaders.Clicked += this.OnClick;
-			compile.Clicked += this.OnClick;
-			toolbar.PackStart(cpp, false, false, 0);
-			toolbar.PackStart(manageHeaders, false, false, 0);
-			toolbar.PackStart(compile, false, false, 0);
-
-			this.hbox = new HBox(false, 0);
-			vbox.PackStart(hbox, true, true, 0);
-			//this.paned = new HPaned();
-			//vbox.PackStart(paned, true, true, 0);
-
-			petriView = new EditorView(doc);
-			petriView.CanFocus = true;
-			petriView.CanDefault = true;
-			petriView.AddEvents ((int) 
-				(Gdk.EventMask.ButtonPressMask    
-					|Gdk.EventMask.ButtonReleaseMask    
-					|Gdk.EventMask.KeyPressMask    
-					|Gdk.EventMask.PointerMotionMask));
-
-			ScrolledWindow scrolledWindow = new ScrolledWindow();
-			scrolledWindow.SetPolicy(PolicyType.Never, PolicyType.Automatic);
-
-			Viewport viewport = new Viewport();
-
-			viewport.Add(petriView);
-
-			petriView.SizeRequested += (o, args) => {
-				viewport.WidthRequest = viewport.Child.Requisition.Width;
-			};
-
-			scrolledWindow.Add(viewport);
-
-			//paned.Position = Configuration.GraphWidth;
-			//paned.Pack1(drawing, true, true);
-			hbox.PackStart(scrolledWindow, true, true, 0);
-			editor = new Fixed();
-			//paned.Pack2(editor, true, true);
-			hbox.PackEnd(editor, false, false, 0);
+			editorGui = new EditorGui(document);
+			debugGui = new DebugGui(document);
 
 			this.FocusInEvent += (o, args) => {
 				document.UpdateMenuItems();
-				PetriView.FocusIn();
+				gui.FocusIn();
 			};
 			this.FocusOutEvent += (o, args) => {
-				PetriView.FocusOut();
+				gui.FocusOut();
 			};
-
-			this.BuildMenus();
 		}
 
 		public void PresentWindow() {
@@ -117,15 +72,37 @@ namespace Petri
 			}
 		}
 
-		public EditorView PetriView {
+		public Gui Gui {
 			get {
-				return petriView;
+				return gui;
+			}
+			set {
+				if(gui != null) {
+					gui.Hide();
+					vbox.Remove(gui);
+				}
+
+				gui = value;
+
+				vbox.PackEnd(gui);
+
+				gui.Redraw();
+				gui.FocusIn();
+				gui.UpdateToolbar();
+
+				gui.ShowAll();
 			}
 		}
 
-		public Fixed Editor {
+		public EditorGui EditorGui {
 			get {
-				return editor;
+				return editorGui;
+			}
+		}
+
+		public DebugGui DebugGui {
+			get {
+				return debugGui;
 			}
 		}
 
@@ -165,21 +142,9 @@ namespace Petri
 
 		protected void OnDeleteEvent(object sender, DeleteEventArgs a)
 		{
+			// TODO: close debugger session
 			bool result = this.document.CloseAndConfirm();
 			a.RetVal = !result;
-		}
-
-		protected void OnClick(object sender, EventArgs e)
-		{
-			if(sender == this.cpp) {
-				document.SaveCpp();
-			}
-			else if(sender == this.manageHeaders) {
-				document.ManageHeaders();
-			}
-			else if(sender == this.compile) {
-				document.Compile();
-			}
 		}
 
 		protected void OnClickMenu(object sender, EventArgs e) {
@@ -342,19 +307,15 @@ namespace Petri
 			menuBar.Append(edit);
 			menuBar.Append(help);
 
-			toolbar.PackEnd(menuBar);
+			vbox.PackStart(menuBar);
 		}
 
 		Document document;
 
 		VBox vbox;
-		HBox hbox;
-		EditorView petriView;
-		HBox toolbar;
-		Fixed editor;
-		Button manageHeaders, cpp, compile;
-		MenuBar menuBar;
+		Gui gui;
 
+		MenuBar menuBar;
 		MenuItem quitItem;
 		MenuItem aboutItem;
 		MenuItem preferencesItem;
@@ -375,6 +336,9 @@ namespace Petri
 
 		MenuItem showHelpItem;
 		AccelGroup accelGroup;
+
+		EditorGui editorGui;
+		DebugGui debugGui;
 	}
 }
 

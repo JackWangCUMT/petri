@@ -8,42 +8,23 @@
 #include "PetriDynamicLibCommon.h"
 #include "DebugServer.h"
 
-#if !defined(PREFIX) || !defined(CLASS_NAME) || !defined(LIB_PATH)
+#if !defined(PREFIX) || !defined(CLASS_NAME) || !defined(LIB_PATH) || !defined(PORT)
 #error "Do not include this file manually, let the C++ code generator use it for you!"
 #endif
 
 class CLASS_NAME : public PetriDynamicLibCommon {
 public:
 	CLASS_NAME() {
-		DebugServer::registerPetriNet(this->name(), *this);
+		this->load();
 	}
 
 	CLASS_NAME(CLASS_NAME const &pn) = delete;
 	CLASS_NAME &operator=(CLASS_NAME const &pn) = delete;
 
-	CLASS_NAME(CLASS_NAME &&pn) : _libHandle(pn._libHandle), _createPtr(pn._createPtr), _createDebugPtr(pn._createDebugPtr), _hashPtr(pn._hashPtr) {
-		pn._libHandle = nullptr;
-		pn._createPtr = nullptr;
-		pn._createDebugPtr = nullptr;
-		pn._hashPtr = nullptr;
-	}
-	CLASS_NAME &operator=(CLASS_NAME &&pn) {
-		_libHandle = nullptr;
-		_createPtr = nullptr;
-		_createDebugPtr = nullptr;
-		_hashPtr = nullptr;
-
-		std::swap(_libHandle, pn._libHandle);
-		std::swap(_createPtr, pn._createPtr);
-		std::swap(_createDebugPtr, pn._createDebugPtr);
-		std::swap(_hashPtr, pn._hashPtr);
-
-		return *this;
-	}
+	CLASS_NAME(CLASS_NAME &&pn) = delete;
+	CLASS_NAME &operator=(CLASS_NAME &&pn) = delete;
 
 	virtual ~CLASS_NAME() {
-		DebugServer::unregisterPetriNet(this->name());
-		
 		if(this->loaded())
 			dlclose(_libHandle);
 	}
@@ -57,13 +38,13 @@ public:
 		return std::unique_ptr<PetriNet>(static_cast<PetriNet *>(ptr));
 	}
 
-	virtual std::unique_ptr<PetriNet> createDebug() override {
+	virtual std::unique_ptr<PetriDebug> createDebug() override {
 		if(!this->loaded()) {
 			throw std::runtime_error("Dynamic library not loaded!");
 		}
 
 		void *ptr = _createDebugPtr();
-		return std::unique_ptr<PetriNet>(static_cast<PetriNet *>(ptr));
+		return std::unique_ptr<PetriDebug>(static_cast<PetriDebug *>(ptr));
 	}
 
 	virtual std::string hash() const override {
@@ -77,23 +58,14 @@ public:
 		return PREFIX;
 	}
 
-	virtual void load() override {
-		if(_libHandle != nullptr) {
-			return;
-		}
-		char const *lib_name = LIB_PATH;
-		_libHandle = dlopen(lib_name, RTLD_NOW);
-		if(_libHandle == nullptr) {
-			throw std::runtime_error("Unable to load the dynamic library!");
-		}
-		_createPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_create"));
-		_createDebugPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_createDebug"));
-		_hashPtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, PREFIX "_getHash"));
+	virtual std::uint16_t port() const override {
+		return PORT;
 	}
 
 	virtual void reload() override {
 		if(this->loaded())
 			dlclose(_libHandle);
+
 		_libHandle = nullptr;
 		_createPtr = nullptr;
 		_createDebugPtr = nullptr;
@@ -106,6 +78,20 @@ public:
 	}
 
 private:
+	virtual void load() override {
+		if(_libHandle != nullptr) {
+			return;
+		}
+
+		_libHandle = dlopen(LIB_PATH, RTLD_NOW);
+		if(_libHandle == nullptr) {
+			throw std::runtime_error("Unable to load the dynamic library!");
+		}
+		_createPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_create"));
+		_createDebugPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_createDebug"));
+		_hashPtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, PREFIX "_getHash"));
+	}
+
 	void *_libHandle = nullptr;
 	void *(*_createPtr)() = nullptr;
 	void *(*_createDebugPtr)() = nullptr;

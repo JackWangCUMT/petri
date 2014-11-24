@@ -40,7 +40,7 @@ namespace Petri
 			if(ev.Button == 1) {
 				// Add new action
 				if(this.selectedEntities.Count == 0) {
-					document.PostAction(new AddStateAction(new Action(this.EditedPetriNet.Document, EditedPetriNet, false, new PointD(ev.X, ev.Y))/*, new List<Transition>()*/));
+					document.PostAction(new AddStateAction(new Action(this.CurrentPetriNet.Document, CurrentPetriNet, false, new PointD(ev.X, ev.Y))/*, new List<Transition>()*/));
 					hoveredItem = SelectedEntity;
 				}
 				else if(this.selectedEntities.Count == 1) {
@@ -59,7 +59,7 @@ namespace Petri
 
 						if(result == ResponseType.Accept) {
 							this.ResetSelection();
-							var inner = new InnerPetriNet(this.EditedPetriNet.Document, this.EditedPetriNet, false, selected.Position);
+							var inner = new InnerPetriNet(this.CurrentPetriNet.Document, this.CurrentPetriNet, false, selected.Position);
 							foreach(var t in selected.TransitionsAfter) {
 								t.Before = inner;
 							}
@@ -68,15 +68,15 @@ namespace Petri
 							}
 							selected.TransitionsAfter.Clear();
 							selected.TransitionsBefore.Clear();
-							EditedPetriNet.RemoveState(selected);
-							EditedPetriNet.AddState(inner);
+							CurrentPetriNet.RemoveState(selected);
+							CurrentPetriNet.AddState(inner);
 							selected = inner;
 						}
 						d.Destroy();
 					}
 
 					if(selected is InnerPetriNet) {
-						this.EditedPetriNet = selected as InnerPetriNet;
+						this.CurrentPetriNet = selected as InnerPetriNet;
 					}
 				}
 			}
@@ -88,10 +88,10 @@ namespace Petri
 					deltaClick.X = ev.X;
 					deltaClick.Y = ev.Y;
 
-					hoveredItem = EditedPetriNet.StateAtPosition(deltaClick);
+					hoveredItem = CurrentPetriNet.StateAtPosition(deltaClick);
 
 					if(hoveredItem == null) {
-						hoveredItem = EditedPetriNet.TransitionAtPosition(deltaClick);
+						hoveredItem = CurrentPetriNet.TransitionAtPosition(deltaClick);
 					}
 
 					if(hoveredItem != null) {
@@ -158,7 +158,7 @@ namespace Petri
 			else if(currentAction == CurrentAction.CreatingTransition && ev.Button == 1) {
 				currentAction = CurrentAction.None;
 				if(hoveredItem != null && hoveredItem is State) {
-					document.PostAction(new AddTransitionAction(new Transition(EditedPetriNet.Document, EditedPetriNet, SelectedEntity as State, hoveredItem as State), true));
+					document.PostAction(new AddTransitionAction(new Transition(CurrentPetriNet.Document, CurrentPetriNet, SelectedEntity as State, hoveredItem as State), true));
 				}
 
 				this.Redraw();
@@ -207,12 +207,12 @@ namespace Petri
 				double xM = Math.Max(deltaClick.X, originalPosition.X);
 				double yM = Math.Max(deltaClick.Y, originalPosition.Y);
 
-				foreach(State s in EditedPetriNet.States) {
+				foreach(State s in CurrentPetriNet.States) {
 					if(xm < s.Position.X + s.Radius && xM > s.Position.X - s.Radius && ym < s.Position.Y + s.Radius && yM > s.Position.Y - s.Radius)
 						selectedFromRect.Add(s);
 				}
 
-				foreach(Transition t in EditedPetriNet.Transitions) {
+				foreach(Transition t in CurrentPetriNet.Transitions) {
 					if(xm < t.Position.X + t.Width / 2 && xM > t.Position.X - t.Width / 2 && ym < t.Position.Y + t.Width / 2 && yM > t.Position.Y - t.Width / 2)
 						selectedFromRect.Add(t);
 				}
@@ -225,10 +225,10 @@ namespace Petri
 				deltaClick.X = ev.X;
 				deltaClick.Y = ev.Y;
 
-				hoveredItem = EditedPetriNet.StateAtPosition(deltaClick);
+				hoveredItem = CurrentPetriNet.StateAtPosition(deltaClick);
 
 				if(hoveredItem == null) {
-					hoveredItem = EditedPetriNet.TransitionAtPosition(deltaClick);
+					hoveredItem = CurrentPetriNet.TransitionAtPosition(deltaClick);
 				}
 
 				this.Redraw();
@@ -249,8 +249,8 @@ namespace Petri
 					if(selectedEntities.Count > 0) {
 						this.ResetSelection();
 					}
-					else if(this.EditedPetriNet.Parent != null) {
-						this.EditedPetriNet = this.EditedPetriNet.Parent;
+					else if(this.CurrentPetriNet.Parent != null) {
+						this.CurrentPetriNet = this.CurrentPetriNet.Parent;
 					}
 					this.Redraw();
 				}
@@ -361,13 +361,13 @@ namespace Petri
 				}
 		}
 
-		public override PetriNet EditedPetriNet {
+		public override PetriNet CurrentPetriNet {
 			get {
-				return base.EditedPetriNet;
+				return base.CurrentPetriNet;
 			}
 			set {
 				this.ResetSelection();
-				base.EditedPetriNet = value;
+				base.CurrentPetriNet = value;
 			}
 		}
 
@@ -382,11 +382,11 @@ namespace Petri
 					return null;
 			}
 			set {
-				if(value != null && EditedPetriNet != value.Parent) {
+				if(value != null && CurrentPetriNet != value.Parent) {
 					if(value is RootPetriNet)
 						this.ResetSelection();
 					else {
-						EditedPetriNet = value.Parent;
+						CurrentPetriNet = value.Parent;
 						SelectedEntity = value;
 					}
 				}

@@ -18,6 +18,8 @@ namespace Petri
 			var elem = new XElement("Settings");
 			elem.SetAttributeValue("Name", Name);
 			elem.SetAttributeValue("OutputPath", OutputPath);
+			elem.SetAttributeValue("Hostname", Hostname);
+			elem.SetAttributeValue("Port", Port.ToString());
 
 			var node = new XElement("Compiler");
 			node.SetAttributeValue("Invocation", Compiler);
@@ -31,7 +33,8 @@ namespace Petri
 			node = new XElement("IncludePaths");
 			foreach(var p in IncludePaths) {
 				var e = new XElement("IncludePath");
-				e.SetAttributeValue("Path", p);
+				e.SetAttributeValue("Path", p.Item1);
+				e.SetAttributeValue("Recursive", p.Item2);
 				node.Add(e);
 			}
 			elem.Add(node);
@@ -65,6 +68,8 @@ namespace Petri
 
 			this.Compiler = "/usr/bin/c++";
 			this.OutputPath = "";
+			this.Hostname = "localhost";
+			this.Port = 12345;
 
 			Name = "MyPetriNet";
 
@@ -78,6 +83,12 @@ namespace Petri
 
 				if(elem.Attribute("OutputPath") != null)
 					OutputPath = elem.Attribute("OutputPath").Value;
+
+				if(elem.Attribute("Hostname") != null)
+					Hostname = elem.Attribute("Hostname").Value;
+
+				if(elem.Attribute("Port") != null)
+					Port = UInt16.Parse(elem.Attribute("Port").Value);
 
 				var node = elem.Element("Compiler");
 				if(node != null) {
@@ -188,6 +199,17 @@ namespace Petri
 				name = value.Replace(" ", "_");
 			}
 		}
+
+		public string Hostname {
+			get;
+			set;
+		}
+
+		public UInt16 Port {
+			get;
+			set;
+		}
+
 
 		string name;
 		Document document;
