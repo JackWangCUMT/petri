@@ -117,9 +117,13 @@ namespace Petri
 					else if(msg["type"].ToString() == "exit") {
 						if(msg["payload"].ToString() == "kbye") {
 							sessionRunning = false;
+							petriRunning = false;
 							document.Window.DebugGui.UpdateToolbar();
 						}
 						else {
+							sessionRunning = false;
+							petriRunning = false;
+
 							throw new Exception("Remote debugger requested a session termination for reason: " + msg["payload"].ToString());
 						}
 					}
