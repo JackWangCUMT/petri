@@ -23,9 +23,8 @@ namespace DebugServer {
 
 class DebugSession {
 public:
-	DebugSession(PetriDynamicLibCommon &petri) : _socket(SockProtocol::TCP), _client(SockProtocol::TCP), _petriNetFactory(petri) {
-		_petriNetFactory.load();
-	}
+	DebugSession(PetriDynamicLibCommon &petri) : _socket(SockProtocol::TCP), _client(SockProtocol::TCP), _petriNetFactory(petri) {}
+	
 	~DebugSession() {
 		if(_receptionThread.joinable())
 			_receptionThread.join();
@@ -77,7 +76,7 @@ public:
 
 protected:
 	void serverCommunication() {
-		setThreadName(("DebugSession "s + _petriNetFactory.name()).c_str());
+		setThreadName("DebugSession "s + _petriNetFactory.name());
 
 		logInfo("Debug session for Petri net ", _petriNetFactory.name(), " started");
 
@@ -186,7 +185,7 @@ protected:
 	}
 	
 	void heartBeat() {
-		setThreadName(("DebugSession "s + _petriNetFactory.name() + " heart beat"s).c_str());
+		setThreadName("DebugSession "s + _petriNetFactory.name() + " heart beat"s);
 		while(_running && _client.getState() == SOCK_ACCEPTED) {
 			std::unique_lock<std::mutex> lk(_stateChangeMutex);
 			_stateChangeCondition.wait(lk, [this]() {

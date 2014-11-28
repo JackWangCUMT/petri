@@ -23,6 +23,8 @@
 
 using namespace std::chrono_literals;
 
+class Action;
+
 class Transition : public CallableTimeout<std::uint64_t> {
 public:
 	Transition(Action &previous, Action &next) : CallableTimeout(0), _previous(previous), _next(next) {}

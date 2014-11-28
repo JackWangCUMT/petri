@@ -23,15 +23,16 @@
 
 using namespace std::chrono_literals;
 
-class Action;
-
 #include "Transition.h"
 #include "Action.h"
 
 class PetriNet {
-	enum {InitialThreadsActions = 0};
+	enum {InitialThreadsActions = 1};
 public:
-	PetriNet() : _actionsPool(InitialThreadsActions) {}
+	/**
+	 * Creates the PetriNet, assigning it a name which serves debug purposes (see ThreadPool constructor)
+	 */
+	PetriNet(std::string const &name) : _actionsPool(InitialThreadsActions, name) {}
 
 	virtual ~PetriNet() {
 		this->stop();
@@ -39,6 +40,11 @@ public:
 			_statesManager.join();
 	}
 
+	/**
+	 * Adds an Action to the PetriNet. The net must not be running yet.
+	 * @param action The action to add
+	 * @param active Controls wether the action is active as soon as the net is started or not
+	 */
 	void addAction(std::shared_ptr<Action> &action, bool active = false) {
 		if(this->running()) {
 			throw std::runtime_error("Cannot modify running state chart!");
@@ -55,23 +61,35 @@ public:
 		}
 	}
 
+	/**
+	 * Checks wether the net is running.
+	 * @return true means that the net has been started, and we can not add any more action to it now.
+	 */
 	bool running() const {
 		return _running;
 	}
 
+	/**
+	 * Starts the Petri net. It must not be already running. If no states are active, this is a no-op.
+	 */
 	virtual void run() {
 		if(_running) {
 			throw std::runtime_error("Already running!");
 		}
 
 		if(_toBeActivated.empty()) {
-			throw std::runtime_error("No active state!");
+			logError("No active state!");
 		}
-
-		_running = true;
-		_statesManager = std::thread(&PetriNet::manageStates, this);
+		else {
+			_running = true;
+			_statesManager = std::thread(&PetriNet::manageStates, this);
+		}
 	}
 
+	/**
+	 * Stops the Petri net. It blocks the calling thread until all running states are finished,
+	 * but do not allows new states to be enabled. If the net is not running, this is a no-op.
+	 */
 	virtual void stop() {
 		if(this->running()) {
 			_running = false;
@@ -155,6 +173,8 @@ protected:
 	}
 
 	virtual void manageStates() {
+		setThreadName(_name + " states manager");
+
 		while(_running) {
 			std::unique_lock<std::mutex> lk(_activationMutex);
 			_activationCondition.wait(lk, [this]() { return !_toBeActivated.empty() || !_toBeDisabled.empty() || !_running; });
@@ -222,6 +242,7 @@ protected:
 
 	std::atomic_ulong _activeStates;
 	std::atomic_bool _running = {false};
+	std::string _name;
 };
 
 

@@ -94,7 +94,7 @@ namespace Petri
 			source += "";
 
 			source += "EXPORT void *" + Document.Settings.Name + "_create() {";
-			source += "auto petriNet = std::make_unique<PetriNet>();";
+			source += "auto petriNet = std::make_unique<PetriNet>(PREFIX);";
 			source += "fill(*petriNet);";
 			source += "return petriNet.release();";
 			source += "}"; // create()
@@ -102,7 +102,7 @@ namespace Petri
 			source += "";
 
 			source += "EXPORT void *" + Document.Settings.Name + "_createDebug() {";
-			source += "auto petriNet = std::make_unique<PetriDebug>();";
+			source += "auto petriNet = std::make_unique<PetriDebug>(PREFIX);";
 			source += "fill(*petriNet);";
 			source += "return petriNet.release();";
 			source += "}"; // create()

@@ -14,6 +14,9 @@
 
 class CLASS_NAME : public PetriDynamicLibCommon {
 public:
+	/**
+	 * Creates the dynamic library wrapper, and loads it, making possible to create the PetriNet objects.
+	 */
 	CLASS_NAME() {
 		this->load();
 	}
@@ -24,57 +27,22 @@ public:
 	CLASS_NAME(CLASS_NAME &&pn) = delete;
 	CLASS_NAME &operator=(CLASS_NAME &&pn) = delete;
 
-	virtual ~CLASS_NAME() {
-		if(this->loaded())
-			dlclose(_libHandle);
-	}
+	virtual ~CLASS_NAME() = default;
 
-	virtual std::unique_ptr<PetriNet> create() override {
-		if(!this->loaded()) {
-			throw std::runtime_error("Dynamic library not loaded!");
-		}
-
-		void *ptr = _createPtr();
-		return std::unique_ptr<PetriNet>(static_cast<PetriNet *>(ptr));
-	}
-
-	virtual std::unique_ptr<PetriDebug> createDebug() override {
-		if(!this->loaded()) {
-			throw std::runtime_error("Dynamic library not loaded!");
-		}
-
-		void *ptr = _createDebugPtr();
-		return std::unique_ptr<PetriDebug>(static_cast<PetriDebug *>(ptr));
-	}
-
-	virtual std::string hash() const override {
-		if(!this->loaded()) {
-			throw std::runtime_error("Dynamic library not loaded!");
-		}
-		return std::string(_hashPtr());
-	}
-
+	/**
+	 * Returns the name of the Petri net.
+	 * @return The name of the Petri net
+	 */
 	virtual std::string name() const override {
 		return PREFIX;
 	}
 
+	/**
+	 * Returns the TCP port on which a DebugSession initialized with this wrapper will listen to debugger connection.
+	 * @return The TCP port which will be used by DebugSession
+	 */
 	virtual std::uint16_t port() const override {
 		return PORT;
-	}
-
-	virtual void reload() override {
-		if(this->loaded())
-			dlclose(_libHandle);
-
-		_libHandle = nullptr;
-		_createPtr = nullptr;
-		_createDebugPtr = nullptr;
-		_hashPtr = nullptr;
-		this->load();
-	}
-
-	virtual bool loaded() const override {
-		return _libHandle != nullptr;
 	}
 
 private:
@@ -91,10 +59,5 @@ private:
 		_createDebugPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_createDebug"));
 		_hashPtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, PREFIX "_getHash"));
 	}
-
-	void *_libHandle = nullptr;
-	void *(*_createPtr)() = nullptr;
-	void *(*_createDebugPtr)() = nullptr;
-	char const *(*_hashPtr)() = nullptr;
 };
 

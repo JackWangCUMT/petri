@@ -28,8 +28,8 @@ public:
 	virtual ReturnType operator()() override;
 
 	virtual std::shared_ptr<CallableBase<ReturnType>> copy_ptr() const override {
-	return std::make_shared<Callable<ReturnType, CallableType, Args...>>(*this);
-}
+		return std::make_shared<Callable<ReturnType, CallableType, Args...>>(*this);
+	}
 
 private:
 	CallableType _c;

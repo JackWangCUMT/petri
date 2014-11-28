@@ -16,10 +16,14 @@ class DebugSession;
 
 class PetriDebug : public PetriNet {
 public:
-	PetriDebug() : PetriNet() {}
+	PetriDebug(std::string const &name) : PetriNet(name) {}
 
 	virtual ~PetriDebug() = default;
 
+	/**
+	 * Adds an observer to the PetriDebug object. The observer will be notified by some of the Petri net events, such as when a state is activated or disabled.
+	 * @param session The observer which will be notified of the events
+	 */
 	void setObserver(DebugSession *session) {
 		_observer = session;
 	}

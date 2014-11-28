@@ -17,6 +17,7 @@
 #include <future>
 #include "KillableThread.h"
 #include "Callable.h"
+#include "Commun.h"
 
 template<typename _ReturnType>
 class ThreadPool {
@@ -25,6 +26,8 @@ class ThreadPool {
 	struct TaskManager {
 		// We want a steady clock (no adjustments, only ticking forward in time), but it would be better if we got an high resolution clock.
 		using ClockType = std::conditional<std::chrono::high_resolution_clock::is_steady, std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
+
+		// Defined to char if ReturnType is void, so that we can nevertheless create a member variable of this type
 		using VoidProofReturnType = typename std::conditional<std::is_same<ReturnType, void>::value, char, ReturnType>::type;
 
 		TaskManager(std::shared_ptr<CallableBase<ReturnType>> &&task) : _task(std::move(task)) {}//, std::chrono::nanoseconds timeout, VoidProofReturnType returnWhenTimeout = VoidProofReturnType()) : _task(std::move(task)), _timeout(timeout), _res(returnWhenTimeout) {}
@@ -41,20 +44,21 @@ class ThreadPool {
 			_cv.wait(lk, [this]() { return _valOK == true; });
 		}
 
-		// Void version
+		// Void version, simply exectutes the task
 		template<typename _Helper = void>
-		typename std::enable_if<(std::is_void<_Helper>::value, std::is_void<ReturnType>::value), void>::type execute() {
+		std::enable_if_t<(std::is_void<_Helper>::value, std::is_void<ReturnType>::value), void> execute() {
 			_task->operator()();
 			this->signalCompletion();
 		}
 
-		//Non-void version
+		//Non-void version, executes the task and stores it in _res
 		template<typename _Helper = void>
-		typename std::enable_if<(std::is_void<_Helper>::value, !std::is_void<ReturnType>::value), void>::type execute() {
+		std::enable_if_t<(std::is_void<_Helper>::value, !std::is_void<ReturnType>::value), void> execute() {
 			_res = std::move(_task->operator()());
 			this->signalCompletion();
 		}
 
+		// Signals the completion of the task to _cv, usually to the thread which called waitForCompletion()
 		void signalCompletion() {
 			_valOK = true;
 			_cv.notify_all();
@@ -67,7 +71,6 @@ class ThreadPool {
 		/*std::chrono::nanoseconds _timeout;
 		std::chrono::time_point<ClockType> _timeoutDate;*/
 
-		// Cannot allocate void value;
 		VoidProofReturnType _res;
 		std::shared_ptr<CallableBase<ReturnType>> _task;
 	};
@@ -77,18 +80,28 @@ public:
 	public:
 		TaskResult() = default;
 
-		// Blocks until result is made available by the worker thread, and returns it
-		// Not available for ResultType == void specialization
+		/**
+		 * Gets the return value of the task, blocks the calling thread until the result is made available.
+		 * Not available for ResultType == void specialization
+		 * @return The return value associated to the task and computed by the worker thread
+		 */
 		template<typename _Helper = void>
-		typename std::enable_if<(std::is_void<_Helper>::value, !std::is_void<ReturnType>::value), ReturnType>::type
+		std::enable_if_t<(std::is_void<_Helper>::value, !std::is_void<ReturnType>::value), ReturnType>
 		returnValue() {
 			return _proxy ? _proxy->returnValue() : throw std::runtime_error("Proxy not associated with a task!");
 		}
 
+		/**
+		 * Blocks the calling thread until the task is complete and the result is available (no result for tasks returning void).
+		 */
 		void waitForCompletion() {
 			_proxy ? _proxy->waitForCompletion() : throw std::runtime_error("Proxy not associated with a task!");
 		}
 
+		/**
+		 * Checks wether the task result is available.
+		 * @return Availability of the task result
+		 */
 		bool available() {
 			return _proxy ? static_cast<bool>(_proxy->_valOK) : false;
 		}
@@ -98,27 +111,46 @@ public:
 	};
 
 public:
-	ThreadPool(std::size_t capacity) : _workerThreads(capacity) {
+	/**
+	 * Creates the thread pool.
+	 * @param capacity Max number of concurrent task at a given time
+	 * @param name     This string is used for debug purposes: it gives a name to each worker threads,
+	 *                 allowing for fast thread discimination when run through a debugger
+	 */
+	ThreadPool(std::size_t capacity, std::string const &name = "") : _workerThreads(capacity), _name(name) {
+		int count = 0;
 		for(auto &t : _workerThreads) {
-			t = std::thread(std::bind(&ThreadPool::work, this));
+			t = std::thread(&ThreadPool::work, this, _name + "_worker " + std::to_string(count++));
 		}
 	}
 
 	~ThreadPool() {
 		if(_pendingTasks > 0) {
 			std::cerr << "Some tasks are still running!" << std::endl;
-			std::terminate();
+			throw std::runtime_error("The thread pool is being destroyed while some of its tasks are still pending!");
 		}
 	}
 
+	/**
+	 * Returns the worker threads count, i.e. the max number of concurrent tasks at a given time.
+	 * @return The current worker threads count
+	 */
 	std::size_t threadCount() const {
 		return _workerThreads.size();
 	}
 
+	/**
+	 * Increments the worker threads count, i.e. allows one more concurrent task to run.
+	 */
 	void addThread() {
-		_workerThreads.emplace_back(std::bind(&ThreadPool::work, this));
+		if(!_alive)
+			throw std::runtime_error("The thread pool is not alive anymore!");
+		_workerThreads.emplace_back(&ThreadPool::work, this, _name + "_worker " + std::to_string(_workerThreads.size()));
 	}
 
+	/**
+	 * Pauses the calling thread until there is no more pending tasks.
+	 */
 	void join() {
 		// Dirty hack…
 		while(_pendingTasks > 0) {
@@ -128,9 +160,12 @@ public:
 		this->cancel();
 	}
 
+	/**
+	 * Stops the execution of the thread pool. Pauses the calling thread until each running task is completed.
+	 * Does not run any of the currently pending taks, simply discards them.
+	 */
 	void cancel() {
 		_alive = false;
-		_taskQueue.push(nullptr);
 		_taskAvailable.notify_all();
 
 		for(auto &t : _workerThreads) {
@@ -141,6 +176,11 @@ public:
 		_pendingTasks = 0;
 	}
 
+	/**
+	 * Adds a task to the thread pool.
+	 * @param task The task to be addes.
+	 * @return A proxy object allowing the user to wait for the task completion, query the task completion status and get the task return value
+	 */
 	TaskResult addTask(std::shared_ptr<CallableBase<ReturnType>> task) {//, std::chrono::nanoseconds timeout) {
 		TaskResult result;
 		// task must be kept alive until execution finishes
@@ -154,17 +194,13 @@ public:
 		return result;
 	}
 
-/*	template<typename Blabla = void>
-	typename std::enable_if<std::is_same<void, Blabla>::value && std::is_same<ReturnType, std::uint64_t>::value, std::future<ReturnType>>::type
-	addTask2(std::unique_ptr<std::function<std::uint64_t()>> task) {
-		return std::async(std::launch::async, *task);
-	}*/
-
 private:
-	void work() {
+	void work(std::string const &name) {
+		setThreadName(name);
+
 		while(_alive) {
 			std::unique_lock<std::mutex> lk(_availabilityMutex);
-			_taskAvailable.wait(lk, [this]() { return !_taskQueue.empty(); });
+			_taskAvailable.wait(lk, [this]() { return !_taskQueue.empty() || !_alive; });
 
 			if(!_alive)
 				return;
@@ -187,6 +223,7 @@ private:
 	std::atomic_bool _alive = {true};
 	std::atomic_uint _pendingTasks = {0};
 	std::vector<std::thread> _workerThreads;
+	std::string const _name;
 };
 
 
