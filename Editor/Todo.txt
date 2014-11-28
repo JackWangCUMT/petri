@@ -12,8 +12,16 @@ Invocation du compilateur C++ depuis l'éditeur de réseaux de Petri OK
 	Affichage des erreurs de compilation dans l'éditeur
 
 Débuggeur graphique
-	Thread de supervision du runtime
-		Pause/Relance de l'exécution du code (comment ?)
-			Socket de communication debugger/debuggé
+	Pause/Relance de l'exécution du code (comment ?)
+	Timeout des communications sur le socket
+
 
 Commenter le code :3
+
+
+
+
+Bugs :
+	Entités inexistantes envoyées par le runtime
+	Exécution parfois anarchique du runtime
+	Rechargement à chaud du code donne des résultats aléatoires

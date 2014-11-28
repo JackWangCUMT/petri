@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Petri
 {
@@ -7,6 +8,7 @@ namespace Petri
 		public DebugController(Document doc) {
 			Document = doc;
 			Server = new DebugServer(doc);
+			ActiveStates = new Dictionary<State, int>();
 		}
 
 		public Document Document {
@@ -15,6 +17,11 @@ namespace Petri
 		}
 
 		public DebugServer Server {
+			get;
+			private set;
+		}
+
+		public Dictionary<State, int> ActiveStates {
 			get;
 			private set;
 		}

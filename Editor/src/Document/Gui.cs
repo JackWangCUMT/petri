@@ -13,6 +13,10 @@ namespace Petri
 		public abstract void Redraw();
 
 		public abstract void UpdateToolbar();
+
+		public abstract PetriView BaseView {
+			get;
+		}
 	}
 }
 

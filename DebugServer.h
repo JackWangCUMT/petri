@@ -27,8 +27,10 @@ public:
 		_petriNetFactory.load();
 	}
 	~DebugSession() {
-		if(_thread.joinable())
-			_thread.join();
+		if(_receptionThread.joinable())
+			_receptionThread.join();
+		if(_heartBeat.joinable())
+			_heartBeat.join();
 	}
 
 	DebugSession(DebugSession const &) = delete;
@@ -37,6 +39,43 @@ public:
 	DebugSession(DebugSession &&) = default;
 	DebugSession &operator=(DebugSession &&) = default;
 
+	void start() {
+		_running = true;
+		_receptionThread = std::thread(&DebugSession::serverCommunication, this);
+	}
+
+	void stop() {
+		_running = false;
+		if(_receptionThread.joinable())
+			_receptionThread.join();
+		if(_heartBeat.joinable())
+			_heartBeat.join();
+	}
+
+	bool running() const {
+		return _running;
+	}
+
+	void addActiveState(Action &a) {
+		std::lock_guard<std::mutex> lk(_stateChangeMutex);
+		++_activeStates[&a];
+
+		_stateChange = true;
+		_stateChangeCondition.notify_all();
+	}
+
+	void removeActiveState(Action &a) {
+		std::lock_guard<std::mutex> lk(_stateChangeMutex);
+		auto it = _activeStates.find(&a);
+		if(it == _activeStates.end() || it->second == 0)
+			throw std::runtime_error("Trying to remove an inactive state!");
+		--it->second;
+
+		_stateChange = true;
+		_stateChangeCondition.notify_all();
+	}
+
+protected:
 	void serverCommunication() {
 		setThreadName(("DebugSession "s + _petriNetFactory.name()).c_str());
 
@@ -70,15 +109,25 @@ public:
 							this->sendObject(this->error("The server (version "s + DebugServer::version + ") is incompatible with your client!"s));
 						}
 						else {
-							Json::Value ehlo;
-							ehlo["type"] = "ehlo";
-							ehlo["version"] = DebugServer::version;
-							this->sendObject(ehlo);
+							if(root["payload"]["hash"] != _petriNetFactory.hash()) {
+								this->sendObject(this->error("You are trying to run a Petri net that is differrent from the one which is compiled!"));
+								throw std::runtime_error("You are trying to run a Petri net that is differrent from the one which is compiled!");
+							}
+							else {
+								Json::Value ehlo;
+								ehlo["type"] = "ehlo";
+								ehlo["version"] = DebugServer::version;
+								this->sendObject(ehlo);
+								
+								_heartBeat = std::thread(&DebugSession::heartBeat, this);
+							}
 						}
 					}
 					else if(type == "start") {
-						if(!_petri)
+						if(!_petri) {
 							_petri = _petriNetFactory.createDebug();
+							_petri->setObserver(this);
+						}
 						else if(_petri->running())
 							throw std::runtime_error("Petri net is already running!");
 
@@ -110,6 +159,7 @@ public:
 						}
 						_petriNetFactory.reload();
 						_petri = _petriNetFactory.createDebug();
+						_petri->setObserver(this);
 					}
 
 					//logDebug0("New debug message received: ", type);
@@ -120,32 +170,51 @@ public:
 				logError("Caught exception, exiting debugger: ", e.what());
 			}
 			_client.shutDown();
+			_stateChangeCondition.notify_all();
+			if(_heartBeat.joinable())
+				_heartBeat.join();
+
+			logDebug0("Disconnected!");
 		}
 
-		_socket.shutDown();
-
 		_running = false;
+		_socket.shutDown();
+		_stateChangeCondition.notify_all();
+
 		if(_petri)
 			_petri->stop();
 	}
+	
+	void heartBeat() {
+		setThreadName(("DebugSession "s + _petriNetFactory.name() + " heart beat"s).c_str());
+		while(_running && _client.getState() == SOCK_ACCEPTED) {
+			std::unique_lock<std::mutex> lk(_stateChangeMutex);
+			_stateChangeCondition.wait(lk, [this]() {
+				return _stateChange || !_running || _client.getState() != SOCK_ACCEPTED;
+			});
 
-	void start() {
-		_running = true;
-		_thread = std::thread(&DebugSession::serverCommunication, this);
+			if(!_running || _client.getState() != SOCK_ACCEPTED)
+				break;
+
+			Json::Value states(Json::arrayValue);
+
+			for(auto &p : _activeStates) {
+				if(p.second > 0) {
+					Json::Value state;
+					state["id"] = Json::Value(p.first->ID());
+					state["count"] = Json::Value(Json::UInt64(p.second));
+					states[states.size()] = state;
+				}
+			}
+
+			this->sendObject(this->json("states", states));
+			_stateChange = false;
+		}
 	}
 
-	void stop() {
-		_running = false;
-		_thread.join();
-	}
-
-	bool running() const {
-		return _running;
-	}
-
-protected:
 	Json::Value receiveObject() {
-		auto vect = _socket.receiveNewMsg(_client);
+		std::vector<std::uint8_t> vect = _socket.receiveNewMsg(_client);
+
 		std::string msg(vect.begin(), vect.end());
 
 		Json::Value root;
@@ -161,6 +230,7 @@ protected:
 	void sendObject(Json::Value const &o) {
 		Json::FastWriter writer;
 		std::string s = writer.write(o);
+
 		_socket.sendMsg(_client, s.c_str(), s.size());
 	}
 
@@ -176,9 +246,16 @@ protected:
 		return this->json("error", error);
 	}
 
-	std::thread _thread;
+	std::map<Action *, std::size_t> _activeStates;
+	bool _stateChange = false;
+	std::condition_variable _stateChangeCondition;
+	std::mutex _stateChangeMutex;
+
+	std::thread _receptionThread, _heartBeat;
 	Socket _socket, _client;
 	std::atomic_bool _running = {false};
+
+
 	PetriDynamicLibCommon &_petriNetFactory;
 	std::unique_ptr<PetriDebug> _petri;
 };

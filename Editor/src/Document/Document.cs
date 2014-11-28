@@ -71,7 +71,7 @@ namespace Petri
 			Modified = true;
 			UndoManager.PostAction(a);
 			UpdateUndo();
-			Window.EditorGui.PetriView.Redraw();
+			Window.Gui.BaseView.Redraw();
 		}
 
 		public void Undo() {
@@ -170,6 +170,23 @@ namespace Petri
 		}
 
 		public bool CloseAndConfirm() {
+			if(this.DebugController.Server.SessionRunning) {
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "Une session de débuggeur est toujours active. Souhaitez-vous l'arrêter ?");
+				d.AddButton("Annuler", ResponseType.Cancel);
+				d.AddButton("Arrêter la session", ResponseType.Yes).HasDefault = true;
+
+				ResponseType result = (ResponseType)d.Run();
+
+				if(result == ResponseType.Yes) {
+					DebugController.Server.StopSession();
+					d.Destroy();
+				}
+				else {
+					d.Destroy();
+					return false;
+				}
+			}
+
 			if(Modified) {
 				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "Souhaitez-vous enregistrer les modifications apportées au graphe ? Vos modifications seront perdues si vous ne les enregistrez pas.");
 				d.AddButton("Ne pas enregistrer", ResponseType.No);
@@ -304,7 +321,7 @@ namespace Petri
 				}
 			}
 
-			Window.EditorGui.PetriView.CurrentPetriNet = null;
+			Window.EditorGui.View.CurrentPetriNet = null;
 			EditorController.EditedObject = null;
 
 			var oldPetriNet = PetriNet;
@@ -373,7 +390,7 @@ namespace Petri
 			if(settings == null) {
 				settings = DocumentSettings.GetDefaultSettings(this);
 			}
-			Window.EditorGui.PetriView.CurrentPetriNet = PetriNet;
+			Window.EditorGui.View.CurrentPetriNet = PetriNet;
 			Window.DebugGui.View.CurrentPetriNet = PetriNet;
 
 			this.CurrentController = this.EditorController;
@@ -462,6 +479,10 @@ namespace Petri
 			set;
 		}
 
+		public Entity EntityFromID(UInt64 id) {
+			return PetriNet.EntityFromID(id);
+		}
+
 		public void ResetID() {
 			this.LastEntityID = 0;
 		}
@@ -493,6 +514,10 @@ namespace Petri
 			CurrentController.UpdateMenuItems();
 			Window.UndoItem.Sensitive = UndoManager.NextUndo != null;
 			Window.RedoItem.Sensitive = UndoManager.NextRedo != null;
+		}
+
+		public string GetHash() {
+			return PetriNet.GetHash();
 		}
 
 		GuiAction guiActionToMatchSave = null;

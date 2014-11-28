@@ -22,11 +22,12 @@ namespace Petri
 			};
 		}
 
-		public void Redraw()
-		{
-			if(needsRedraw == false) {
-				needsRedraw = true;
-				this.QueueDraw();
+		public void Redraw() {
+			if(document.Window.Gui == null || document.Window.Gui.BaseView == this) {
+				if(needsRedraw == false) {
+					needsRedraw = true;
+					this.QueueDraw();
+				}
 			}
 		}
 
@@ -38,13 +39,8 @@ namespace Petri
 			this.Redraw();
 		}
 
-		protected virtual void ManageTwoButtonPress(Gdk.EventButton ev) {
-
-		}
-
-		protected virtual void ManageOneButtonPress(Gdk.EventButton ev) {
-
-		}
+		protected virtual void ManageTwoButtonPress(Gdk.EventButton ev) {}
+		protected virtual void ManageOneButtonPress(Gdk.EventButton ev) {}
 
 		protected override bool OnButtonPressEvent(Gdk.EventButton ev) {
 			if(ev.Type == Gdk.EventType.ButtonPress) {

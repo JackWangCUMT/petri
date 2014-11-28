@@ -78,9 +78,15 @@ namespace Petri
 
 		public override void UpdateToolbar() {}
 
-		public EditorView PetriView {
+		public EditorView View {
 			get {
 				return petriView;
+			}
+		}
+
+		public override PetriView BaseView {
+			get {
+				return View;
 			}
 		}
 

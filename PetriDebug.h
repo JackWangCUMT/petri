@@ -12,11 +12,23 @@
 #include "Socket.h"
 #include "jsoncpp/include/json.h"
 
+class DebugSession;
+
 class PetriDebug : public PetriNet {
 public:
 	PetriDebug() : PetriNet() {}
 
 	virtual ~PetriDebug() = default;
+
+	void setObserver(DebugSession *session) {
+		_observer = session;
+	}
+
+protected:
+	virtual void enableState(Action &a) override;
+	virtual void disableState(Action &a) override;
+
+	DebugSession *_observer = nullptr;
 };
 
 

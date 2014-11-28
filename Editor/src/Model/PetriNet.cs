@@ -149,6 +149,49 @@ namespace Petri
 			return "";
 		}
 
+		public Entity EntityFromID(UInt64 id) {
+			foreach(var s in States) {
+				if(s.ID == id)
+					return s;
+				if(s is PetriNet) {
+					Entity e = (s as PetriNet).EntityFromID(id);
+					if(e != null)
+						return e;
+				}
+				if(s is InnerPetriNet && (s as InnerPetriNet).EntryPointID == id) {
+					return s;
+				}
+			}
+			foreach(var t in Transitions) {
+				if(t.ID == id)
+					return t;
+			}
+
+			return null;
+		}
+
+		public bool ContainsEntity(UInt64 id) {
+			foreach(var s in States) {
+				if(s.ID == id)
+					return true;
+				if(s is PetriNet) {
+					Entity e = (s as PetriNet).EntityFromID(id);
+					if(e != null)
+						return true;
+				}
+				if(s is InnerPetriNet && (s as InnerPetriNet).EntryPointID == id) {
+					return true;
+				}
+			}
+			foreach(var t in Transitions) {
+				if(t.ID == id)
+					return true;
+			}
+
+			return false;
+		}
+
+
 		// Recursively gets all of the Action/PetriNet
 		protected List<Entity> BuildActionsList() {
 			var l = new List<Entity>();

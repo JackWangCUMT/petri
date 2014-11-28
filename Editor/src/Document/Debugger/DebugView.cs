@@ -23,6 +23,10 @@ namespace Petri
 
 		protected override void ManageTwoButtonPress(Gdk.EventButton ev) {
 			if(ev.Button == 1) {
+				var entity = CurrentPetriNet.StateAtPosition(new PointD(ev.X, ev.Y));
+				if(entity is InnerPetriNet) {
+					this.CurrentPetriNet = entity as InnerPetriNet;
+				}
 			}
 		}
 
@@ -76,9 +80,21 @@ namespace Petri
 				Color color = new Color(0, 0, 0, 1);
 				double lineWidth = 3;
 
-				/*if(EntitySelected(e)) {
+				int enableCount;
+				if(document.DebugController.ActiveStates.TryGetValue(e as State, out enableCount) == true && enableCount > 0) {
 					color.R = 1;
-				}*/
+				}
+				else if(e is InnerPetriNet) {
+					foreach(var s in document.DebugController.ActiveStates) {
+						if((e as InnerPetriNet).ContainsEntity(s.Key.ID)) {
+							color.R = 1;
+							color.G = 0;
+							color.B = 1;
+							break;
+						}
+					}
+				}
+
 				context.LineWidth = lineWidth;
 				context.SetSourceRGBA(color.R, color.G, color.B, color.A);
 

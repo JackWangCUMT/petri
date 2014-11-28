@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Net.Sockets;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace Petri
 {
@@ -14,7 +15,9 @@ namespace Petri
 		}
 
 		~DebugServer() {
-			this.StopSession();
+			if(petriRunning || sessionRunning) {
+				throw new Exception("Debugger still running!");
+			}
 		}
 
 		public bool SessionRunning {
@@ -37,14 +40,23 @@ namespace Petri
 
 		public void StartSession() {
 			sessionRunning = true;
-			thread = new Thread(this.receiver);
-			thread.Start();
+			receiverThread = new Thread(this.receiver);
+			receiverThread.Start();
 			while(socket == null);
 		}
 
 		public void StopSession() {
-			if(sessionRunning)
+			if(sessionRunning) {
+				if(PetriRunning) {
+					StopPetri();
+				}
+
 				this.sendObject(new JObject(new JProperty("type", "exit")));
+
+				if(receiverThread != null)
+					receiverThread.Join();
+				sessionRunning = false;
+			}
 		}
 
 		public void StartPetri() {
@@ -69,18 +81,16 @@ namespace Petri
 		}
 
 		private void Hello() {
-			this.sendObject(new JObject(new JProperty("type", "hello"), new JProperty("payload", new JObject(new JProperty("version", Version)))));
+			this.sendObject(new JObject(new JProperty("type", "hello"), new JProperty("payload", new JObject(new JProperty("version", Version), new JProperty("hash", document.GetHash())))));
 		
 			try {
 				var ehlo = this.receiveObject();
 				if(ehlo != null && ehlo["type"].ToString() == "ehlo") {
-					if(ehlo["version"].ToString() == Version) {
-						document.Window.DebugGui.UpdateToolbar();
-						return;
-					}
-					else {
-						throw new Exception("Wrong version of the debugger");
-					}
+					document.Window.DebugGui.UpdateToolbar();
+					return;
+				}
+				else if(ehlo != null && ehlo["type"].ToString() == "error") {
+					throw new Exception("An error was returned by the debugger: " + ehlo["error"]);
 				}
 				throw new Exception("Invalid message received from debugger (expected ehlo)");
 			}
@@ -100,6 +110,7 @@ namespace Petri
 					JObject msg = this.receiveObject();
 					if(msg == null)
 						break;
+
 					if(msg["type"].ToString() == "ack") {
 						if(msg["payload"].ToString() == "start") {
 							petriRunning = true;
@@ -127,8 +138,21 @@ namespace Petri
 							throw new Exception("Remote debugger requested a session termination for reason: " + msg["payload"].ToString());
 						}
 					}
+					else if(msg["type"].ToString() == "states") {
+						var states = msg["payload"].Select(t => t).ToList();
 
-					Console.WriteLine("Received msg: " + msg);
+						document.DebugController.ActiveStates.Clear();
+						foreach(var s in states) {
+							var id = UInt64.Parse(s["id"].ToString());
+							var e = document.EntityFromID(id);
+							if(e == null || !(e is State)) {
+								throw new Exception("Entity sent from runtime doesn't exist on our side! (id: " + id + ")");
+							}
+							document.DebugController.ActiveStates[e as State] = int.Parse(s["count"].ToString());
+						}
+
+						document.Window.DebugGui.View.Redraw();
+					}
 				}
 				if(sessionRunning) {
 					throw new Exception("Session ended unexpectedly");
@@ -205,7 +229,7 @@ namespace Petri
 
 		bool petriRunning;
 		volatile bool sessionRunning;
-		Thread thread;
+		Thread receiverThread;
 
 		volatile TcpClient socket;
 		object upLock = new object();

@@ -56,6 +56,12 @@ namespace Petri
 			}
 		}
 
+		public override PetriView BaseView {
+			get {
+				return View;
+			}
+		}
+
 		public override void FocusIn() {
 			view.FocusIn();
 		}

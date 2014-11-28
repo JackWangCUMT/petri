@@ -141,7 +141,7 @@ protected:
 				std::this_thread::sleep_for(std::min(1000000ns, minDelay));
 			}
 
-		} while(!deactivate);
+		} while(!deactivate && _running);
 
 		for(auto it = a.transitions().begin(); it != a.transitions().end(); ++it) {
 			(*it)->didTest();
@@ -163,7 +163,7 @@ protected:
 				return;
 
 			while(!_toBeDisabled.empty()) {
-				_toBeDisabled.pop();
+				this->disableState(*_toBeDisabled.front());
 				--_activeStates;
 			}
 
@@ -178,7 +178,8 @@ protected:
 
 					a.currentTokens() -= a.requiredTokens();
 
-					_actionsPool.addTask(make_callable_ptr(&PetriNet::executeState, *this, std::ref(a)));
+					this->enableState(a);
+
 					it = _toBeActivated.erase(it);
 				}
 				else {
@@ -198,6 +199,14 @@ protected:
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
 		}
+	}
+
+	virtual void enableState(Action &a) {
+		_actionsPool.addTask(make_callable_ptr(&PetriNet::executeState, *this, std::ref(a)));
+	}
+
+	virtual void disableState(Action &a) {
+		_toBeDisabled.pop();
 	}
 
 	std::thread _statesManager;

@@ -10,9 +10,12 @@ namespace Petri
 		{
 			this.exitPoint = new ExitPoint(doc, this, new Cairo.PointD(300, 100));
 			this.AddState(this.ExitPoint);
+			this.EntryPointID = Document.LastEntityID++;
 		}
 
 		public InnerPetriNet(Document doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
+			EntryPointID = UInt64.Parse(descriptor.Attribute("EntryPointID").Value);
+
 			foreach(var s in this.States) {
 				if(s.GetType() == typeof(ExitPoint)) {
 					this.exitPoint = s as ExitPoint;
@@ -24,10 +27,20 @@ namespace Petri
 				throw new Exception("No Exit node found in the saved Petri net!");
 		}
 
+		public override void Serialize(XElement elem) {
+			elem.SetAttributeValue("EntryPointID", this.EntryPointID);
+			base.Serialize(elem);
+		}
+
 		public ExitPoint ExitPoint {
 			get {
 				return exitPoint;
 			}
+		}
+
+		public UInt64 EntryPointID {
+			get;
+			private set;
 		}
 
 		public string EntryPointName {
@@ -46,7 +59,7 @@ namespace Petri
 
 			source += name + "->setName(\"" + this.Name + "_Entry" + "\");";
 			source += name + "->setRequiredTokens(" + RequiredTokens.ToString() + ");";
-			source += name + "->setID(" + lastID.Consume() + ");";
+			source += name + "->setID(" + EntryPointID + ");";
 
 			source += "petriNet.addAction(" + name + ", " + "false" + ");";
 
