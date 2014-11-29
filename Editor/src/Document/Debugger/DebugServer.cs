@@ -49,9 +49,13 @@ namespace Petri
 			if(sessionRunning) {
 				if(PetriRunning) {
 					StopPetri();
+					petriRunning = false;
 				}
 
-				this.sendObject(new JObject(new JProperty("type", "exit")));
+				try {
+					this.sendObject(new JObject(new JProperty("type", "exit")));
+				}
+				catch(Exception e) {}
 
 				if(receiverThread != null)
 					receiverThread.Join();
@@ -60,13 +64,25 @@ namespace Petri
 		}
 
 		public void StartPetri() {
-			if(!petriRunning)
-				this.sendObject(new JObject(new JProperty("type", "start")));
+			try {
+				if(!petriRunning)
+					this.sendObject(new JObject(new JProperty("type", "start")));
+			}
+			catch(Exception e) {
+				// TODO: present error
+				this.StopSession();
+			}
 		}
 
 		public void StopPetri() {
-			if(petriRunning)
-				this.sendObject(new JObject(new JProperty("type", "stop")));
+			try {
+				if(petriRunning)
+					this.sendObject(new JObject(new JProperty("type", "stop")));
+			}
+			catch(Exception e) {
+				// TODO: present error
+				this.StopSession();
+			}
 		}
 
 		public void ReloadPetri() {
@@ -76,14 +92,20 @@ namespace Petri
 				// TODO: TODO…
 			}
 			else {
-				this.sendObject(new JObject(new JProperty("type", "reload")));
+				try {
+					this.sendObject(new JObject(new JProperty("type", "reload")));
+				}
+				catch(Exception e) {
+					// TODO: present error
+					this.StopSession();
+				}
 			}
 		}
 
 		private void Hello() {
-			this.sendObject(new JObject(new JProperty("type", "hello"), new JProperty("payload", new JObject(new JProperty("version", Version), new JProperty("hash", document.GetHash())))));
-		
 			try {
+				this.sendObject(new JObject(new JProperty("type", "hello"), new JProperty("payload", new JObject(new JProperty("version", Version), new JProperty("hash", document.GetHash())))));
+		
 				var ehlo = this.receiveObject();
 				if(ehlo != null && ehlo["type"].ToString() == "ehlo") {
 					document.Window.DebugGui.UpdateToolbar();
@@ -155,12 +177,13 @@ namespace Petri
 					}
 				}
 				if(sessionRunning) {
-					throw new Exception("Session ended unexpectedly");
+					throw new Exception("Socket unexpectedly disconnected");
 				}
 			}
 			catch(Exception e) {
 				Console.WriteLine(e);
 				Console.WriteLine("Exception in the debugger, exiting session");
+				this.StopSession();
 			}
 
 			try {
@@ -171,11 +194,15 @@ namespace Petri
 		}
 
 		private JObject receiveObject() {
+			int count = 0;
 			while(sessionRunning) {
 				string val = this.receiveString();
 				if(val.Length > 0)
 					return JObject.Parse(val);
 
+				if(++count > 5) {
+					throw new Exception("Remote debugger not available anymore!");
+				}
 				Thread.Sleep(1);
 			}
 

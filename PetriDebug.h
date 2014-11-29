@@ -8,7 +8,7 @@
 #ifndef IA_Pe_tri_PetriDebug_h
 #define IA_Pe_tri_PetriDebug_h
 
-#include "Petri.h"
+#include "PetriNet.h"
 #include "Socket.h"
 #include "jsoncpp/include/json.h"
 

@@ -13,7 +13,7 @@
 #include <dlfcn.h>
 #include "Log.h"
 #include "Condition.h"
-#include "Petri.h"
+#include "PetriNet.h"
 #include "PetriDebug.h"
 
 using namespace std::chrono_literals;

@@ -142,8 +142,8 @@ public:
 		}
 	}
 
-	// Recommened to provide those, as  a memory allocation could otherwise be interrupted, leading the heap in an inconsistent state.
-	// The handlers have to behaves like a recursive lock not to interfere with the user's code.
+	// Recommended to provide those, as  a memory allocation could otherwise be interrupted, leading the heap in an inconsistent state.
+	// The handlers have to behaves like a recursive lock in order to not interfere with the user's code.
 	// Set to nullptr to reset a handler.
 	void setCriticalHandlers(std::function<void()> &&enterCritical, std::function<void()> &&exitrCritical) {
 		_enterCritical = std::move(enterCritical);
