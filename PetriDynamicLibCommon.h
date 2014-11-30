@@ -23,10 +23,8 @@ public:
 	PetriDynamicLibCommon(PetriDynamicLibCommon &&pn) = default;
 	PetriDynamicLibCommon &operator=(PetriDynamicLibCommon &&pn) = default;
 	virtual ~PetriDynamicLibCommon() {
-		if(this->loaded())
-			dlclose(_libHandle);
+		this->unload();
 	}
-
 
 	/**
 	 * Creates the PetriNet object according to the code contained in the dynamic library.
@@ -82,6 +80,27 @@ public:
 	 * Unloads the code of the dynamic library previously loaded, and loads the code contained in a possibly updated dylib.
 	 */
 	void reload() {
+		this->unload();
+		this->load();
+	}
+
+	/**
+	 * Returns whether the dylib code resides in memory or not
+	 * @return The loaded state of the dynamic library
+	 */
+	bool loaded() const {
+		return _libHandle != nullptr;
+	}
+
+	/**
+	 * Loads the dynamic library associated to this wrapper.
+	 */
+	virtual void load() = 0;
+
+	/**
+	 * Removes the dynamic library associated to this wrapper from memory.
+	 */
+	void unload() {
 		if(this->loaded())
 			dlclose(_libHandle);
 
@@ -89,20 +108,9 @@ public:
 		_createPtr = nullptr;
 		_createDebugPtr = nullptr;
 		_hashPtr = nullptr;
-		this->load();
-	}
-
-	/**
-	 * Returns wether the dylib code resides in memory or not
-	 * @return The loaded state of the dynamic library
-	 */
-	bool loaded() const {
-		return _libHandle != nullptr;
 	}
 
 protected:
-	virtual void load() = 0;
-
 	void *_libHandle = nullptr;
 	void *(*_createPtr)() = nullptr;
 	void *(*_createDebugPtr)() = nullptr;

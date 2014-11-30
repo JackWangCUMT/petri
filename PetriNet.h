@@ -39,12 +39,12 @@ public:
 	/**
 	 * Adds an Action to the PetriNet. The net must not be running yet.
 	 * @param action The action to add
-	 * @param active Controls wether the action is active as soon as the net is started or not
+	 * @param active Controls whether the action is active as soon as the net is started or not
 	 */
 	void addAction(std::shared_ptr<Action> &action, bool active = false);
 
 	/**
-	 * Checks wether the net is running.
+	 * Checks whether the net is running.
 	 * @return true means that the net has been started, and we can not add any more action to it now.
 	 */
 	bool running() const {
@@ -68,26 +68,23 @@ protected:
 	// This method is executed concurrently on the thread pool.
 	virtual void executeState(Action &a);
 
-	// This method runs on a separate thread when the Petri net is in running state.
-	virtual void manageStates();
+	virtual void stateEnabled(Action &a) {}
+	virtual void stateDisabled(Action &a) {}
 
-	virtual void enableState(Action &a);
-	virtual void disableState(Action &a);
+	void enableState(Action &a);
+	void disableState(Action &a);
+	void swapStates(Action &oldAction, Action &newAction);
 
-	std::thread _statesManager;
 	std::condition_variable _activationCondition;
-	std::set<Action *> _toBeActivated;
-	std::queue<Action *> _toBeDisabled;
+	std::multiset<Action *> _activeStates;
 	std::mutex _activationMutex;
 
-	std::list<std::shared_ptr<Action>> _states;
-	std::list<Transition> _transitions;
-	
+	std::atomic_bool _running = {false};
 	ThreadPool<void> _actionsPool;
 
-	std::atomic_ulong _activeStates;
-	std::atomic_bool _running = {false};
-	std::string _name;
+	std::string const _name;
+	std::list<std::pair<std::shared_ptr<Action>, bool>> _states;
+	std::list<Transition> _transitions;
 };
 
 

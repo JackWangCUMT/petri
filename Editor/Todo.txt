@@ -17,11 +17,3 @@ Débuggeur graphique
 
 
 Commenter le code :3
-
-
-
-
-Bugs :
-	Entités inexistantes envoyées par le runtime
-	Exécution parfois anarchique du runtime
-	Rechargement à chaud du code donne des résultats aléatoires

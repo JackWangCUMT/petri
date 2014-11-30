@@ -7,6 +7,9 @@
 
 #include "PetriDynamicLibCommon.h"
 #include "DebugServer.h"
+#include <chrono>
+#include <ctime>
+#include <iomanip>
 
 #if !defined(PREFIX) || !defined(CLASS_NAME) || !defined(LIB_PATH) || !defined(PORT)
 #error "Do not include this file manually, let the C++ code generator use it for you!"
@@ -15,10 +18,10 @@
 class CLASS_NAME : public PetriDynamicLibCommon {
 public:
 	/**
-	 * Creates the dynamic library wrapper, and loads it, making possible to create the PetriNet objects.
+	 * Creates the dynamic library wrapper. It still needs to be loaded to access the wrapped functions.
 	 */
 	CLASS_NAME() {
-		this->load();
+
 	}
 
 	CLASS_NAME(CLASS_NAME const &pn) = delete;
@@ -45,11 +48,12 @@ public:
 		return PORT;
 	}
 
-private:
 	virtual void load() override {
 		if(_libHandle != nullptr) {
 			return;
 		}
+
+		auto serverDate = DebugServer::getAPIdate();
 
 		_libHandle = dlopen(LIB_PATH, RTLD_NOW);
 		if(_libHandle == nullptr) {
@@ -58,6 +62,18 @@ private:
 		_createPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_create"));
 		_createDebugPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_createDebug"));
 		_hashPtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, PREFIX "_getHash"));
+
+		auto APIDatePtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, PREFIX "_getAPIDate"));
+		char const *format = "%b %d %Y %H:%M:%S";
+		std::tm tm;
+		strptime(APIDatePtr(), format, &tm);
+		auto libDate = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+
+		if(serverDate > libDate) {
+			this->unload();
+
+			throw std::runtime_error("The dynamic library is out of date and must be recompiled!");
+		}
 	}
 };
 

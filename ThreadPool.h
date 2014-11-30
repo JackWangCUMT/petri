@@ -99,7 +99,7 @@ public:
 		}
 
 		/**
-		 * Checks wether the task result is available.
+		 * Checks whether the task result is available.
 		 * @return Availability of the task result
 		 */
 		bool available() {
@@ -126,8 +126,12 @@ public:
 
 	~ThreadPool() {
 		if(_pendingTasks > 0) {
-			std::cerr << "Some tasks are still running!" << std::endl;
+			logError("Some tasks are still running!");
 			throw std::runtime_error("The thread pool is being destroyed while some of its tasks are still pending!");
+		}
+		if(_alive) {
+			logError("Thread pool is still alive!");
+			throw std::runtime_error("The thread pool is strill alive!");
 		}
 	}
 
@@ -152,12 +156,14 @@ public:
 	 * Pauses the calling thread until there is no more pending tasks.
 	 */
 	void join() {
-		// Dirty hack…
-		while(_pendingTasks > 0) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		}
+		if(_alive) {
+			// Dirty hack…
+			while(_pendingTasks > 0) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			}
 
-		this->cancel();
+			this->cancel();
+		}
 	}
 
 	/**

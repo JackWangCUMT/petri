@@ -48,7 +48,7 @@ namespace Petri
 
 		public override string MakeCpp()
 		{
-			return "std::make_shared<CheckResultCondition>(" + this.Transition.CppName + "->mutableResult(), ResultatAction::" + this.ResultatAction.ToString() + ")";
+			return this.Transition.CppName + "->compareResult(ResultatAction::" + this.ResultatAction.ToString() + ")";
 		}
 
 		public override string MakeUserReadable()

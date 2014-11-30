@@ -8,15 +8,13 @@
 #include "PetriDebug.h"
 #include "DebugServer.h"
 
-void PetriDebug::enableState(Action &a) {
-	this->PetriNet::enableState(a);
+void PetriDebug::stateEnabled(Action &a) {
 	if(_observer) {
 		_observer->addActiveState(a);
 	}
 }
 
-void PetriDebug::disableState(Action &a) {
-	this->PetriNet::disableState(a);
+void PetriDebug::stateDisabled(Action &a) {
 	if(_observer) {
 		_observer->removeActiveState(a);
 	}

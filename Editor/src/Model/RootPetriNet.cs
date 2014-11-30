@@ -113,6 +113,12 @@ namespace Petri
 			source += "return \"" + hash + "\";";
 			source += "}";
 
+			source += "";
+
+			source += "EXPORT char const *" + Document.Settings.Name + "_getAPIDate() {";
+			source += "return \"" + System.DateTime.Now.ToString("MMM dd yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) + "\";";
+			source += "}";
+
 			return hash;
 		}
 

@@ -18,22 +18,6 @@
 
 using namespace std::chrono_literals;
 
-struct CheckResultCondition : ConditionBaseCopyPtr<CheckResultCondition> {
-	CheckResultCondition(std::atomic<ResultatAction> const &toCheck, ResultatAction expected) : _toCheck(toCheck), _expected(expected) {}
-
-	ResultatAction expected() const {
-		return _expected;
-	}
-
-	virtual bool isFulfilled() override {
-		return _toCheck.load() == _expected;
-	}
-
-private:
-	std::atomic<ResultatAction> const &_toCheck;
-	ResultatAction const _expected;
-};
-
 namespace PetriUtils {
 	struct indirect {
 		template <class _Tp>

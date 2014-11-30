@@ -55,7 +55,7 @@ namespace Petri
 				try {
 					this.sendObject(new JObject(new JProperty("type", "exit")));
 				}
-				catch(Exception e) {}
+				catch(Exception) {}
 
 				if(receiverThread != null)
 					receiverThread.Join();
@@ -66,9 +66,9 @@ namespace Petri
 		public void StartPetri() {
 			try {
 				if(!petriRunning)
-					this.sendObject(new JObject(new JProperty("type", "start")));
+					this.sendObject(new JObject(new JProperty("type", "start"), new JProperty("payload", new JObject(new JProperty("hash", document.GetHash())))));
 			}
-			catch(Exception e) {
+			catch(Exception) {
 				// TODO: present error
 				this.StopSession();
 			}
@@ -79,7 +79,7 @@ namespace Petri
 				if(petriRunning)
 					this.sendObject(new JObject(new JProperty("type", "stop")));
 			}
-			catch(Exception e) {
+			catch(Exception) {
 				// TODO: present error
 				this.StopSession();
 			}
@@ -95,7 +95,7 @@ namespace Petri
 				try {
 					this.sendObject(new JObject(new JProperty("type", "reload")));
 				}
-				catch(Exception e) {
+				catch(Exception) {
 					// TODO: present error
 					this.StopSession();
 				}
@@ -104,7 +104,7 @@ namespace Petri
 
 		private void Hello() {
 			try {
-				this.sendObject(new JObject(new JProperty("type", "hello"), new JProperty("payload", new JObject(new JProperty("version", Version), new JProperty("hash", document.GetHash())))));
+				this.sendObject(new JObject(new JProperty("type", "hello"), new JProperty("payload", new JObject(new JProperty("version", Version)))));
 		
 				var ehlo = this.receiveObject();
 				if(ehlo != null && ehlo["type"].ToString() == "ehlo") {
@@ -141,10 +141,19 @@ namespace Petri
 						else if(msg["payload"].ToString() == "stop") {
 							petriRunning = false;
 							document.Window.DebugGui.UpdateToolbar();
+							document.DebugController.ActiveStates.Clear();
+							document.Window.DebugGui.View.Redraw();
 						}
 						else if(msg["payload"].ToString() == "reload") {
 							Console.WriteLine("Petri net reloaded!");
 							document.Window.DebugGui.UpdateToolbar();
+						}
+					}
+					else if(msg["type"].ToString() == "error") {
+						// TODO: present error
+
+						if(petriRunning) {
+							this.StopPetri();
 						}
 					}
 					else if(msg["type"].ToString() == "exit") {

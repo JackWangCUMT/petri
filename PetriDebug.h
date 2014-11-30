@@ -29,8 +29,8 @@ public:
 	}
 
 protected:
-	virtual void enableState(Action &a) override;
-	virtual void disableState(Action &a) override;
+	virtual void stateEnabled(Action &a) override;
+	virtual void stateDisabled(Action &a) override;
 
 	DebugSession *_observer = nullptr;
 };

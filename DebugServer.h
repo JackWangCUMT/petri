@@ -18,6 +18,7 @@ using namespace std::string_literals;
 
 namespace DebugServer {
 	extern std::string const version;
+	extern std::chrono::system_clock::time_point getAPIdate();
 }
 
 class DebugSession {

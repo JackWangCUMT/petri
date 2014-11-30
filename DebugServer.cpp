@@ -9,6 +9,13 @@
 #include "Commun.h"
 
 std::string const DebugServer::version = "0.1";
+std::chrono::system_clock::time_point DebugServer::getAPIdate() {
+	char const *format = "%a %b %d %H:%M:%S %Y";
+	std::tm tm;
+
+	strptime(__TIMESTAMP__, format, &tm);
+	return std::chrono::system_clock::from_time_t(std::mktime(&tm));
+}
 
 DebugSession::DebugSession(PetriDynamicLibCommon &petri) : _socket(SockProtocol::TCP), _client(SockProtocol::TCP), _petriNetFactory(petri) {}
 
@@ -86,33 +93,45 @@ void DebugSession::serverCommunication() {
 				if(type == "hello") {
 					if(root["payload"]["version"] != DebugServer::version) {
 						this->sendObject(this->error("The server (version "s + DebugServer::version + ") is incompatible with your client!"s));
+						throw std::runtime_error("The server (version "s + DebugServer::version + ") is incompatible with your client!"s);
 					}
 					else {
-						if(root["payload"]["hash"] != _petriNetFactory.hash()) {
-							this->sendObject(this->error("You are trying to run a Petri net that is differrent from the one which is compiled!"));
-							throw std::runtime_error("You are trying to run a Petri net that is differrent from the one which is compiled!");
-						}
-						else {
-							Json::Value ehlo;
-							ehlo["type"] = "ehlo";
-							ehlo["version"] = DebugServer::version;
-							this->sendObject(ehlo);
-
-							_heartBeat = std::thread(&DebugSession::heartBeat, this);
-						}
+						Json::Value ehlo;
+						ehlo["type"] = "ehlo";
+						ehlo["version"] = DebugServer::version;
+						this->sendObject(ehlo);
+						_heartBeat = std::thread(&DebugSession::heartBeat, this);
 					}
 				}
 				else if(type == "start") {
-					if(!_petri) {
-						_petri = _petriNetFactory.createDebug();
-						_petri->setObserver(this);
+					if(!_petriNetFactory.loaded()) {
+						try {
+							_petriNetFactory.load();
+						}
+						catch(std::exception &e) {
+							this->sendObject(this->error("The PetriNet API has been updated after the compilation of the dynamic library, please recompile to allow debugging!"));
+							logError("The PetriNet API has been updated after the compilation of the dynamic library, please recompile to allow debugging!");
+						}
 					}
-					else if(_petri->running())
-						throw std::runtime_error("Petri net is already running!");
+					if(_petriNetFactory.loaded()) {
+						if(root["payload"]["hash"] != _petriNetFactory.hash()) {
+							this->sendObject(this->error("You are trying to run a Petri net that is different from the one which is compiled!"));
+							logError("You are trying to run a Petri net that is different from the one which is compiled!");
+							_petriNetFactory.unload();
+						}
+						else {
+							if(!_petri) {
+								_petri = _petriNetFactory.createDebug();
+								_petri->setObserver(this);
+							}
+							else if(_petri->running())
+								throw std::runtime_error("Petri net is already running!");
 
-					_petri->run();
+							_petri->run();
 
-					this->sendObject(this->json("ack", "start"));
+							this->sendObject(this->json("ack", "start"));
+						}
+					}
 				}
 				else if(type == "exit") {
 					this->clearPetri();
@@ -132,8 +151,6 @@ void DebugSession::serverCommunication() {
 					_petri = _petriNetFactory.createDebug();
 					_petri->setObserver(this);
 				}
-
-				//logDebug0("New debug message received: ", type);
 			}
 		}
 		catch(std::exception &e) {
@@ -187,7 +204,6 @@ void DebugSession::heartBeat() {
 
 void DebugSession::clearPetri() {
 	if(_petri != nullptr) {
-		_petri->stop();
 		_petri = nullptr;
 	}
 	_activeStates.clear();

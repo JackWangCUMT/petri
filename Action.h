@@ -24,6 +24,9 @@
 
 using namespace std::chrono_literals;
 
+/**
+ * A state composing a PetriNet.
+ */
 class Action : public CallableTimeout<std::uint64_t> {
 public:
 	/**
@@ -89,8 +92,12 @@ public:
 	 * Gets the current tokens count given to the Action by its preceding Actions.
 	 * @return The current tokens count of the Action
 	 */
-	std::atomic_ulong &currentTokens() {
+	std::size_t &currentTokens() {
 		return _currentTokens;
+	}
+
+	std::mutex &tokensMutex() {
+		return _tokensMutex;
 	}
 
 	/**
@@ -122,7 +129,9 @@ private:
 	std::shared_ptr<CallableBase<ResultatAction>> _action;
 	std::string _name;
 	std::size_t _requiredTokens;
-	std::atomic_ulong _currentTokens;
+
+	std::size_t _currentTokens;
+	std::mutex _tokensMutex;
 };
 
 #endif

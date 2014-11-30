@@ -6,13 +6,12 @@
 //
 
 #include "PetriNet.h"
+#include <cassert>
 
-PetriNet::PetriNet(std::string const &name) : _actionsPool(InitialThreadsActions, name) {}
+PetriNet::PetriNet(std::string const &name) : _actionsPool(InitialThreadsActions, name), _name(name) {}
 
 PetriNet::~PetriNet() {
 	this->stop();
-	if(_statesManager.joinable())
-		_statesManager.join();
 }
 
 void PetriNet::addAction(std::shared_ptr<Action> &action, bool active) {
@@ -20,165 +19,151 @@ void PetriNet::addAction(std::shared_ptr<Action> &action, bool active) {
 		throw std::runtime_error("Cannot modify running state chart!");
 	}
 
-	_states.push_back(action);
-
-	if(active) {
-		std::lock_guard<std::mutex> lk(_activationMutex);
-		// We allow the initially active states to be actually enabled
-		_states.back().get()->currentTokens() = _states.back().get()->requiredTokens();
-		++_activeStates;
-		_toBeActivated.insert(_states.back().get());
-	}
+	_states.emplace_back(action, active);
 }
 
 void PetriNet::run() {
-	if(_running) {
+	if(this->running()) {
 		throw std::runtime_error("Already running!");
 	}
 
-	if(_toBeActivated.empty()) {
-		logError("No active state!");
-	}
-	else {
-		_running = true;
-		_statesManager = std::thread(&PetriNet::manageStates, this);
+	for(auto &p : _states) {
+		if(p.second) {
+			_running = true;
+			this->enableState(*p.first);
+		}
 	}
 }
 
 void PetriNet::stop() {
 	if(this->running()) {
 		_running = false;
-
 		_activationCondition.notify_all();
 
-		// stop() may be called by _statesManager, so we do not try to join from our own thread.
-		if(std::this_thread::get_id() != _statesManager.get_id())
-			_statesManager.join();
 		_actionsPool.join();
 	}
 }
 
-void PetriNet::executeState(Action &a) {
-	// Lock later, during the reaction to a fulfilled transition
-	std::unique_lock<std::mutex> activationLock(_activationMutex, std::defer_lock);
+void PetriNet::executeState(Action &a) {	
+	Action *nextState = nullptr;
+
+	for(auto &t : a.transitions()) {
+		t->actionStarted();
+	}
+
+	// Runs the Callable
 	ResultatAction res = a.action()();
 
-	std::vector<std::pair<decltype(a.transitions().begin()), bool>> conditionsResult;
-	conditionsResult.reserve(a.transitions().size());
-
-	for(auto it = a.transitions().begin(); it != a.transitions().end(); ++it) {
-		(*it)->willTest();
+	for(auto &t : a.transitions()) {
+		t->actionEnded();
 	}
 
-	auto lastTest = ClockType::time_point();
-
-	bool deactivate = false;
-	do {
-		if(!_running || a.transitions().empty())
-			break;
-
-		auto now = ClockType::now();
-		auto minDelay = ClockType::duration::max() / 2;
+	if(!a.transitions().empty()) {
+		std::list<decltype(a.transitions().begin())> transitionsToTest;
 		for(auto it = a.transitions().begin(); it != a.transitions().end(); ++it) {
-			bool isFulfilled = false;
-			if((now - lastTest) >= (*it)->delayBetweenEvaluation()) {
-				isFulfilled = (*it)->isFulfilled(res);
-				minDelay = std::min(minDelay, (*it)->delayBetweenEvaluation());
-			}
-			else {
-				minDelay = std::min(minDelay, (*it)->delayBetweenEvaluation() - (now - lastTest));
-			}
-
-			conditionsResult.push_back(std::make_pair(it, isFulfilled));
-		}
-		lastTest = now;
-
-		activationLock.lock();
-		for(auto &p : conditionsResult) {
-			if(p.second) {
-				Action &a = (*p.first)->next();
-				++a.currentTokens();
-
-				if(_toBeActivated.insert(&a).second)
-					++_activeStates;
-
-				deactivate = true;
-			}
-		}
-		activationLock.unlock();
-
-		while(ClockType::now() - lastTest <= minDelay) {
-			std::this_thread::sleep_for(std::min(1000000ns, minDelay));
+			transitionsToTest.push_back(it);
 		}
 
-	} while(!deactivate && _running);
+		auto lastTest = ClockType::time_point();
 
-	for(auto it = a.transitions().begin(); it != a.transitions().end(); ++it) {
-		(*it)->didTest();
-	}
+		while(_running && transitionsToTest.size()) {
+			auto now = ClockType::now();
+			auto minDelay = ClockType::duration::max() / 2;
 
-	activationLock.lock();
-	_toBeDisabled.push(&a);
-	activationLock.unlock();
+			for(auto it = transitionsToTest.begin(); it != transitionsToTest.end();) {
+				bool isFulfilled = false;
 
-	_activationCondition.notify_all();
-}
-
-void PetriNet::manageStates() {
-	setThreadName(_name + " states manager");
-
-	while(_running) {
-		std::unique_lock<std::mutex> lk(_activationMutex);
-		_activationCondition.wait(lk, [this]() { return !_toBeActivated.empty() || !_toBeDisabled.empty() || !_running; });
-
-		if(!_running)
-			return;
-
-		while(!_toBeDisabled.empty()) {
-			this->disableState(*_toBeDisabled.front());
-			--_activeStates;
-		}
-
-		for(auto it = _toBeActivated.begin(); it != _toBeActivated.end(); ) {
-			Action &a = **it;
-
-			if(a.currentTokens() >= a.requiredTokens()) {
-				if(_activeStates >= _actionsPool.threadCount()) {
-					logInfo("Pool too small, resizing needed (new size: ", _actionsPool.threadCount() + 1, ") !");
-					logInfo(_activeStates);
-					_actionsPool.addThread();
+				if((now - lastTest) >= (**it)->delayBetweenEvaluation()) {
+					// Testing the transition
+					isFulfilled = (**it)->isFulfilled(res);
+					minDelay = std::min(minDelay, (**it)->delayBetweenEvaluation());
+				}
+				else {
+					minDelay = std::min(minDelay, (**it)->delayBetweenEvaluation() - (now - lastTest));
 				}
 
-				a.currentTokens() -= a.requiredTokens();
+				if(isFulfilled) {
+					Action &a = (**it)->next();
+					std::lock_guard<std::mutex> tokensLock(a.tokensMutex());
+					if(++a.currentTokens() >= a.requiredTokens()) {
+						a.currentTokens() -= a.requiredTokens();
 
-				this->enableState(a);
+						if(nextState == nullptr) {
+							nextState = &a;
+						}
+						else {
+							this->enableState(a);
+						}
+					}
 
-				it = _toBeActivated.erase(it);
+					it = transitionsToTest.erase(it);
+				}
+			}
+
+			if(nextState != nullptr) {
+				break;
 			}
 			else {
-				++it;
-			}
-		}
-		lk.unlock();
+				lastTest = now;
 
-		if(_activeStates == 0) {
-			if(!_toBeActivated.empty()) {
-				logError("Warning!\nThe statechart has states waiting for tokens to be activated, but will never get them as there are no active states to give them.\nThe pending states are now discarded.");
+				while(ClockType::now() - lastTest <= minDelay) {
+					std::this_thread::sleep_for(std::min(1000000ns, minDelay));
+				}
 			}
-			this->stop();
-		}
-
-		if(!_toBeActivated.empty()) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 	}
+
+	if(nextState != nullptr) {
+		this->swapStates(a, *nextState);
+	}
+	else {
+		this->disableState(a);
+	}
+}
+
+void PetriNet::swapStates(Action &oldAction, Action &newAction) {
+	{
+		std::lock_guard<std::mutex> lk(_activationMutex);
+		_activeStates.insert(&newAction);
+
+		auto it = _activeStates.find(&oldAction);
+		assert(it != _activeStates.end());
+		_activeStates.erase(it);
+	}
+
+	this->stateDisabled(oldAction);
+	this->stateEnabled(newAction);
+
+	this->executeState(newAction);
 }
 
 void PetriNet::enableState(Action &a) {
-	_actionsPool.addTask(make_callable_ptr(&PetriNet::executeState, *this, std::ref(a)));
+	{
+		std::lock_guard<std::mutex> lk(_activationMutex);
+		_activeStates.insert(&a);
+
+		if(_actionsPool.threadCount() < _activeStates.size()) {
+			_actionsPool.addThread();
+		}
+	}
+
+	_actionsPool.addTask(make_callable_ptr(std::bind(&PetriNet::executeState, std::ref(*this), std::placeholders::_1), std::ref(a)));
+
+	this->stateEnabled(a);
 }
 
 void PetriNet::disableState(Action &a) {
-	_toBeDisabled.pop();
+	std::lock_guard<std::mutex> lk(_activationMutex);
+
+	auto it = _activeStates.find(&a);
+	assert(it != _activeStates.end());
+
+	_activeStates.erase(it);
+
+	if(_activeStates.size() == 0) {
+		_running = false;
+	}
+
+	this->stateDisabled(a);
 }
 
