@@ -191,7 +191,7 @@ void DebugSession::heartBeat() {
 		for(auto &p : _activeStates) {
 			if(p.second > 0) {
 				Json::Value state;
-				state["id"] = Json::Value(p.first->ID());
+				state["id"] = Json::Value(Json::UInt64(p.first->ID()));
 				state["count"] = Json::Value(Json::UInt64(p.second));
 				states[states.size()] = state;
 			}
