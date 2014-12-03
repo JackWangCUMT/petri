@@ -183,6 +183,29 @@ public:
 	}
 
 	/**
+	 * Pauses the execution of the thread pool. The tasks that were already running are still executed,
+	 * but the current and future pending tasks will remain pending until the resume() method is called.
+	 * If the thread pool is not alive, this is a no-op.
+	 */
+	void pause() {
+		if(_alive) {
+			_pause = true;
+		}
+	}
+
+	/**
+	 * Resumes the execution of the thread pool. If it wasn't alive and paused before, this is a no-op.
+	 */
+	void resume() {
+		if(_alive) {
+			bool d = true;
+			if(_pause.compare_exchange_strong(d, false)) {
+				_taskAvailable.notify_all();
+			}
+		}
+	}
+
+	/**
 	 * Adds a task to the thread pool.
 	 * @param task The task to be addes.
 	 * @return A proxy object allowing the user to wait for the task completion, query the task completion status and get the task return value
@@ -206,7 +229,7 @@ private:
 
 		while(_alive) {
 			std::unique_lock<std::mutex> lk(_availabilityMutex);
-			_taskAvailable.wait(lk, [this]() { return !_taskQueue.empty() || !_alive; });
+			_taskAvailable.wait(lk, [this]() { return (!_taskQueue.empty() && !_pause) || !_alive; });
 
 			if(!_alive)
 				return;
@@ -226,6 +249,7 @@ private:
 	std::condition_variable _taskAvailable;
 	std::mutex _availabilityMutex;
 
+	std::atomic_bool _pause = {false};
 	std::atomic_bool _alive = {true};
 	std::atomic_uint _pendingTasks = {0};
 	std::vector<std::thread> _workerThreads;

@@ -14,14 +14,17 @@ namespace Petri
 
 			startStopSession = new Button(new Label("Démarrer session"));
 			startStopPetri = new Button(new Label("Exécuter"));
+			playPause = new Button(new Label("Pause"));
 			reload = new Button(new Label("Fix"));
 			switchToEditor = new Button(new Label("Éditeur"));
 			startStopSession.Clicked += this.OnClick;
 			startStopPetri.Clicked += this.OnClick;
+			playPause.Clicked += this.OnClick;
 			reload.Clicked += this.OnClick;
 			switchToEditor.Clicked += this.OnClick;
 			toolbar.PackStart(startStopSession, false, false, 0);
 			toolbar.PackStart(startStopPetri, false, false, 0);
+			toolbar.PackStart(playPause, false, false, 0);
 			toolbar.PackStart(reload, false, false, 0);
 			toolbar.PackStart(switchToEditor, false, false, 0);
 
@@ -79,19 +82,32 @@ namespace Petri
 				startStopPetri.Sensitive = true;
 				reload.Sensitive = true;
 
+
 				((Label)startStopSession.Child).Text = "Stopper la session";
 
 				if(document.DebugController.Server.PetriRunning) {
 					((Label)startStopPetri.Child).Text = "Stopper";
+					playPause.Sensitive = true;
+					if(document.DebugController.Server.Pause) {
+						((Label)playPause.Child).Text = "Continuer";
+					}
+					else {
+						((Label)playPause.Child).Text = "Pause";
+					}
 				}
 				else {
 					((Label)startStopPetri.Child).Text = "Exécuter";
+					playPause.Sensitive = false;
+					((Label)playPause.Child).Text = "Pause";
 				}
 			}
 			else {
 				((Label)startStopSession.Child).Text = "Démarrer la session";
+				((Label)startStopPetri.Child).Text = "Exécuter";
 				startStopPetri.Sensitive = false;
 				reload.Sensitive = false;
+				playPause.Sensitive = false;
+				((Label)playPause.Child).Text = "Pause";
 			}
 		}
 
@@ -111,6 +127,9 @@ namespace Petri
 				else {
 					Server.StartPetri();
 				}
+			}
+			else if(sender == playPause) {
+				Server.Pause = !Server.Pause;
 			}
 			else if(sender == this.reload) {
 				Server.ReloadPetri();
@@ -133,7 +152,7 @@ namespace Petri
 		DebugView view;
 		Document document;
 		HBox toolbar;
-		Button startStopSession, startStopPetri, reload, switchToEditor;
+		Button startStopSession, startStopPetri, playPause, reload, switchToEditor;
 	}
 }
 

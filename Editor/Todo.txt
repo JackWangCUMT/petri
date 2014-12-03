@@ -12,8 +12,11 @@ Invocation du compilateur C++ depuis l'éditeur de réseaux de Petri OK
 	Affichage des erreurs de compilation dans l'éditeur
 
 Débuggeur graphique
-	Pause/Relance de l'exécution du code (comment ?)
 	Timeout des communications sur le socket
 
 
 Commenter le code :3
+
+FIXME:
+	potentiel stack overflow dans le runtime (au bout de très longtemps, mais quand même)
+	état interne des Conditions pas thread-safe

@@ -135,15 +135,21 @@ void DebugSession::serverCommunication() {
 				}
 				else if(type == "exit") {
 					this->clearPetri();
-
 					this->sendObject(this->json("exit", "kbye"));
 
 					break;
 				}
 				else if(type == "stop") {
 					this->clearPetri();
-
 					this->sendObject(this->json("ack", "stop"));
+				}
+				else if(type == "pause") {
+					this->setPause(true);
+					this->sendObject(this->json("ack", "pause"));
+				}
+				else if(type == "resume") {
+					this->setPause(false);
+					this->sendObject(this->json("ack", "resume"));
 				}
 				else if(type == "reload") {
 					this->clearPetri();
@@ -207,6 +213,18 @@ void DebugSession::clearPetri() {
 		_petri = nullptr;
 	}
 	_activeStates.clear();
+}
+
+void DebugSession::setPause(bool pause) {
+	if(!_petri || !_petri->running())
+		throw std::runtime_error("Petri net is not running!");
+
+	if(pause) {
+		_petri->actionsPool().pause();
+	}
+	else {
+		_petri->actionsPool().resume();
+	}
 }
 
 Json::Value DebugSession::receiveObject() {

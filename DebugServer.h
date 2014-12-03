@@ -46,6 +46,8 @@ protected:
 
 	void clearPetri();
 
+	void setPause(bool pause);
+
 	Json::Value receiveObject();
 	void sendObject(Json::Value const &o);
 

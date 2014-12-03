@@ -12,6 +12,7 @@ namespace Petri
 			document = doc;
 			sessionRunning = false;
 			petriRunning = false;
+			pause = false;
 		}
 
 		~DebugServer() {
@@ -32,6 +33,29 @@ namespace Petri
 			}
 		}
 
+		public bool Pause {
+			get {
+				return pause;
+			}
+			set {
+				if(PetriRunning) {
+					try {
+						if(value) {
+							this.sendObject(new JObject(new JProperty("type", "pause")));
+						}
+						else {
+							this.sendObject(new JObject(new JProperty("type", "resume")));
+						}
+					}
+					catch(Exception) {}
+				}
+				else {
+					pause = false;
+					document.Window.DebugGui.UpdateToolbar();
+				}
+			}
+		}
+
 		public string Version {
 			get {
 				return "0.1";
@@ -41,11 +65,13 @@ namespace Petri
 		public void StartSession() {
 			sessionRunning = true;
 			receiverThread = new Thread(this.receiver);
+			pause = false;
 			receiverThread.Start();
 			while(socket == null);
 		}
 
 		public void StopSession() {
+			pause = false;
 			if(sessionRunning) {
 				if(PetriRunning) {
 					StopPetri();
@@ -64,6 +90,7 @@ namespace Petri
 		}
 
 		public void StartPetri() {
+			pause = false;
 			try {
 				if(!petriRunning)
 					this.sendObject(new JObject(new JProperty("type", "start"), new JProperty("payload", new JObject(new JProperty("hash", document.GetHash())))));
@@ -75,6 +102,7 @@ namespace Petri
 		}
 
 		public void StopPetri() {
+			pause = false;
 			try {
 				if(petriRunning)
 					this.sendObject(new JObject(new JProperty("type", "stop")));
@@ -146,6 +174,14 @@ namespace Petri
 						}
 						else if(msg["payload"].ToString() == "reload") {
 							Console.WriteLine("Petri net reloaded!");
+							document.Window.DebugGui.UpdateToolbar();
+						}
+						else if(msg["payload"].ToString() == "pause") {
+							pause = true;
+							document.Window.DebugGui.UpdateToolbar();
+						}
+						else if(msg["payload"].ToString() == "resume") {
+							pause = false;
 							document.Window.DebugGui.UpdateToolbar();
 						}
 					}
@@ -263,7 +299,7 @@ namespace Petri
 			}
 		}
 
-		bool petriRunning;
+		bool petriRunning, pause;
 		volatile bool sessionRunning;
 		Thread receiverThread;
 

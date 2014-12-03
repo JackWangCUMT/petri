@@ -28,6 +28,10 @@ public:
 		_observer = session;
 	}
 
+	ThreadPool<void> &actionsPool() {
+		return _actionsPool;
+	}
+
 protected:
 	virtual void stateEnabled(Action &a) override;
 	virtual void stateDisabled(Action &a) override;
