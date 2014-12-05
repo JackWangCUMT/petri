@@ -10,18 +10,6 @@ namespace Petri
 		public EditorController(Document doc) {
 			document = doc;
 
-			allFunctions = new List<Cpp.Function>();
-			cppActions = new List<Cpp.Function>();
-			cppConditions = new List<Cpp.Function>();
-
-			var timeout = new Cpp.Function(new Cpp.Type("Timeout", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "Timeout", false);
-			timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>", Cpp.Scope.EmptyScope()), "timeout"));
-			cppConditions.Add(timeout);
-
-			var defaultAction = Action.DefaultFunction();
-			cppActions.Insert(0, defaultAction);
-			allFunctions.Insert(0, defaultAction);
-
 			editor = EntityEditor.GetEditor(null, doc);
 			this.UpdateMenuItems();
 		}
@@ -223,9 +211,6 @@ namespace Petri
 
 		Document document;
 		EntityEditor editor;
-		List<Cpp.Function> allFunctions;
-		List<Cpp.Function> cppActions;
-		List<Cpp.Function> cppConditions;
 	}
 }
 

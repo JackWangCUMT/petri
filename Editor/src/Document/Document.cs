@@ -16,6 +16,18 @@ namespace Petri
 			AllFunctions = new List<Cpp.Function>();
 			CppConditions = new List<Cpp.Function>();
 
+			AllFunctions = new List<Cpp.Function>();
+			CppActions = new List<Cpp.Function>();
+			CppConditions = new List<Cpp.Function>();
+
+			var timeout = new Cpp.Function(new Cpp.Type("Timeout", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "Timeout", false);
+			timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>", Cpp.Scope.EmptyScope()), "timeout"));
+			CppConditions.Add(timeout);
+
+			var defaultAction = Action.DefaultFunction();
+			CppActions.Insert(0, defaultAction);
+			AllFunctions.Insert(0, defaultAction);
+
 			EditorController = new EditorController(this);
 			DebugController = new DebugController(this);
 

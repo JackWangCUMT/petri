@@ -223,7 +223,7 @@ namespace Petri
 							a.Function = a.DefaultAction();
 						}
 						else if(val == manual) {
-							EditInvocation(a, val == manual, objectList, objectIndentation, editorFields);
+							EditInvocation(a, true, objectList, objectIndentation, editorFields);
 						}
 						else {
 							var f = document.CppActions.Find(delegate(Cpp.Function ff) {
@@ -243,7 +243,10 @@ namespace Petri
 									invocation = new Cpp.FunctionInvocation(f, pp.ToArray());
 								}
 								this.PostAction(ModifLocation.Function, new InvocationChangeAction(a, invocation));
-								EditInvocation(a, val == manual, objectList, objectIndentation, editorFields);
+								EditInvocation(a, false, objectList, objectIndentation, editorFields);
+							}
+							else {
+								EditInvocation(a, false, objectList, objectIndentation, editorFields);
 							}
 						}
 					}
@@ -262,7 +265,8 @@ namespace Petri
 			editorFields.Clear();
 
 			if(manual) {
-				CreateWidget<Label>(objectList, objectIndentation, 0, "Invocation de l'action :");
+				var label = CreateWidget<Label>(objectList, objectIndentation, 0, "Invocation de l'action :");
+				editorFields.Add(label);
 				var invocation = CreateWidget<Entry>(objectList, objectIndentation, 0, a.Function.MakeUserReadable());
 				editorFields.Add(invocation);
 				invocation.FocusOutEvent += (obj, eventInfo) => {

@@ -12,7 +12,11 @@ namespace Petri
 
 				this.Arguments = new List<Expression>();
 				foreach(var arg in arguments) {
-					this.Arguments.Add(arg);
+					var a = arg;
+					if(a.MakeUserReadable() == "")
+						a = new LitteralExpression("void");
+
+					this.Arguments.Add(a);
 				}
 
 				// TODO: Perform type verification here
