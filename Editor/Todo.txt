@@ -21,6 +21,4 @@ FIXME:
 	potentiel stack overflow dans le runtime (au bout de très longtemps, mais quand même)
 	état interne des Conditions pas thread-safe
 
-	Copier-coller exitpoint
-	Bug parenthèses : a && b && c -> a && (b && c)
-	Màj menubar OS X
+	Copier-coller texte

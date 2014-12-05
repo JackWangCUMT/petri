@@ -135,8 +135,8 @@ namespace Petri {
 							int opIndex = s.IndexOf(prop.cpp);
 							if(opIndex == -1)
 								opIndex = bound;
-							// If we have found an operator closer to the start of the string (in relation to the operator associativity)
-							if(opIndex.CompareTo(index) == -direction) {
+							// If we have found an operator closer to the end of the string (in relation to the operator associativity)
+							if(opIndex.CompareTo(index) == direction) {
 								// The operator is ambiguous. We assume the ambiguity is that there exist a binary op with the same representation
 								// So we have to check if we have found a unary version
 								if(prop.ambiguous) {
@@ -162,10 +162,12 @@ namespace Petri {
 
 					if(index != bound) {
 						var prop = Cpp.Operator.Properties[foundOperator];
+
 						if(prop.type == Petri.Cpp.Operator.Type.Binary) {
 							string e1 = s.Substring(0, index);
 							string e2 = s.Substring(index + prop.cpp.Length);
 
+							// Method call
 							if(foundOperator == Petri.Cpp.Operator.Name.SelectionRef || foundOperator == Petri.Cpp.Operator.Name.SelectionPtr) {
 								int paramIndex = e2.Substring(0, e2.LastIndexOf("@")).LastIndexOf("@");
 								var args = Parser.RemoveParenthesis(Expression.GetStringFromPreprocessed(e2.Substring(paramIndex, e2.Length - paramIndex - 2) + "()", subexprs));
@@ -194,6 +196,7 @@ namespace Petri {
 
 							e1 = Expression.GetStringFromPreprocessed(e1, subexprs);
 							e2 = Expression.GetStringFromPreprocessed(e2, subexprs);
+
 							return new BinaryExpression(foundOperator, Expression.CreateFromString<Expression>(e1, entity, funcList), Expression.CreateFromString<Expression>(e2, entity, funcList));
 						}
 						else if(prop.type == Petri.Cpp.Operator.Type.PrefixUnary) {
@@ -297,7 +300,7 @@ namespace Petri {
 							// We can assume the associativity is the same for both operators as they have the same precedence
 
 							// If the operator is left-associative, but the expression was parenthesize from right to left
-							// eg. a + (b + c) (do not forget that IEEE floating point values are not communtative with regards to addition among others.
+							// eg. a + (b + c) (do not forget that IEEE floating point values are not communtative with regards to addition, among others).
 							// So we need to preserve the associativity the user gave at first.
 							if(parentProperties.associativity == Petri.Cpp.Operator.Associativity.LeftToRight && castedParent.Expression2 == child) {
 								parenthesize = true;

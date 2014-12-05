@@ -40,6 +40,11 @@ namespace Petri
 			this.FocusInEvent += (o, args) => {
 				document.UpdateMenuItems();
 				gui.FocusIn();
+				if(Configuration.RunningPlatform == Platform.Mac) {
+					menuBar.ShowAll();
+					menuBar.Hide();
+					IgeMacMenu.MenuBar = menuBar;
+				}
 			};
 			this.FocusOutEvent += (o, args) => {
 				gui.FocusOut();
@@ -47,7 +52,6 @@ namespace Petri
 		}
 
 		public void PresentWindow() {
-			this.ShowAll();
 			if(Configuration.RunningPlatform == Platform.Mac) {
 				MonoDevelop.MacInterop.ApplicationEvents.Quit += delegate (object sender, MonoDevelop.MacInterop.ApplicationQuitEventArgs e) {
 					MainClass.SaveAndQuit();
@@ -58,17 +62,17 @@ namespace Petri
 
 				IgeMacMenu.GlobalKeyHandlerEnabled = true;
 
-				IgeMacMenu.MenuBar = menuBar;
-
-				//tell IGE which menu item should be used for the app menu's quit item
 				IgeMacMenu.QuitMenuItem = quitItem;
 
-				//add a new group to the app menu, and add some items to it
 				var appGroup = IgeMacMenu.AddAppMenuGroup();
 				appGroup.AddMenuItem(aboutItem, "À propos de Petri…");
 				appGroup.AddMenuItem(preferencesItem, "Préférences…");
 
-				menuBar.Hide();
+				vbox.Show();
+				this.Show();
+			}
+			else {
+				this.ShowAll();
 			}
 		}
 

@@ -60,16 +60,33 @@ namespace Petri
 						if(result == ResponseType.Accept) {
 							this.ResetSelection();
 							var inner = new InnerPetriNet(this.CurrentPetriNet.Document, this.CurrentPetriNet, false, selected.Position);
-							foreach(var t in selected.TransitionsAfter) {
-								t.Before = inner;
+
+							var guiActionList = new List<GuiAction>();
+
+							var statesTable = new Dictionary<UInt64, State>();
+							foreach(Transition t in selected.TransitionsAfter) {
+								statesTable[t.After.ID] = t.After;
+								statesTable[t.Before.ID] = inner;
+								guiActionList.Add(new RemoveTransitionAction(t, t.After.RequiredTokens == t.After.TransitionsBefore.Count));
+
+								var newTransition = Entity.EntityFromXml(document, t.GetXml(), document.Window.EditorGui.View.CurrentPetriNet, statesTable) as Transition;
+								newTransition.ID = document.LastEntityID++;
+								guiActionList.Add(new AddTransitionAction(newTransition, newTransition.After.RequiredTokens == newTransition.After.TransitionsBefore.Count));
 							}
-							foreach(var t in selected.TransitionsBefore) {
-								t.After = inner;
+							foreach(Transition t in selected.TransitionsBefore) {
+								statesTable[t.Before.ID] = t.Before;
+								statesTable[t.After.ID] = inner;
+								guiActionList.Add(new RemoveTransitionAction(t, t.After.RequiredTokens == t.After.TransitionsBefore.Count));
+
+								var newTransition = Entity.EntityFromXml(document, t.GetXml(), document.Window.EditorGui.View.CurrentPetriNet, statesTable) as Transition;
+								newTransition.ID = document.LastEntityID++;
+								guiActionList.Add(new AddTransitionAction(newTransition, newTransition.After.RequiredTokens == newTransition.After.TransitionsBefore.Count));
 							}
-							selected.TransitionsAfter.Clear();
-							selected.TransitionsBefore.Clear();
-							CurrentPetriNet.RemoveState(selected);
-							CurrentPetriNet.AddState(inner);
+
+							guiActionList.Add(new RemoveStateAction(selected));
+							guiActionList.Add(new AddStateAction(inner));
+							var guiAction = new GuiActionList(guiActionList, "Transformer l'entité en macro");
+							document.PostAction(guiAction);
 							selected = inner;
 						}
 						d.Destroy();

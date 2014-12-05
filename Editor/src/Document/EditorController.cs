@@ -46,9 +46,11 @@ namespace Petri
 			var transitions = new HashSet<Transition>();
 			foreach(var e in document.Window.EditorGui.View.SelectedEntities) {
 				if(e is State) {
-					if(!(e is ExitPoint)) {// Do not erase exit point!
+					if(!(e is ExitPoint)) { // Do not erase exit point!
 						states.Add(e as State);
 					}
+
+					// Removes all transitions attached to the deleted states
 					foreach(var t in (e as State).TransitionsAfter) {
 						transitions.Add(t);
 					}
@@ -67,7 +69,6 @@ namespace Petri
 			foreach(State s in states) {
 				deleteEntities.Add(new RemoveStateAction(s));
 			}
-
 
 			document.Window.EditorGui.View.ResetSelection();
 
@@ -88,6 +89,7 @@ namespace Petri
 		}
 
 		public void UpdateSelection() {
+			document.UpdateMenuItems();
 			if(document.Window.EditorGui.View.SelectedEntities.Count == 1) {
 				this.EditedObject = document.Window.EditorGui.View.SelectedEntity;
 			}
@@ -149,7 +151,7 @@ namespace Petri
 			var cloned = new List<Entity>();
 
 			var states = from e in entities
-			             where e is State
+						 where (e is State && !(e is ExitPoint))
 			             select (e as State);
 			var transitions = new List<Transition>(from e in entities
 			                                       where e is Transition

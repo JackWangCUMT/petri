@@ -18,9 +18,6 @@ namespace Petri
 			this.Width = 50;
 			this.Height = 30;
 
-			//this.Before.AddTransitionAfter(this);
-			//this.After.AddTransitionBefore(this);
-
 			this.Shift = new PointD(0, 0);
 			this.ShiftAmplitude = PetriView.Norm(this.Direction());
 
@@ -35,8 +32,6 @@ namespace Petri
 			this.Before = statesTable[UInt64.Parse(descriptor.Attribute("BeforeID").Value)];
 			this.After = statesTable[UInt64.Parse(descriptor.Attribute("AfterID").Value)];
 
-			//this.before.AddTransitionAfter(this);
-			//this.after.AddTransitionBefore(this);
 
 			this.Condition = ConditionBase.ConditionFromString(descriptor.Attribute("Condition").Value, this, conditions);
 

@@ -171,11 +171,11 @@ namespace Petri
 			}
 			set {
 				modified = value;
-				if(value == true)
+				if(value == true) {
 					this.Blank = false;
-
-				// We require the current undo stack to represent an unmodified state
-				if(value == false) {
+				}
+				else {
+					// We require the current undo stack to represent an unmodified state
 					guiActionToMatchSave = UndoManager.NextUndo;
 				}
 			}
@@ -183,6 +183,7 @@ namespace Petri
 
 		public bool CloseAndConfirm() {
 			if(this.DebugController.Server.SessionRunning) {
+				Window.Present();
 				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "Une session de débuggeur est toujours active. Souhaitez-vous l'arrêter ?");
 				d.AddButton("Annuler", ResponseType.Cancel);
 				d.AddButton("Arrêter la session", ResponseType.Yes).HasDefault = true;
