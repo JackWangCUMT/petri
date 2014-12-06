@@ -10,7 +10,7 @@ namespace Petri
 	{
 
 		public DebugView(Document doc) : base(doc) {
-		
+			this.EntityDraw = new DebugEntityDraw(document);
 		}
 
 		public override void FocusIn() {
@@ -62,7 +62,13 @@ namespace Petri
 		protected override bool OnKeyReleaseEvent(Gdk.EventKey ev) {
 			return base.OnKeyReleaseEvent(ev);
 		}
-		protected override void UpdateContextToEntity(Cairo.Context context, Entity e, ref double arrowScale) {
+
+		protected override EntityDraw EntityDraw {
+			get;
+			set;
+		}
+
+		/*protected override void UpdateContextToEntity(Cairo.Context context, Entity e, ref double arrowScale) {
 			if(e is Transition) {
 				Color c = new Color(0.1, 0.6, 1, 1);
 				double lineWidth = 2;
@@ -73,7 +79,7 @@ namespace Petri
 					lineWidth += 2;
 					arrowScale = 18;
 				}*/
-				context.SetSourceRGBA(c.R, c.G, c.B, c.A);
+				/*context.SetSourceRGBA(c.R, c.G, c.B, c.A);
 				context.LineWidth = lineWidth;
 			}
 			else if(e is State) {
@@ -104,11 +110,12 @@ namespace Petri
 					lineWidth += 2;
 				}*/
 
-				context.LineWidth = lineWidth;
+				/*context.LineWidth = lineWidth;
 			}
-		}
+		}*/
 
 		protected override void SpecializedDrawing(Cairo.Context context) {
+
 		}
 	}
 }

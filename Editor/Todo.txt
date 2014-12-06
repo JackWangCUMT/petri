@@ -13,6 +13,9 @@ Invocation du compilateur C++ depuis l'éditeur de réseaux de Petri OK
 
 Débuggeur graphique
 	Timeout des communications sur le socket
+	Breakpoints
+
+Réglages du document
 
 
 Commenter le code :3

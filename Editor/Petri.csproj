@@ -109,6 +109,9 @@
     <Compile Include="src\Document\EditorGui.cs" />
     <Compile Include="src\Document\Debugger\DebugGui.cs" />
     <Compile Include="src\Document\Gui.cs" />
+    <Compile Include="src\Document\EntityDraw.cs" />
+    <Compile Include="src\Document\Debugger\DebugEntityDraw.cs" />
+    <Compile Include="src\Document\EditorEntityDraw.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

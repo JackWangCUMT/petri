@@ -8,7 +8,7 @@ namespace Petri
 {
 	public class EditorView : PetriView
 	{
-		public enum CurrentAction {
+		public enum EditorAction {
 			None,
 			MovingAction,
 			MovingTransition,
@@ -17,14 +17,27 @@ namespace Petri
 		}
 
 		public EditorView(Document doc) : base(doc) {
-			currentAction = CurrentAction.None;
+			currentAction = EditorAction.None;
+			this.EntityDraw = new EditorEntityDraw(this);
+		}
+
+		public EditorAction CurrentAction {
+			get {
+				return currentAction;
+			}
+		}
+
+		public Entity HoveredItem {
+			get {
+				return hoveredItem;
+			}
 		}
 
 		public override void FocusIn() {
 			shiftDown = true;
 			shiftDown = false;
 			ctrlDown = false;
-			currentAction = CurrentAction.None;
+			currentAction = EditorAction.None;
 			base.FocusIn();
 			hoveredItem = null;
 		}
@@ -32,7 +45,7 @@ namespace Petri
 		public override void FocusOut() {
 			shiftDown = false;
 			ctrlDown = false;
-			currentAction = CurrentAction.None;
+			currentAction = EditorAction.None;
 			base.FocusOut();
 		}
 
@@ -44,7 +57,7 @@ namespace Petri
 					hoveredItem = SelectedEntity;
 				}
 				else if(this.selectedEntities.Count == 1) {
-					this.currentAction = CurrentAction.None;
+					this.currentAction = EditorAction.None;
 
 					var selected = this.SelectedEntity as State;
 
@@ -101,7 +114,7 @@ namespace Petri
 
 		protected override void ManageOneButtonPress(Gdk.EventButton ev) {
 			if(ev.Button == 1) {
-				if(currentAction == CurrentAction.None) {
+				if(currentAction == EditorAction.None) {
 					deltaClick.X = ev.X;
 					deltaClick.Y = ev.Y;
 
@@ -127,10 +140,10 @@ namespace Petri
 						originalPosition.Y = motionReference.Position.Y;
 
 						if(motionReference is State) {
-							currentAction = CurrentAction.MovingAction;
+							currentAction = EditorAction.MovingAction;
 						}
 						else if(motionReference is Transition) {
-							currentAction = CurrentAction.MovingTransition;
+							currentAction = EditorAction.MovingTransition;
 						}
 						deltaClick.X = ev.X - originalPosition.X;
 						deltaClick.Y = ev.Y - originalPosition.Y;
@@ -140,22 +153,22 @@ namespace Petri
 							this.ResetSelection();
 						else
 							selectedFromRect = new HashSet<Entity>(selectedEntities);
-						currentAction = CurrentAction.SelectionRect;
+						currentAction = EditorAction.SelectionRect;
 						originalPosition.X = ev.X;
 						originalPosition.Y = ev.Y;
 					}
 				}
 			}
 			else if(ev.Button == 3) {
-				if(currentAction == CurrentAction.None && hoveredItem != null && hoveredItem is State) {
+				if(currentAction == EditorAction.None && hoveredItem != null && hoveredItem is State) {
 					SelectedEntity = hoveredItem;
-					currentAction = CurrentAction.CreatingTransition;
+					currentAction = EditorAction.CreatingTransition;
 				}
 			}
 		}
 
 		protected override bool OnButtonReleaseEvent(Gdk.EventButton ev) {
-			if(currentAction == CurrentAction.MovingAction || currentAction == CurrentAction.MovingTransition) {
+			if(currentAction == EditorAction.MovingAction || currentAction == EditorAction.MovingTransition) {
 				if(shouldUnselect) {
 					SelectedEntity = hoveredItem;
 				}
@@ -170,18 +183,18 @@ namespace Petri
 						document.PostAction(new GuiActionList(actions, actions.Count > 1 ? "Déplacer les entités" : "Déplacer l'entité"));
 					}
 				}
-				currentAction = CurrentAction.None;
+				currentAction = EditorAction.None;
 			}
-			else if(currentAction == CurrentAction.CreatingTransition && ev.Button == 1) {
-				currentAction = CurrentAction.None;
+			else if(currentAction == EditorAction.CreatingTransition && ev.Button == 1) {
+				currentAction = EditorAction.None;
 				if(hoveredItem != null && hoveredItem is State) {
 					document.PostAction(new AddTransitionAction(new Transition(CurrentPetriNet.Document, CurrentPetriNet, SelectedEntity as State, hoveredItem as State), true));
 				}
 
 				this.Redraw();
 			}
-			else if(currentAction == CurrentAction.SelectionRect) {
-				currentAction = CurrentAction.None;
+			else if(currentAction == EditorAction.SelectionRect) {
+				currentAction = EditorAction.None;
 
 				this.ResetSelection();
 				foreach(var e in selectedFromRect)
@@ -198,8 +211,8 @@ namespace Petri
 		{
 			shouldUnselect = false;
 
-			if(currentAction == CurrentAction.MovingAction || currentAction == CurrentAction.MovingTransition) {
-				if(currentAction == CurrentAction.MovingAction) {
+			if(currentAction == EditorAction.MovingAction || currentAction == EditorAction.MovingTransition) {
+				if(currentAction == EditorAction.MovingAction) {
 					selectedEntities.RemoveWhere(item => item is Transition);
 					document.EditorController.UpdateSelection();
 				}
@@ -212,7 +225,7 @@ namespace Petri
 				}
 				this.Redraw();
 			}
-			else if(currentAction == CurrentAction.SelectionRect) {
+			else if(currentAction == EditorAction.SelectionRect) {
 				deltaClick.X = ev.X;
 				deltaClick.Y = ev.Y;
 
@@ -258,11 +271,11 @@ namespace Petri
 		protected override bool OnKeyPressEvent(Gdk.EventKey ev)
 		{
 			if(ev.Key == Gdk.Key.Escape) {
-				if(currentAction == CurrentAction.CreatingTransition) {
-					currentAction = CurrentAction.None;
+				if(currentAction == EditorAction.CreatingTransition) {
+					currentAction = EditorAction.None;
 					this.Redraw();
 				}
-				else if(currentAction == CurrentAction.None) {
+				else if(currentAction == EditorAction.None) {
 					if(selectedEntities.Count > 0) {
 						this.ResetSelection();
 					}
@@ -271,12 +284,12 @@ namespace Petri
 					}
 					this.Redraw();
 				}
-				else if(currentAction == CurrentAction.SelectionRect) {
-					currentAction = CurrentAction.None;
+				else if(currentAction == EditorAction.SelectionRect) {
+					currentAction = EditorAction.None;
 					this.Redraw();
 				}
 			}
-			else if(selectedEntities.Count > 0 && currentAction == CurrentAction.None && (ev.Key == Gdk.Key.Delete || ev.Key == Gdk.Key.BackSpace)) {
+			else if(selectedEntities.Count > 0 && currentAction == EditorAction.None && (ev.Key == Gdk.Key.Delete || ev.Key == Gdk.Key.BackSpace)) {
 				document.PostAction(document.EditorController.RemoveSelection());
 			}
 			else if(ev.Key == Gdk.Key.Shift_L || ev.Key == Gdk.Key.Shift_R) {
@@ -300,10 +313,16 @@ namespace Petri
 
 			return base.OnKeyReleaseEvent(ev);
 		}
-		protected override void UpdateContextToEntity(Cairo.Context context, Entity e, ref double arrowScale) {
+
+		protected override EntityDraw EntityDraw {
+			get;
+			set;
+		}
+
+		/*protected override void UpdateContextToEntity(Cairo.Context context, Entity e, ref double arrowScale) {
 			if(e is Transition) {
 				Color c = new Color(0.1, 0.6, 1, 1);
-				double lineWidth = 2;
+				double lineWidth o 2;
 
 				if(EntitySelected(e)) {
 					c.R = 0.3;
@@ -326,16 +345,16 @@ namespace Petri
 
 				context.Save();
 
-				if(e == hoveredItem && currentAction == CurrentAction.CreatingTransition) {
+				if(e == hoveredItem && currentAction == EditorAction.CreatingTransition) {
 					lineWidth += 2;
 				}
 
 				context.LineWidth = lineWidth;
 			}
-		}
+		}*/
 
 		protected override void SpecializedDrawing(Cairo.Context context) {
-				if(currentAction == CurrentAction.CreatingTransition) {
+				if(currentAction == EditorAction.CreatingTransition) {
 					Color color = new Color(1, 0, 0, 1);
 					double lineWidth = 2;
 
@@ -359,10 +378,10 @@ namespace Petri
 						context.MoveTo(origin);
 						context.LineTo(new PointD(destination.X - 0.99 * direction.X * arrowLength, destination.Y - 0.99 * direction.Y * arrowLength));
 						context.Stroke();
-						PetriView.DrawArrow(context, direction, destination, arrowLength);
+						EntityDraw.DrawArrow(context, direction, destination, arrowLength);
 					}
 				}
-				else if(currentAction == CurrentAction.SelectionRect) {
+				else if(currentAction == EditorAction.SelectionRect) {
 					double xm = Math.Min(deltaClick.X, originalPosition.X);
 					double ym = Math.Min(deltaClick.Y, originalPosition.Y);
 					double xM = Math.Max(deltaClick.X, originalPosition.X);
@@ -428,8 +447,8 @@ namespace Petri
 			}
 		}
 
-		bool EntitySelected(Entity e) {
-			if(currentAction == CurrentAction.SelectionRect) {
+		public bool EntitySelected(Entity e) {
+			if(currentAction == EditorAction.SelectionRect) {
 				return selectedFromRect.Contains(e);
 			}
 			return selectedEntities.Contains(e);
@@ -451,7 +470,7 @@ namespace Petri
 			selectedEntities.Clear();
 		}
 
-		CurrentAction currentAction;
+		EditorAction currentAction;
 		bool shouldUnselect = false;
 		Entity motionReference;
 		HashSet<Entity> selectedEntities = new HashSet<Entity>();

@@ -121,12 +121,16 @@ namespace Petri {
 					int direction;
 					if(Cpp.Operator.Properties[Cpp.Operator.ByPrecedence[i][0]].associativity == Petri.Cpp.Operator.Associativity.LeftToRight) {
 						bound = s.Length;
-						direction = 1;
+						direction = -1;
 					}
 					else {
 						bound = -1;
-						direction = -1;
+						direction = 1;
 					}
+					if(Cpp.Operator.Properties[Cpp.Operator.ByPrecedence[i][0]].type == Cpp.Operator.Type.Binary) {
+						direction = -direction;
+					}
+
 					int index = bound;
 					var foundOperator = Petri.Cpp.Operator.Name.None;
 					foreach(var op in Cpp.Operator.ByPrecedence[i]) {
@@ -137,7 +141,7 @@ namespace Petri {
 								opIndex = bound;
 							// If we have found an operator closer to the end of the string (in relation to the operator associativity)
 							if(opIndex.CompareTo(index) == direction) {
-								// The operator is ambiguous. We assume the ambiguity is that there exist a binary op with the same representation
+								// If the operator is ambiguous, we assume the ambiguity is that there exist a binary op with the same representation
 								// So we have to check if we have found a unary version
 								if(prop.ambiguous) {
 									if(prop.type == Petri.Cpp.Operator.Type.PrefixUnary) {
