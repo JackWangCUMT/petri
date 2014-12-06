@@ -63,7 +63,7 @@
   <ItemGroup>
     <Folder Include="Resources\" />
     <Folder Include="src\" />
-    <Folder Include="src\Document\Debugger\" />
+    <Folder Include="src\Document\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Todo.txt" />
@@ -81,13 +81,6 @@
     <Compile Include="src\Cpp\Operator.cs" />
     <Compile Include="src\Cpp\Parser.cs" />
     <Compile Include="src\Cpp\Type.cs" />
-    <Compile Include="src\Document\CppGenerator.cs" />
-    <Compile Include="src\Document\Document.cs" />
-    <Compile Include="src\Document\EntityEditor.cs" />
-    <Compile Include="src\Document\HeadersManager.cs" />
-    <Compile Include="src\Document\MainWindow.cs" />
-    <Compile Include="src\Document\PetriView.cs" />
-    <Compile Include="src\Document\UndoManager.cs" />
     <Compile Include="src\Model\Action.cs" />
     <Compile Include="src\Model\Condition.cs" />
     <Compile Include="src\Model\Entity.cs" />
@@ -97,21 +90,28 @@
     <Compile Include="src\Model\RootPetriNet.cs" />
     <Compile Include="src\Model\State.cs" />
     <Compile Include="src\Model\Transition.cs" />
-    <Compile Include="src\Document\DocumentSettings.cs" />
-    <Compile Include="src\Document\CppCompiler.cs" />
     <Compile Include="src\Cpp\FunctionInvocation.cs" />
-    <Compile Include="src\Document\Debugger\DebugServer.cs" />
-    <Compile Include="src\Document\EditorView.cs" />
-    <Compile Include="src\Document\Debugger\DebugView.cs" />
-    <Compile Include="src\Document\EditorController.cs" />
-    <Compile Include="src\Document\Controller.cs" />
-    <Compile Include="src\Document\Debugger\DebugController.cs" />
-    <Compile Include="src\Document\EditorGui.cs" />
-    <Compile Include="src\Document\Debugger\DebugGui.cs" />
-    <Compile Include="src\Document\Gui.cs" />
-    <Compile Include="src\Document\EntityDraw.cs" />
-    <Compile Include="src\Document\Debugger\DebugEntityDraw.cs" />
-    <Compile Include="src\Document\EditorEntityDraw.cs" />
+    <Compile Include="src\Document\CppCompiler.cs" />
+    <Compile Include="src\Document\CppGenerator.cs" />
+    <Compile Include="src\Document\Document.cs" />
+    <Compile Include="src\Document\DocumentSettings.cs" />
+    <Compile Include="src\Document\HeadersManager.cs" />
+    <Compile Include="src\Document\MainWindow.cs" />
+    <Compile Include="src\Document\UndoManager.cs" />
+    <Compile Include="src\Document\DocumentSection\Controller.cs" />
+    <Compile Include="src\Document\DocumentSection\EntityDraw.cs" />
+    <Compile Include="src\Document\DocumentSection\Gui.cs" />
+    <Compile Include="src\Document\DocumentSection\PetriView.cs" />
+    <Compile Include="src\Document\DocumentSection\Debugger\DebugController.cs" />
+    <Compile Include="src\Document\DocumentSection\Debugger\DebugEntityDraw.cs" />
+    <Compile Include="src\Document\DocumentSection\Debugger\DebugGui.cs" />
+    <Compile Include="src\Document\DocumentSection\Debugger\DebugServer.cs" />
+    <Compile Include="src\Document\DocumentSection\Debugger\DebugView.cs" />
+    <Compile Include="src\Document\DocumentSection\Editor\EditorController.cs" />
+    <Compile Include="src\Document\DocumentSection\Editor\EditorEntityDraw.cs" />
+    <Compile Include="src\Document\DocumentSection\Editor\EditorGui.cs" />
+    <Compile Include="src\Document\DocumentSection\Editor\EditorView.cs" />
+    <Compile Include="src\Document\DocumentSection\Editor\EntityEditor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
