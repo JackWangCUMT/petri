@@ -42,7 +42,8 @@ namespace Petri
 			node = new XElement("LibPaths");
 			foreach(var p in LibPaths) {
 				var e = new XElement("LibPath");
-				e.SetAttributeValue("Path", p);
+				e.SetAttributeValue("Path", p.Item1);
+				e.SetAttributeValue("Recursive", p.Item2);
 				node.Add(e);
 			}
 			elem.Add(node);
@@ -62,7 +63,7 @@ namespace Petri
 			document = doc;
 
 			IncludePaths = new List<Tuple<string, bool>>();
-			LibPaths = new List<string>();
+			LibPaths = new List<Tuple<string, bool>>();
 			Libs = new List<string>();
 			CompilerFlags = new List<string>();
 
@@ -109,7 +110,7 @@ namespace Petri
 				node = elem.Element("LibPaths");
 				if(node != null) {
 					foreach(var e in node.Elements()) {
-						LibPaths.Add(e.Attribute("Path").Value);
+						LibPaths.Add(Tuple.Create(e.Attribute("Path").Value, bool.Parse(e.Attribute("Recursive").Value)));
 					}
 				}
 
@@ -120,6 +121,18 @@ namespace Petri
 					}
 				}
 			}
+
+			Modified = false;
+		}
+
+		public bool Modified {
+			get;
+			set;
+		}
+
+		public string Name {
+			get;
+			set;
 		}
 
 		// The bool stands for "recursive or not"
@@ -128,7 +141,7 @@ namespace Petri
 			private set;
 		}
 
-		public List<string> LibPaths {
+		public List<Tuple<string, bool>> LibPaths {
 			get;
 			private set;
 		}
@@ -140,7 +153,7 @@ namespace Petri
 
 		public string Compiler {
 			get;
-			private set;
+			set;
 		}
 
 		public List<string> CompilerFlags {
@@ -149,6 +162,16 @@ namespace Petri
 		}
 
 		public string OutputPath {
+			get;
+			set;
+		}
+
+		public string Hostname {
+			get;
+			set;
+		}
+
+		public UInt16 Port {
 			get;
 			set;
 		}
@@ -175,8 +198,15 @@ namespace Petri
 				}
 				val += "-I" + OutputPath + " ";
 
-				foreach(var l in LibPaths) {
-					val += "-L'" + l + "' ";
+				foreach(var i in LibPaths) {
+					// Recursive?
+					if(i.Item2) {
+						var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
+						foreach(var dir in directories) {
+							val += "-L'" + dir + "' ";
+						}
+					}
+					val += "-L'" + i.Item1 + "' ";
 				}
 
 				foreach(var l in Libs) {
@@ -191,27 +221,6 @@ namespace Petri
 			}
 		}
 
-		public string Name {
-			get {
-				return name;
-			}
-			set {
-				name = value.Replace(" ", "_");
-			}
-		}
-
-		public string Hostname {
-			get;
-			set;
-		}
-
-		public UInt16 Port {
-			get;
-			set;
-		}
-
-
-		string name;
 		Document document;
 	}
 }

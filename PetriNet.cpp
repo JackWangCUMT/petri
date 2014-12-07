@@ -134,7 +134,7 @@ void PetriNet::swapStates(Action &oldAction, Action &newAction) {
 	this->stateDisabled(oldAction);
 	this->stateEnabled(newAction);
 
-	this->executeState(newAction);
+	_actionsPool.addTask(make_callable_ptr(std::bind(&PetriNet::executeState, std::ref(*this), std::placeholders::_1), std::ref(newAction)));
 }
 
 void PetriNet::enableState(Action &a) {

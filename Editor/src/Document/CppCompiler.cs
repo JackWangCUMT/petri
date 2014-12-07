@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Gtk;
 
 namespace Petri
 {
@@ -14,7 +15,13 @@ namespace Petri
 			p.StartInfo.UseShellExecute = false;
 			p.StartInfo.RedirectStandardOutput = true;
 			p.StartInfo.FileName = document.Settings.Compiler;
-			p.StartInfo.Arguments = document.Settings.CompilerArguments;
+			string s = document.Settings.CompilerArguments;
+			if(s.Length < 5000) {
+				p.StartInfo.Arguments = document.Settings.CompilerArguments;
+			}
+			else {
+				return "Erreur : l'invocation du compilateur est trop longue (" + s.Length.ToString() + " caractères. Essayez de supprimer des chemins d'inclusion récursifs.";
+			}
 			p.Start();
 
 			string output = p.StandardOutput.ReadToEnd();

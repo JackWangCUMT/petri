@@ -102,7 +102,7 @@ namespace Petri
 					lastY += 10;
 				}
 
-				Fixed.FixedChild w2 = ((global::Gtk.Fixed.FixedChild)(document.Window.EditorGui.Editor[w]));
+				Fixed.FixedChild w2 = ((Fixed.FixedChild)(document.Window.EditorGui.Editor[w]));
 				w2.X = lastX + objectIndentation[i];
 				w2.Y = lastY;
 
@@ -274,7 +274,7 @@ namespace Petri
 					try {
 						funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, document.AllFunctions);
 						if(!funcInvocation.Function.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()))) {
-							throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
+							throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvocation.Function.ReturnType.ToString().Replace("&", "&amp;") + " trouvé.");
 						}
 						PostAction(ModifLocation.Function, new InvocationChangeAction(a, funcInvocation));
 					}

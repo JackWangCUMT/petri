@@ -167,7 +167,7 @@ namespace Petri
 
 		public bool Modified {
 			get {
-				return modified;
+				return modified || (Settings != null && Settings.Modified);
 			}
 			set {
 				modified = value;
@@ -219,6 +219,13 @@ namespace Petri
 					d.Destroy();
 					return false;
 				}
+			}
+
+			if(headersManager != null) {
+				headersManager.Hide();
+			}
+			if(settingsEditor != null) {
+				settingsEditor.Hide();
 			}
 
 			MainClass.RemoveDocument(this);
@@ -307,6 +314,7 @@ namespace Petri
 				tempFileName = "";
 
 				Modified = false;
+				Settings.Modified = false;
 			}
 			catch(Exception e) {
 				if(tempFileName.Length > 0)
@@ -396,6 +404,7 @@ namespace Petri
 				else {
 					// If it is a fresh opening, just get back to an empty state.
 					PetriNet = new RootPetriNet(this);
+					settings = null;
 					Modified = false;
 					this.Blank = true;
 				}
@@ -487,6 +496,14 @@ namespace Petri
 			headersManager.Show();
 		}
 
+		public void EditSettings() {
+			if(settingsEditor == null) {
+				settingsEditor = new SettingsEditor(this);
+			}
+
+			settingsEditor.Show();
+		}
+
 		public UInt64 LastEntityID {
 			get;
 			set;
@@ -536,6 +553,7 @@ namespace Petri
 		GuiAction guiActionToMatchSave = null;
 		HeadersManager headersManager;
 		DocumentSettings settings;
+		SettingsEditor settingsEditor;
 		bool modified;
 	}
 }

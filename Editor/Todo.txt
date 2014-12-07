@@ -15,13 +15,10 @@ Débuggeur graphique
 	Timeout des communications sur le socket
 	Breakpoints
 
-Réglages du document
-
-
 Commenter le code :3
 
 FIXME:
-	potentiel stack overflow dans le runtime (au bout de très longtemps, mais quand même)
 	état interne des Conditions pas thread-safe
 
-	Copier-coller texte
+	Cible des raccourcis clavier (copier-coller, fermer…)
+	Parenthèses A && B && C

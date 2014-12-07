@@ -7,15 +7,9 @@ namespace Petri
 {
 	public class RootPetriNet : PetriNet
 	{
-		public RootPetriNet(Document doc) : base(doc, null, true, new Cairo.PointD(0, 0))
-		{
-			Document.Modified = false;
-		}
+		public RootPetriNet(Document doc) : base(doc, null, true, new Cairo.PointD(0, 0)) {}
 
-		public RootPetriNet(Document doc, XElement descriptor) : base(doc, null, descriptor)
-		{
-			Document.Modified = false;
-		}
+		public RootPetriNet(Document doc, XElement descriptor) : base(doc, null, descriptor) {}
 
 		public override bool Active {
 			get {

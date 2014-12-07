@@ -196,6 +196,9 @@ namespace Petri
 				if(this.document.CloseAndConfirm())
 					this.Destroy();
 			}
+			else if(sender == documentSettings) {
+				document.EditSettings();
+			}
 		}
 
 		protected void BuildMenus() {
@@ -206,12 +209,15 @@ namespace Petri
 
 			Menu fileMenu = new Menu();
 			Menu editMenu = new Menu();
+			Menu documentMenu = new Menu();
 			Menu helpMenu = new Menu();
 			MenuItem file = new MenuItem("Fichier");
 			MenuItem edit = new MenuItem("Édition");
+			MenuItem document = new MenuItem("Document");
 			MenuItem help = new MenuItem("Aide");
 			file.Submenu = fileMenu;
 			edit.Submenu = editMenu;
+			document.Submenu = documentMenu;
 			help.Submenu = helpMenu;
 
 			quitItem = new MenuItem("Quitter");
@@ -293,12 +299,18 @@ namespace Petri
 			copyItem.Sensitive = false;
 			pasteItem.Sensitive = false;
 
+			documentSettings = new MenuItem("Options…");
+			documentSettings.Activated += OnClickMenu;
+			documentMenu.Append(documentSettings);
+
+
 			showHelpItem = new MenuItem("Aide…");
 			showHelpItem.Activated += OnClickMenu;
 			aboutItem = new MenuItem("À propos…");
 			aboutItem.Activated += OnClickMenu;
 
 			helpMenu.Append(showHelpItem);
+			helpMenu.Append(aboutItem);
 
 			if(Configuration.RunningPlatform != Platform.Mac) {
 				fileMenu.Append(quitItem);
@@ -309,6 +321,7 @@ namespace Petri
 
 			menuBar.Append(file);
 			menuBar.Append(edit);
+			menuBar.Append(document);
 			menuBar.Append(help);
 
 			vbox.PackStart(menuBar);
@@ -339,6 +352,9 @@ namespace Petri
 		MenuItem selectAllItem;
 
 		MenuItem showHelpItem;
+
+		MenuItem documentSettings;
+
 		AccelGroup accelGroup;
 
 		EditorGui editorGui;

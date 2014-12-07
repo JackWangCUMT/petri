@@ -12,7 +12,6 @@ namespace Petri
 			states = new List<State>();
 			transitions = new List<Transition>();
 
-			Document.Modified = false;
 			this.Radius = 30;
 		}
 

@@ -127,9 +127,6 @@ namespace Petri {
 						bound = -1;
 						direction = 1;
 					}
-					if(Cpp.Operator.Properties[Cpp.Operator.ByPrecedence[i][0]].type == Cpp.Operator.Type.Binary) {
-						direction = -direction;
-					}
 
 					int index = bound;
 					var foundOperator = Petri.Cpp.Operator.Name.None;

@@ -112,6 +112,7 @@
     <Compile Include="src\Document\DocumentSection\Editor\EditorGui.cs" />
     <Compile Include="src\Document\DocumentSection\Editor\EditorView.cs" />
     <Compile Include="src\Document\DocumentSection\Editor\EntityEditor.cs" />
+    <Compile Include="src\Document\SettingsEditor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
