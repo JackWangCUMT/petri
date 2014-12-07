@@ -8,14 +8,11 @@ Gestion des timeouts
 Gestion des modifications des headers en cours de route par un programme extérieur
 	En cas de changements incompatibles, proposer une résolution à la main ?
 
-Invocation du compilateur C++ depuis l'éditeur de réseaux de Petri OK
-	Affichage des erreurs de compilation dans l'éditeur
-
 Débuggeur graphique
 	Timeout des communications sur le socket
-	Breakpoints
 
 Commenter le code :3
+Documentation
 
 FIXME:
 	état interne des Conditions pas thread-safe

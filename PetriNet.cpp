@@ -40,7 +40,7 @@ void PetriNet::stop() {
 		_running = false;
 		_activationCondition.notify_all();
 
-		_actionsPool.join();
+		_actionsPool.cancel();
 	}
 }
 
@@ -147,9 +147,8 @@ void PetriNet::enableState(Action &a) {
 		}
 	}
 
-	_actionsPool.addTask(make_callable_ptr(std::bind(&PetriNet::executeState, std::ref(*this), std::placeholders::_1), std::ref(a)));
-
 	this->stateEnabled(a);
+	_actionsPool.addTask(make_callable_ptr(std::bind(&PetriNet::executeState, std::ref(*this), std::placeholders::_1), std::ref(a)));
 }
 
 void PetriNet::disableState(Action &a) {
@@ -160,10 +159,9 @@ void PetriNet::disableState(Action &a) {
 
 	_activeStates.erase(it);
 
+	this->stateDisabled(a);
 	if(_activeStates.size() == 0) {
 		_running = false;
 	}
-
-	this->stateDisabled(a);
 }
 

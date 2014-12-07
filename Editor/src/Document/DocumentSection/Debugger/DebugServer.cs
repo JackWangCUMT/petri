@@ -4,6 +4,7 @@ using System.Threading;
 using System.Net.Sockets;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using Gtk;
 
 namespace Petri
 {
@@ -74,6 +75,9 @@ namespace Petri
 			pause = false;
 			if(sessionRunning) {
 				if(PetriRunning) {
+					if(Pause) {
+						this.Pause = false;
+					}
 					StopPetri();
 					petriRunning = false;
 				}
@@ -117,7 +121,7 @@ namespace Petri
 			this.StopPetri();
 			document.SaveCppDontAsk();
 			if(!document.Compile()) {
-				// TODO: TODO…
+
 			}
 			else {
 				try {
@@ -128,6 +132,14 @@ namespace Petri
 					this.StopSession();
 				}
 			}
+		}
+
+		public void UpdateBreakpoints() {
+			var breakpoints = new JArray();
+			foreach(var p in document.DebugController.Breakpoints) {
+				breakpoints.Add(new JValue(p.ID));
+			}
+			this.sendObject(new JObject(new JProperty("type", "breakpoints"), new JProperty("payload", breakpoints)));
 		}
 
 		private void Hello() {
@@ -169,11 +181,12 @@ namespace Petri
 						else if(msg["payload"].ToString() == "stop") {
 							petriRunning = false;
 							document.Window.DebugGui.UpdateToolbar();
-							document.DebugController.ActiveStates.Clear();
+							lock(document.DebugController.ActiveStates) {
+								document.DebugController.ActiveStates.Clear();
+							}
 							document.Window.DebugGui.View.Redraw();
 						}
 						else if(msg["payload"].ToString() == "reload") {
-							Console.WriteLine("Petri net reloaded!");
 							document.Window.DebugGui.UpdateToolbar();
 						}
 						else if(msg["payload"].ToString() == "pause") {
@@ -186,7 +199,14 @@ namespace Petri
 						}
 					}
 					else if(msg["type"].ToString() == "error") {
-						// TODO: present error
+						GLib.Timeout.Add(0, () => {
+							MessageDialog d = new MessageDialog(document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "Une erreur est survenue dans le débuggueur : " + msg["payload"].ToString());
+							d.AddButton("Annuler", ResponseType.Cancel);
+							d.Run();
+							d.Destroy();
+
+							return false;
+						});
 
 						if(petriRunning) {
 							this.StopPetri();
@@ -208,14 +228,16 @@ namespace Petri
 					else if(msg["type"].ToString() == "states") {
 						var states = msg["payload"].Select(t => t).ToList();
 
-						document.DebugController.ActiveStates.Clear();
-						foreach(var s in states) {
-							var id = UInt64.Parse(s["id"].ToString());
-							var e = document.EntityFromID(id);
-							if(e == null || !(e is State)) {
-								throw new Exception("Entity sent from runtime doesn't exist on our side! (id: " + id + ")");
+						lock(document.DebugController.ActiveStates) {
+							document.DebugController.ActiveStates.Clear();
+							foreach(var s in states) {
+								var id = UInt64.Parse(s["id"].ToString());
+								var e = document.EntityFromID(id);
+								if(e == null || !(e is State)) {
+									throw new Exception("Entity sent from runtime doesn't exist on our side! (id: " + id + ")");
+								}
+								document.DebugController.ActiveStates[e as State] = int.Parse(s["count"].ToString());
 							}
-							document.DebugController.ActiveStates[e as State] = int.Parse(s["count"].ToString());
 						}
 
 						document.Window.DebugGui.View.Redraw();

@@ -27,6 +27,15 @@ namespace Petri
 				if(entity is InnerPetriNet) {
 					this.CurrentPetriNet = entity as InnerPetriNet;
 				}
+				else if(entity is Action) {
+					var a = entity as Action;
+					if(document.DebugController.Breakpoints.Contains(a)) {
+						document.DebugController.RemoveBreakpoint(a);
+					}
+					else {
+						document.DebugController.AddBreakpoint(a);
+					}
+				}
 			}
 		}
 
@@ -67,53 +76,7 @@ namespace Petri
 			get;
 			set;
 		}
-
-		/*protected override void UpdateContextToEntity(Cairo.Context context, Entity e, ref double arrowScale) {
-			if(e is Transition) {
-				Color c = new Color(0.1, 0.6, 1, 1);
-				double lineWidth = 2;
-
-				/*if(EntitySelected(e)) {
-					c.R = 0.3;
-					c.G = 0.8;
-					lineWidth += 2;
-					arrowScale = 18;
-				}*/
-				/*context.SetSourceRGBA(c.R, c.G, c.B, c.A);
-				context.LineWidth = lineWidth;
-			}
-			else if(e is State) {
-				Color color = new Color(0, 0, 0, 1);
-				double lineWidth = 3;
-
-				int enableCount;
-				if(document.DebugController.ActiveStates.TryGetValue(e as State, out enableCount) == true && enableCount > 0) {
-					color.R = 1;
-				}
-				else if(e is InnerPetriNet) {
-					foreach(var s in document.DebugController.ActiveStates) {
-						if((e as InnerPetriNet).ContainsEntity(s.Key.ID)) {
-							color.R = 1;
-							color.G = 0;
-							color.B = 1;
-							break;
-						}
-					}
-				}
-
-				context.LineWidth = lineWidth;
-				context.SetSourceRGBA(color.R, color.G, color.B, color.A);
-
-				context.Save();
-
-				/*if(e == hoveredItem && currentAction == CurrentAction.CreatingTransition) {
-					lineWidth += 2;
-				}*/
-
-				/*context.LineWidth = lineWidth;
-			}
-		}*/
-
+		
 		protected override void SpecializedDrawing(Cairo.Context context) {
 
 		}

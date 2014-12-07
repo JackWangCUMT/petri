@@ -41,7 +41,7 @@ public:
 	 * @param action The action to add
 	 * @param active Controls whether the action is active as soon as the net is started or not
 	 */
-	void addAction(std::shared_ptr<Action> &action, bool active = false);
+	virtual void addAction(std::shared_ptr<Action> &action, bool active = false);
 
 	/**
 	 * Checks whether the net is running.

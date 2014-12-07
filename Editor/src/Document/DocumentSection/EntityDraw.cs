@@ -8,11 +8,11 @@ namespace Petri
 		public EntityDraw() {}
 
 		public void Draw(State e, Context context) {
-			this.InitContextForBorder(e, context);
-			this.DrawBorder(e, context);
-
 			this.InitContextForBackground(e, context);
 			this.DrawBackground(e, context);
+
+			this.InitContextForBorder(e, context);
+			this.DrawBorder(e, context);
 
 			this.InitContextForName(e, context);
 			this.DrawName(e, context);
@@ -34,13 +34,20 @@ namespace Petri
 			this.DrawText(e, context);
 		}
 
+		protected virtual void InitContextForBackground(State s, Context context) {
+			context.SetSourceRGBA(1, 1, 1, 1);
+		}
+		protected virtual void DrawBackground(State s, Context context) {
+			context.Arc(s.Position.X, s.Position.Y, s.Radius, 0, 2 * Math.PI);
+
+			context.FillPreserve();
+		}
+
 		protected virtual void InitContextForBorder(State s, Context context) {
 			context.LineWidth = 3;
 			context.SetSourceRGBA(0, 0, 0, 1);
 		}
 		protected virtual void DrawBorder(State s, Context context) {
-			context.Arc(s.Position.X, s.Position.Y, s.Radius, 0, 2 * Math.PI);
-
 			if(s.Active) {
 				context.StrokePreserve();
 
@@ -49,13 +56,6 @@ namespace Petri
 			}
 
 			context.Stroke();
-		}
-
-		protected virtual void InitContextForBackground(State s, Context context) {
-			context.SetSourceRGBA(1, 1, 1, 1);
-		}
-		protected virtual void DrawBackground(State s, Context context) {
-			context.FillPreserve();
 		}
 
 		protected virtual void InitContextForName(State s, Context context) {

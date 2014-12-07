@@ -9,6 +9,7 @@ namespace Petri
 			Document = doc;
 			Server = new DebugServer(doc);
 			ActiveStates = new Dictionary<State, int>();
+			Breakpoints = new HashSet<Action>();
 		}
 
 		public Document Document {
@@ -24,6 +25,21 @@ namespace Petri
 		public Dictionary<State, int> ActiveStates {
 			get;
 			private set;
+		}
+
+		public HashSet<Action> Breakpoints {
+			get;
+			private set;
+		}
+			
+		public void AddBreakpoint(Action a) {
+			Breakpoints.Add(a);
+			Server.UpdateBreakpoints();
+		}
+
+		public void RemoveBreakpoint(Action a) {
+			Breakpoints.Remove(a);
+			Server.UpdateBreakpoints();
 		}
 
 		public override void ManageFocus(object focus) {

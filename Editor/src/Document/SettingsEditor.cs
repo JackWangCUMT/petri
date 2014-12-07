@@ -258,9 +258,11 @@ namespace Petri
 		public void Show() {
 			_window.ShowAll();
 			_window.Present();
+			_document.AssociatedWindows.Add(_window);
 		}
 
 		public void Hide() {
+			_document.AssociatedWindows.Remove(_window);
 			_window.Hide();
 		}
 

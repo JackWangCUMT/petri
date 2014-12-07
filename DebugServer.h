@@ -13,6 +13,7 @@
 #include "PetriNet.h"
 #include "Socket.h"
 #include "jsoncpp/include/json.h"
+#include <set>
 
 using namespace std::string_literals;
 
@@ -65,6 +66,9 @@ protected:
 
 	PetriDynamicLibCommon &_petriNetFactory;
 	std::unique_ptr<PetriDebug> _petri;
+
+	std::mutex _breakpointsMutex;
+	std::set<Action *> _breakpoints;
 };
 
 #endif

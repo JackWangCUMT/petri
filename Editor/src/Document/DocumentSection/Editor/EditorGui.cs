@@ -40,7 +40,7 @@ namespace Petri
 					|Gdk.EventMask.PointerMotionMask));
 
 			ScrolledWindow scrolledWindow = new ScrolledWindow();
-			scrolledWindow.SetPolicy(PolicyType.Never, PolicyType.Automatic);
+			scrolledWindow.SetPolicy(PolicyType.Automatic, PolicyType.Automatic);
 
 			Viewport viewport = new Viewport();
 
@@ -48,6 +48,7 @@ namespace Petri
 
 			petriView.SizeRequested += (o, args) => {
 				viewport.WidthRequest = viewport.Child.Requisition.Width;
+				viewport.HeightRequest = viewport.Child.Requisition.Height;
 			};
 
 			scrolledWindow.Add(viewport);

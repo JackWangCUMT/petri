@@ -37,6 +37,12 @@ namespace Petri
 			this.Blank = true;
 			this.Restore();
 			Window.PresentWindow();
+			AssociatedWindows = new HashSet<Window>();
+		}
+
+		public HashSet<Window> AssociatedWindows {
+			get;
+			private set;
 		}
 
 		public MainWindow Window {
@@ -176,7 +182,7 @@ namespace Petri
 				}
 				else {
 					// We require the current undo stack to represent an unmodified state
-					guiActionToMatchSave = UndoManager.NextUndo;
+					_guiActionToMatchSave = UndoManager.NextUndo;
 				}
 			}
 		}
@@ -221,16 +227,14 @@ namespace Petri
 				}
 			}
 
-			if(headersManager != null) {
-				headersManager.Hide();
-			}
-			if(settingsEditor != null) {
-				settingsEditor.Hide();
+			foreach(Window w in AssociatedWindows) {
+				w.Hide();
 			}
 
 			MainClass.RemoveDocument(this);
 			if(MainClass.Documents.Count == 0)
 				MainClass.SaveAndQuit();
+
 			return true;
 		}
 
@@ -274,7 +278,7 @@ namespace Petri
 				var doc = new XDocument();
 				var root = new XElement("Document");
 
-				root.Add(settings.GetXml());
+				root.Add(_settings.GetXml());
 
 				var winConf = new XElement("Window");
 				{
@@ -348,7 +352,7 @@ namespace Petri
 			var oldPetriNet = PetriNet;
 
 			this.ResetID();
-			settings = null;
+			_settings = null;
 
 			try {
 				if(Path == "") {
@@ -372,7 +376,7 @@ namespace Petri
 
 					var elem = document.FirstNode as XElement;
 
-					settings = DocumentSettings.CreateSettings(this, elem.Element("Settings"));
+					_settings = DocumentSettings.CreateSettings(this, elem.Element("Settings"));
 
 					var winConf = elem.Element("Window");
 					Window.Move(int.Parse(winConf.Attribute("X").Value), int.Parse(winConf.Attribute("Y").Value));
@@ -404,13 +408,13 @@ namespace Petri
 				else {
 					// If it is a fresh opening, just get back to an empty state.
 					PetriNet = new RootPetriNet(this);
-					settings = null;
+					_settings = null;
 					Modified = false;
 					this.Blank = true;
 				}
 			}
-			if(settings == null) {
-				settings = DocumentSettings.GetDefaultSettings(this);
+			if(_settings == null) {
+				_settings = DocumentSettings.GetDefaultSettings(this);
 			}
 			Window.EditorGui.View.CurrentPetriNet = PetriNet;
 			Window.DebugGui.View.CurrentPetriNet = PetriNet;
@@ -420,12 +424,12 @@ namespace Petri
 		}
 
 		public void SaveCppDontAsk() {
-			if(this.settings.OutputPath.Length == 0) {
+			if(this._settings.OutputPath.Length == 0) {
 				this.SaveCpp();
 				return;
 			}
 
-			string path = System.IO.Path.Combine(this.settings.OutputPath, settings.Name);
+			string path = System.IO.Path.Combine(this._settings.OutputPath, _settings.Name);
 
 			var cppGen = PetriNet.GenerateCpp();
 			cppGen.Item1.AddHeader("\"" + path + ".h\"");
@@ -438,10 +442,10 @@ namespace Petri
 			generator += "#define PETRI_" + cppGen.Item2 + "_H\n";
 
 			generator += "#define CLASS_NAME MyPetriNet";
-			generator += "#define PREFIX \"" + settings.Name + "\"";
+			generator += "#define PREFIX \"" + _settings.Name + "\"";
 			generator += "#define LIB_PATH \"" + path + ".so" + "\"\n";
 
-			generator += "#define PORT " + settings.Port;
+			generator += "#define PORT " + _settings.Port;
 
 			generator += "";
 
@@ -459,16 +463,16 @@ namespace Petri
 				new object[]{"Annuler",ResponseType.Cancel,
 					"Enregistrer",ResponseType.Accept});
 			
-			if(this.settings.OutputPath.Length > 0) {
-				fc.SetCurrentFolder(this.settings.OutputPath);
+			if(this._settings.OutputPath.Length > 0) {
+				fc.SetCurrentFolder(this._settings.OutputPath);
 			}
 
 			fc.DoOverwriteConfirmation = true;
 
 			if(fc.Run() == (int)ResponseType.Accept) {
-				string old = settings.OutputPath;
-				this.settings.OutputPath = fc.Filename;
-				Modified = old != settings.OutputPath;
+				string old = _settings.OutputPath;
+				this._settings.OutputPath = fc.Filename;
+				Modified = old != _settings.OutputPath;
 
 				this.SaveCppDontAsk();
 			}
@@ -480,8 +484,18 @@ namespace Petri
 			var c = new CppCompiler(this);
 			var o = c.Compile();
 			if(o != "") {
-				// TODO: manage errors output
-				Console.WriteLine("Compilation failed!");
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, "La compilation a échoué. Souhaitez-vous consulter les erreurs générées ?");
+				d.AddButton("Non", ResponseType.Cancel);
+				d.AddButton("Oui", ResponseType.Accept);
+				d.DefaultResponse = ResponseType.Accept;
+
+				ResponseType result = (ResponseType)d.Run();
+
+				d.Destroy();
+				if(result == ResponseType.Accept) {
+					new CompilationErrorPresenter(this, o).Show();
+				}
+
 				return false;
 			}
 
@@ -489,19 +503,19 @@ namespace Petri
 		}
 
 		public void ManageHeaders() {
-			if(headersManager == null) {
-				headersManager = new HeadersManager(this);
+			if(_headersManager == null) {
+				_headersManager = new HeadersManager(this);
 			}
 
-			headersManager.Show();
+			_headersManager.Show();
 		}
 
 		public void EditSettings() {
-			if(settingsEditor == null) {
-				settingsEditor = new SettingsEditor(this);
+			if(_settingsEditor == null) {
+				_settingsEditor = new SettingsEditor(this);
 			}
 
-			settingsEditor.Show();
+			_settingsEditor.Show();
 		}
 
 		public UInt64 LastEntityID {
@@ -519,7 +533,7 @@ namespace Petri
 
 		public DocumentSettings Settings {
 			get {
-				return settings;
+				return _settings;
 			}
 		}
 
@@ -530,7 +544,7 @@ namespace Petri
 
 		private void UpdateUndo() {
 			// If we fall back to the state we consider unmodified, let it be considered so
-			Modified = UndoManager.NextUndo != this.guiActionToMatchSave;
+			Modified = UndoManager.NextUndo != this._guiActionToMatchSave;
 
 			Window.RevertItem.Sensitive = this.Modified;
 
@@ -550,10 +564,10 @@ namespace Petri
 			return PetriNet.GetHash();
 		}
 
-		GuiAction guiActionToMatchSave = null;
-		HeadersManager headersManager;
-		DocumentSettings settings;
-		SettingsEditor settingsEditor;
+		GuiAction _guiActionToMatchSave = null;
+		HeadersManager _headersManager;
+		DocumentSettings _settings;
+		SettingsEditor _settingsEditor;
 		bool modified;
 	}
 }

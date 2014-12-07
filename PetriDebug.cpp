@@ -19,3 +19,8 @@ void PetriDebug::stateDisabled(Action &a) {
 		_observer->removeActiveState(a);
 	}
 }
+
+void PetriDebug::addAction(std::shared_ptr<Action> &action, bool active) {
+	_statesMap[action->ID()] = action.get();
+	this->PetriNet::addAction(action, active);
+}

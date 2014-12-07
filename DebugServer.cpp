@@ -44,6 +44,13 @@ bool DebugSession::running() const {
 }
 
 void DebugSession::addActiveState(Action &a) {
+	{
+		std::lock_guard<std::mutex> lk(_breakpointsMutex);
+		if(_breakpoints.count(&a) > 0) {
+			this->setPause(true);
+			this->sendObject(this->json("ack", "pause"));
+		}
+	}
 	std::lock_guard<std::mutex> lk(_stateChangeMutex);
 	++_activeStates[&a];
 
@@ -156,6 +163,19 @@ void DebugSession::serverCommunication() {
 					_petriNetFactory.reload();
 					_petri = _petriNetFactory.createDebug();
 					_petri->setObserver(this);
+				}
+				else if(type == "breakpoints") {
+					Json::Value breakpoints = root["payload"];
+					if(breakpoints.type() != Json::arrayValue) {
+						throw std::runtime_error("Invalid breakpoint specifying format!");
+					}
+
+					std::lock_guard<std::mutex> lk(_breakpointsMutex);
+					_breakpoints.clear();
+					for(Json::ArrayIndex i = Json::ArrayIndex(0); i != breakpoints.size(); ++i) {
+						auto id = breakpoints[i].asUInt64();
+						_breakpoints.insert(_petri->stateWithID(id));
+					}
 				}
 			}
 		}
