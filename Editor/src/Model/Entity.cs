@@ -38,6 +38,8 @@ namespace Petri
 					return new InnerPetriNet(document, parent, descriptor);
 			case "Transition":
 				return new Transition(document, parent, descriptor, statesTable, document.AllFunctions);
+			case "Comment":
+				return new Comment(document, parent, descriptor);
 			default:
 				return null;
 			}

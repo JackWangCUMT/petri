@@ -11,7 +11,6 @@ namespace Petri
 			this.TransitionsBefore = new List<Transition>();
 			this.TransitionsAfter = new List<Transition>();
 
-			this.Parent = parent;
 			this.Active = active;
 			this.RequiredTokens = requiredTokens;
 			this.Position = pos;

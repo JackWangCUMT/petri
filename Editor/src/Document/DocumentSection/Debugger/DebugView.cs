@@ -6,9 +6,7 @@ using System.Linq;
 
 namespace Petri
 {
-	public class DebugView : PetriView
-	{
-
+	public class DebugView : PetriView {
 		public DebugView(Document doc) : base(doc) {
 			this.EntityDraw = new DebugEntityDraw(document);
 		}

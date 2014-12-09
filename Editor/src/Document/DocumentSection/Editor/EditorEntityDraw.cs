@@ -9,6 +9,14 @@ namespace Petri
 			_editor = editor;
 		}
 
+		protected override void InitContextForBorder(Comment c, Context context) {
+			base.InitContextForBorder(c, context);
+			if(_editor.EntitySelected(c)) {
+				context.LineWidth = 2;
+			}
+			context.SetSourceRGBA(0.8, 0.6, 0.4, 1);
+		}
+
 		protected override void InitContextForBorder(State s, Context context) {
 			Color color = new Color(0, 0, 0, 1);
 			double lineWidth = 3;

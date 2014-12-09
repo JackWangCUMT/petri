@@ -238,6 +238,35 @@ namespace Petri
 			return true;
 		}
 
+		public void ExportAsPDF() {
+			string exportPath = "";
+
+			var fc = new Gtk.FileChooserDialog("Exporter le PDF sous…", Window,
+				FileChooserAction.Save,
+				new object[]{"Annuler",ResponseType.Cancel,
+					"Enregistrer",ResponseType.Accept});
+
+			if(Configuration.SavePath.Length > 0) {
+				fc.SetCurrentFolder(System.IO.Directory.GetParent(Configuration.SavePath).FullName);
+				fc.CurrentName = System.IO.Path.GetFileName(Configuration.SavePath);
+			}
+
+			fc.DoOverwriteConfirmation = true;
+
+			if(fc.Run() == (int)ResponseType.Accept) {
+				exportPath = fc.Filename;
+				if(!exportPath.EndsWith(".pdf"))
+					exportPath += ".pdf";
+			}
+			fc.Destroy();
+
+			if(exportPath != "") {
+				var renderView = new RenderView(this);
+
+				renderView.Render(exportPath);
+			}
+		}
+
 		public void SaveAs() {
 			var fc = new Gtk.FileChooserDialog("Enregistrer le graphe sous…", Window,
 				FileChooserAction.Save,
@@ -266,8 +295,7 @@ namespace Petri
 			this.Save();
 		}
 
-		public void Save()
-		{
+		public void Save() {
 			string tempFileName = "";
 			try {
 				if(Path == "") {

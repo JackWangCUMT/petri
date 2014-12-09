@@ -7,6 +7,17 @@ namespace Petri
 	{
 		public EntityDraw() {}
 
+		public void Draw(Comment e, Context context) {
+			this.InitContextForBackground(e, context);
+			this.DrawBackground(e, context);
+
+			this.InitContextForBorder(e, context);
+			this.DrawBorder(e, context);
+
+			this.InitContextForName(e, context);
+			this.DrawName(e, context);
+		}
+
 		public void Draw(State e, Context context) {
 			this.InitContextForBackground(e, context);
 			this.DrawBackground(e, context);
@@ -32,6 +43,63 @@ namespace Petri
 
 			this.InitContextForText(e, context);
 			this.DrawText(e, context);
+		}
+
+		protected virtual void InitContextForBackground(Comment c, Context context) {
+			context.SetSourceRGBA(1, 1, 0.7, 1);
+			var layout = new Pango.Layout(Gdk.PangoHelper.ContextGet());
+
+			layout.FontDescription = new Pango.FontDescription();
+			layout.FontDescription.Family = "Lucida Grande";
+			layout.FontDescription.Size = Pango.Units.FromPixels(12);
+
+			layout.SetText(c.Name);
+			int width;
+			int height;
+			layout.GetPixelSize(out width, out height);
+			c.Size = new PointD(width + 10, height + 10);
+		}
+		protected virtual void DrawBackground(Comment c, Context context) {
+			PointD point = new PointD(c.Position.X, c.Position.Y);
+			point.X -= c.Size.X / 2 + context.LineWidth / 2;
+			point.Y -= c.Size.Y / 2;
+			context.MoveTo(point);
+			point.X += c.Size.X;
+			context.LineTo(point);
+			point.Y += c.Size.Y;
+			context.LineTo(point);
+			point.X -= c.Size.X;
+			context.LineTo(point);
+			point.Y -= c.Size.Y;
+			context.LineTo(point);
+
+			context.FillPreserve();
+		}
+
+		protected virtual void InitContextForBorder(Comment c, Context context) {
+			context.LineWidth = 1;
+			context.SetSourceRGBA(0.8, 0.6, 0.4, 1);
+		}
+		protected virtual void DrawBorder(Comment c, Context context) {
+			context.Stroke();
+		}
+
+		protected virtual void InitContextForName(Comment c, Context context) {
+			context.SetSourceRGBA(0, 0, 0, 1);
+		}
+		protected virtual void DrawName(Comment c, Context context) {
+			var layout = new Pango.Layout(Gdk.PangoHelper.ContextGet());
+
+			layout.FontDescription = new Pango.FontDescription();
+			layout.FontDescription.Family = "Lucida Grande";
+			layout.FontDescription.Size = Pango.Units.FromPixels(12);
+
+			layout.SetText(c.Name);
+			int width;
+			int height;
+			layout.GetPixelSize(out width, out height);
+			context.MoveTo(c.Position.X - width / 2, c.Position.Y - height / 2);
+			Pango.CairoHelper.ShowLayout(context, layout);
 		}
 
 		protected virtual void InitContextForBackground(State s, Context context) {

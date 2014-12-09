@@ -116,19 +116,20 @@ namespace Petri
 			return hash;
 		}
 
-		// Use this to scale down the IDs of Actions (resp. Transitions) to 0...N, with N = number of Actions (resp. Transitions)
+		// Use this to scale down the IDs of entities to 0...N, with N = number of entities
 		public void Canonize()
 		{
-			var states = this.BuildActionsList();
-			states.Add(this);
-			states.AddRange(this.Transitions);
+			var entities = this.BuildActionsList();
+			entities.Add(this);
+			entities.AddRange(this.Transitions);
+			entities.AddRange(this.Comments);
 
-			states.Sort(delegate(Entity o1, Entity o2) {
+			entities.Sort(delegate(Entity o1, Entity o2) {
 				return o1.ID.CompareTo(o2.ID);
 			});
 
 			Document.LastEntityID = 0;
-			foreach(Entity o in states) {
+			foreach(Entity o in entities) {
 				o.ID = Document.LastEntityID;
 				++Document.LastEntityID;
 			}

@@ -74,63 +74,84 @@ namespace Petri
 			set;
 		}
 
-		protected override bool OnExposeEvent(Gdk.EventExpose ev)
-		{
+		protected override bool OnExposeEvent(Gdk.EventExpose ev) {
 			base.OnExposeEvent(ev);
+
+			using(Cairo.Context context = Gdk.CairoHelper.Create(this.GdkWindow)) {
+				this.RenderInternal(context, CurrentPetriNet);
+			}
+
+			return true;
+		}
+
+		protected void RenderInternal(Context context, PetriNet petriNet) {
 			needsRedraw = false;
+
+
+			var extents = new PointD();
+			extents.X = Math.Max(petriNet.Size.X, Allocation.Size.Width);
+			extents.Y = Math.Max(petriNet.Size.Y, Allocation.Size.Height);
+
+			context.LineWidth = 4;
+			context.MoveTo(0, 0);
+			context.LineTo(extents.X, 0);
+			context.LineTo(extents.X, extents.Y);
+			context.LineTo(0, extents.Y);
+			context.LineTo(0, 0);
+
+			context.SetSourceRGBA(1, 1, 1, 1);
+			context.Fill();
+
+			{
+				context.SetSourceRGBA(0.0, 0.6, 0.2, 1);
+				context.SelectFontFace("Lucida Grande", FontSlant.Normal, FontWeight.Normal);
+				context.SetFontSize(16);
+				string val = petriNet.Name;
+				TextExtents te = context.TextExtents(val);
+				context.MoveTo(15 - te.XBearing, 15 - te.YBearing);
+				context.TextPath(val);
+				context.Fill();
+			}
 
 			double minX = 0, minY = 0;
 
-			using(Cairo.Context context = Gdk.CairoHelper.Create(this.GdkWindow)) {
-				context.LineWidth = 4;
-				context.MoveTo(0, 0);
-				context.LineTo(this.Allocation.Width, 0);
-				context.LineTo(this.Allocation.Width, this.Allocation.Height);
-				context.LineTo(0, this.Allocation.Height);
-				context.LineTo(0, 0);
-				context.SetSourceRGBA(1, 1, 1, 1);
-				context.Fill();
+			foreach(var t in petriNet.Transitions) {
+				if(t.Position.X + t.Width / 2 > minX)
+					minX = t.Position.X + t.Width / 2;
+				if(t.Position.Y > minY + t.Height / 2)
+					minY = t.Position.Y + t.Height / 2;
 
-				{
-					context.SetSourceRGBA(0.0, 0.6, 0.2, 1);
-					context.SelectFontFace("Lucida Grande", FontSlant.Normal, FontWeight.Normal);
-					context.SetFontSize(16);
-					string val = CurrentPetriNet.Name;
-					TextExtents te = context.TextExtents(val);
-					context.MoveTo(15 - te.XBearing, 15 - te.YBearing);
-					context.TextPath(val);
-					context.Fill();
-				}
-
-				foreach(var t in CurrentPetriNet.Transitions) {
-					if(t.Position.X > minX)
-						minX = t.Position.X;
-					if(t.Position.Y > minY)
-						minY = t.Position.Y;
-
-					this.EntityDraw.Draw(t, context);
-				}
-
-				foreach(var s in CurrentPetriNet.States) {
-					if(s.Position.X > minX)
-						minX = s.Position.X;
-					if(s.Position.Y > minY)
-						minY = s.Position.Y;
-
-					this.EntityDraw.Draw(s, context);
-				}
-
-				this.SpecializedDrawing(context);
-
-				context.LineWidth = 4;
-				context.MoveTo(0, 0);
-				context.LineTo(this.Allocation.Width, 0);
-				context.LineTo(this.Allocation.Width, this.Allocation.Height);
-				context.LineTo(0, this.Allocation.Height);
-				context.LineTo(0, 0);
-				context.SetSourceRGBA(0.7, 0.7, 0.7, 1);
-				context.Stroke();
+				this.EntityDraw.Draw(t, context);
 			}
+
+			foreach(var s in petriNet.States) {
+				if(s.Position.X + s.Radius / 2 > minX)
+					minX = s.Position.X + s.Radius / 2;
+				if(s.Position.Y + s.Radius / 2 > minY)
+					minY = s.Position.Y + s.Radius / 2;
+
+				this.EntityDraw.Draw(s, context);
+			}
+
+			foreach(var c in petriNet.Comments) {
+				if(c.Position.X + c.Size.X / 2 > minX)
+					minX = c.Position.X + c.Size.X / 2;
+				if(c.Position.Y + c.Size.Y / 2 > minY)
+					minY = c.Position.Y + c.Size.Y / 2;
+
+				this.EntityDraw.Draw(c, context);
+			}
+
+			this.SpecializedDrawing(context);
+
+			context.LineWidth = 4;
+			context.MoveTo(0, 0);
+			context.LineTo(extents.X, 0);
+			context.LineTo(extents.X, extents.Y);
+			context.LineTo(0, extents.Y);
+			context.LineTo(0, 0);
+			context.SetSourceRGBA(0.7, 0.7, 0.7, 1);
+			context.Stroke();
 
 			minX += 50;
 			minY += 50;
@@ -138,10 +159,9 @@ namespace Petri
 			int prevX, prevY;
 			this.GetSizeRequest(out prevX, out prevY);
 			this.SetSizeRequest((int)minX, (int)minY);
+			petriNet.Size = new PointD(minX, minY);
 			if(Math.Abs(minX - prevX) > 10 || Math.Abs(minY - prevY) > 10)
-				this.Redraw();
-
-			return true;
+				this.RenderInternal(context, petriNet);
 		}
 
 		protected abstract void SpecializedDrawing(Cairo.Context context);

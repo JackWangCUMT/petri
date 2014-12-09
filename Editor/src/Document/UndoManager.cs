@@ -7,28 +7,28 @@ namespace Petri
 	{
 		public UndoManager()
 		{
-			undoStack = new Stack<ActionDescription>();
-			redoStack = new Stack<ActionDescription>();
+			_undoStack = new Stack<ActionDescription>();
+			_redoStack = new Stack<ActionDescription>();
 		}
 
 		public void PostAction(GuiAction a) {
-			redoStack.Clear();
-			undoStack.Push(new ActionDescription(a, a.Description));
+			_redoStack.Clear();
+			_undoStack.Push(new ActionDescription(a, a.Description));
 			a.Apply();
 		}
 
 		public void Undo() {
-			this.SwapAndApply(undoStack, redoStack);
+			this.SwapAndApply(_undoStack, _redoStack);
 		}
 
 		public void Redo() {
-			this.SwapAndApply(redoStack, undoStack);
+			this.SwapAndApply(_redoStack, _undoStack);
 		}
 
 		public GuiAction NextUndo {
 			get {
-				if(undoStack.Count > 0)
-					return undoStack.Peek().action;
+				if(_undoStack.Count > 0)
+					return _undoStack.Peek()._action;
 				else
 					return null;
 			}
@@ -36,14 +36,14 @@ namespace Petri
 
 		public string NextUndoDescription {
 			get {
-				return undoStack.Peek().description;
+				return _undoStack.Peek()._description;
 			}
 		}
 
 		public GuiAction NextRedo {
 			get {
-				if(redoStack.Count > 0)
-					return redoStack.Peek().action;
+				if(_redoStack.Count > 0)
+					return _redoStack.Peek()._action;
 				else
 					return null;
 			}
@@ -51,31 +51,31 @@ namespace Petri
 
 		public string NextRedoDescription {
 			get {
-				return redoStack.Peek().description;
+				return _redoStack.Peek()._description;
 			}
 		}
 
 		private struct ActionDescription {
 			public ActionDescription(GuiAction a, string d) {
-				action = a;
-				description = d;
+				_action = a;
+				_description = d;
 			}
 
-			public GuiAction action;
-			public string description;
+			public GuiAction _action;
+			public string _description;
 		}
 
 		private void SwapAndApply(Stack<ActionDescription> toPop, Stack<ActionDescription> toPush) {
 			if(toPop.Count > 0) {
 				var actionDescription = toPop.Pop();
-				actionDescription.action = actionDescription.action.Reverse();
-				toPush.Push(new ActionDescription(actionDescription.action, actionDescription.description));
-				actionDescription.action.Apply();
+				actionDescription._action = actionDescription._action.Reverse();
+				toPush.Push(new ActionDescription(actionDescription._action, actionDescription._description));
+				actionDescription._action.Apply();
 			}
 		}
 
-		Stack<ActionDescription> undoStack;
-		Stack<ActionDescription> redoStack;
+		Stack<ActionDescription> _undoStack;
+		Stack<ActionDescription> _redoStack;
 	}
 
 	public abstract class GuiAction {
@@ -91,64 +91,64 @@ namespace Petri
 
 	public class GuiActionWrapper : GuiAction {
 		public GuiActionWrapper(GuiAction a, string description) {
-			action = a;
-			this.description = description;
+			_action = a;
+			_description = description;
 		}
 
 		public override void Apply() {
-			action.Apply();
+			_action.Apply();
 		}
 
 		public override GuiAction Reverse() {
-			return new GuiActionWrapper(action.Reverse(), description);
+			return new GuiActionWrapper(_action.Reverse(), _description);
 		}
 
 		public override object Focus {
 			get {
-				return action.Focus;
+				return _action.Focus;
 			}
 		}
 
 		public override string Description {
 			get {
-				return description;
+				return _description;
 			}
 		}
 
-		GuiAction action;
-		string description;
+		GuiAction _action;
+		string _description;
 	}
 
 	public class GuiActionList : GuiAction {
 		public GuiActionList(IEnumerable<GuiAction> a, string description) {
-			actions = new List<GuiAction>(a);
-			this.description = description;
+			_actions = new List<GuiAction>(a);
+			_description = description;
 
 			// Strange use case anyway
-			if(actions.Count == 0) {
+			if(_actions.Count == 0) {
 				throw new ArgumentException("The action list is empty!");
 			}
 		}
 
 		public override void Apply() {
-			foreach(var a in actions) {
+			foreach(var a in _actions) {
 				a.Apply();
 			}
 		}
 
 		public override GuiAction Reverse() {
 			var l = new List<GuiAction>();
-			foreach(var a in actions) {
+			foreach(var a in _actions) {
 				l.Insert(0, a.Reverse());
 			}
 
-			return new GuiActionList(l, description);
+			return new GuiActionList(l, _description);
 		}
 
 		public override object Focus {
 			get {
 				var l = new List<Entity>();
-				foreach(var a in actions) {
+				foreach(var a in _actions) {
 					var f = a.Focus;
 					if(f is List<Entity>)
 						l.AddRange(f as List<Entity>);
@@ -162,132 +162,143 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return description;
+				return _description;
 			}
 		}
 
-		List<GuiAction> actions;
-		string description;
+		List<GuiAction> _actions;
+		string _description;
 	}
 
 	public class ChangeNameAction : GuiAction {
 		public ChangeNameAction(Entity e, string newName) {
-			entity = e;
-			this.newName = newName;
-			this.oldName = entity.Name;
+			_entity = e;
+			_newName = newName;
+			_oldName = _entity.Name;
 		}
 
 		public override void Apply() {
-			entity.Name = newName;
+			_entity.Name = _newName;
 		}
 
 		public override GuiAction Reverse() {
-			return new ChangeNameAction(entity, oldName); 
+			return new ChangeNameAction(_entity, _oldName); 
 		}
 
 		public override object Focus {
 			get {
-				return entity;
+				return _entity;
 			}
 		}
 
 		public override string Description {
 			get {
-				return "Changer le nom";
+				if(_entity is Comment) {
+					return "Modifier le commentaire";
+				}
+				else {
+					return "Changer le nom";
+				}
 			}
 		}
 
-		Entity entity;
-		string newName;
-		string oldName;
+		Entity _entity;
+		string _newName;
+		string _oldName;
 	}
 
 	public class ChangeRequiredTokensAction : GuiAction {
 		public ChangeRequiredTokensAction(State s, int newCount) {
-			state = s;
-			this.newCount = newCount;
-			this.oldCount = s.RequiredTokens;
+			_state = s;
+			_newCount = newCount;
+			_oldCount = s.RequiredTokens;
 		}
 
 		public override void Apply() {
-			state.RequiredTokens = newCount;
+			_state.RequiredTokens = _newCount;
 		}
 
 		public override GuiAction Reverse() {
-			return new ChangeRequiredTokensAction(state, oldCount); 
+			return new ChangeRequiredTokensAction(_state, _oldCount); 
 		}
 
 		public override object Focus {
 			get {
-				return state;
+				return _state;
 			}
 		}
 
 		public override string Description {
 			get {
-				return "Changer le nom";
+				return "Changer le nombre de jetons requis";
 			}
 		}
 
-		State state;
-		int newCount;
-		int oldCount;
+		State _state;
+		int _newCount;
+		int _oldCount;
 	}
 
 	public class MoveAction : GuiAction {
 		public MoveAction(Entity e, Cairo.PointD delta) {
-			entity = e;
-			this.delta = new Cairo.PointD(delta.X, delta.Y);
+			_entity = e;
+			_delta = new Cairo.PointD(delta.X, delta.Y);
 		}
 
 		public override void Apply() {
-			entity.Position = new Cairo.PointD(entity.Position.X + delta.X, entity.Position.Y + delta.Y);
+			_entity.Position = new Cairo.PointD(_entity.Position.X + _delta.X, _entity.Position.Y + _delta.Y);
 		}
 
 		public override GuiAction Reverse() {
-			return new MoveAction(entity, new Cairo.PointD(-delta.X, -delta.Y)); 
+			return new MoveAction(_entity, new Cairo.PointD(-_delta.X, -_delta.Y)); 
 		}
 
 		public override object Focus {
 			get {
-				return entity;
+				return _entity;
 			}
 		}
 
 		public override string Description {
 			get {
 				string desc = "Déplacer ";
-				if(entity is State)
+				if(_entity is State) {
 					desc += "l'état";
-				else if(entity is Transition)
+				}
+				else if(_entity is Transition) {
 					desc += "la transition";
-				else // Too lazy to search for a counter example but should probably never happen
+				}
+				else if(_entity is Comment) {
+					desc += "le commentaire";
+				}
+				else {// Too lazy to search for a counter example but should probably never happen
 					desc += "l'entité";
+				}
 
 				return desc;
 			}
 		}
 
-		Entity entity;
-		Cairo.PointD delta;
+		Entity _entity;
+		Cairo.PointD _delta;
 	}
 
 	public class ToggleActiveAction : GuiAction {
 		public ToggleActiveAction(State e) {
-			entity = e;
+			_entity = e;
 		}
 
 		public override void Apply() {
-			entity.Active = !entity.Active;
+			_entity.Active = !_entity.Active;
 		}
 
 		public override GuiAction Reverse() {
-			return new ToggleActiveAction(entity); 
+			return new ToggleActiveAction(_entity); 
 		}
 
 		public override object Focus {
 			get {
-				return entity;
+				return _entity;
 			}
 		}
 
@@ -297,27 +308,27 @@ namespace Petri
 			}
 		}
 
-		State entity;
+		State _entity;
 	}
 
 	public class ConditionChangeAction : GuiAction {
 		public ConditionChangeAction(Transition t, ConditionBase newCondition) {
-			transition = t;
-			oldCondition = t.Condition;
-			this.newCondition = newCondition;
+			_transition = t;
+			_oldCondition = t.Condition;
+			_newCondition = newCondition;
 		}
 
 		public override void Apply() {
-			transition.Condition = newCondition;
+			_transition.Condition = _newCondition;
 		}
 
 		public override GuiAction Reverse() {
-			return new ConditionChangeAction(transition, oldCondition); 
+			return new ConditionChangeAction(_transition, _oldCondition); 
 		}
 
 		public override object Focus {
 			get {
-				return transition;
+				return _transition;
 			}
 		}
 
@@ -327,28 +338,28 @@ namespace Petri
 			}
 		}
 
-		Transition transition;
-		ConditionBase newCondition, oldCondition;
+		Transition _transition;
+		ConditionBase _newCondition, _oldCondition;
 	}
 
 	public class InvocationChangeAction : GuiAction {
 		public InvocationChangeAction(Action a, Cpp.FunctionInvocation i) {
-			action = a;
-			oldInvocation = a.Function;
-			this.newInvocation = i;
+			_action = a;
+			_oldInvocation = a.Function;
+			_newInvocation = i;
 		}
 
 		public override void Apply() {
-			action.Function = newInvocation;
+			_action.Function = _newInvocation;
 		}
 
 		public override GuiAction Reverse() {
-			return new InvocationChangeAction(action, oldInvocation); 
+			return new InvocationChangeAction(_action, _oldInvocation); 
 		}
 
 		public override object Focus {
 			get {
-				return action;
+				return _action;
 			}
 		}
 
@@ -358,32 +369,88 @@ namespace Petri
 			}
 		}
 
-		Action action;
-		Cpp.FunctionInvocation newInvocation, oldInvocation;
+		Action _action;
+		Cpp.FunctionInvocation _newInvocation, _oldInvocation;
 	}
 
-	public class AddTransitionAction : GuiAction {
-		public AddTransitionAction(Transition t, bool incrementTokenCount) {
-			this.transition = t;
-			this.incrementTokenCount = incrementTokenCount;
+	public class AddCommentAction : GuiAction {
+		public AddCommentAction(Comment c) {
+			_comment = c;
 		}
 
 		public override void Apply() {
-			transition.Before.Parent.AddTransition(transition);
-
-			transition.Before.AddTransitionAfter(transition);
-			transition.After.AddTransitionBefore(transition);
-			if(incrementTokenCount)
-				++transition.After.RequiredTokens;
+			_comment.Parent.AddComment(_comment);
 		}
 
 		public override GuiAction Reverse() {
-			return new RemoveTransitionAction(transition, incrementTokenCount); 
+			return new RemoveCommentAction(_comment); 
 		}
 
 		public override object Focus {
 			get {
-				return transition;
+				return _comment;
+			}
+		}
+
+		public override string Description {
+			get {
+				return "Ajouter un commentaire";
+			}
+		}
+
+		Comment _comment;
+	}
+
+	public class RemoveCommentAction : GuiAction {
+		public RemoveCommentAction(Comment c) {
+			_comment = c;
+		}
+
+		public override void Apply() {
+			_comment.Parent.RemoveComment(_comment);
+		}
+
+		public override GuiAction Reverse() {
+			return new AddCommentAction(_comment); 
+		}
+
+		public override object Focus {
+			get {
+				return _comment.Parent;
+			}
+		}
+
+		public override string Description {
+			get {
+				return "Supprimer le commentaire";
+			}
+		}
+
+		Comment _comment;
+	}
+
+	public class AddTransitionAction : GuiAction {
+		public AddTransitionAction(Transition t, bool incrementTokenCount) {
+			_transition = t;
+			_incrementTokenCount = incrementTokenCount;
+		}
+
+		public override void Apply() {
+			_transition.Before.Parent.AddTransition(_transition);
+
+			_transition.Before.AddTransitionAfter(_transition);
+			_transition.After.AddTransitionBefore(_transition);
+			if(_incrementTokenCount)
+				++_transition.After.RequiredTokens;
+		}
+
+		public override GuiAction Reverse() {
+			return new RemoveTransitionAction(_transition, _incrementTokenCount); 
+		}
+
+		public override object Focus {
+			get {
+				return _transition;
 			}
 		}
 
@@ -393,30 +460,30 @@ namespace Petri
 			}
 		}
 
-		Transition transition;
-		bool incrementTokenCount;
+		Transition _transition;
+		bool _incrementTokenCount;
 	}
 
 	public class RemoveTransitionAction : GuiAction {
 		public RemoveTransitionAction(Transition t, bool decrementTokenCount) {
-			this.transition = t;
-			this.decrementTokenCount = decrementTokenCount;
+			_transition = t;
+			_decrementTokenCount = decrementTokenCount;
 		}
 
 		public override void Apply() {
-			if(decrementTokenCount) {
-				--transition.After.RequiredTokens;
+			if(_decrementTokenCount) {
+				--_transition.After.RequiredTokens;
 			}
-			transition.Before.Parent.RemoveTransition(transition);
+			_transition.Before.Parent.RemoveTransition(_transition);
 		}
 
 		public override GuiAction Reverse() {
-			return new AddTransitionAction(transition, decrementTokenCount); 
+			return new AddTransitionAction(_transition, _decrementTokenCount); 
 		}
 
 		public override object Focus {
 			get {
-				return transition.Parent;
+				return _transition.Parent;
 			}
 		}
 
@@ -426,26 +493,26 @@ namespace Petri
 			}
 		}
 
-		Transition transition;
-		bool decrementTokenCount;
+		Transition _transition;
+		bool _decrementTokenCount;
 	}
 
 	public class AddStateAction : GuiAction {
 		public AddStateAction(State s) {
-			state = s;
+			_state = s;
 		}
 
 		public override void Apply() {
-			state.Parent.AddState(state);
+			_state.Parent.AddState(_state);
 		}
 
 		public override GuiAction Reverse() {
-			return new RemoveStateAction(state); 
+			return new RemoveStateAction(_state); 
 		}
 
 		public override object Focus {
 			get {
-				return state;
+				return _state;
 			}
 		}
 
@@ -455,25 +522,25 @@ namespace Petri
 			}
 		}
 
-		State state;
+		State _state;
 	}
 
 	public class RemoveStateAction : GuiAction {
 		public RemoveStateAction(State s) {
-			state = s;
+			_state = s;
 		}
 
 		public override void Apply() {
-			state.Parent.RemoveState(state);
+			_state.Parent.RemoveState(_state);
 		}
 
 		public override GuiAction Reverse() {
-			return new AddStateAction(state); 
+			return new AddStateAction(_state); 
 		}
 
 		public override object Focus {
 			get {
-				return state.Parent;
+				return _state.Parent;
 			}
 		}
 
@@ -483,23 +550,23 @@ namespace Petri
 			}
 		}
 
-		State state;
+		State _state;
 	}
 		
 	public class DoNothingAction : GuiAction {
 		public DoNothingAction(Entity e) {
-			entity = e;
+			_entity = e;
 		}
 
 		public override void Apply() {}
 
 		public override GuiAction Reverse() {
-			return new DoNothingAction(entity); 
+			return new DoNothingAction(_entity); 
 		}
 
 		public override object Focus {
 			get {
-				return entity;
+				return _entity;
 			}
 		}
 
@@ -509,7 +576,7 @@ namespace Petri
 			}
 		}
 
-		Entity entity;
+		Entity _entity;
 	}
 }
 

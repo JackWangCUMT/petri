@@ -164,6 +164,9 @@ namespace Petri
 			else if(sender == saveAsItem) {
 				document.SaveAs();
 			}
+			else if(sender == exportItem) {
+				document.ExportAsPDF();
+			}
 			else if(sender == revertItem) {
 				document.Restore();
 			}
@@ -244,6 +247,9 @@ namespace Petri
 			saveAsItem.Activated += OnClickMenu;
 			saveAsItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.s, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
 
+			exportItem = new MenuItem("Exporter en PDF…");
+			exportItem.Activated += OnClickMenu;
+
 			revertItem = new MenuItem("Revenir…");
 			revertItem.Activated += OnClickMenu;
 			revertItem.Sensitive = false;
@@ -254,6 +260,7 @@ namespace Petri
 			fileMenu.Append(closeItem);
 			fileMenu.Append(saveItem);
 			fileMenu.Append(saveAsItem);
+			fileMenu.Append(exportItem);
 			fileMenu.Append(revertItem);
 
 			undoItem = new MenuItem("Annuler");
@@ -342,6 +349,7 @@ namespace Petri
 		MenuItem closeItem;
 		MenuItem saveItem;
 		MenuItem saveAsItem;
+		MenuItem exportItem;
 		MenuItem revertItem;
 
 		MenuItem undoItem;

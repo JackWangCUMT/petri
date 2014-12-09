@@ -43,6 +43,7 @@ namespace Petri
 
 		public GuiAction RemoveSelection() {
 			var states = new List<State>();
+			var comments = new List<Comment>();
 			var transitions = new HashSet<Transition>();
 			foreach(var e in document.Window.EditorGui.View.SelectedEntities) {
 				if(e is State) {
@@ -58,8 +59,12 @@ namespace Petri
 						transitions.Add(t);
 					}
 				}
-				else if(e is Transition)
+				else if(e is Transition) {
 					transitions.Add(e as Transition);
+				}
+				else if(e is Comment) {
+					comments.Add(e as Comment);
+				}
 			}
 
 			var deleteEntities = new List<GuiAction>();
@@ -68,6 +73,9 @@ namespace Petri
 			}
 			foreach(State s in states) {
 				deleteEntities.Add(new RemoveStateAction(s));
+			}
+			foreach(Comment c in comments) {
+				deleteEntities.Add(new RemoveCommentAction(c));
 			}
 
 			document.Window.EditorGui.View.ResetSelection();
@@ -83,6 +91,9 @@ namespace Petri
 			}
 			foreach(var t in document.Window.EditorGui.View.CurrentPetriNet.Transitions) {
 				selected.Add(t);
+			}
+			foreach(var c in document.Window.EditorGui.View.CurrentPetriNet.Comments) {
+				selected.Add(c);
 			}
 
 			UpdateSelection();
@@ -123,6 +134,9 @@ namespace Petri
 			var transitions = new HashSet<Transition>(from e in newEntities
 				where e is Transition
 				select (e as Transition));
+			var comments = from e in newEntities
+					where e is Comment
+				    select (e as Comment);
 
 			foreach(State s in states) {
 				// Change entity's owner
@@ -130,6 +144,12 @@ namespace Petri
 				s.Name = s.Name + " 2";
 				s.Position = new Cairo.PointD(s.Position.X + 20, s.Position.Y + 20);
 				actionList.Add(new AddStateAction(s));
+			}
+			foreach(Comment c in comments) {
+				// Change entity's owner
+				c.Parent = this.document.Window.EditorGui.View.CurrentPetriNet;
+				c.Position = new Cairo.PointD(c.Position.X + 20, c.Position.Y + 20);
+				actionList.Add(new AddCommentAction(c));
 			}
 
 			foreach(Transition t in transitions) {
@@ -153,6 +173,9 @@ namespace Petri
 			var states = from e in entities
 						 where (e is State && !(e is ExitPoint))
 			             select (e as State);
+			var comments = from e in entities
+				           where (e is Comment)
+						   select (e as Comment);
 			var transitions = new List<Transition>(from e in entities
 			                                       where e is Transition
 			                                       select (e as Transition));
@@ -166,6 +189,13 @@ namespace Petri
 				var xml = s.GetXml();
 				var newState = Entity.EntityFromXml(document, xml, document.Window.EditorGui.View.CurrentPetriNet, null) as State;
 				statesTable.Add(newState.ID, newState);
+			}
+			foreach(Comment c in comments) {
+				var xml = c.GetXml();
+				var newComment = Entity.EntityFromXml(document, xml, document.Window.EditorGui.View.CurrentPetriNet, null) as Comment;
+				newComment.Document = destination;
+				newComment.ID = destination.LastEntityID++;
+				cloned.Add(newComment);
 			}
 
 			foreach(Transition t in transitions) {
@@ -201,6 +231,10 @@ namespace Petri
 			s.ID = s.Document.LastEntityID++;
 			var ss = s as PetriNet;
 			if(ss != null) {
+				foreach(Comment c in ss.Comments) {
+					c.Document = d;
+					c.ID = c.Document.LastEntityID++;
+				}
 				foreach(Transition t in ss.Transitions) {
 					t.Document = d;
 					t.ID = t.Document.LastEntityID++;

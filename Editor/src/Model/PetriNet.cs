@@ -9,20 +9,28 @@ namespace Petri
 	public abstract class PetriNet : NonRootState
 	{
 		public PetriNet(Document doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos) {
-			states = new List<State>();
-			transitions = new List<Transition>();
+			Comments = new List<Comment>();
+			States = new List<State>();
+			Transitions = new List<Transition>();
 
 			this.Radius = 30;
+			this.Size = new Cairo.PointD(0, 0);
 		}
 
 		public PetriNet(Document doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
-			this.states = new List<State>();
-			this.transitions = new List<Transition>();
+			Comments = new List<Comment>();
+			States = new List<State>();
+			Transitions = new List<Transition>();
 
 			// Used to map XML's IDs of Transitions to actual States, after loading them.
 			var statesTable = new Dictionary<UInt64, State>();
 
 			this.Name = descriptor.Attribute("Name").Value;
+
+			foreach(var e in descriptor.Element("Comments").Elements()) {
+				var c = Entity.EntityFromXml(Document, e, this, null) as Comment;
+				Comments.Add(c);
+			}
 
 			foreach(var e in descriptor.Element("States").Elements()) {
 				var s = Entity.EntityFromXml(Document, e, this, null) as State;
@@ -43,6 +51,10 @@ namespace Petri
 
 		public override void Serialize(XElement elem) {
 			base.Serialize(elem);
+			var comments = new XElement("Comments");
+			foreach(var c in this.Comments) {
+				comments.Add(c.GetXml());
+			}
 			var states = new XElement("States");
 			foreach(var s in this.States) {
 				states.Add(s.GetXml());
@@ -52,6 +64,7 @@ namespace Petri
 				transitions.Add(t.GetXml());
 			}
 
+			elem.Add(comments);
 			elem.Add(states);
 			elem.Add(transitions);
 		}
@@ -63,31 +76,48 @@ namespace Petri
 		}
 
 		public override bool UsesHeader(string h) {
-			foreach(var t in transitions)
+			foreach(var t in Transitions)
 				if(t.UsesHeader(h))
 					return true;
-			foreach(var s in states)
+			foreach(var s in States)
 				if(s.UsesHeader(h))
 					return true;
 
 			return false;
 		}
 
-		public void AddState(State a)
-		{
-			states.Add(a);
+		public void AddComment(Comment c) {
+			Comments.Add(c);
 		}
 
-		public void AddTransition(Transition t)
-		{
-			transitions.Add(t);
+		public void AddState(State a) {
+			States.Add(a);
+		}
+
+		public void AddTransition(Transition t) {
+			Transitions.Add(t);
+		}
+
+		public Cairo.PointD Size {
+			get;
+			set;
 		}
 
 		// TODO: come back with a better collision algorithm :p
-		public State StateAtPosition(Cairo.PointD position)
-		{
-			for(int i = states.Count - 1; i >= 0; --i) {
-				var s = states[i];
+		public Comment CommentAtPosition(Cairo.PointD position) {
+			for(int i = Comments.Count - 1; i >= 0; --i) {
+				var c = Comments[i];
+				if(Math.Abs(c.Position.X - position.X) <= c.Size.X / 2 && Math.Abs(c.Position.Y - position.Y) < c.Size.Y / 2) {
+					return c;
+				}
+			}
+
+			return null;
+		}
+
+		public State StateAtPosition(Cairo.PointD position) {
+			for(int i = States.Count - 1; i >= 0; --i) {
+				var s = States[i];
 				if(s.PointInState(position)) {
 					return s;
 				}
@@ -96,10 +126,9 @@ namespace Petri
 			return null;
 		}
 		
-		public Transition TransitionAtPosition(Cairo.PointD position)
-		{
-			for(int i = transitions.Count - 1; i >= 0; --i) {
-				var t = transitions[i];
+		public Transition TransitionAtPosition(Cairo.PointD position) {
+			for(int i = Transitions.Count - 1; i >= 0; --i) {
+				var t = Transitions[i];
 				if(Math.Abs(t.Position.X - position.X) <= t.Width / 2 && Math.Abs(t.Position.Y - position.Y) < t.Height / 2) {
 					return t;
 				}
@@ -108,9 +137,12 @@ namespace Petri
 			return null;
 		}
 
-		public void RemoveState(State a)
-		{
-			states.Remove(a);
+		public void RemoveComment(Comment c) {
+			Comments.Remove(c);
+		}
+
+		public void RemoveState(State a) {
+			States.Remove(a);
 		}
 
 		public void RemoveTransition(Transition t)
@@ -118,19 +150,22 @@ namespace Petri
 			t.Before.RemoveTransitionAfter(t);
 			t.After.RemoveTransitionBefore(t);
 
-			transitions.Remove(t);
+			Transitions.Remove(t);
+		}
+
+		public List<Comment> Comments {
+			get;
+			private set;
 		}
 
 		public List<State> States {
-			get {
-				return states;
-			}
+			get;
+			private set;
 		}
 
 		public List<Transition> Transitions {
-			get {
-				return transitions;
-			}
+			get;
+			private set;
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
@@ -205,9 +240,6 @@ namespace Petri
 
 			return l;
 		}
-
-		private List<State> states;
-		private List<Transition> transitions;
 	}
 }
 
