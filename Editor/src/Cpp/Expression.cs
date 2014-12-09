@@ -335,7 +335,7 @@ namespace Petri {
 
 		public class LitteralExpression : Expression {
 			public LitteralExpression(string expr) : base(Cpp.Operator.Name.None) {
-				Expression = expr;
+				Expression = expr.Trim();
 			}
 
 			public string Expression {

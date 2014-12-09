@@ -180,6 +180,9 @@ namespace Petri
 					SelectedEntity = hoveredItem;
 					currentAction = EditorAction.CreatingTransition;
 				}
+				else if(hoveredItem == null) {
+					this.ResetSelection();
+				}
 			}
 		}
 
