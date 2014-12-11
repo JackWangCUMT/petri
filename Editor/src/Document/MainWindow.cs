@@ -249,6 +249,7 @@ namespace Petri
 
 			exportItem = new MenuItem("Exporter en PDF…");
 			exportItem.Activated += OnClickMenu;
+			exportItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
 			revertItem = new MenuItem("Revenir…");
 			revertItem.Activated += OnClickMenu;

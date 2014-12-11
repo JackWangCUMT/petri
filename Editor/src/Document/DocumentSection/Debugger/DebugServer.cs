@@ -200,7 +200,7 @@ namespace Petri
 					}
 					else if(msg["type"].ToString() == "error") {
 						GLib.Timeout.Add(0, () => {
-							MessageDialog d = new MessageDialog(document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "Une erreur est survenue dans le débuggueur : " + msg["payload"].ToString());
+							MessageDialog d = new MessageDialog(document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + msg["payload"].ToString()));
 							d.AddButton("Annuler", ResponseType.Cancel);
 							d.Run();
 							d.Destroy();

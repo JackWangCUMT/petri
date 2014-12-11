@@ -17,6 +17,34 @@ namespace Petri
 			context.SetSourceRGBA(0.8, 0.6, 0.4, 1);
 		}
 
+		protected override void DrawBorder(Comment c, Context context) {
+			base.DrawBorder(c, context);
+			if(_editor.EntitySelected(c)) {
+				PointD point = new PointD(c.Position.X - c.Size.X / 2 - 2, c.Position.Y - 3);
+				context.MoveTo(point);
+				point.X += 6;
+				context.LineTo(point);
+				point.Y += 6;
+				context.LineTo(point);
+				point.X -= 6;
+				context.LineTo(point);
+				point.Y -= 6;
+				context.LineTo(point);
+
+				point.X = c.Position.X + c.Size.X / 2 - 8;
+				context.MoveTo(point);
+				point.X += 6;
+				context.LineTo(point);
+				point.Y += 6;
+				context.LineTo(point);
+				point.X -= 6;
+				context.LineTo(point);
+				point.Y -= 6;
+				context.LineTo(point);
+				context.Fill();
+			}
+		}
+
 		protected override void InitContextForBorder(State s, Context context) {
 			Color color = new Color(0, 0, 0, 1);
 			double lineWidth = 3;

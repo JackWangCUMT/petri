@@ -26,27 +26,12 @@ namespace Petri
 			Application.Quit();
 		}
 
+		public static String SafeMarkupFromString(string s) {
+			return s.Replace("&", "&amp;");
+		}
+
 		public static void Main(string[] args)
 		{
-			/*var ff = Cpp.Parser.Parse("/Users/remi/Documents/Programmation/C#/IA Robot/IA Pétri/IA Pétri/TransitionsHeader.h");
-			foreach(var f in ff) {
-				Console.WriteLine(f.Signature);
-			}
-			var s = Cpp.Expression.CreateFromString<Cpp.Expression>("c3(b+c)* \"huhuihuhiu\" - f4('g'[456+3])", null, ff);
-			Console.WriteLine(s.MakeUserReadable());
-			var s2 = Cpp.Expression.CreateFromString<Cpp.Expression>("a<(b+3)*4", null, ff);
-			Console.WriteLine(s2.MakeUserReadable());
-			var s3 = Cpp.Expression.CreateFromString<Cpp.Expression>("getA().AA::init2(42<c3(42+7))", null, ff);
-			Console.WriteLine(s3.MakeUserReadable());
-			return;*/
-
-			/*var f2 = ff[7];
-			var i = new Cpp.MethodInvocation((Cpp.Method)f2, new Cpp.LitteralExpression("patata"), true, new Cpp.LitteralExpression("myVec"));
-			Console.WriteLine(i.MakeUserReadable());
-			var expr = Cpp.Expression.CreateFromString<Cpp.Expression>("(::f2()).AA::print(f3(\"fjioejo\", 42))", null, ff);
-			Console.WriteLine(expr.MakeUserReadable());
-			return*/
-
 			Application.Init();
 
 			var doc = new Document("");
@@ -81,26 +66,29 @@ namespace Petri
 			fc.AddFilter(filter);
 
 			if(fc.Run() == (int)ResponseType.Accept) {
+				string filename = fc.Filename;
+				fc.Destroy();
 				foreach(var d in documents) {
-					if(d.Path == fc.Filename) {
+					if(d.Path == filename) {
 						d.Window.Present();
-						fc.Destroy();
 						return;
 					}
 				}
 
 				// Reuse last blank document which was created (typically the first one created on program launch)
 				if(documents.Count > 0 && documents[documents.Count - 1].Blank) {
-					documents[documents.Count - 1].Path = fc.Filename;
+					documents[documents.Count - 1].Path = filename;
 					documents[documents.Count - 1].Restore();
 					documents[documents.Count - 1].Window.Present();
 				}
 				else {
-					var doc = new Document(fc.Filename);
+					var doc = new Document(filename);
 					MainClass.AddDocument(doc);
 				}
 			}
-			fc.Destroy();
+			else {
+				fc.Destroy();
+			}
 		}
 
 		public static HashSet<Entity> Clipboard {

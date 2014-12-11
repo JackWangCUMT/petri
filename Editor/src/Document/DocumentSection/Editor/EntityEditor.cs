@@ -277,12 +277,12 @@ namespace Petri
 					try {
 						funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, _document.AllFunctions);
 						if(!funcInvocation.Function.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()))) {
-							throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvocation.Function.ReturnType.ToString().Replace("&", "&amp;") + " trouvé.");
+							throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
 						}
 						PostAction(ModifLocation.Function, new InvocationChangeAction(a, funcInvocation));
 					}
 					catch(Exception ex) {
-						MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "L'expression spécifiée est invalide (" + ex.Message + ").");
+						MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("L'expression spécifiée est invalide (" + ex.Message + ")."));
 						d.AddButton("Annuler", ResponseType.Cancel);
 						d.Run();
 						d.Destroy();
@@ -398,7 +398,7 @@ namespace Petri
 					PostAction(ModifLocation.Condition, cond);
 				}
 				catch(Exception e) {
-					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "La condition spécifiée est invalide (" + e.Message + ").");
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("La condition spécifiée est invalide (" + e.Message + ")."));
 					d.AddButton("Annuler", ResponseType.Cancel);
 					d.Run();
 					d.Destroy();

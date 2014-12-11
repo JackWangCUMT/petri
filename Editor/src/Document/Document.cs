@@ -352,7 +352,7 @@ namespace Petri
 				if(tempFileName.Length > 0)
 					System.IO.File.Delete(tempFileName);
 
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Une erreur est survenue lors de l'enregistrement : " + e.ToString());
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue lors de l'enregistrement : " + e.ToString()));
 				d.AddButton("OK", ResponseType.Cancel);
 				d.Run();
 				d.Destroy();
@@ -362,7 +362,7 @@ namespace Petri
 		public void Restore()
 		{
 			if(Modified) {
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, "Souhaitez-vous revenir à la dernière version enregistrée du graphe ? Vos modifications seront perdues.");
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, MainClass.SafeMarkupFromString("Souhaitez-vous revenir à la dernière version enregistrée du graphe ? Vos modifications seront perdues."));
 				d.AddButton("Annuler", ResponseType.Cancel);
 				d.AddButton("Revenir", ResponseType.Accept);
 
@@ -374,7 +374,6 @@ namespace Petri
 				}
 			}
 
-			Window.EditorGui.View.CurrentPetriNet = null;
 			EditorController.EditedObject = null;
 
 			var oldPetriNet = PetriNet;
@@ -423,12 +422,6 @@ namespace Petri
 				}
 			}
 			catch(Exception e) {
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Une erreur est survenue lors de du chargement du document : " + e.ToString());
-				d.AddButton("OK", ResponseType.Cancel);
-				d.Run();
-				d.Destroy();
-				Console.WriteLine("Error during Petri net loading: {0}", e.Message);
-
 				if(oldPetriNet != null) {
 					// The document was already open and the user-requested restore failed for some reason. What could we do?
 					// At least the modified document is preserved so that the user has a chance to save his work.
@@ -436,10 +429,17 @@ namespace Petri
 				else {
 					// If it is a fresh opening, just get back to an empty state.
 					PetriNet = new RootPetriNet(this);
+					Window.EditorGui.View.CurrentPetriNet = PetriNet;
 					_settings = null;
 					Modified = false;
 					this.Blank = true;
 				}
+
+
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue lors de du chargement du document : " + e.ToString()));
+				d.AddButton("OK", ResponseType.Cancel);
+				d.Run();
+				d.Destroy();
 			}
 			if(_settings == null) {
 				_settings = DocumentSettings.GetDefaultSettings(this);

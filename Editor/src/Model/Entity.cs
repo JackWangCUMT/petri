@@ -49,9 +49,9 @@ namespace Petri
 			this.parent = parent;
 			this.Document = doc;
 
-			this.ID = UInt64.Parse(descriptor.Attribute("ID").Value);
+			this.ID = XmlConvert.ToUInt64(descriptor.Attribute("ID").Value);
 			this.Name = descriptor.Attribute("Name").Value;
-			this.Position = new Cairo.PointD(double.Parse(descriptor.Attribute("X").Value), double.Parse(descriptor.Attribute("Y").Value));
+			this.Position = new Cairo.PointD(XmlConvert.ToDouble(descriptor.Attribute("X").Value), XmlConvert.ToDouble(descriptor.Attribute("Y").Value));
 
 			if(this.ID >= Document.LastEntityID)
 				Document.LastEntityID = this.ID + 1;
@@ -60,10 +60,10 @@ namespace Petri
 		public abstract XElement GetXml();
 
 		public virtual void Serialize(XElement element) {
-			element.SetAttributeValue("ID", this.ID.ToString());
-			element.SetAttributeValue("Name", this.Name.ToString());
-			element.SetAttributeValue("X", this.Position.X.ToString());
-			element.SetAttributeValue("Y", this.Position.Y.ToString());
+			element.SetAttributeValue("ID", this.ID);
+			element.SetAttributeValue("Name", this.Name);
+			element.SetAttributeValue("X", this.Position.X);
+			element.SetAttributeValue("Y", this.Position.Y);
 		}
 
 		public UInt64 ID {

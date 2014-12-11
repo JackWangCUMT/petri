@@ -14,7 +14,8 @@ namespace Petri
 			MovingComment,
 			MovingTransition,
 			CreatingTransition,
-			SelectionRect
+			SelectionRect,
+			ResizingComment
 		}
 
 		public EditorView(Document doc) : base(doc) {
@@ -157,7 +158,13 @@ namespace Petri
 							currentAction = EditorAction.MovingTransition;
 						}
 						else if(motionReference is Comment) {
-							currentAction = EditorAction.MovingComment;
+							Comment c = motionReference as Comment;
+							if(Math.Abs(ev.X - motionReference.Position.X - c.Size.X / 2) < 8 || Math.Abs(ev.X - motionReference.Position.X + (motionReference as Comment).Size.X / 2) < 8) {
+								currentAction = EditorAction.ResizingComment;
+							}
+							else {
+								currentAction = EditorAction.MovingComment;
+							}
 						}
 						deltaClick.X = ev.X - originalPosition.X;
 						deltaClick.Y = ev.Y - originalPosition.Y;
@@ -222,6 +229,9 @@ namespace Petri
 
 				selectedFromRect.Clear();
 			}
+			else if(currentAction == EditorAction.ResizingComment) {
+				currentAction = EditorAction.None;
+			}
 
 			return base.OnButtonReleaseEvent(ev);
 		}
@@ -273,6 +283,12 @@ namespace Petri
 
 				selectedFromRect.SymmetricExceptWith(oldSet);
 
+				this.Redraw();
+			}
+			else if(currentAction == EditorAction.ResizingComment) {
+				Comment comment = hoveredItem as Comment;
+				double w = Math.Abs(ev.X - comment.Position.X) * 2;
+				comment.Size = new PointD(w, 0);
 				this.Redraw();
 			}
 			else {

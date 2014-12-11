@@ -38,8 +38,8 @@ namespace Petri
 			this.Width = double.Parse(descriptor.Attribute("W").Value);
 			this.Height = double.Parse(descriptor.Attribute("H").Value);
 
-			this.Shift = new Cairo.PointD(double.Parse(descriptor.Attribute("ShiftX").Value), double.Parse(descriptor.Attribute("ShiftY").Value));
-			this.ShiftAmplitude = double.Parse(descriptor.Attribute("ShiftAmplitude").Value);
+			this.Shift = new Cairo.PointD(XmlConvert.ToDouble(descriptor.Attribute("ShiftX").Value), XmlConvert.ToDouble(descriptor.Attribute("ShiftY").Value));
+			this.ShiftAmplitude = XmlConvert.ToDouble(descriptor.Attribute("ShiftAmplitude").Value);
 
 			this.Position = this.Position;
 		}
@@ -52,17 +52,17 @@ namespace Petri
 
 		public override void Serialize(XElement elem) {
 			base.Serialize(elem);
-			elem.SetAttributeValue("BeforeID", this.Before.ID.ToString());
-			elem.SetAttributeValue("AfterID", this.After.ID.ToString());
+			elem.SetAttributeValue("BeforeID", this.Before.ID);
+			elem.SetAttributeValue("AfterID", this.After.ID);
 
 			elem.SetAttributeValue("Condition", this.Condition.MakeUserReadable());
 
-			elem.SetAttributeValue("W", this.Width.ToString());
-			elem.SetAttributeValue("H", this.Height.ToString());
+			elem.SetAttributeValue("W", this.Width);
+			elem.SetAttributeValue("H", this.Height);
 
-			elem.SetAttributeValue("ShiftX", this.Shift.X.ToString());
-			elem.SetAttributeValue("ShiftY", this.Shift.Y.ToString());
-			elem.SetAttributeValue("ShiftAmplitude", this.ShiftAmplitude.ToString());
+			elem.SetAttributeValue("ShiftX", this.Shift.X);
+			elem.SetAttributeValue("ShiftY", this.Shift.Y);
+			elem.SetAttributeValue("ShiftAmplitude", this.ShiftAmplitude);
 		}
 
 		public override bool UsesHeader(string h) {

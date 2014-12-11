@@ -46,20 +46,24 @@ namespace Petri
 		}
 
 		protected virtual void InitContextForBackground(Comment c, Context context) {
-			context.SetSourceRGBA(1, 1, 0.7, 1);
-			var layout = new Pango.Layout(Gdk.PangoHelper.ContextGet());
-
-			layout.FontDescription = new Pango.FontDescription();
-			layout.FontDescription.Family = "Lucida Grande";
-			layout.FontDescription.Size = Pango.Units.FromPixels(12);
-
-			layout.SetText(c.Name);
-			int width;
-			int height;
-			layout.GetPixelSize(out width, out height);
-			c.Size = new PointD(width + 10, height + 10);
+			context.SetSourceColor(c.Color);
 		}
 		protected virtual void DrawBackground(Comment c, Context context) {
+			_commentsLayout = new Pango.Layout(Gdk.PangoHelper.ContextGet());
+
+			_commentsLayout.FontDescription = new Pango.FontDescription();
+			_commentsLayout.FontDescription.Family = "Lucida Grande";
+			_commentsLayout.FontDescription.Size = Pango.Units.FromPixels(12);
+
+			_commentsLayout.SetText(c.Name);
+
+			_commentsLayout.Width = (int)((c.Size.X - 13) * Pango.Scale.PangoScale);
+			_commentsLayout.Justify = true;
+			int width;
+			int height;
+			_commentsLayout.GetPixelSize(out width, out height);
+			c.Size = new PointD(Math.Max(c.Size.X, width + 13), height + 10);
+
 			PointD point = new PointD(c.Position.X, c.Position.Y);
 			point.X -= c.Size.X / 2 + context.LineWidth / 2;
 			point.Y -= c.Size.Y / 2;
@@ -78,7 +82,7 @@ namespace Petri
 
 		protected virtual void InitContextForBorder(Comment c, Context context) {
 			context.LineWidth = 1;
-			context.SetSourceRGBA(0.8, 0.6, 0.4, 1);
+			context.SetSourceRGBA(c.Color.R * 0.8, c.Color.G * 0.6, c.Color.B * 0.4, c.Color.A);
 		}
 		protected virtual void DrawBorder(Comment c, Context context) {
 			context.Stroke();
@@ -88,18 +92,9 @@ namespace Petri
 			context.SetSourceRGBA(0, 0, 0, 1);
 		}
 		protected virtual void DrawName(Comment c, Context context) {
-			var layout = new Pango.Layout(Gdk.PangoHelper.ContextGet());
-
-			layout.FontDescription = new Pango.FontDescription();
-			layout.FontDescription.Family = "Lucida Grande";
-			layout.FontDescription.Size = Pango.Units.FromPixels(12);
-
-			layout.SetText(c.Name);
-			int width;
-			int height;
-			layout.GetPixelSize(out width, out height);
-			context.MoveTo(c.Position.X - width / 2, c.Position.Y - height / 2);
-			Pango.CairoHelper.ShowLayout(context, layout);
+			context.MoveTo(c.Position.X - c.Size.X / 2 + 5, c.Position.Y - c.Size.Y / 2 + 5);
+			Pango.CairoHelper.ShowLayout(context, _commentsLayout);
+			_commentsLayout = null;
 		}
 
 		protected virtual void InitContextForBackground(State s, Context context) {
@@ -252,6 +247,8 @@ namespace Petri
 
 			context.Fill();
 		}
+
+		Pango.Layout _commentsLayout;
 	}
 }
 

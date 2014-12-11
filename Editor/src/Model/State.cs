@@ -21,16 +21,16 @@ namespace Petri
 			this.TransitionsBefore = new List<Transition>();
 			this.TransitionsAfter = new List<Transition>();
 
-			this.Active = bool.Parse(descriptor.Attribute("Active").Value);
-			this.RequiredTokens = int.Parse(descriptor.Attribute("RequiredTokens").Value);
-			this.Radius = double.Parse(descriptor.Attribute("Radius").Value);
+			this.Active = XmlConvert.ToBoolean(descriptor.Attribute("Active").Value);
+			this.RequiredTokens = XmlConvert.ToInt32(descriptor.Attribute("RequiredTokens").Value);
+			this.Radius = XmlConvert.ToDouble(descriptor.Attribute("Radius").Value);
 		}
 
 		public override void Serialize(XElement element) {
 			base.Serialize(element);
-			element.SetAttributeValue("Active", this.Active.ToString());
-			element.SetAttributeValue("RequiredTokens", this.RequiredTokens.ToString());
-			element.SetAttributeValue("Radius", this.Radius.ToString());
+			element.SetAttributeValue("Active", this.Active);
+			element.SetAttributeValue("RequiredTokens", this.RequiredTokens);
+			element.SetAttributeValue("Radius", this.Radius);
 		}
 
 		public virtual bool Active {
