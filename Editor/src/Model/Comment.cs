@@ -12,6 +12,8 @@ namespace Petri
 			this.Position = pos;
 			this.Name = "Commentaire";
 			this.SizeToFit();
+
+			this.Color = new Color(1, 1, 0.7, 1);
 		}
 
 		public Comment(Document doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {

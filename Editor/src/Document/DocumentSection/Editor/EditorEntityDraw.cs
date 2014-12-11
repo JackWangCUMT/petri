@@ -20,7 +20,7 @@ namespace Petri
 		protected override void DrawBorder(Comment c, Context context) {
 			base.DrawBorder(c, context);
 			if(_editor.EntitySelected(c)) {
-				PointD point = new PointD(c.Position.X - c.Size.X / 2 - 2, c.Position.Y - 3);
+				PointD point = new PointD(c.Position.X - c.Size.X / 2 - 2, c.Position.Y - 2);
 				context.MoveTo(point);
 				point.X += 6;
 				context.LineTo(point);
@@ -31,7 +31,7 @@ namespace Petri
 				point.Y -= 6;
 				context.LineTo(point);
 
-				point.X = c.Position.X + c.Size.X / 2 - 8;
+				point.X = c.Position.X + c.Size.X / 2 - 7;
 				context.MoveTo(point);
 				point.X += 6;
 				context.LineTo(point);
