@@ -449,6 +449,7 @@ namespace Petri
 
 			this.CurrentController = this.EditorController;
 			Window.Gui = Window.EditorGui;
+			Window.EditorGui.Paned.Position = Window.DefaultWidth - 260;
 		}
 
 		public void SaveCppDontAsk() {

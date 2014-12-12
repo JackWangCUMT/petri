@@ -6,34 +6,36 @@ namespace Petri
 	public class EditorGui : Gui
 	{
 		public EditorGui(Document doc) {
-			document = doc;
+			_document = doc;
 
-			toolbar = new HBox(false, 20);
-			this.PackStart(toolbar, false, false, 0);
-			toolbar.HeightRequest = 40;
+			_toolbar = new HBox(false, 20);
+			this.PackStart(_toolbar, false, false, 0);
+			_toolbar.HeightRequest = 40;
 
-			cpp = new Button(new Label("Générer C++…"));
-			manageHeaders = new Button(new Label("Ouvrir un .h…"));
-			compile = new Button(new Label("Compiler le code généré…"));
-			switchToDebug = new Button(new Label("Debug"));
-			cpp.Clicked += this.OnClick;
-			manageHeaders.Clicked += this.OnClick;
-			compile.Clicked += this.OnClick;
-			switchToDebug.Clicked += this.OnClick;
-			toolbar.PackStart(cpp, false, false, 0);
-			toolbar.PackStart(manageHeaders, false, false, 0);
-			toolbar.PackStart(compile, false, false, 0);
-			toolbar.PackStart(switchToDebug, false, false, 0);
+			_cpp = new Button(new Label("Générer C++…"));
+			_manageHeaders = new Button(new Label("Ouvrir un .h…"));
+			_compile = new Button(new Label("Compiler le code généré…"));
+			_switchToDebug = new Button(new Label("Debug"));
+			_cpp.Clicked += this.OnClick;
+			_manageHeaders.Clicked += this.OnClick;
+			_compile.Clicked += this.OnClick;
+			_switchToDebug.Clicked += this.OnClick;
+			_toolbar.PackStart(_cpp, false, false, 0);
+			_toolbar.PackStart(_manageHeaders, false, false, 0);
+			_toolbar.PackStart(_compile, false, false, 0);
+			_toolbar.PackStart(_switchToDebug, false, false, 0);
 
-			this.hbox = new HBox(false, 0);
-			this.PackStart(hbox, true, true, 0);
-			//this.paned = new HPaned();
-			//vbox.PackStart(paned, true, true, 0);
+			_paned = new HPaned();
+			this.PackStart(_paned, true, true, 0);
 
-			petriView = new EditorView(doc);
-			petriView.CanFocus = true;
-			petriView.CanDefault = true;
-			petriView.AddEvents ((int) 
+			_paned.SizeRequested += (object o, SizeRequestedArgs args) => {
+				_document.EditorController.EntityEditor.Resize((o as HPaned).Child2.Allocation.Width);
+			};
+
+			_petriView = new EditorView(doc);
+			_petriView.CanFocus = true;
+			_petriView.CanDefault = true;
+			_petriView.AddEvents ((int) 
 				(Gdk.EventMask.ButtonPressMask    
 					|Gdk.EventMask.ButtonReleaseMask    
 					|Gdk.EventMask.KeyPressMask    
@@ -44,36 +46,33 @@ namespace Petri
 
 			Viewport viewport = new Viewport();
 
-			viewport.Add(petriView);
+			viewport.Add(_petriView);
 
-			petriView.SizeRequested += (o, args) => {
+			_petriView.SizeRequested += (o, args) => {
 				viewport.WidthRequest = viewport.Child.Requisition.Width;
 				viewport.HeightRequest = viewport.Child.Requisition.Height;
 			};
 
 			scrolledWindow.Add(viewport);
 
-			//paned.Position = Configuration.GraphWidth;
-			//paned.Pack1(drawing, true, true);
-			hbox.PackStart(scrolledWindow, true, true, 0);
-			editor = new Fixed();
-			//paned.Pack2(editor, true, true);
-			hbox.PackEnd(editor, false, false, 0);
+			_paned.Pack1(scrolledWindow, true, true);
+			_editor = new Fixed();
+			_paned.Pack2(_editor, false, true);
 		}
 
 		protected void OnClick(object sender, EventArgs e)
 		{
-			if(sender == this.cpp) {
-				document.SaveCpp();
+			if(sender == _cpp) {
+				_document.SaveCpp();
 			}
-			else if(sender == this.manageHeaders) {
-				document.ManageHeaders();
+			else if(sender == _manageHeaders) {
+				_document.ManageHeaders();
 			}
-			else if(sender == this.compile) {
-				document.Compile();
+			else if(sender == _compile) {
+				_document.Compile();
 			}
-			else if(sender == this.switchToDebug) {
-				document.SwitchToDebug();
+			else if(sender == _switchToDebug) {
+				_document.SwitchToDebug();
 			}
 		}
 
@@ -81,7 +80,7 @@ namespace Petri
 
 		public EditorView View {
 			get {
-				return petriView;
+				return _petriView;
 			}
 		}
 
@@ -93,29 +92,35 @@ namespace Petri
 
 		public Fixed Editor {
 			get {
-				return editor;
+				return _editor;
+			}
+		}
+
+		public HPaned Paned {
+			get {
+				return _paned;
 			}
 		}
 
 		public override void FocusIn() {
-			petriView.FocusIn();
+			_petriView.FocusIn();
 		}
 
 		public override void FocusOut() {
-			petriView.FocusOut();
+			_petriView.FocusOut();
 		}
 
 		public override void Redraw() {
-			petriView.Redraw();
+			_petriView.Redraw();
 		}
 
-		HBox hbox;
-		HBox toolbar;
-		EditorView petriView;
-		Fixed editor;
-		Button manageHeaders, cpp, compile, switchToDebug;
+		HPaned _paned;
+		HBox _toolbar;
+		EditorView _petriView;
+		Fixed _editor;
+		Button _manageHeaders, _cpp, _compile, _switchToDebug;
 
-		Document document;
+		Document _document;
 	}
 }
 

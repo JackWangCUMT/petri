@@ -48,7 +48,7 @@ namespace Petri
 			this.PostAction(ModifLocation.EntityChange, null);
 
 			if(!_document.Window.EditorGui.View.MultipleSelection && e != null) {
-				var label = CreateWidget<Label>(_objectList, _objectIndentation, 0, "ID de l'entité : " + e.ID.ToString());
+				var label = CreateLabel(0, "ID de l'entité : " + e.ID.ToString());
 				label.Markup = "<span color=\"grey\">" + label.Text + "</span>";
 			}
 		}
@@ -79,13 +79,30 @@ namespace Petri
 			return funcList;
 		}
 
-		protected WidgetType CreateWidget<WidgetType>(List<Widget> list, List<int> indentList, int indentation, params object[] widgetConstructionArgs) where WidgetType : Widget
+		protected Label CreateLabel(int indentation, string text) {
+			var label = new Label(text);
+			this.AddWidget(label, false, indentation);
+
+			return label;
+		}
+
+		protected WidgetType CreateWidget<WidgetType>(bool resizeable, int indentation, params object[] widgetConstructionArgs) where WidgetType : Widget
 		{
 			WidgetType w = (WidgetType)Activator.CreateInstance(typeof(WidgetType), widgetConstructionArgs);
-			list.Add(w);
-			indentList.Add(indentation);
-
+			this.AddWidget(w, resizeable, indentation);
 			return w;
+		}
+
+		protected void AddWidget(Widget w, bool resizeable, int indentation) {
+			_objectList.Add(Tuple.Create(w, indentation, resizeable));
+		}
+
+		public void Resize(int width) {
+			foreach(var tuple in _objectList) {
+				if(tuple.Item3) {
+					tuple.Item1.WidthRequest = width - 20 - tuple.Item2;
+				}
+			}
 		}
 
 		protected void FormatAndShow()
@@ -96,7 +113,7 @@ namespace Petri
 
 			int lastX = 20, lastY = 0;
 			for(int i = 0; i < _objectList.Count; ++i) {
-				Widget w = _objectList[i];
+				Widget w = _objectList[i].Item1;
 				_document.Window.EditorGui.Editor.Add(w);
 				if(w.GetType() == typeof(Label)) {
 					lastY += 20;
@@ -106,7 +123,7 @@ namespace Petri
 				}
 
 				Fixed.FixedChild w2 = ((Fixed.FixedChild)(_document.Window.EditorGui.Editor[w]));
-				w2.X = lastX + _objectIndentation[i];
+				w2.X = lastX + _objectList[i].Item2;
 				w2.Y = lastY;
 
 				lastY += w.Allocation.Height + 20;
@@ -153,34 +170,32 @@ namespace Petri
 		protected Document _document;
 		ModifLocation _lastLocation = ModifLocation.None;
 		List<GuiAction> _actions;
-		protected List<Widget> _objectList = new List<Widget>();
-		protected List<int> _objectIndentation = new List<int>();
+		protected List<Tuple<Widget, int, bool>> _objectList = new List<Tuple<Widget, int, bool>>();
 	}
 
 	public class ActionEditor : EntityEditor {
 		public ActionEditor(Action a, Document doc) : base(a, doc) {
-			CreateWidget<Label>(_objectList, _objectIndentation, 0, "Nom de l'action :");
-			var name = CreateWidget<Entry>(_objectList, _objectIndentation, 0, a.Name);
+			CreateLabel(0, "Nom de l'action :");
+			var name = CreateWidget<Entry>(true, 0, a.Name);
 			name.Changed += (obj, eventInfo) => {
 				this.PostAction(ModifLocation.Name, new ChangeNameAction(a, (obj as Entry).Text));
 			};
 
-			var active = CreateWidget<CheckButton>(_objectList, _objectIndentation, 0, "Active à t = 0 :");
+			var active = CreateWidget<CheckButton>(false, 0, "Active à t = 0 :");
 			active.Active = a.Active;
 			active.Toggled += (sender, e) => {
 				this.PostAction(ModifLocation.Active, new ToggleActiveAction(a));
 			};
 
 			if(a.TransitionsBefore.Count > 0) {
-				CreateWidget<Label>(_objectList, _objectIndentation, 0, "Jetons requis pour entrer dans l'action :");
+				CreateLabel(0, "Jetons requis pour entrer dans l'action :");
 				var list = new List<string>();
 				for(int i = 0; i < a.TransitionsBefore.Count; ++i) {
 					list.Add((i + 1).ToString());
 				}
 
 				ComboBox tokensChoice = ComboHelper(list[a.RequiredTokens - 1], list);
-				_objectList.Add(tokensChoice);
-				_objectIndentation.Add(0);
+				this.AddWidget(tokensChoice, false, 0);
 
 				tokensChoice.Changed += (object sender, EventArgs e) => {
 					ComboBox combo = sender as ComboBox;
@@ -198,7 +213,7 @@ namespace Petri
 			{
 				var editorFields = new List<Widget>();
 
-				CreateWidget<Label>(_objectList, _objectIndentation, 0, "Action associée :");
+				CreateLabel(0, "Action associée :");
 
 				var list = new List<string>();
 				string defaultFunction = "Afficher ID + Nom action";
@@ -213,8 +228,7 @@ namespace Petri
 
 
 				ComboBox funcList = ComboHelper(activeFunction, list);
-				_objectList.Add(funcList);
-				_objectIndentation.Add(0);
+				this.AddWidget(funcList, true, 0);
 				funcList.Changed += (object sender, EventArgs e) => {
 					ComboBox combo = sender as ComboBox;
 
@@ -226,7 +240,7 @@ namespace Petri
 							a.Function = a.DefaultAction();
 						}
 						else if(val == manual) {
-							EditInvocation(a, true, _objectList, _objectIndentation, editorFields);
+							EditInvocation(a, true, editorFields);
 						}
 						else {
 							var f = _document.CppActions.Find(delegate(Cpp.Function ff) {
@@ -246,31 +260,29 @@ namespace Petri
 									invocation = new Cpp.FunctionInvocation(f, pp.ToArray());
 								}
 								this.PostAction(ModifLocation.Function, new InvocationChangeAction(a, invocation));
-								EditInvocation(a, false, _objectList, _objectIndentation, editorFields);
+								EditInvocation(a, false, editorFields);
 							}
 							else {
-								EditInvocation(a, false, _objectList, _objectIndentation, editorFields);
+								EditInvocation(a, false, editorFields);
 							}
 						}
 					}
 				};
 
-				EditInvocation(a, activeFunction == manual, _objectList, _objectIndentation, editorFields);
+				EditInvocation(a, activeFunction == manual, editorFields);
 			}
 		}
 
-		private void EditInvocation(Action a, bool manual, List<Widget> objectList, List<int> objectIndentation, List<Widget> editorFields) {
+		private void EditInvocation(Action a, bool manual, List<Widget> editorFields) {
 			foreach(var e in editorFields) {
-				int i = objectList.IndexOf(e);
-				objectList.Remove(e);
-				objectIndentation.RemoveAt(i);
+				_objectList.RemoveAll(((Tuple<Widget, int, bool> obj) => obj.Item1 == e));
 			}
 			editorFields.Clear();
 
 			if(manual) {
-				var label = CreateWidget<Label>(_objectList, _objectIndentation, 0, "Invocation de l'action :");
+				var label = CreateLabel(0, "Invocation de l'action :");
 				editorFields.Add(label);
-				var invocation = CreateWidget<Entry>(_objectList, _objectIndentation, 0, a.Function.MakeUserReadable());
+				var invocation = CreateWidget<Entry>(true, 0, a.Function.MakeUserReadable());
 				editorFields.Add(invocation);
 				invocation.FocusOutEvent += (obj, eventInfo) => {
 					Cpp.FunctionInvocation funcInvocation = null;
@@ -295,10 +307,10 @@ namespace Petri
 				if(!a.IsDefault()) {
 					if(a.Function.Function is Cpp.Method) {
 						var method = a.Function as Cpp.MethodInvocation;
-						var editorHeader = CreateWidget<Label>(_objectList, _objectIndentation, 20, "Objet *this de type " + method.Function.Enclosing.ToString() + " :");
+						var editorHeader = CreateLabel(20, "Objet *this de type " + method.Function.Enclosing.ToString() + " :");
 						editorFields.Add(editorHeader);
 
-						var valueEditor = CreateWidget<Entry>(_objectList, _objectIndentation, 20, method.This.MakeUserReadable());
+						var valueEditor = CreateWidget<Entry>(true, 20, method.This.MakeUserReadable());
 						editorFields.Add(valueEditor);
 						valueEditor.Changed += (obj, eventInfo) => {
 							var args = new List<Cpp.Expression>();
@@ -316,10 +328,10 @@ namespace Petri
 					}
 					for(int i = 0; i < a.Function.Function.Parameters.Count; ++i) {
 						var p = a.Function.Function.Parameters[i];
-						var editorHeader = CreateWidget<Label>(_objectList, _objectIndentation, 20, "Paramètre " + p.Type + " " + p.Name + " :");
+						var editorHeader = CreateLabel(20, "Paramètre " + p.Type + " " + p.Name + " :");
 						editorFields.Add(editorHeader);
 
-						var valueEditor = CreateWidget<Entry>(_objectList, _objectIndentation, 20, a.Function.Arguments[i].MakeUserReadable());
+						var valueEditor = CreateWidget<Entry>(true, 20, a.Function.Arguments[i].MakeUserReadable());
 						editorFields.Add(valueEditor);
 						valueEditor.Changed += (obj, eventInfo) => {
 							var args = new List<Cpp.Expression>();
@@ -351,30 +363,20 @@ namespace Petri
 
 	public class CommentEditor : EntityEditor {
 		public CommentEditor(Comment c, Document doc) : base(c, doc) {
-			CreateWidget<Label>(_objectList, _objectIndentation, 0, "Commentaire :");
-			var buf = new TextBuffer(new TextTagTable());
-			buf.Text = c.Name;
-			var comment = new TextView(buf);
-			comment.SetSizeRequest(200, 400);
-			/*HBox box = new HBox(true, 0);
-
-			ScrolledWindow scrolledWindow = new ScrolledWindow();
-			scrolledWindow.SetPolicy(PolicyType.Never, PolicyType.Never);
-
-			var view = new Viewport()
-			view.Add(comment);
-
-			view.SizeRequested += (o, args) => {
-				view.WidthRequest = 100;
-				view.HeightRequest = 200;
+			CreateLabel(0, "Couleur :");
+			var color = CreateWidget<ColorButton>(false, 0, new Gdk.Color((byte)(c.Color.R * 255), (byte)(c.Color.G * 255), (byte)(c.Color.B * 255)));
+			color.ColorSet += (object sender, EventArgs e) => {
+				var newColor = (sender as ColorButton).Color;
+				c.Color = new Cairo.Color(newColor.Red / 65535.0, newColor.Green / 65535.0, newColor.Blue / 65535.0);
 			};
 
-			scrolledWindow.Add(view);
+			CreateLabel(0, "Commentaire :");
 
-			box.PackStart(scrolledWindow, false, false, 0);*/
-
-			_objectList.Add(comment);
-			_objectIndentation.Add(0);
+			var buf = new TextBuffer(new TextTagTable());
+			buf.Text = c.Name;
+			var comment = CreateWidget<TextView>(true, 0, buf);
+			comment.SetSizeRequest(200, 400);
+			comment.WrapMode = WrapMode.Word;
 
 			comment.FocusOutEvent += (obj, eventInfo) => {
 				this.PostAction(ModifLocation.Name, new ChangeNameAction(c, (obj as TextView).Buffer.Text));
@@ -384,14 +386,14 @@ namespace Petri
 
 	public class TransitionEditor : EntityEditor {
 		public TransitionEditor(Transition t, Document doc) : base(t, doc) {
-			CreateWidget<Label>(_objectList, _objectIndentation, 0, "Nom de la transition :");
-			var name = CreateWidget<Entry>(_objectList, _objectIndentation, 0, t.Name);
+			CreateLabel(0, "Nom de la transition :");
+			var name = CreateWidget<Entry>(true, 0, t.Name);
 			name.Changed += (obj, eventInfo) => {
 				this.PostAction(ModifLocation.Name, new ChangeNameAction(t, (obj as Entry).Text));
 			};
 
-			CreateWidget<Label>(_objectList, _objectIndentation, 0, "Condition de la transition :");
-			var condition = CreateWidget<Entry>(_objectList, _objectIndentation, 0, t.Condition.MakeUserReadable());
+			CreateLabel(0, "Condition de la transition :");
+			var condition = CreateWidget<Entry>(true, 0, t.Condition.MakeUserReadable());
 			condition.FocusOutEvent += (obj, eventInfo) => {
 				try {
 					var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, t, _document.AllFunctions));
@@ -412,13 +414,13 @@ namespace Petri
 	public class InnerPetriNetEditor : EntityEditor {
 		public InnerPetriNetEditor(InnerPetriNet i, Document doc) : base(i, doc)
 		{
-			CreateWidget<Label>(_objectList, _objectIndentation, 0, "Nom du graphe :");
-			var name = CreateWidget<Entry>(_objectList, _objectIndentation, 0, i.Name);
+			CreateLabel(0, "Nom du graphe :");
+			var name = CreateWidget<Entry>(true, 0, i.Name);
 			name.Changed += (obj, eventInfo) => {
 				this.PostAction(ModifLocation.Name, new ChangeNameAction(i, (obj as Entry).Text));
 			};
 
-			var active = CreateWidget<CheckButton>(_objectList, _objectIndentation, 0, "Actif à t = 0 :");
+			var active = CreateWidget<CheckButton>(false, 0, "Actif à t = 0 :");
 			active.Active = i.Active;
 			active.Toggled += (sender, e) => {
 				this.PostAction(ModifLocation.Active, new ToggleActiveAction(i));
@@ -428,19 +430,19 @@ namespace Petri
 
 	public class ExitPointEditor : EntityEditor {
 		public ExitPointEditor(ExitPoint e, Document doc) : base(e, doc) {
-			CreateWidget<Label>(_objectList, _objectIndentation, 0, "Sortie du graphe");
+			CreateLabel(0, "Sortie du graphe");
 		}
 	}
 
 	public class MultipleEditor : EntityEditor {
 		public MultipleEditor(Document doc) : base(null, doc) {
-			CreateWidget<Label>(_objectList, _objectIndentation, 0, "Sélectionnez un seul objet");
+			CreateLabel(0, "Sélectionnez un seul objet");
 		}
 	}
 
 	public class EmptyEditor : EntityEditor {
 		public EmptyEditor(Document doc) : base(null, doc) {
-			CreateWidget<Label>(_objectList, _objectIndentation, 0, "Sélectionnez un objet à modifier");
+			CreateLabel(0, "Sélectionnez un objet à modifier");
 		}
 	}
 
