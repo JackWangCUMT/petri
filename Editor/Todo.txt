@@ -18,9 +18,6 @@ Compilation du code : formattage des erreurs de compilation
 
 Menu Document -> choix mode éditeur ou débuggueur
 
-Commentaires :
-	Asociation à un état ?
-
 Actions/Transitions : ajustement des dimensions à la longueur du titre
 
 FIXME:

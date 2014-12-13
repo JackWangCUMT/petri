@@ -37,6 +37,7 @@ namespace Petri
 			this.Blank = true;
 			this.Restore();
 			Window.PresentWindow();
+			Window.EditorGui.Paned.Position = Window.Allocation.Width - 260;
 			AssociatedWindows = new HashSet<Window>();
 		}
 
@@ -449,7 +450,6 @@ namespace Petri
 
 			this.CurrentController = this.EditorController;
 			Window.Gui = Window.EditorGui;
-			Window.EditorGui.Paned.Position = Window.DefaultWidth - 260;
 		}
 
 		public void SaveCppDontAsk() {

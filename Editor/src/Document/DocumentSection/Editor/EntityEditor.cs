@@ -115,10 +115,13 @@ namespace Petri
 			for(int i = 0; i < _objectList.Count; ++i) {
 				Widget w = _objectList[i].Item1;
 				_document.Window.EditorGui.Editor.Add(w);
-				if(w.GetType() == typeof(Label)) {
+				if(w is Label) {
 					lastY += 20;
 				}
-				if(w.GetType() == typeof(CheckButton)) {
+				else if(w is CheckButton) {
+					lastY += 10;
+				}
+				else if(w is ColorButton) {
 					lastY += 10;
 				}
 
@@ -364,11 +367,45 @@ namespace Petri
 	public class CommentEditor : EntityEditor {
 		public CommentEditor(Comment c, Document doc) : base(c, doc) {
 			CreateLabel(0, "Couleur :");
-			var color = CreateWidget<ColorButton>(false, 0, new Gdk.Color((byte)(c.Color.R * 255), (byte)(c.Color.G * 255), (byte)(c.Color.B * 255)));
-			color.ColorSet += (object sender, EventArgs e) => {
-				var newColor = (sender as ColorButton).Color;
-				c.Color = new Cairo.Color(newColor.Red / 65535.0, newColor.Green / 65535.0, newColor.Blue / 65535.0);
+			_colors = new List<Cairo.Color>();
+			_colors.Add(new Cairo.Color(1, 1, 0.7));
+			_colors.Add(new Cairo.Color(1, 0.7, 0.7));
+			_colors.Add(new Cairo.Color(0.7, 1, 0.7));
+			_colors.Add(new Cairo.Color(0.7, 0.7, 1));
+			_colors.Add(new Cairo.Color(1, 0.7, 1));
+			_colorNames = new List<String>();
+			_colorNames.Add("Jaune");
+			_colorNames.Add("Rouge");
+			_colorNames.Add("Vert");
+			_colorNames.Add("Bleu");
+			_colorNames.Add("Rose");
+			_colorNames.Add("Manuel…");
+
+			int colorIndex = _colors.FindIndex(((Cairo.Color obj) => { return obj.R == c.Color.R && obj.G == c.Color.G && obj.B == c.Color.B; }));
+			if(colorIndex == -1) {
+				colorIndex = _colorNames.Count - 1;
+			}
+
+			var colorList = ComboHelper(_colorNames[colorIndex], _colorNames);
+			colorList.Changed += (object sender, EventArgs e) => {
+				ComboBox combo = sender as ComboBox;
+
+				TreeIter iter;
+
+				if(combo.GetActiveIter(out iter)) {
+					var val = combo.Model.GetValue(iter, 0) as string;
+					this.EditColor(c, val, true);
+				}
 			};
+			this.AddWidget(colorList, false, 0);
+
+			_button = new ColorButton();
+			_button.ColorSet += (object sender, EventArgs e) => {
+				var newColor = (sender as ColorButton).Color;
+				this.PostAction(ModifLocation.None, new ChangeCommentColorAction(c, new Cairo.Color(newColor.Red / 65535.0, newColor.Green / 65535.0, newColor.Blue / 65535.0)));
+			};
+
+			this.EditColor(c, _colorNames[colorIndex], false);
 
 			CreateLabel(0, "Commentaire :");
 
@@ -382,6 +419,28 @@ namespace Petri
 				this.PostAction(ModifLocation.Name, new ChangeNameAction(c, (obj as TextView).Buffer.Text));
 			};
 		}
+
+		protected void EditColor(Comment comment, string color, bool changed) {
+			if(color == "Manuel…") {
+				int index = _objectList.FindIndex(obj => { return obj.Item1 is Label && (obj.Item1 as Label).Text == "Couleur :"; });
+				_objectList.Insert(index + 2, Tuple.Create(_button as Widget, 20, false));
+				_button.Color = new Gdk.Color((byte)(comment.Color.R * 255), (byte)(comment.Color.G * 255), (byte)(comment.Color.B * 255));
+			}
+			else {
+				int index = _objectList.FindIndex(obj => { return obj.Item1 == _button; });
+				if(index != -1) {
+					_objectList.RemoveAt(index);
+				}
+
+				this.PostAction(ModifLocation.None, new ChangeCommentColorAction(comment, _colors[_colorNames.IndexOf(color)]));
+			}
+			_document.Window.EditorGui.View.Redraw();
+			this.FormatAndShow();
+		}
+
+		List<string> _colorNames;
+		List<Cairo.Color> _colors;
+		ColorButton _button;
 	}
 
 	public class TransitionEditor : EntityEditor {

@@ -429,6 +429,68 @@ namespace Petri
 		Comment _comment;
 	}
 
+	public class ChangeCommentColorAction : GuiAction {
+		public ChangeCommentColorAction(Comment c, Cairo.Color color) {
+			_comment = c;
+			_oldColor = new Cairo.Color(c.Color.R, c.Color.G, c.Color.B, c.Color.A);
+			_newColor = color;
+		}
+
+		public override void Apply() {
+			_comment.Color = new Cairo.Color(_newColor.R, _newColor.G, _newColor.B, _newColor.A);
+		}
+
+		public override GuiAction Reverse() {
+			return new ChangeCommentColorAction(_comment, _oldColor); 
+		}
+
+		public override object Focus {
+			get {
+				return _comment.Parent;
+			}
+		}
+
+		public override string Description {
+			get {
+				return "Changer la couleur du commentaire";
+			}
+		}
+
+		Comment _comment;
+		Cairo.Color _oldColor, _newColor;
+	}
+
+	public class ResizeCommentAction : GuiAction {
+		public ResizeCommentAction(Comment c, Cairo.PointD size) {
+			_comment = c;
+			_oldSize = new Cairo.PointD(c.Size.X, c.Size.Y);
+			_newSize = size;
+		}
+
+		public override void Apply() {
+			_comment.Size = new Cairo.PointD(_newSize.X, _newSize.Y);
+		}
+
+		public override GuiAction Reverse() {
+			return new ResizeCommentAction(_comment, _oldSize); 
+		}
+
+		public override object Focus {
+			get {
+				return _comment.Parent;
+			}
+		}
+
+		public override string Description {
+			get {
+				return "Redimensionner le commentaire";
+			}
+		}
+
+		Comment _comment;
+		Cairo.PointD _oldSize, _newSize;
+	}
+
 	public class AddTransitionAction : GuiAction {
 		public AddTransitionAction(Transition t, bool incrementTokenCount) {
 			_transition = t;
