@@ -16,8 +16,6 @@ Documentation
 
 Compilation du code : formattage des erreurs de compilation
 
-Menu Document -> choix mode éditeur ou débuggueur
-
 Actions/Transitions : ajustement des dimensions à la longueur du titre
 
 FIXME:

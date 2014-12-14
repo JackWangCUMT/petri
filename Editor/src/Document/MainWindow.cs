@@ -7,7 +7,7 @@ namespace Petri
 	public class MainWindow : Gtk.Window
 	{
 		public MainWindow(Document doc) : base(Gtk.WindowType.Toplevel) {
-			this.document = doc;
+			_document = doc;
 
 			this.Name = "IA_Robot.MainWindow";
 			this.WindowPosition = ((global::Gtk.WindowPosition)(4));
@@ -17,8 +17,8 @@ namespace Petri
 			this.DeleteEvent += this.OnDeleteEvent;
 
 			this.BorderWidth = 15;
-			this.vbox = new VBox(false, 5);
-			this.Add(vbox);
+			_vbox = new VBox(false, 5);
+			this.Add(_vbox);
 
 			if(MainClass.Documents.Count > 0) {
 				int x, y;
@@ -34,20 +34,20 @@ namespace Petri
 
 			this.BuildMenus();
 
-			editorGui = new EditorGui(document);
-			debugGui = new DebugGui(document);
+			_editorGui = new EditorGui(_document);
+			_debugGui = new DebugGui(_document);
 
 			this.FocusInEvent += (o, args) => {
-				document.UpdateMenuItems();
-				gui.FocusIn();
+				_document.UpdateMenuItems();
+				_gui.FocusIn();
 				if(Configuration.RunningPlatform == Platform.Mac) {
-					menuBar.ShowAll();
-					menuBar.Hide();
-					IgeMacMenu.MenuBar = menuBar;
+					_menuBar.ShowAll();
+					_menuBar.Hide();
+					IgeMacMenu.MenuBar = _menuBar;
 				}
 			};
 			this.FocusOutEvent += (o, args) => {
-				gui.FocusOut();
+				_gui.FocusOut();
 			};
 		}
 
@@ -62,13 +62,13 @@ namespace Petri
 
 				IgeMacMenu.GlobalKeyHandlerEnabled = true;
 
-				IgeMacMenu.QuitMenuItem = quitItem;
+				IgeMacMenu.QuitMenuItem = _quitItem;
 
 				var appGroup = IgeMacMenu.AddAppMenuGroup();
-				appGroup.AddMenuItem(aboutItem, "À propos de Petri…");
-				appGroup.AddMenuItem(preferencesItem, "Préférences…");
+				appGroup.AddMenuItem(_aboutItem, "À propos de Petri…");
+				appGroup.AddMenuItem(_preferencesItem, "Préférences…");
 
-				vbox.Show();
+				_vbox.Show();
 				this.Show();
 			}
 			else {
@@ -78,137 +78,142 @@ namespace Petri
 
 		public Gui Gui {
 			get {
-				return gui;
+				return _gui;
 			}
 			set {
-				if(gui != null) {
-					gui.Hide();
-					vbox.Remove(gui);
+				if(_gui != null) {
+					_gui.Hide();
+					_vbox.Remove(_gui);
 				}
 
-				gui = value;
+				_gui = value;
 
-				vbox.PackEnd(gui);
+				_vbox.PackEnd(_gui);
 
-				gui.Redraw();
-				gui.FocusIn();
-				gui.UpdateToolbar();
+				_gui.Redraw();
+				_gui.FocusIn();
+				_gui.UpdateToolbar();
 
-				gui.ShowAll();
+				_gui.ShowAll();
 			}
 		}
 
 		public EditorGui EditorGui {
 			get {
-				return editorGui;
+				return _editorGui;
 			}
 		}
 
 		public DebugGui DebugGui {
 			get {
-				return debugGui;
+				return _debugGui;
 			}
 		}
 
 		public MenuItem UndoItem {
 			get {
-				return undoItem;
+				return _undoItem;
 			}
 		}
 
 		public MenuItem RedoItem {
 			get {
-				return redoItem;
+				return _redoItem;
 			}
 		}
 
 		public MenuItem CutItem {
 			get {
-				return cutItem;
+				return _cutItem;
 			}
 		}
 		public MenuItem CopyItem {
 			get {
-				return copyItem;
+				return _copyItem;
 			}
 		}
 		public MenuItem PasteItem {
 			get {
-				return pasteItem;
+				return _pasteItem;
 			}
 		}
 
 		public MenuItem RevertItem {
 			get {
-				return revertItem;
+				return _revertItem;
 			}
 		}
 
 		protected void OnDeleteEvent(object sender, DeleteEventArgs a)
 		{
-			// TODO: close debugger session
-			bool result = this.document.CloseAndConfirm();
+			bool result = _document.CloseAndConfirm();
 			a.RetVal = !result;
 		}
 
 		protected void OnClickMenu(object sender, EventArgs e) {
-			if(sender == quitItem) {
+			if(sender == _quitItem) {
 				bool shouldExit = MainClass.OnExit();
 				if(shouldExit) {
 					MainClass.SaveAndQuit();
 				}
 			}
-			else if(sender == saveItem) {
-				document.Save();
+			else if(sender == _saveItem) {
+				_document.Save();
 			}
-			else if(sender == saveAsItem) {
-				document.SaveAs();
+			else if(sender == _saveAsItem) {
+				_document.SaveAs();
 			}
-			else if(sender == exportItem) {
-				document.ExportAsPDF();
+			else if(sender == _exportItem) {
+				_document.ExportAsPDF();
 			}
-			else if(sender == revertItem) {
-				document.Restore();
+			else if(sender == _revertItem) {
+				_document.Restore();
 			}
-			else if(sender == undoItem) {
-				document.Undo();
+			else if(sender == _undoItem) {
+				_document.Undo();
 			}
-			else if(sender == redoItem) {
-				document.Redo();
+			else if(sender == _redoItem) {
+				_document.Redo();
 			}
-			else if(sender == copyItem) {
-				document.CurrentController.Copy();
+			else if(sender == _copyItem) {
+				_document.CurrentController.Copy();
 			}
-			else if(sender == cutItem) {
-				document.CurrentController.Cut();
+			else if(sender == _cutItem) {
+				_document.CurrentController.Cut();
 			}
-			else if(sender == pasteItem) {
-				document.CurrentController.Paste();
+			else if(sender == _pasteItem) {
+				_document.CurrentController.Paste();
 			}
-			else if(sender == selectAllItem) {
-				document.CurrentController.SelectAll();
+			else if(sender == _selectAllItem) {
+				_document.CurrentController.SelectAll();
 			}
-			else if(sender == openItem) {
+			else if(sender == _openItem) {
 				MainClass.OpenDocument();
 			}
-			else if(sender == newItem) {
+			else if(sender == _newItem) {
 				var doc = new Document("");
 				MainClass.AddDocument(doc);
 			}
-			else if(sender == closeItem) {
-				if(this.document.CloseAndConfirm())
+			else if(sender == _closeItem) {
+				if(_document.CloseAndConfirm())
 					this.Destroy();
 			}
-			else if(sender == documentSettings) {
-				document.EditSettings();
+			else if(sender == _showEditor) {
+				_document.SwitchToEditor();
+			}
+			else if(sender == _showDebugger) {
+				_document.SwitchToDebug();
+			}
+			else if(sender == _documentSettings) {
+				_document.EditSettings();
 			}
 		}
 
 		protected void BuildMenus() {
-			accelGroup = new AccelGroup();
-			this.AddAccelGroup(accelGroup);
+			_accelGroup = new AccelGroup();
+			this.AddAccelGroup(_accelGroup);
 
-			menuBar = new MenuBar();
+			_menuBar = new MenuBar();
 
 			Menu fileMenu = new Menu();
 			Menu editMenu = new Menu();
@@ -223,151 +228,163 @@ namespace Petri
 			document.Submenu = documentMenu;
 			help.Submenu = helpMenu;
 
-			quitItem = new MenuItem("Quitter");
-			quitItem.Activated += OnClickMenu;
-			quitItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.q, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_quitItem = new MenuItem("Quitter");
+			_quitItem.Activated += OnClickMenu;
+			_quitItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.q, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			newItem = new MenuItem("Nouveau");
-			newItem.Activated += OnClickMenu;
-			newItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.n, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_newItem = new MenuItem("Nouveau");
+			_newItem.Activated += OnClickMenu;
+			_newItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.n, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			openItem = new MenuItem("Ouvrir…");
-			openItem.Activated += OnClickMenu;
-			openItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.o, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_openItem = new MenuItem("Ouvrir…");
+			_openItem.Activated += OnClickMenu;
+			_openItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.o, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			closeItem = new MenuItem("Fermer");
-			closeItem.Activated += OnClickMenu;
-			closeItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.w, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_closeItem = new MenuItem("Fermer");
+			_closeItem.Activated += OnClickMenu;
+			_closeItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.w, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			saveItem = new MenuItem("Enregistrer");
-			saveItem.Activated += OnClickMenu;
-			saveItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.s, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_saveItem = new MenuItem("Enregistrer");
+			_saveItem.Activated += OnClickMenu;
+			_saveItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.s, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			saveAsItem = new MenuItem("Enregistrer sous…");
-			saveAsItem.Activated += OnClickMenu;
-			saveAsItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.s, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
+			_saveAsItem = new MenuItem("Enregistrer sous…");
+			_saveAsItem.Activated += OnClickMenu;
+			_saveAsItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.s, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
 
-			exportItem = new MenuItem("Exporter en PDF…");
-			exportItem.Activated += OnClickMenu;
-			exportItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_exportItem = new MenuItem("Exporter en PDF…");
+			_exportItem.Activated += OnClickMenu;
+			_exportItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			revertItem = new MenuItem("Revenir…");
-			revertItem.Activated += OnClickMenu;
-			revertItem.Sensitive = false;
+			_revertItem = new MenuItem("Revenir…");
+			_revertItem.Activated += OnClickMenu;
+			_revertItem.Sensitive = false;
 
-			fileMenu.Append(newItem);
-			fileMenu.Append(openItem);
+			fileMenu.Append(_newItem);
+			fileMenu.Append(_openItem);
 			fileMenu.Append(new SeparatorMenuItem());
-			fileMenu.Append(closeItem);
-			fileMenu.Append(saveItem);
-			fileMenu.Append(saveAsItem);
-			fileMenu.Append(exportItem);
-			fileMenu.Append(revertItem);
+			fileMenu.Append(_closeItem);
+			fileMenu.Append(_saveItem);
+			fileMenu.Append(_saveAsItem);
+			fileMenu.Append(_exportItem);
+			fileMenu.Append(_revertItem);
 
-			undoItem = new MenuItem("Annuler");
-			undoItem.Activated += OnClickMenu;
-			undoItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.z, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_undoItem = new MenuItem("Annuler");
+			_undoItem.Activated += OnClickMenu;
+			_undoItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.z, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			redoItem = new MenuItem("Rétablir");
-			redoItem.Activated += OnClickMenu;
-			redoItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.z, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
+			_redoItem = new MenuItem("Rétablir");
+			_redoItem.Activated += OnClickMenu;
+			_redoItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.z, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
 
-			cutItem = new MenuItem("Couper");
-			cutItem.Activated += OnClickMenu;
-			cutItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.x, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_cutItem = new MenuItem("Couper");
+			_cutItem.Activated += OnClickMenu;
+			_cutItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.x, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			copyItem = new MenuItem("Copier");
-			copyItem.Activated += OnClickMenu;
-			copyItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.c, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_copyItem = new MenuItem("Copier");
+			_copyItem.Activated += OnClickMenu;
+			_copyItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.c, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			selectAllItem = new MenuItem("Tout sélectionner");
-			selectAllItem.Activated += OnClickMenu;
-			selectAllItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.a, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_selectAllItem = new MenuItem("Tout sélectionner");
+			_selectAllItem.Activated += OnClickMenu;
+			_selectAllItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.a, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			pasteItem = new MenuItem("Coller");
-			pasteItem.Activated += OnClickMenu;
-			pasteItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.v, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_pasteItem = new MenuItem("Coller");
+			_pasteItem.Activated += OnClickMenu;
+			_pasteItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.v, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			preferencesItem = new MenuItem("Préférences…");
-			preferencesItem.Activated += OnClickMenu;
-			preferencesItem.AddAccelerator("activate", accelGroup, new AccelKey(Gdk.Key.comma, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+			_preferencesItem = new MenuItem("Préférences…");
+			_preferencesItem.Activated += OnClickMenu;
+			_preferencesItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.comma, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			editMenu.Append(undoItem);
-			editMenu.Append(redoItem);
+			editMenu.Append(_undoItem);
+			editMenu.Append(_redoItem);
 			editMenu.Append(new SeparatorMenuItem());
-			editMenu.Append(cutItem);
-			editMenu.Append(copyItem);
-			editMenu.Append(pasteItem);
+			editMenu.Append(_cutItem);
+			editMenu.Append(_copyItem);
+			editMenu.Append(_pasteItem);
 			editMenu.Append(new SeparatorMenuItem());
-			editMenu.Append(selectAllItem);
+			editMenu.Append(_selectAllItem);
 
-			undoItem.Sensitive = false;
-			redoItem.Sensitive = false;
-			cutItem.Sensitive = false;
-			copyItem.Sensitive = false;
-			pasteItem.Sensitive = false;
+			_undoItem.Sensitive = false;
+			_redoItem.Sensitive = false;
+			_cutItem.Sensitive = false;
+			_copyItem.Sensitive = false;
+			_pasteItem.Sensitive = false;
 
-			documentSettings = new MenuItem("Options…");
-			documentSettings.Activated += OnClickMenu;
-			documentMenu.Append(documentSettings);
+			_showEditor = new MenuItem("Afficher l'éditeur");
+			_showEditor.Activated += OnClickMenu;
+			_showEditor.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
+			_showDebugger = new MenuItem("Afficher le débuggueur");
+			_showDebugger.Activated += OnClickMenu;
+			_showDebugger.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.d, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
+			_documentSettings = new MenuItem("Réglages…");
+			_documentSettings.Activated += OnClickMenu;
+
+			documentMenu.Append(_showEditor);
+			documentMenu.Append(_showDebugger);
+			documentMenu.Append(new SeparatorMenuItem());
+			documentMenu.Append(_documentSettings);
 
 
-			showHelpItem = new MenuItem("Aide…");
-			showHelpItem.Activated += OnClickMenu;
-			aboutItem = new MenuItem("À propos…");
-			aboutItem.Activated += OnClickMenu;
+			_showHelpItem = new MenuItem("Aide…");
+			_showHelpItem.Activated += OnClickMenu;
+			_aboutItem = new MenuItem("À propos…");
+			_aboutItem.Activated += OnClickMenu;
 
-			helpMenu.Append(showHelpItem);
-			helpMenu.Append(aboutItem);
+			helpMenu.Append(_showHelpItem);
+			helpMenu.Append(_aboutItem);
 
 			if(Configuration.RunningPlatform != Platform.Mac) {
-				fileMenu.Append(quitItem);
+				fileMenu.Append(_quitItem);
 				editMenu.Append(new SeparatorMenuItem());
-				editMenu.Append(preferencesItem);
-				helpMenu.Append(aboutItem);
+				editMenu.Append(_preferencesItem);
+				helpMenu.Append(_aboutItem);
 			}
 
-			menuBar.Append(file);
-			menuBar.Append(edit);
-			menuBar.Append(document);
-			menuBar.Append(help);
+			_menuBar.Append(file);
+			_menuBar.Append(edit);
+			_menuBar.Append(document);
+			_menuBar.Append(help);
 
-			vbox.PackStart(menuBar);
+			_vbox.PackStart(_menuBar);
 		}
 
-		Document document;
+		Document _document;
 
-		VBox vbox;
-		Gui gui;
+		VBox _vbox;
+		Gui _gui;
 
-		MenuBar menuBar;
-		MenuItem quitItem;
-		MenuItem aboutItem;
-		MenuItem preferencesItem;
+		MenuBar _menuBar;
+		MenuItem _quitItem;
+		MenuItem _aboutItem;
+		MenuItem _preferencesItem;
 
-		MenuItem newItem;
-		MenuItem openItem;
-		MenuItem closeItem;
-		MenuItem saveItem;
-		MenuItem saveAsItem;
-		MenuItem exportItem;
-		MenuItem revertItem;
+		MenuItem _newItem;
+		MenuItem _openItem;
+		MenuItem _closeItem;
+		MenuItem _saveItem;
+		MenuItem _saveAsItem;
+		MenuItem _exportItem;
+		MenuItem _revertItem;
 
-		MenuItem undoItem;
-		MenuItem redoItem;
-		MenuItem cutItem;
-		MenuItem copyItem;
-		MenuItem pasteItem;
-		MenuItem selectAllItem;
+		MenuItem _undoItem;
+		MenuItem _redoItem;
+		MenuItem _cutItem;
+		MenuItem _copyItem;
+		MenuItem _pasteItem;
+		MenuItem _selectAllItem;
 
-		MenuItem showHelpItem;
+		MenuItem _showHelpItem;
 
-		MenuItem documentSettings;
+		MenuItem _showEditor;
+		MenuItem _showDebugger;
+		MenuItem _documentSettings;
 
-		AccelGroup accelGroup;
+		AccelGroup _accelGroup;
 
-		EditorGui editorGui;
-		DebugGui debugGui;
+		EditorGui _editorGui;
+		DebugGui _debugGui;
 	}
 }
 
