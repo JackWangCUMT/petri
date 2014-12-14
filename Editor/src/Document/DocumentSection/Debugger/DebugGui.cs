@@ -6,32 +6,32 @@ namespace Petri
 	public class DebugGui : Gui
 	{
 		public DebugGui(Document doc) {
-			document = doc;
+			_document = doc;
 
-			toolbar = new HBox(false, 20);
-			this.PackStart(toolbar, false, false, 0);
-			toolbar.HeightRequest = 40;
+			_toolbar = new HBox(false, 20);
+			this.PackStart(_toolbar, false, false, 0);
+			_toolbar.HeightRequest = 40;
 
-			startStopSession = new Button(new Label("Démarrer session"));
-			startStopPetri = new Button(new Label("Exécuter"));
-			playPause = new Button(new Label("Pause"));
-			reload = new Button(new Label("Fix"));
-			switchToEditor = new Button(new Label("Éditeur"));
-			startStopSession.Clicked += this.OnClick;
-			startStopPetri.Clicked += this.OnClick;
-			playPause.Clicked += this.OnClick;
-			reload.Clicked += this.OnClick;
-			switchToEditor.Clicked += this.OnClick;
-			toolbar.PackStart(startStopSession, false, false, 0);
-			toolbar.PackStart(startStopPetri, false, false, 0);
-			toolbar.PackStart(playPause, false, false, 0);
-			toolbar.PackStart(reload, false, false, 0);
-			toolbar.PackStart(switchToEditor, false, false, 0);
+			_startStopSession = new Button(new Label("Démarrer session"));
+			_startStopPetri = new Button(new Label("Exécuter"));
+			_playPause = new Button(new Label("Pause"));
+			_reload = new Button(new Label("Fix"));
+			_switchToEditor = new Button(new Label("Éditeur"));
+			_startStopSession.Clicked += this.OnClick;
+			_startStopPetri.Clicked += this.OnClick;
+			_playPause.Clicked += this.OnClick;
+			_reload.Clicked += this.OnClick;
+			_switchToEditor.Clicked += this.OnClick;
+			_toolbar.PackStart(_startStopSession, false, false, 0);
+			_toolbar.PackStart(_startStopPetri, false, false, 0);
+			_toolbar.PackStart(_playPause, false, false, 0);
+			_toolbar.PackStart(_reload, false, false, 0);
+			_toolbar.PackStart(_switchToEditor, false, false, 0);
 
-			view = new DebugView(doc);
-			view.CanFocus = true;
-			view.CanDefault = true;
-			view.AddEvents ((int) 
+			_view = new DebugView(doc);
+			_view.CanFocus = true;
+			_view.CanDefault = true;
+			_view.AddEvents ((int) 
 				(Gdk.EventMask.ButtonPressMask    
 					|Gdk.EventMask.ButtonReleaseMask    
 					|Gdk.EventMask.KeyPressMask    
@@ -42,9 +42,9 @@ namespace Petri
 
 			Viewport viewport = new Viewport();
 
-			viewport.Add(view);
+			viewport.Add(_view);
 
-			view.SizeRequested += (o, args) => {
+			_view.SizeRequested += (o, args) => {
 				viewport.WidthRequest = viewport.Child.Requisition.Width;
 			};
 
@@ -55,7 +55,7 @@ namespace Petri
 
 		public DebugView View {
 			get {
-				return view;
+				return _view;
 			}
 		}
 
@@ -66,53 +66,53 @@ namespace Petri
 		}
 
 		public override void FocusIn() {
-			view.FocusIn();
+			_view.FocusIn();
 		}
 
 		public override void FocusOut() {
-			view.FocusOut();
+			_view.FocusOut();
 		}
 
 		public override void Redraw() {
-			view.Redraw();
+			_view.Redraw();
 		}
 
 		public override void UpdateToolbar() {
-			if(document.DebugController.Server.SessionRunning) {
-				startStopPetri.Sensitive = true;
-				reload.Sensitive = true;
+			if(_document.DebugController.Server.SessionRunning) {
+				_startStopPetri.Sensitive = true;
+				_reload.Sensitive = true;
 
 
-				((Label)startStopSession.Child).Text = "Stopper la session";
+				((Label)_startStopSession.Child).Text = "Stopper la session";
 
-				if(document.DebugController.Server.PetriRunning) {
-					((Label)startStopPetri.Child).Text = "Stopper";
-					playPause.Sensitive = true;
-					if(document.DebugController.Server.Pause) {
-						((Label)playPause.Child).Text = "Continuer";
+				if(_document.DebugController.Server.PetriRunning) {
+					((Label)_startStopPetri.Child).Text = "Stopper";
+					_playPause.Sensitive = true;
+					if(_document.DebugController.Server.Pause) {
+						((Label)_playPause.Child).Text = "Continuer";
 					}
 					else {
-						((Label)playPause.Child).Text = "Pause";
+						((Label)_playPause.Child).Text = "Pause";
 					}
 				}
 				else {
-					((Label)startStopPetri.Child).Text = "Exécuter";
-					playPause.Sensitive = false;
-					((Label)playPause.Child).Text = "Pause";
+					((Label)_startStopPetri.Child).Text = "Exécuter";
+					_playPause.Sensitive = false;
+					((Label)_playPause.Child).Text = "Pause";
 				}
 			}
 			else {
-				((Label)startStopSession.Child).Text = "Démarrer la session";
-				((Label)startStopPetri.Child).Text = "Exécuter";
-				startStopPetri.Sensitive = false;
-				reload.Sensitive = false;
-				playPause.Sensitive = false;
-				((Label)playPause.Child).Text = "Pause";
+				((Label)_startStopSession.Child).Text = "Démarrer la session";
+				((Label)_startStopPetri.Child).Text = "Exécuter";
+				_startStopPetri.Sensitive = false;
+				_reload.Sensitive = false;
+				_playPause.Sensitive = false;
+				((Label)_playPause.Child).Text = "Pause";
 			}
 		}
 
 		protected void OnClick(object sender, EventArgs e) {
-			if(sender == this.startStopSession) {
+			if(sender == _startStopSession) {
 				if(Server.SessionRunning) {
 					Server.StopSession();
 				}
@@ -120,7 +120,7 @@ namespace Petri
 					Server.StartSession();
 				}
 			}
-			else if(sender == this.startStopPetri) {
+			else if(sender == _startStopPetri) {
 				if(Server.PetriRunning) {
 					Server.StopPetri();
 				}
@@ -128,31 +128,27 @@ namespace Petri
 					Server.StartPetri();
 				}
 			}
-			else if(sender == playPause) {
+			else if(sender == _playPause) {
 				Server.Pause = !Server.Pause;
 			}
-			else if(sender == this.reload) {
+			else if(sender == _reload) {
 				Server.ReloadPetri();
 			}
-			else if(sender == this.switchToEditor) {
-				document.SwitchToEditor();
+			else if(sender == _switchToEditor) {
+				_document.SwitchToEditor();
 			}
 		}
 
 		protected DebugServer Server {
 			get {
-				if(server == null)
-					server = document.DebugController.Server;
-
-				return server;
+				return _document.DebugController.Server;
 			}
 		}
 
-		DebugServer server;
-		DebugView view;
-		Document document;
-		HBox toolbar;
-		Button startStopSession, startStopPetri, playPause, reload, switchToEditor;
+		DebugView _view;
+		Document _document;
+		HBox _toolbar;
+		Button _startStopSession, _startStopPetri, _playPause, _reload, _switchToEditor;
 	}
 }
 

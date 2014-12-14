@@ -174,10 +174,10 @@ namespace Petri
 
 		public bool Modified {
 			get {
-				return modified || (Settings != null && Settings.Modified);
+				return _modified || (Settings != null && Settings.Modified);
 			}
 			set {
-				modified = value;
+				_modified = value;
 				if(value == true) {
 					this.Blank = false;
 				}
@@ -597,7 +597,7 @@ namespace Petri
 		HeadersManager _headersManager;
 		DocumentSettings _settings;
 		SettingsEditor _settingsEditor;
-		bool modified;
+		bool _modified;
 	}
 }
 

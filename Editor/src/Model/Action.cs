@@ -48,12 +48,12 @@ namespace Petri
 
 		public Cpp.FunctionInvocation Function {
 			get {
-				return function;
+				return _function;
 			}
 			set {
-				function = value;
+				_function = value;
 				if(this.IsDefault())
-					function = this.DefaultAction();
+					_function = this.DefaultAction();
 					
 				Document.Modified = true;
 			}
@@ -80,7 +80,7 @@ namespace Petri
 			return "";
 		}
 
-		Cpp.FunctionInvocation function;
+		Cpp.FunctionInvocation _function;
 	}
 }
 

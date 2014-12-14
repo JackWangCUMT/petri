@@ -14,7 +14,7 @@ namespace Petri
 
 			public string Value {
 				get {
-					return value;
+					return _value;
 				}
 				set {
 					Regex regex = new Regex(@"^[0-9]*(\.[0-9]+)?(_ns|_us|_ms|_s)");
@@ -24,13 +24,13 @@ namespace Petri
 						throw new ArgumentException("Invalid timeout duration.");
 					}
 					else {
-						this.value = value;
+						this._value = value;
 					}
 
 				}
 			}
 
-			private string value;
+			private string _value;
 		}
 	}
 }

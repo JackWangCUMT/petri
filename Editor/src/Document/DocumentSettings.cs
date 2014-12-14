@@ -60,7 +60,7 @@ namespace Petri
 		}
 
 		private DocumentSettings(Document doc, XElement elem) {
-			document = doc;
+			_document = doc;
 
 			IncludePaths = new List<Tuple<string, bool>>();
 			LibPaths = new List<Tuple<string, bool>>();
@@ -221,7 +221,7 @@ namespace Petri
 			}
 		}
 
-		Document document;
+		Document _document;
 	}
 }
 

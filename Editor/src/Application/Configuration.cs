@@ -16,12 +16,12 @@ namespace Petri
 		public static Platform RunningPlatform {
 			get {
 				Configuration.Get();
-				return Configuration.platform;
+				return Configuration._platform;
 			}
 		}	
 
 		public static Configuration Get() {
-			if(Configuration.instance == null) {
+			if(Configuration._instance == null) {
 				try {
 					switch(Environment.OSVersion.Platform) {
 						case PlatformID.Unix:
@@ -29,20 +29,20 @@ namespace Petri
 								& Directory.Exists("/System")
 								& Directory.Exists("/Users")
 								& Directory.Exists("/Volumes"))
-								Configuration.platform = Platform.Mac;
+								Configuration._platform = Platform.Mac;
 							else
-								Configuration.platform = Platform.Linux;
+								Configuration._platform = Platform.Linux;
 							break;
 						case PlatformID.MacOSX:
-							Configuration.platform = Platform.Mac;
+							Configuration._platform = Platform.Mac;
 							break;
 						default:
-							Configuration.platform = Platform.Windows;
+							Configuration._platform = Platform.Windows;
 							break;
 					}
 
 					// Get the current configuration file.
-					Configuration.config = System.Configuration.ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+					Configuration._config = System.Configuration.ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 				}
 				catch(System.Xml.XmlException) {
 					string s = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
@@ -52,23 +52,23 @@ namespace Petri
 				}
 
 				try {
-					Configuration.instance = Configuration.config.Sections["CustomSection"] as Configuration;
+					Configuration._instance = Configuration._config.Sections["CustomSection"] as Configuration;
 				}
 				catch(System.Configuration.ConfigurationErrorsException err) {
 					Console.WriteLine("CreateConfigurationFile: {0}", err.ToString());
 				}
-				if(Configuration.instance == null) {
-					Configuration.instance = new Configuration();
-					Configuration.config.Sections.Add("CustomSection", Configuration.instance);
+				if(Configuration._instance == null) {
+					Configuration._instance = new Configuration();
+					Configuration._config.Sections.Add("CustomSection", Configuration._instance);
 				}
 			}
 
-			return Configuration.instance;
+			return Configuration._instance;
 		}
 
 		public static void Save() {
-			if(Configuration.instance != null) {
-				Configuration.config.Save(ConfigurationSaveMode.Full, true);
+			if(Configuration._instance != null) {
+				Configuration._config.Save(ConfigurationSaveMode.Full, true);
 			}
 		}
 
@@ -162,9 +162,9 @@ namespace Petri
 		}
 
 					
-		private static System.Configuration.Configuration config = null;
-		private static Configuration instance = null;
-		private static Platform platform;
+		private static System.Configuration.Configuration _config = null;
+		private static Configuration _instance = null;
+		private static Platform _platform;
 	}
 }
 

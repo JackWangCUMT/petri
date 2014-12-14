@@ -20,7 +20,7 @@ namespace Petri
 	public abstract class Entity
 	{
 		public Entity(Document doc, PetriNet parent) {
-			this.parent = parent;
+			_parent = parent;
 			this.Document = doc;
 			this.ID = Document.LastEntityID++;
 		}
@@ -46,7 +46,7 @@ namespace Petri
 		}
 
 		public Entity(Document doc, PetriNet parent, XElement descriptor) {
-			this.parent = parent;
+			_parent = parent;
 			this.Document = doc;
 
 			this.ID = XmlConvert.ToUInt64(descriptor.Attribute("ID").Value);
@@ -68,31 +68,31 @@ namespace Petri
 
 		public UInt64 ID {
 			get {
-				return id;
+				return _id;
 			}
 			set {
-				id = value;
+				_id = value;
 			}
 		}
 
 		public virtual string Name {
 			get {
-				return name;
+				return _name;
 			}
 			set {
 				if(value == "_") {
 					throw new ArgumentException();
 				}
-				name = value;
+				_name = value;
 			}
 		}
 
 		public PetriNet Parent {
 			get {
-				return parent;
+				return _parent;
 			}
 			set {
-				parent = value;
+				_parent = value;
 			}
 		}
 
@@ -102,16 +102,16 @@ namespace Petri
 			}
 			set {
 				if(this.Parent != null)
-					parent.Document = value;
+					_parent.Document = value;
 			}
 		}
 
 		public virtual Cairo.PointD Position {
 			get {
-				return position;
+				return _position;
 			}
 			set {
-				position = value;
+				_position = value;
 			}
 		}
 
@@ -121,10 +121,10 @@ namespace Petri
 			get;
 		}
 
-		UInt64 id;
-		string name;
-		PetriNet parent;
-		Cairo.PointD position;
+		UInt64 _id;
+		string _name;
+		PetriNet _parent;
+		Cairo.PointD _position;
 	}
 }
 

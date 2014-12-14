@@ -8,7 +8,7 @@ namespace Petri
 {
 	public class DebugView : PetriView {
 		public DebugView(Document doc) : base(doc) {
-			this.EntityDraw = new DebugEntityDraw(document);
+			this.EntityDraw = new DebugEntityDraw(_document);
 		}
 
 		public override void FocusIn() {
@@ -27,11 +27,11 @@ namespace Petri
 				}
 				else if(entity is Action) {
 					var a = entity as Action;
-					if(document.DebugController.Breakpoints.Contains(a)) {
-						document.DebugController.RemoveBreakpoint(a);
+					if(_document.DebugController.Breakpoints.Contains(a)) {
+						_document.DebugController.RemoveBreakpoint(a);
 					}
 					else {
-						document.DebugController.AddBreakpoint(a);
+						_document.DebugController.AddBreakpoint(a);
 					}
 				}
 			}

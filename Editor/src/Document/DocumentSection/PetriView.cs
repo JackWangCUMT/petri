@@ -10,12 +10,12 @@ namespace Petri
 	public abstract class PetriView : Gtk.DrawingArea
 	{
 		public PetriView(Document doc) {
-			document = doc;
-			needsRedraw = false;
-			deltaClick = new PointD(0, 0);
-			originalPosition = new PointD();
-			lastClickDate = DateTime.Now;
-			lastClickPosition = new PointD(0, 0);
+			_document = doc;
+			_needsRedraw = false;
+			_deltaClick = new PointD(0, 0);
+			_originalPosition = new PointD();
+			_lastClickDate = DateTime.Now;
+			_lastClickPosition = new PointD(0, 0);
 
 			this.ButtonPressEvent += (object o, ButtonPressEventArgs args) => {
 				this.HasFocus = true;
@@ -23,9 +23,9 @@ namespace Petri
 		}
 
 		public void Redraw() {
-			if(document.Window.Gui == null || document.Window.Gui.BaseView == this) {
-				if(needsRedraw == false) {
-					needsRedraw = true;
+			if(_document.Window.Gui == null || _document.Window.Gui.BaseView == this) {
+				if(_needsRedraw == false) {
+					_needsRedraw = true;
 					this.QueueDraw();
 				}
 			}
@@ -45,15 +45,15 @@ namespace Petri
 		protected override bool OnButtonPressEvent(Gdk.EventButton ev) {
 			if(ev.Type == Gdk.EventType.ButtonPress) {
 				// The Windows version of GTK# currently doesn't detect TwoButtonPress events, so here is a lame simulation of it.
-				if(/*ev.Type == Gdk.EventType.TwoButtonPress || */(lastClickPosition.X == ev.X && lastClickPosition.Y == ev.Y && (DateTime.Now - lastClickDate).TotalMilliseconds < 500)) {
-					lastClickPosition.X = -12345;
+				if(/*ev.Type == Gdk.EventType.TwoButtonPress || */(_lastClickPosition.X == ev.X && _lastClickPosition.Y == ev.Y && (DateTime.Now - _lastClickDate).TotalMilliseconds < 500)) {
+					_lastClickPosition.X = -12345;
 
 					this.ManageTwoButtonPress(ev);
 				}
 				else {
-					lastClickDate = DateTime.Now;
-					lastClickPosition.X = ev.X;
-					lastClickPosition.Y = ev.Y;
+					_lastClickDate = DateTime.Now;
+					_lastClickPosition.X = ev.X;
+					_lastClickPosition.Y = ev.Y;
 
 					this.ManageOneButtonPress(ev);
 				}
@@ -85,7 +85,7 @@ namespace Petri
 		}
 
 		protected void RenderInternal(Context context, PetriNet petriNet) {
-			needsRedraw = false;
+			_needsRedraw = false;
 
 
 			var extents = new PointD();
@@ -168,17 +168,17 @@ namespace Petri
 
 		public RootPetriNet RootPetriNet {
 			get {
-				return document.PetriNet;
+				return _document.PetriNet;
 			}
 		}
 
 		public virtual PetriNet CurrentPetriNet {
 			get {
-				return editedPetriNet;
+				return _editedPetriNet;
 			}
 			set {
-				document.EditorController.EditedObject = null;
-				editedPetriNet = value;
+				_document.EditorController.EditedObject = null;
+				_editedPetriNet = value;
 			}
 		}
 
@@ -207,15 +207,15 @@ namespace Petri
 			return PetriView.Normalized(new PointD(x, y));
 		}
 
-		protected Document document;
+		protected Document _document;
 
-		protected PetriNet editedPetriNet;
-		bool needsRedraw;
+		protected PetriNet _editedPetriNet;
+		bool _needsRedraw;
 
-		protected PointD deltaClick;
-		protected PointD originalPosition;
+		protected PointD _deltaClick;
+		protected PointD _originalPosition;
 
-		PointD lastClickPosition;
-		System.DateTime lastClickDate;
+		PointD _lastClickPosition;
+		System.DateTime _lastClickDate;
 	}
 }

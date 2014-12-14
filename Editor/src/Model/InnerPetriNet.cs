@@ -8,7 +8,7 @@ namespace Petri
 	{
 		public InnerPetriNet(Document doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos)
 		{
-			this.exitPoint = new ExitPoint(doc, this, new Cairo.PointD(300, 100));
+			_exitPoint = new ExitPoint(doc, this, new Cairo.PointD(300, 100));
 			this.AddState(this.ExitPoint);
 			this.EntryPointID = Document.LastEntityID++;
 		}
@@ -18,12 +18,12 @@ namespace Petri
 
 			foreach(var s in this.States) {
 				if(s.GetType() == typeof(ExitPoint)) {
-					this.exitPoint = s as ExitPoint;
+					_exitPoint = s as ExitPoint;
 					break;
 				}
 			}
 
-			if(this.exitPoint == null)
+			if(_exitPoint == null)
 				throw new Exception("No Exit node found in the saved Petri net!");
 		}
 
@@ -34,7 +34,7 @@ namespace Petri
 
 		public ExitPoint ExitPoint {
 			get {
-				return exitPoint;
+				return _exitPoint;
 			}
 		}
 
@@ -68,7 +68,7 @@ namespace Petri
 			return "";
 		}
 
-		ExitPoint exitPoint;
+		ExitPoint _exitPoint;
 	}
 }
 

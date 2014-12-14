@@ -9,8 +9,8 @@ namespace Petri
 	public class MainClass
 	{
 		public static bool OnExit() {
-			while(documents.Count > 0) {
-				if(!documents[documents.Count - 1].CloseAndConfirm())
+			while(_documents.Count > 0) {
+				if(!_documents[_documents.Count - 1].CloseAndConfirm())
 					return false;
 			}
 
@@ -41,16 +41,16 @@ namespace Petri
 		}
 
 		public static void AddDocument(Document doc) {
-			documents.Add(doc);
+			_documents.Add(doc);
 		}
 
 		public static void RemoveDocument(Document doc) {
-			documents.Remove(doc);
+			_documents.Remove(doc);
 		}
 
 		public static List<Document> Documents {
 			get {
-				return documents;
+				return _documents;
 			}
 		}
 
@@ -68,7 +68,7 @@ namespace Petri
 			if(fc.Run() == (int)ResponseType.Accept) {
 				string filename = fc.Filename;
 				fc.Destroy();
-				foreach(var d in documents) {
+				foreach(var d in _documents) {
 					if(d.Path == filename) {
 						d.Window.Present();
 						return;
@@ -76,10 +76,10 @@ namespace Petri
 				}
 
 				// Reuse last blank document which was created (typically the first one created on program launch)
-				if(documents.Count > 0 && documents[documents.Count - 1].Blank) {
-					documents[documents.Count - 1].Path = filename;
-					documents[documents.Count - 1].Restore();
-					documents[documents.Count - 1].Window.Present();
+				if(_documents.Count > 0 && _documents[_documents.Count - 1].Blank) {
+					_documents[_documents.Count - 1].Path = filename;
+					_documents[_documents.Count - 1].Restore();
+					_documents[_documents.Count - 1].Window.Present();
 				}
 				else {
 					var doc = new Document(filename);
@@ -93,14 +93,14 @@ namespace Petri
 
 		public static HashSet<Entity> Clipboard {
 			get {
-				return clipboard;
+				return _clipboard;
 			}
 			set {
-				clipboard = value;
+				_clipboard = value;
 			}
 		}
 
-		static List<Document> documents = new List<Document>();
-		static HashSet<Entity> clipboard = new HashSet<Entity>();
+		static List<Document> _documents = new List<Document>();
+		static HashSet<Entity> _clipboard = new HashSet<Entity>();
 	}
 }

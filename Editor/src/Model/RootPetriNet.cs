@@ -37,15 +37,6 @@ namespace Petri
 			}
 		}
 
-		public override Document Document {
-			get {
-				return document;
-			}
-			set {
-				document = value;
-			}
-		}
-
 		public Tuple<Cpp.Generator, string> GenerateCpp()
 		{
 			var source = new Cpp.Generator();
@@ -136,8 +127,6 @@ namespace Petri
 
 			Document.Modified = true;
 		}
-
-		private Document document;
 	}
 }
 

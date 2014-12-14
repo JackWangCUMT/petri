@@ -10,33 +10,33 @@ namespace Petri
 {
 	public class DebugServer {
 		public DebugServer(Document doc) {
-			document = doc;
-			sessionRunning = false;
-			petriRunning = false;
-			pause = false;
+			_document = doc;
+			_sessionRunning = false;
+			_petriRunning = false;
+			_pause = false;
 		}
 
 		~DebugServer() {
-			if(petriRunning || sessionRunning) {
+			if(_petriRunning || _sessionRunning) {
 				throw new Exception("Debugger still running!");
 			}
 		}
 
 		public bool SessionRunning {
 			get {
-				return sessionRunning;
+				return _sessionRunning;
 			}
 		}
 
 		public bool PetriRunning {
 			get {
-				return petriRunning;
+				return _petriRunning;
 			}
 		}
 
 		public bool Pause {
 			get {
-				return pause;
+				return _pause;
 			}
 			set {
 				if(PetriRunning) {
@@ -51,8 +51,8 @@ namespace Petri
 					catch(Exception) {}
 				}
 				else {
-					pause = false;
-					document.Window.DebugGui.UpdateToolbar();
+					_pause = false;
+					_document.Window.DebugGui.UpdateToolbar();
 				}
 			}
 		}
@@ -64,22 +64,22 @@ namespace Petri
 		}
 
 		public void StartSession() {
-			sessionRunning = true;
-			receiverThread = new Thread(this.receiver);
-			pause = false;
-			receiverThread.Start();
-			while(socket == null);
+			_sessionRunning = true;
+			_receiverThread = new Thread(this.receiver);
+			_pause = false;
+			_receiverThread.Start();
+			while(_socket == null);
 		}
 
 		public void StopSession() {
-			pause = false;
-			if(sessionRunning) {
+			_pause = false;
+			if(_sessionRunning) {
 				if(PetriRunning) {
 					if(Pause) {
 						this.Pause = false;
 					}
 					StopPetri();
-					petriRunning = false;
+					_petriRunning = false;
 				}
 
 				try {
@@ -87,17 +87,17 @@ namespace Petri
 				}
 				catch(Exception) {}
 
-				if(receiverThread != null)
-					receiverThread.Join();
-				sessionRunning = false;
+				if(_receiverThread != null)
+					_receiverThread.Join();
+				_sessionRunning = false;
 			}
 		}
 
 		public void StartPetri() {
-			pause = false;
+			_pause = false;
 			try {
-				if(!petriRunning)
-					this.sendObject(new JObject(new JProperty("type", "start"), new JProperty("payload", new JObject(new JProperty("hash", document.GetHash())))));
+				if(!_petriRunning)
+					this.sendObject(new JObject(new JProperty("type", "start"), new JProperty("payload", new JObject(new JProperty("hash", _document.GetHash())))));
 			}
 			catch(Exception) {
 				// TODO: present error
@@ -106,9 +106,9 @@ namespace Petri
 		}
 
 		public void StopPetri() {
-			pause = false;
+			_pause = false;
 			try {
-				if(petriRunning)
+				if(_petriRunning)
 					this.sendObject(new JObject(new JProperty("type", "stop")));
 			}
 			catch(Exception) {
@@ -119,8 +119,8 @@ namespace Petri
 
 		public void ReloadPetri() {
 			this.StopPetri();
-			document.SaveCppDontAsk();
-			if(!document.Compile()) {
+			_document.SaveCppDontAsk();
+			if(!_document.Compile()) {
 
 			}
 			else {
@@ -136,7 +136,7 @@ namespace Petri
 
 		public void UpdateBreakpoints() {
 			var breakpoints = new JArray();
-			foreach(var p in document.DebugController.Breakpoints) {
+			foreach(var p in _document.DebugController.Breakpoints) {
 				breakpoints.Add(new JValue(p.ID));
 			}
 			this.sendObject(new JObject(new JProperty("type", "breakpoints"), new JProperty("payload", breakpoints)));
@@ -148,7 +148,7 @@ namespace Petri
 		
 				var ehlo = this.receiveObject();
 				if(ehlo != null && ehlo["type"].ToString() == "ehlo") {
-					document.Window.DebugGui.UpdateToolbar();
+					_document.Window.DebugGui.UpdateToolbar();
 					return;
 				}
 				else if(ehlo != null && ehlo["type"].ToString() == "error") {
@@ -158,49 +158,49 @@ namespace Petri
 			}
 			catch(Exception e) {
 				Console.WriteLine("Couldn't connect to C++ debugger: " + e);
-				sessionRunning = false;
-				document.Window.DebugGui.UpdateToolbar();
+				_sessionRunning = false;
+				_document.Window.DebugGui.UpdateToolbar();
 			}
 		}
 
 		private void receiver() {
-			socket = new TcpClient(document.Settings.Hostname, document.Settings.Port);
+			_socket = new TcpClient(_document.Settings.Hostname, _document.Settings.Port);
 			this.Hello();
 
 			try {
-				while(sessionRunning && socket.Connected) {
+				while(_sessionRunning && _socket.Connected) {
 					JObject msg = this.receiveObject();
 					if(msg == null)
 						break;
 
 					if(msg["type"].ToString() == "ack") {
 						if(msg["payload"].ToString() == "start") {
-							petriRunning = true;
-							document.Window.DebugGui.UpdateToolbar();
+							_petriRunning = true;
+							_document.Window.DebugGui.UpdateToolbar();
 						}
 						else if(msg["payload"].ToString() == "stop") {
-							petriRunning = false;
-							document.Window.DebugGui.UpdateToolbar();
-							lock(document.DebugController.ActiveStates) {
-								document.DebugController.ActiveStates.Clear();
+							_petriRunning = false;
+							_document.Window.DebugGui.UpdateToolbar();
+							lock(_document.DebugController.ActiveStates) {
+								_document.DebugController.ActiveStates.Clear();
 							}
-							document.Window.DebugGui.View.Redraw();
+							_document.Window.DebugGui.View.Redraw();
 						}
 						else if(msg["payload"].ToString() == "reload") {
-							document.Window.DebugGui.UpdateToolbar();
+							_document.Window.DebugGui.UpdateToolbar();
 						}
 						else if(msg["payload"].ToString() == "pause") {
-							pause = true;
-							document.Window.DebugGui.UpdateToolbar();
+							_pause = true;
+							_document.Window.DebugGui.UpdateToolbar();
 						}
 						else if(msg["payload"].ToString() == "resume") {
-							pause = false;
-							document.Window.DebugGui.UpdateToolbar();
+							_pause = false;
+							_document.Window.DebugGui.UpdateToolbar();
 						}
 					}
 					else if(msg["type"].ToString() == "error") {
 						GLib.Timeout.Add(0, () => {
-							MessageDialog d = new MessageDialog(document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + msg["payload"].ToString()));
+							MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + msg["payload"].ToString()));
 							d.AddButton("Annuler", ResponseType.Cancel);
 							d.Run();
 							d.Destroy();
@@ -208,19 +208,19 @@ namespace Petri
 							return false;
 						});
 
-						if(petriRunning) {
+						if(_petriRunning) {
 							this.StopPetri();
 						}
 					}
 					else if(msg["type"].ToString() == "exit") {
 						if(msg["payload"].ToString() == "kbye") {
-							sessionRunning = false;
-							petriRunning = false;
-							document.Window.DebugGui.UpdateToolbar();
+							_sessionRunning = false;
+							_petriRunning = false;
+							_document.Window.DebugGui.UpdateToolbar();
 						}
 						else {
-							sessionRunning = false;
-							petriRunning = false;
+							_sessionRunning = false;
+							_petriRunning = false;
 
 							throw new Exception("Remote debugger requested a session termination for reason: " + msg["payload"].ToString());
 						}
@@ -228,22 +228,22 @@ namespace Petri
 					else if(msg["type"].ToString() == "states") {
 						var states = msg["payload"].Select(t => t).ToList();
 
-						lock(document.DebugController.ActiveStates) {
-							document.DebugController.ActiveStates.Clear();
+						lock(_document.DebugController.ActiveStates) {
+							_document.DebugController.ActiveStates.Clear();
 							foreach(var s in states) {
 								var id = UInt64.Parse(s["id"].ToString());
-								var e = document.EntityFromID(id);
+								var e = _document.EntityFromID(id);
 								if(e == null || !(e is State)) {
 									throw new Exception("Entity sent from runtime doesn't exist on our side! (id: " + id + ")");
 								}
-								document.DebugController.ActiveStates[e as State] = int.Parse(s["count"].ToString());
+								_document.DebugController.ActiveStates[e as State] = int.Parse(s["count"].ToString());
 							}
 						}
 
-						document.Window.DebugGui.View.Redraw();
+						_document.Window.DebugGui.View.Redraw();
 					}
 				}
-				if(sessionRunning) {
+				if(_sessionRunning) {
 					throw new Exception("Socket unexpectedly disconnected");
 				}
 			}
@@ -254,15 +254,15 @@ namespace Petri
 			}
 
 			try {
-				socket.Close();
+				_socket.Close();
 			}
 			catch(Exception) {}
-			document.Window.DebugGui.UpdateToolbar();
+			_document.Window.DebugGui.UpdateToolbar();
 		}
 
 		private JObject receiveObject() {
 			int count = 0;
-			while(sessionRunning) {
+			while(_sessionRunning) {
 				string val = this.receiveString();
 				if(val.Length > 0)
 					return JObject.Parse(val);
@@ -283,10 +283,10 @@ namespace Petri
 		private string receiveString() {
 			byte[] msg;
 
-			lock(downLock) {
+			lock(_downLock) {
 				byte[] countBytes = new byte[4];
 
-				int len =  socket.GetStream().Read(countBytes, 0, 4);
+				int len =  _socket.GetStream().Read(countBytes, 0, 4);
 				if(len != 4)
 					return "";
 
@@ -295,7 +295,7 @@ namespace Petri
 
 				msg = new byte[count];
 				while(read < count) {
-					read += (UInt32)socket.GetStream().Read(msg, (int)read, (int)(count - read));
+					read += (UInt32)_socket.GetStream().Read(msg, (int)read, (int)(count - read));
 				}
 			}
 
@@ -316,20 +316,20 @@ namespace Petri
 
 			msg.CopyTo(bytes, 4);
 
-			lock(upLock) {
-				socket.GetStream().Write(bytes, 0, bytes.Length);
+			lock(_upLock) {
+				_socket.GetStream().Write(bytes, 0, bytes.Length);
 			}
 		}
 
-		bool petriRunning, pause;
-		volatile bool sessionRunning;
-		Thread receiverThread;
+		bool _petriRunning, _pause;
+		volatile bool _sessionRunning;
+		Thread _receiverThread;
 
-		volatile TcpClient socket;
-		object upLock = new object();
-		object downLock = new object();
+		volatile TcpClient _socket;
+		object _upLock = new object();
+		object _downLock = new object();
 
-		Document document;
+		Document _document;
 	}
 }
 

@@ -92,7 +92,7 @@ namespace Petri
 	{
 		public ExpressionCondition(Cpp.Expression cond) : base()
 		{
-			expr = cond;
+			_expr = cond;
 		}
 
 		public override bool UsesHeader(string h) {
@@ -101,15 +101,15 @@ namespace Petri
 
 		public override string MakeUserReadable()
 		{
-			return expr.MakeUserReadable();
+			return _expr.MakeUserReadable();
 		}
 
 		public override string MakeCpp()
 		{
-			return "std::make_shared<Condition>(make_callable_ptr([]() { return " + expr.MakeCpp() + "->operator()(); }))";
+			return "std::make_shared<Condition>(make_callable_ptr([]() { return " + _expr.MakeCpp() + "->operator()(); }))";
 		}
 
-		Cpp.Expression expr;
+		Cpp.Expression _expr;
 	}
 
 }
