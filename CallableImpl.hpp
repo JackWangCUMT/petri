@@ -15,6 +15,9 @@ namespace Callable_detail {
 	template<bool MemberFunction, typename CallableType, typename... Args2>
 	struct callFinal {};
 
+	template<bool Pointer, typename CallableType, typename... Args2>
+	struct callFinalMember {};
+
 	template<typename Tuple, bool callable, int N>
 	struct getArg {};
 
@@ -47,8 +50,22 @@ namespace Callable_detail {
 	// Member function pointer, so we have to call it with the first argument as *this object
 	template<typename CallableType, typename Arg, typename... Args2>
 	struct callFinal<true, CallableType, Arg, Args2...> {
+		static auto call(CallableType &callable, Arg &arg, Args2 ...args) -> decltype(callFinalMember<std::is_pointer<std::remove_reference_t<Arg>>::value, CallableType, Arg, Args2...>::call(callable, arg, args...)) {
+			return callFinalMember<std::is_pointer<std::remove_reference_t<Arg>>::value, CallableType, Arg, Args2...>::call(callable, arg, args...);
+		}
+	};
+
+	template<typename CallableType, typename Arg, typename... Args2>
+	struct callFinalMember<false, CallableType, Arg, Args2...> {
 		static auto call(CallableType &callable, Arg &arg, Args2 ...args) -> decltype((arg.*callable)(args...)) {
 			return (arg.*callable)(args...);
+		}
+	};
+
+	template<typename CallableType, typename Arg, typename... Args2>
+	struct callFinalMember<true, CallableType, Arg, Args2...> {
+		static auto call(CallableType &callable, Arg &arg, Args2 ...args) -> decltype((arg->*callable)(args...)) {
+			return (arg->*callable)(args...);
 		}
 	};
 
