@@ -37,6 +37,11 @@ namespace Petri
 			}
 		}
 
+		public override Document Document {
+			get;
+			set;
+		}
+
 		public Tuple<Cpp.Generator, string> GenerateCpp()
 		{
 			var source = new Cpp.Generator();

@@ -121,7 +121,13 @@ namespace Petri
 				return;
 
 			if(header.Length > 0) {
-				var functions = Cpp.Parser.Parse(header);
+				// If path is relative, then make it absolute
+				string filename = header;
+				if(!System.IO.Path.IsPathRooted(header)) {
+					filename = System.IO.Path.Combine(System.IO.Directory.GetParent(this.Path).FullName, filename);
+				}
+
+				var functions = Cpp.Parser.Parse(filename);
 				foreach(var func in functions) {
 					if(func.ReturnType.Equals("ResultatAction")) {
 						CppActions.Add(func);

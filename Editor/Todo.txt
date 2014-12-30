@@ -18,6 +18,8 @@ Compilation du code : formattage des erreurs de compilation
 
 Actions/Transitions : ajustement des dimensions à la longueur du titre
 
+Chemins relatifs/absoluts des headers inclus
+
 FIXME:
 	état interne des Conditions pas thread-safe
 
