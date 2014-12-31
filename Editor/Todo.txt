@@ -7,6 +7,7 @@ Gestion des timeouts
 
 Gestion des modifications des headers en cours de route par un programme extérieur
 	En cas de changements incompatibles, proposer une résolution à la main ?
+	Impossibilité de trouver un en-tête au chargement ?
 
 Débuggeur graphique
 	Timeout des communications sur le socket
@@ -18,7 +19,7 @@ Compilation du code : formattage des erreurs de compilation
 
 Actions/Transitions : ajustement des dimensions à la longueur du titre
 
-Chemins relatifs/absoluts des headers inclus
+Barre d'outils
 
 FIXME:
 	état interne des Conditions pas thread-safe

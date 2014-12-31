@@ -94,7 +94,7 @@ namespace Petri
 
 		protected void OnDeleteEvent(object sender, DeleteEventArgs a) {
 			_window.Hide();
-			// We do not close the window so that there is no need to recreate it upon reponing
+			// We do not close the window so that there is no need to recreate it upon reopening
 			a.RetVal = true;
 		}
 
@@ -104,8 +104,17 @@ namespace Petri
 				new object[]{"Annuler",ResponseType.Cancel,
 					"Ouvrir",ResponseType.Accept});
 
+			CheckButton b = new CheckButton("Chemin relatif");
+			b.Active = true;
+			fc.ActionArea.PackEnd(b);
+			b.Show();
+
 			if(fc.Run() == (int)ResponseType.Accept) {
-				_document.AddHeader(fc.Filename);
+				string filename = fc.Filename;
+				if(b.Active) {
+					filename = Configuration.GetRelativePath(filename, System.IO.Directory.GetParent(_document.Path).FullName);
+				}
+				_document.AddHeader(filename);
 			}
 			fc.Destroy();
 

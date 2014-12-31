@@ -538,11 +538,19 @@ namespace Petri
 		}
 
 		public void ManageHeaders() {
-			if(_headersManager == null) {
-				_headersManager = new HeadersManager(this);
-			}
+			if(this.Path != "") {
+				if(_headersManager == null) {
+					_headersManager = new HeadersManager(this);
+				}
 
-			_headersManager.Show();
+				_headersManager.Show();
+			}
+			else {
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, "Veuillez enregistrer le document avant d'ajouter des headers.");
+
+				d.Run();
+				d.Destroy();
+			}
 		}
 
 		public void EditSettings() {

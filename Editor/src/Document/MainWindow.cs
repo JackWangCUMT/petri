@@ -204,6 +204,9 @@ namespace Petri
 			else if(sender == _showDebugger) {
 				_document.SwitchToDebug();
 			}
+			else if(sender == _manageHeaders) {
+				_document.ManageHeaders();
+			}
 			else if(sender == _documentSettings) {
 				_document.EditSettings();
 			}
@@ -318,12 +321,16 @@ namespace Petri
 			_showDebugger = new MenuItem("Afficher le débuggueur");
 			_showDebugger.Activated += OnClickMenu;
 			_showDebugger.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.d, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
+			_manageHeaders = new MenuItem("Gérer les headers…");
+			_manageHeaders.Activated += OnClickMenu;
 			_documentSettings = new MenuItem("Réglages…");
 			_documentSettings.Activated += OnClickMenu;
+			_documentSettings.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.comma, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
 
 			documentMenu.Append(_showEditor);
 			documentMenu.Append(_showDebugger);
 			documentMenu.Append(new SeparatorMenuItem());
+			documentMenu.Append(_manageHeaders);
 			documentMenu.Append(_documentSettings);
 
 
@@ -379,6 +386,7 @@ namespace Petri
 
 		MenuItem _showEditor;
 		MenuItem _showDebugger;
+		MenuItem _manageHeaders;
 		MenuItem _documentSettings;
 
 		AccelGroup _accelGroup;
