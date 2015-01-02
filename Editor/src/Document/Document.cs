@@ -121,8 +121,9 @@ namespace Petri
 				return;
 
 			if(header.Length > 0) {
-				// If path is relative, then make it absolute
 				string filename = header;
+
+				// If path is relative, then make it absolute
 				if(!System.IO.Path.IsPathRooted(header)) {
 					filename = System.IO.Path.Combine(System.IO.Directory.GetParent(this.Path).FullName, filename);
 				}
