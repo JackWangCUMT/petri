@@ -248,7 +248,7 @@ void DebugSession::setPause(bool pause) {
 }
 
 Json::Value DebugSession::receiveObject() {
-	std::vector<std::uint8_t> vect = _socket.receiveNewMsg(_client);
+	std::vector<uint8_t> vect = _socket.receiveNewMsg(_client);
 
 	std::string msg(vect.begin(), vect.end());
 

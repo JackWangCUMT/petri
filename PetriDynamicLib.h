@@ -44,7 +44,7 @@ public:
 	 * Returns the TCP port on which a DebugSession initialized with this wrapper will listen to debugger connection.
 	 * @return The TCP port which will be used by DebugSession
 	 */
-	virtual std::uint16_t port() const override {
+	virtual uint16_t port() const override {
 		return PORT;
 	}
 

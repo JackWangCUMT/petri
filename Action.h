@@ -27,7 +27,7 @@ using namespace std::chrono_literals;
 /**
  * A state composing a PetriNet.
  */
-class Action : public CallableTimeout<std::uint64_t> {
+class Action : public CallableTimeout<uint64_t> {
 public:
 	/**
 	 * Creates an empty action, associated to a null CallablePtr.

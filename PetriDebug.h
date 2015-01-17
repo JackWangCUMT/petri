@@ -49,7 +49,7 @@ public:
 	 * @param The ID to match with a state.
 	 * @return The state matching ID
 	 */
-	Action *stateWithID(std::uint64_t id) const {
+	Action *stateWithID(uint64_t id) const {
 		auto it = _statesMap.find(id);
 		if(it != _statesMap.end())
 			return it->second;
@@ -62,7 +62,7 @@ protected:
 	virtual void stateDisabled(Action &a) override;
 
 	DebugSession *_observer = nullptr;
-	std::unordered_map<std::uint64_t, Action *> _statesMap;
+	std::unordered_map<uint64_t, Action *> _statesMap;
 };
 
 

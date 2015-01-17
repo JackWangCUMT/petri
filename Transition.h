@@ -26,7 +26,7 @@ class Action;
 /**
  * A transition linking 2 Action, composing a PetriNet.
  */
-class Transition : public CallableTimeout<std::uint64_t> {
+class Transition : public CallableTimeout<uint64_t> {
 public:
 	/**
 	 * Creates an Transition object, containing a nullptr test, allowing the end of execution of Action 'previous' to provoke

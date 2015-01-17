@@ -74,7 +74,7 @@ public:
 	 * Returns the TCP port on which a DebugSession initialized with this wrapper will listen to debugger connection.
 	 * @return The TCP port which will be used by DebugSession
 	 */
-	virtual std::uint16_t port() const = 0;
+	virtual uint16_t port() const = 0;
 
 	/**
 	 * Unloads the code of the dynamic library previously loaded, and loads the code contained in a possibly updated dylib.
