@@ -227,8 +227,7 @@ namespace Petri
 					if(func.Name != "defaultAction" && func.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope())))
 						list.Add(func.Signature);
 				}
-				string activeFunction = a.IsDefault() ? defaultFunction : (list.Contains(a.Function.Function.Signature) ? a.Function.Function.Signature : manual);
-
+				string activeFunction = a.IsDefault() ? defaultFunction : (!a.Function.NeedsExpansion && list.Contains(a.Function.Function.Signature) ? a.Function.Function.Signature : manual);
 
 				ComboBox funcList = ComboHelper(activeFunction, list);
 				this.AddWidget(funcList, true, 0);
@@ -285,12 +284,20 @@ namespace Petri
 			if(manual) {
 				var label = CreateLabel(0, "Invocation de l'action :");
 				editorFields.Add(label);
-				var invocation = CreateWidget<Entry>(true, 0, a.Function.MakeUserReadable());
+				string userReadable;
+				if(a.Function.NeedsExpansion) {
+					userReadable = a.Function.Unexpanded;
+				}
+				else {
+					userReadable = a.Function.MakeUserReadable();
+				}
+
+				var invocation = CreateWidget<Entry>(true, 0, userReadable);
 				editorFields.Add(invocation);
 				invocation.FocusOutEvent += (obj, eventInfo) => {
 					Cpp.FunctionInvocation funcInvocation = null;
 					try {
-						funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, _document.AllFunctions);
+						funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, _document.AllFunctions, _document.CppMacros);
 						if(!funcInvocation.Function.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()))) {
 							throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
 						}
@@ -323,10 +330,10 @@ namespace Petri
 									if((w as Entry).Text == "this")
 										args.Add(new Cpp.EntityExpression(a, "this"));
 									else
-										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, _document.AllFunctions));
+										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, _document.AllFunctions, _document.CppMacros));
 								}
 							}
-							this.PostAction(ModifLocation.Function, new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions), false, args.ToArray())));
+							this.PostAction(ModifLocation.Function, new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions, _document.CppMacros), false, args.ToArray())));
 						};
 					}
 					for(int i = 0; i < a.Function.Function.Parameters.Count; ++i) {
@@ -344,12 +351,12 @@ namespace Petri
 									if((w as Entry).Text == "this")
 										args.Add(new Cpp.EntityExpression(a, "this"));
 									else
-										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, _document.AllFunctions));
+										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, _document.AllFunctions, _document.CppMacros));
 								}
 							}
 							Cpp.FunctionInvocation invocation;
 							if(a.Function.Function is Cpp.Method) {
-								invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions), false, args.ToArray());
+								invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions, _document.CppMacros), false, args.ToArray());
 							}
 							else {
 								invocation = new Cpp.FunctionInvocation(a.Function.Function, args.ToArray());
@@ -452,10 +459,17 @@ namespace Petri
 			};
 
 			CreateLabel(0, "Condition de la transition :");
-			var condition = CreateWidget<Entry>(true, 0, t.Condition.MakeUserReadable());
+			string userReadable;
+			if(t.Condition is ExpressionCondition && ((ExpressionCondition)t.Condition).Expression.NeedsExpansion) {
+				userReadable = ((ExpressionCondition)t.Condition).Expression.Unexpanded;
+			}
+			else {
+				userReadable = t.Condition.MakeUserReadable();
+			}
+			var condition = CreateWidget<Entry>(true, 0, userReadable);
 			condition.FocusOutEvent += (obj, eventInfo) => {
 				try {
-					var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, t, _document.AllFunctions));
+					var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, t, _document.AllFunctions, _document.CppMacros));
 					PostAction(ModifLocation.Condition, cond);
 				}
 				catch(Exception e) {

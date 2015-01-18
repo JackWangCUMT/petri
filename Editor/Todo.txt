@@ -1,5 +1,4 @@
-﻿C++ alias/typedefs
-Fonctions builtin ?
+﻿Fonctions builtin ?
 
 Autocomplétion des expressions
 
@@ -21,11 +20,13 @@ Actions/Transitions : ajustement des dimensions à la longueur du titre
 
 Barre d'outils
 Fonction recherche
-Macros nommées ?
 
+Modification/ajout de macros dans le logiciel
 
 FIXME:
 	état interne des Conditions pas thread-safe
 
 	Cible des raccourcis clavier (copier-coller, fermer…)
 	Parenthèses A && B && C
+	Chemin relatif lib.so
+	Chemin relatif compilation

@@ -21,8 +21,8 @@ namespace Petri
 			this.Function = this.DefaultAction();
 		}
 
-		public Action(Document doc, PetriNet parent, XElement descriptor, IEnumerable<Cpp.Function> functions) : base(doc, parent, descriptor) {
-			this.Function = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>(descriptor.Attribute("Function").Value, this, functions);
+		public Action(Document doc, PetriNet parent, XElement descriptor, IEnumerable<Cpp.Function> functions, IDictionary<string, string> macros) : base(doc, parent, descriptor) {
+			this.Function = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>(descriptor.Attribute("Function").Value, this, functions, macros);
 		}
 
 		public override XElement GetXml() {

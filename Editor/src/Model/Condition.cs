@@ -14,7 +14,7 @@ namespace Petri
 
 		public abstract bool UsesHeader(string h);
 
-		public static ConditionBase ConditionFromString(string condition, Transition transition, List<Cpp.Function> funcList)
+		public static ConditionBase ConditionFromString(string condition, Transition transition, IEnumerable<Cpp.Function> funcList, IDictionary<string, string> macros)
 		{
 			foreach(Action.ResultatAction res in Enum.GetValues(typeof(Action.ResultatAction))) {
 				if(condition == res.ToString()) {
@@ -24,7 +24,7 @@ namespace Petri
 			if(condition.StartsWith("Timeout(")) {
 				return new TimeoutCondition(new Cpp.Duration(condition.Substring("Timeout(".Length, condition.Length - "Timeout(".Length - 1)));
 			}
-			return new ExpressionCondition(Cpp.Expression.CreateFromString<Cpp.Expression>(condition, null, funcList));
+			return new ExpressionCondition(Cpp.Expression.CreateFromString<Cpp.Expression>(condition, null, funcList, macros));
 		}
 	}
 
@@ -92,7 +92,7 @@ namespace Petri
 	{
 		public ExpressionCondition(Cpp.Expression cond) : base()
 		{
-			_expr = cond;
+			Expression = cond;
 		}
 
 		public override bool UsesHeader(string h) {
@@ -101,15 +101,18 @@ namespace Petri
 
 		public override string MakeUserReadable()
 		{
-			return _expr.MakeUserReadable();
+			return Expression.MakeUserReadable();
+		}
+
+		public Cpp.Expression Expression {
+			get;
+			private set;
 		}
 
 		public override string MakeCpp()
 		{
-			return "std::make_shared<Condition>(make_callable_ptr([]() { return " + _expr.MakeCpp() + "->operator()(); }))";
+			return "std::make_shared<Condition>(make_callable_ptr([]() { return " + Expression.MakeCpp() + "->operator()(); }))";
 		}
-
-		Cpp.Expression _expr;
 	}
 
 }

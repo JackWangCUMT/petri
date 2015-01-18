@@ -20,6 +20,8 @@ namespace Petri
 			CppActions = new List<Cpp.Function>();
 			CppConditions = new List<Cpp.Function>();
 
+			CppMacros = new Dictionary<string, string>();
+
 			var timeout = new Cpp.Function(new Cpp.Type("Timeout", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "Timeout", false);
 			timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>", Cpp.Scope.EmptyScope()), "timeout"));
 			CppConditions.Add(timeout);
@@ -152,11 +154,17 @@ namespace Petri
 
 			CppActions.RemoveAll(a => a.Header == header);
 			CppConditions.RemoveAll(c => c.Header == header);
+			AllFunctions.RemoveAll(s => s.Header == header);
 			Headers.Remove(header);
 
 			Modified = true;
 
 			return true;
+		}
+
+		public Dictionary<string, string> CppMacros {
+			get;
+			private set;
 		}
 
 		public List<Cpp.Function> CppConditions {
@@ -333,9 +341,17 @@ namespace Petri
 					hh.SetAttributeValue("File", h);
 					headers.Add(hh);
 				}
+				var macros = new XElement("Macros");
+				foreach(var m in CppMacros) {
+					var mm = new XElement("Macro");
+					mm.SetAttributeValue("Name", m.Key);
+					mm.SetAttributeValue("Value", m.Value);
+					headers.Add(mm);
+				}
 				doc.Add(root);
 				root.Add(winConf);
 				root.Add(headers);
+				root.Add(macros);
 				root.Add(PetriNet.GetXml());
 
 				// Write to a temporary file to avoid corrupting the existing document on error
@@ -417,9 +433,24 @@ namespace Petri
 					Window.Move(int.Parse(winConf.Attribute("X").Value), int.Parse(winConf.Attribute("Y").Value));
 					Window.Resize(int.Parse(winConf.Attribute("W").Value), int.Parse(winConf.Attribute("H").Value));
 
+					while(this.Headers.Count > 0) {
+						this.RemoveHeader(this.Headers[0]);
+					}
+
+					CppMacros.Clear();
+
 					var node = elem.Element("Headers");
-					foreach(var e in node.Elements()) {
-						this.AddHeader(e.Attribute("File").Value);
+					if(node != null) {
+						foreach(var e in node.Elements()) {
+							this.AddHeader(e.Attribute("File").Value);
+						}
+					}
+
+					node = elem.Element("Macros");
+					if(node != null) {
+						foreach(var e in node.Elements()) {
+							CppMacros.Add(e.Attribute("Name").Value, e.Attribute("Value").Value);
+						}
 					}
 
 					PetriNet = new RootPetriNet(this, elem.Element("PetriNet"));

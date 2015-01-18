@@ -11,18 +11,27 @@ namespace Petri {
 
 			protected Expression(Operator.Name op) {
 				this.Operator = op;
+				Unexpanded = "";
 			}
 
 			public abstract string MakeCpp();
 			public abstract string MakeUserReadable();
 
-			public static ExpressionType CreateFromString<ExpressionType>(string s, Entity entity, IEnumerable<Function> funcList) where ExpressionType : Expression {
+			public static ExpressionType CreateFromString<ExpressionType>(string s, Entity entity, IEnumerable<Function> funcList, IDictionary<string, string> macros) where ExpressionType : Expression {
+				string unexpanded = s;
+
+				string expanded = Expand(s, macros);
+				s = expanded;
+
 				var tup = Expression.Preprocess(s);
 
 				Expression result = Expression.CreateFromPreprocessedString(tup.Item1, entity, funcList, tup.Item2);
 
 				if(!(result is ExpressionType))
 					throw new Exception("Unable to get a valid expression");
+
+				result.Unexpanded = unexpanded;
+				result.NeedsExpansion = !unexpanded.Equals(expanded);
 
 				return (ExpressionType)result;
 
@@ -33,10 +42,30 @@ namespace Petri {
 				private set;
 			}
 
+			public string Unexpanded {
+				get;
+				private set;
+			}
+
+			public bool NeedsExpansion {
+				get;
+				private set;
+			}
+
+			private static string Expand(string expression, IDictionary<string, string> macros) {
+				if(macros != null) {
+					foreach(var macro in macros) {
+						expression = expression.Replace(macro.Key, macro.Value);
+					}
+				}
+			
+				return expression;
+			}
+
 			private static Tuple<string, Dictionary<int, Tuple<ExprType, string>>> Preprocess(string s) {
-				s.Replace("\t", " ");
-				s.Replace("  ", " ");
-				s.Replace(" (", "(");
+				s = s.Replace("\t", " ");
+				s = s.Replace("  ", " ");
+				s = s.Replace(" (", "(");
 				s = Parser.RemoveParenthesis(s.Trim()).Trim();
 				var subexprs = new Dictionary<int, Tuple<ExprType, string>>();
 
@@ -198,10 +227,10 @@ namespace Petri {
 							e1 = Expression.GetStringFromPreprocessed(e1, subexprs);
 							e2 = Expression.GetStringFromPreprocessed(e2, subexprs);
 
-							return new BinaryExpression(foundOperator, Expression.CreateFromString<Expression>(e1, entity, funcList), Expression.CreateFromString<Expression>(e2, entity, funcList));
+							return new BinaryExpression(foundOperator, Expression.CreateFromString<Expression>(e1, entity, funcList, null), Expression.CreateFromString<Expression>(e2, entity, funcList, null));
 						}
 						else if(prop.type == Petri.Cpp.Operator.Type.PrefixUnary) {
-							return new UnaryExpression(foundOperator, Expression.CreateFromString<Expression>(Expression.GetStringFromPreprocessed(s.Substring(index + prop.cpp.Length), subexprs), entity, funcList));
+							return new UnaryExpression(foundOperator, Expression.CreateFromString<Expression>(Expression.GetStringFromPreprocessed(s.Substring(index + prop.cpp.Length), subexprs), entity, funcList, null));
 						}
 						else if(prop.type == Petri.Cpp.Operator.Type.SuffixUnary) {
 							if(foundOperator == Petri.Cpp.Operator.Name.FunCall) {
@@ -229,7 +258,7 @@ namespace Petri {
 							
 								return new FunctionInvocation(f, param.ToArray());
 							}
-							return new UnaryExpression(foundOperator, Expression.CreateFromString<Expression>(Expression.GetStringFromPreprocessed(s.Substring(0, index), subexprs), entity, funcList));
+							return new UnaryExpression(foundOperator, Expression.CreateFromString<Expression>(Expression.GetStringFromPreprocessed(s.Substring(0, index), subexprs), entity, funcList, null));
 						}
 					}
 				}
@@ -262,8 +291,10 @@ namespace Petri {
 				return prep;
 			}
 
-			private static MethodInvocation CreateInvocation(bool indirection, List<string> invocation, IEnumerable<Function> funcList, Entity entity) {
-				var func = Parser.RemoveParenthesis(invocation[1]);
+			private static MethodInvocation CreateInvocation(bool indirection, List<string> invocation, IEnumerable<Function> funcList, IDictionary<string, string> macros, Entity entity) {
+				var func = Expand(invocation[1], macros);
+				func = Parser.RemoveParenthesis(func);
+
 				int index = func.IndexOf("(");
 				var args = Parser.RemoveParenthesis(func.Substring(index));
 				func = func.Substring(0, index);
@@ -271,7 +302,7 @@ namespace Petri {
 				var argsList = Parser.SyntacticSplit(args, ",");
 				var exprList = new List<Expression>();
 				foreach(var ss in argsList) {
-					exprList.Add(Expression.CreateFromString<Expression>(Parser.RemoveParenthesis(ss), entity, funcList));
+					exprList.Add(Expression.CreateFromString<Expression>(Parser.RemoveParenthesis(ss), entity, funcList, null));
 				}
 				Cpp.Method m = (funcList.FirstOrDefault(delegate(Cpp.Function ff) {
 					return (ff is Method) && ff.Parameters.Count == argsList.Count && tup.Item2 == ff.Name && tup.Item1.Equals(ff.Enclosing);
@@ -281,7 +312,7 @@ namespace Petri {
 					throw new Exception("Aucune méthode ne correspond à l'expression demandée");
 				}
 
-				return new MethodInvocation(m, Expression.CreateFromString<Expression>(invocation[0], entity, funcList), indirection, exprList.ToArray());
+				return new MethodInvocation(m, Expression.CreateFromString<Expression>(invocation[0], entity, funcList, macros), indirection, exprList.ToArray());
 			}
 
 			protected static string Parenthesize(Expression parent, Expression child, string representation) {

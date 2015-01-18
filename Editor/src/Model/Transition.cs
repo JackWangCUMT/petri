@@ -28,12 +28,12 @@ namespace Petri
 			this.UpdatePosition();
 		}
 
-		public Transition(Document doc, PetriNet parent, XElement descriptor, IDictionary<UInt64, State> statesTable, List<Cpp.Function> conditions) : base(doc, parent, descriptor) {
+		public Transition(Document doc, PetriNet parent, XElement descriptor, IDictionary<UInt64, State> statesTable, IEnumerable<Cpp.Function> conditions, IDictionary<string, string> macros) : base(doc, parent, descriptor) {
 			this.Before = statesTable[UInt64.Parse(descriptor.Attribute("BeforeID").Value)];
 			this.After = statesTable[UInt64.Parse(descriptor.Attribute("AfterID").Value)];
 
 
-			this.Condition = ConditionBase.ConditionFromString(descriptor.Attribute("Condition").Value, this, conditions);
+			this.Condition = ConditionBase.ConditionFromString(descriptor.Attribute("Condition").Value, this, conditions, macros);
 
 			this.Width = double.Parse(descriptor.Attribute("W").Value);
 			this.Height = double.Parse(descriptor.Attribute("H").Value);
