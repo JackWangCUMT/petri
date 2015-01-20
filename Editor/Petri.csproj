@@ -27,6 +27,7 @@
     <CreatePackage>false</CreatePackage>
     <EnablePackageSigning>false</EnablePackageSigning>
     <IncludeMonoRuntime>false</IncludeMonoRuntime>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -41,6 +42,7 @@
     <CreatePackage>false</CreatePackage>
     <EnableCodeSigning>false</EnableCodeSigning>
     <ConsolePause>false</ConsolePause>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Core" />
@@ -117,6 +119,7 @@
     <Compile Include="src\Model\Comment.cs" />
     <Compile Include="src\Document\DocumentSection\RenderView.cs" />
     <Compile Include="src\Document\DocumentSection\RenderEntityDraw.cs" />
+    <Compile Include="src\Document\MacrosManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

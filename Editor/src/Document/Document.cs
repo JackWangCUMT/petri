@@ -140,11 +140,11 @@ namespace Petri
 					}
 					AllFunctions.Add(func);
 				}
+
+				Headers.Add(header);
+
+				Modified = true;
 			}
-
-			Headers.Add(header);
-
-			Modified = true;
 		}
 
 		// Performs the removal if possible
@@ -284,6 +284,8 @@ namespace Petri
 		}
 
 		public void SaveAs() {
+			string filename = null;
+
 			var fc = new Gtk.FileChooserDialog("Enregistrer le graphe sous…", Window,
 				FileChooserAction.Save,
 				new object[]{"Annuler",ResponseType.Cancel,
@@ -300,13 +302,18 @@ namespace Petri
 				this.Path = fc.Filename;
 				if(!this.Path.EndsWith(".petri"))
 					this.Path += ".petri";
-				Window.Title = System.IO.Path.GetFileName(this.Path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
+
+				filename = System.IO.Path.GetFileName(this.Path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
+
 				fc.Destroy();
 			}
 			else {
 				fc.Destroy();
 				return;
 			}
+
+			Window.Title = filename;
+			Settings.Name = filename;
 
 			this.Save();
 		}
@@ -346,7 +353,7 @@ namespace Petri
 					var mm = new XElement("Macro");
 					mm.SetAttributeValue("Name", m.Key);
 					mm.SetAttributeValue("Value", m.Value);
-					headers.Add(mm);
+					macros.Add(mm);
 				}
 				doc.Add(root);
 				root.Add(winConf);
@@ -427,7 +434,7 @@ namespace Petri
 
 					var elem = document.FirstNode as XElement;
 
-					_settings = DocumentSettings.CreateSettings(this, elem.Element("Settings"));
+					_settings = DocumentSettings.CreateSettings(elem.Element("Settings"));
 
 					var winConf = elem.Element("Window");
 					Window.Move(int.Parse(winConf.Attribute("X").Value), int.Parse(winConf.Attribute("Y").Value));
@@ -481,7 +488,7 @@ namespace Petri
 				d.Destroy();
 			}
 			if(_settings == null) {
-				_settings = DocumentSettings.GetDefaultSettings(this);
+				_settings = DocumentSettings.GetDefaultSettings();
 			}
 			Window.EditorGui.View.CurrentPetriNet = PetriNet;
 			Window.DebugGui.View.CurrentPetriNet = PetriNet;
@@ -491,16 +498,19 @@ namespace Petri
 		}
 
 		public void SaveCppDontAsk() {
-			if(this._settings.OutputPath.Length == 0) {
+			if(this._settings.SourceOutputPath.Length == 0) {
 				this.SaveCpp();
 				return;
 			}
 
-			string path = System.IO.Path.Combine(this._settings.OutputPath, _settings.Name);
+			string path = _settings.Name;
 
-			var cppGen = PetriNet.GenerateCpp();
+			string className = _settings.Name;
+			string prefix = _settings.Name;
+
+			var cppGen = PetriNet.GenerateCpp(prefix);
 			cppGen.Item1.AddHeader("\"" + path + ".h\"");
-			cppGen.Item1.Write(path + ".cpp");
+			cppGen.Item1.Write(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, path) + ".cpp");
 
 			var generator = new Cpp.Generator();
 			generator.AddHeader("\"PetriUtils.h\"");
@@ -508,9 +518,8 @@ namespace Petri
 			generator += "#ifndef PETRI_" + cppGen.Item2 + "_H";
 			generator += "#define PETRI_" + cppGen.Item2 + "_H\n";
 
-			generator += "#define CLASS_NAME MyPetriNet";
-			generator += "#define PREFIX \"" + _settings.Name + "\"";
-			generator += "#define LIB_PATH \"" + path + ".so" + "\"\n";
+			generator += "#define CLASS_NAME " + className;
+			generator += "#define PREFIX \"" + prefix + "\"";
 
 			generator += "#define PORT " + _settings.Port;
 
@@ -518,55 +527,85 @@ namespace Petri
 
 			generator += "#include \"PetriDynamicLib.h\"\n";
 
+			generator += "#undef PORT";
+
+			generator += "#undef PREFIX";
+			generator += "#undef CLASS_NAME\n";
+
 			generator += "#endif"; // ifndef header guard
 
-			System.IO.File.WriteAllText(path + ".h", generator.Value);
+			System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, path) + ".h", generator.Value);
 		}
 
-		public void SaveCpp()
-		{
-			var fc = new Gtk.FileChooserDialog("Enregistrer le code généré sous…", Window,
-				FileChooserAction.SelectFolder,
-				new object[]{"Annuler",ResponseType.Cancel,
-					"Enregistrer",ResponseType.Accept});
-			
-			if(this._settings.OutputPath.Length > 0) {
-				fc.SetCurrentFolder(this._settings.OutputPath);
+		public void SaveCpp() {
+			if(Path != "") {
+				if(_settings.SourceOutputPath != "") {
+					this.SaveCppDontAsk();
+				}
+				else {
+					var fc = new Gtk.FileChooserDialog("Enregistrer le code généré sous…", Window,
+						         FileChooserAction.SelectFolder,
+						         new object[] {"Annuler", ResponseType.Cancel,
+							"Enregistrer", ResponseType.Accept
+						});
+
+					if(fc.Run() == (int)ResponseType.Accept) {
+						string old = _settings.SourceOutputPath;
+						this._settings.SourceOutputPath = Configuration.GetRelativePath(fc.Filename, System.IO.Directory.GetParent(this.Path).FullName);
+						Modified = old != _settings.SourceOutputPath;
+
+						this.SaveCppDontAsk();
+					}
+
+					fc.Destroy();
+				}
 			}
+			else {
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, "Veuillez enregistrer le document avant de générer le code C++.");
 
-			fc.DoOverwriteConfirmation = true;
-
-			if(fc.Run() == (int)ResponseType.Accept) {
-				string old = _settings.OutputPath;
-				this._settings.OutputPath = fc.Filename;
-				Modified = old != _settings.OutputPath;
-
-				this.SaveCppDontAsk();
+				d.Run();
+				d.Destroy();
 			}
-
-			fc.Destroy();
 		}
 
 		public bool Compile() {
-			var c = new CppCompiler(this);
-			var o = c.Compile();
-			if(o != "") {
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, "La compilation a échoué. Souhaitez-vous consulter les erreurs générées ?");
-				d.AddButton("Non", ResponseType.Cancel);
-				d.AddButton("Oui", ResponseType.Accept);
-				d.DefaultResponse = ResponseType.Accept;
+			if(this.Path != "") {
+				var c = new CppCompiler(this);
+				var o = c.Compile();
+				if(o != "") {
+					MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, "La compilation a échoué. Souhaitez-vous consulter les erreurs générées ?");
+					d.AddButton("Non", ResponseType.Cancel);
+					d.AddButton("Oui", ResponseType.Accept);
+					d.DefaultResponse = ResponseType.Accept;
 
-				ResponseType result = (ResponseType)d.Run();
+					ResponseType result = (ResponseType)d.Run();
 
-				d.Destroy();
-				if(result == ResponseType.Accept) {
-					new CompilationErrorPresenter(this, o).Show();
+					d.Destroy();
+					if(result == ResponseType.Accept) {
+						new CompilationErrorPresenter(this, o).Show();
+					}
+
+					return false;
 				}
 
-				return false;
+				return true;
+			}
+			else {
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, "Veuillez enregistrer le document avant de le compiler.");
+
+				d.Run();
+				d.Destroy();
+
+				return true;
+			}
+		}
+
+		public void ManageMacros() {
+			if(_macrosManager == null) {
+				_macrosManager = new MacrosManager(this);
 			}
 
-			return true;
+			_macrosManager.Show();
 		}
 
 		public void ManageHeaders() {
@@ -578,7 +617,7 @@ namespace Petri
 				_headersManager.Show();
 			}
 			else {
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, "Veuillez enregistrer le document avant d'ajouter des headers.");
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, "Veuillez enregistrer le document avant d'en modifier les headers.");
 
 				d.Run();
 				d.Destroy();
@@ -586,11 +625,19 @@ namespace Petri
 		}
 
 		public void EditSettings() {
-			if(_settingsEditor == null) {
-				_settingsEditor = new SettingsEditor(this);
-			}
+			if(this.Path != "") {
+				if(_settingsEditor == null) {
+					_settingsEditor = new SettingsEditor(this);
+				}
 
-			_settingsEditor.Show();
+				_settingsEditor.Show();
+			}
+			else {
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, "Veuillez enregistrer le document avant d'en modifier les réglages.");
+
+				d.Run();
+				d.Destroy();
+			}
 		}
 
 		public UInt64 LastEntityID {
@@ -641,6 +688,7 @@ namespace Petri
 
 		GuiAction _guiActionToMatchSave = null;
 		HeadersManager _headersManager;
+		MacrosManager _macrosManager;
 		DocumentSettings _settings;
 		SettingsEditor _settingsEditor;
 		bool _modified;

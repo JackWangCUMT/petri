@@ -6,18 +6,19 @@ namespace Petri
 {
 	public class DocumentSettings
 	{
-		public static DocumentSettings CreateSettings(Document doc, XElement node) {
-			return new DocumentSettings(doc, node);
+		public static DocumentSettings CreateSettings(XElement node) {
+			return new DocumentSettings(node);
 		}
 
-		public static DocumentSettings GetDefaultSettings(Document doc) {
-			return new DocumentSettings(doc, null);
+		public static DocumentSettings GetDefaultSettings() {
+			return new DocumentSettings(null);
 		}
 
 		public XElement GetXml() {
 			var elem = new XElement("Settings");
 			elem.SetAttributeValue("Name", Name);
-			elem.SetAttributeValue("OutputPath", OutputPath);
+			elem.SetAttributeValue("SourceOutputPath", SourceOutputPath);
+			elem.SetAttributeValue("LibOutputPath", LibOutputPath);
 			elem.SetAttributeValue("Hostname", Hostname);
 			elem.SetAttributeValue("Port", Port.ToString());
 
@@ -59,16 +60,15 @@ namespace Petri
 			return elem;
 		}
 
-		private DocumentSettings(Document doc, XElement elem) {
-			_document = doc;
-
+		private DocumentSettings(XElement elem) {
 			IncludePaths = new List<Tuple<string, bool>>();
 			LibPaths = new List<Tuple<string, bool>>();
 			Libs = new List<string>();
 			CompilerFlags = new List<string>();
 
 			this.Compiler = "/usr/bin/c++";
-			this.OutputPath = "";
+			this.SourceOutputPath = "";
+			this.LibOutputPath = "";
 			this.Hostname = "localhost";
 			this.Port = 12345;
 
@@ -82,8 +82,10 @@ namespace Petri
 				if(elem.Attribute("Name") != null)
 					Name = elem.Attribute("Name").Value;
 
-				if(elem.Attribute("OutputPath") != null)
-					OutputPath = elem.Attribute("OutputPath").Value;
+				if(elem.Attribute("SourceOutputPath") != null)
+					SourceOutputPath = elem.Attribute("SourceOutputPath").Value;
+				if(elem.Attribute("LibOutputPath") != null)
+					LibOutputPath = elem.Attribute("LibOutputPath").Value;
 
 				if(elem.Attribute("Hostname") != null)
 					Hostname = elem.Attribute("Hostname").Value;
@@ -161,7 +163,12 @@ namespace Petri
 			private set;
 		}
 
-		public string OutputPath {
+		public string LibOutputPath {
+			get;
+			set;
+		}
+
+		public string SourceOutputPath {
 			get;
 			set;
 		}
@@ -194,9 +201,11 @@ namespace Petri
 							val += "-I'" + dir + "' ";
 						}
 					}
+					val += "-iquote'" + i.Item1 + "' ";
 					val += "-I'" + i.Item1 + "' ";
 				}
-				val += "-I" + OutputPath + " ";
+				val += "-iquote'" + SourceOutputPath + "' ";
+				val += "-I'" + SourceOutputPath + "' ";
 
 				foreach(var i in LibPaths) {
 					// Recursive?
@@ -213,15 +222,13 @@ namespace Petri
 					val += "-l'" + l + "' ";
 				}
 
-				val += "-o " + System.IO.Path.Combine(OutputPath, Name) + ".so ";
+				val += "-o '" + System.IO.Path.Combine(LibOutputPath, Name + ".so") + "' ";
 
-				val += System.IO.Path.Combine(OutputPath, Name) + ".cpp";
+				val += "'" + System.IO.Path.Combine(SourceOutputPath, Name) + ".cpp'";
 
 				return val;
 			}
 		}
-
-		Document _document;
 	}
 }
 

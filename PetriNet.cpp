@@ -44,6 +44,13 @@ void PetriNet::stop() {
 	}
 }
 
+void PetriNet::join() {
+	// Quick and dirty…
+	while(this->running()) {
+		std::this_thread::sleep_for(std::chrono::nanoseconds(1'000'000));
+	}
+}
+
 void PetriNet::executeState(Action &a) {	
 	Action *nextState = nullptr;
 

@@ -76,10 +76,22 @@ namespace Petri
 				vbox.PackStart(entry, false, false, 0);
 
 
-				label = new Label("Chemin où créer la librairie dynamique :");
-				entry = new Entry(_document.Settings.OutputPath);
+				label = new Label("Chemin où générer le code (relatif au document) :");
+				entry = new Entry(_document.Settings.SourceOutputPath);
 				entry.FocusOutEvent += (obj, eventInfo) => {
-					_document.Settings.OutputPath = (obj as Entry).Text;
+					_document.Settings.SourceOutputPath = (obj as Entry).Text;
+					_document.Settings.Modified = true;
+				};
+
+				hbox = new HBox(false, 5);
+				hbox.PackStart(label, false, false, 0);
+				vbox.PackStart(hbox, false, false, 0);
+				vbox.PackStart(entry, false, false, 0);
+
+				label = new Label("Chemin où créer la librairie dynamique (relatif au document) :");
+				entry = new Entry(_document.Settings.LibOutputPath);
+				entry.FocusOutEvent += (obj, eventInfo) => {
+					_document.Settings.LibOutputPath = (obj as Entry).Text;
 					_document.Settings.Modified = true;
 				};
 

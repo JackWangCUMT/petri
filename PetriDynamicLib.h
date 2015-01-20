@@ -11,18 +11,16 @@
 #include <ctime>
 #include <iomanip>
 
-#if !defined(PREFIX) || !defined(CLASS_NAME) || !defined(LIB_PATH) || !defined(PORT)
+#if !defined(PREFIX) || !defined(CLASS_NAME) || !defined(PORT)
 #error "Do not include this file manually, let the C++ code generator use it for you!"
 #endif
 
 class CLASS_NAME : public PetriDynamicLibCommon {
 public:
 	/**
-	 * Creates the dynamic library wrapper. It still needs to be loaded to access the wrapped functions.
+	 * Creates the dynamic library wrapper. You still need to call the load() method to access the wrapped functions.
 	 */
-	CLASS_NAME() {
-
-	}
+	CLASS_NAME() = default;
 
 	CLASS_NAME(CLASS_NAME const &pn) = delete;
 	CLASS_NAME &operator=(CLASS_NAME const &pn) = delete;
@@ -54,10 +52,14 @@ public:
 		}
 
 		auto serverDate = DebugServer::getAPIdate();
+		auto const path = this->name() + ".so";
 
-		_libHandle = dlopen(LIB_PATH, RTLD_NOW);
+		_libHandle = dlopen(path.c_str(), RTLD_LAZY);
+
 		if(_libHandle == nullptr) {
-			throw std::runtime_error("Unable to load the dynamic library!");
+			logError("Unable to load the dynamic library at path \"", path, "\"!\n", "Reason: ", dlerror());
+
+			throw std::runtime_error("Unable to load the dynamic library at path \"" + path + "\"!");
 		}
 		_createPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_create"));
 		_createDebugPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_createDebug"));

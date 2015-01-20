@@ -18,7 +18,6 @@
 #include <mutex>
 #include <thread>
 #include <deque>
-#include "Log.h"
 #include "Commun.h"
 
 using namespace std::chrono_literals;
@@ -52,7 +51,7 @@ public:
 	}
 
 	/**
-	 * Starts the Petri net. It must not be already running. If no states are active, this is a no-op.
+	 * Starts the Petri net. It must not be already running. If no states are initially active, this is a no-op.
 	 */
 	virtual void run();
 
@@ -61,6 +60,11 @@ public:
 	 * but do not allows new states to be enabled. If the net is not running, this is a no-op.
 	 */
 	virtual void stop();
+
+	/**
+	 * Blocks the calling thread until the Petri net has completed its whole execution.
+	 */
+	virtual void join();
 
 protected:
 	using ClockType = std::conditional<std::chrono::high_resolution_clock::is_steady, std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;

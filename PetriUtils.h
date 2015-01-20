@@ -11,7 +11,7 @@
 #include <functional>
 #include <memory>
 #include <dlfcn.h>
-#include "Log.h"
+#include "Commun.h"
 #include "Condition.h"
 #include "PetriNet.h"
 #include "PetriDebug.h"

@@ -11,14 +11,14 @@
 #include "PetriDynamicLibCommon.h"
 #include <string>
 #include "PetriNet.h"
-#include "Socket.h"
+#include "Commun.h"
 #include "jsoncpp/include/json.h"
 #include <set>
 
 using namespace std::string_literals;
 
 namespace DebugServer {
-	extern std::string const version;
+	extern std::string getVersion();
 	extern std::chrono::system_clock::time_point getAPIdate();
 }
 
@@ -60,8 +60,10 @@ protected:
 	std::condition_variable _stateChangeCondition;
 	std::mutex _stateChangeMutex;
 
-	std::thread _receptionThread, _heartBeat;
-	Socket _socket, _client;
+	std::thread _receptionThread;
+	std::thread _heartBeat;
+	Socket _socket;
+	Socket _client;
 	std::atomic_bool _running = {false};
 
 	PetriDynamicLibCommon &_petriNetFactory;

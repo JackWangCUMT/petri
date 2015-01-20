@@ -9,7 +9,7 @@
 #define IA_Pe_tri_PetriDebug_h
 
 #include "PetriNet.h"
-#include "Socket.h"
+#include "Commun.h"
 #include "jsoncpp/include/json.h"
 #include <unordered_map>
 

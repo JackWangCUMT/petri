@@ -8,7 +8,10 @@
 #include "DebugServer.h"
 #include "Commun.h"
 
-std::string const DebugServer::version = "0.1";
+std::string DebugServer::getVersion() {
+	return "0.1";
+}
+
 std::chrono::system_clock::time_point DebugServer::getAPIdate() {
 	char const *format = "%a %b %d %H:%M:%S %Y";
 	std::tm tm;
@@ -72,8 +75,6 @@ void DebugSession::removeActiveState(Action &a) {
 void DebugSession::serverCommunication() {
 	setThreadName("DebugSession "s + _petriNetFactory.name());
 
-	logInfo("Debug session for Petri net ", _petriNetFactory.name(), " started");
-
 	int attempts = 0;
 	while(true) {
 		if(_socket.listen(_petriNetFactory.port()))
@@ -88,9 +89,9 @@ void DebugSession::serverCommunication() {
 	}
 
 	while(_running) {
-		logInfo("Listening…");
+		logInfo("Debug session for Petri net ", _petriNetFactory.name(), " started. Waiting for the debugger to attach…");
 		_socket.accept(_client);
-		logDebug0("Connected!");
+		logDebug0("Debugger connected!");
 
 		try {
 			while(_running && _client.getState() == SOCK_ACCEPTED) {
@@ -98,14 +99,14 @@ void DebugSession::serverCommunication() {
 				auto const &type = root["type"];
 
 				if(type == "hello") {
-					if(root["payload"]["version"] != DebugServer::version) {
-						this->sendObject(this->error("The server (version "s + DebugServer::version + ") is incompatible with your client!"s));
-						throw std::runtime_error("The server (version "s + DebugServer::version + ") is incompatible with your client!"s);
+					if(root["payload"]["version"] != DebugServer::getVersion()) {
+						this->sendObject(this->error("The server (version "s + DebugServer::getVersion() + ") is incompatible with your client!"s));
+						throw std::runtime_error("The server (version "s + DebugServer::getVersion() + ") is incompatible with your client!"s);
 					}
 					else {
 						Json::Value ehlo;
 						ehlo["type"] = "ehlo";
-						ehlo["version"] = DebugServer::version;
+						ehlo["version"] = DebugServer::getVersion();
 						this->sendObject(ehlo);
 						_heartBeat = std::thread(&DebugSession::heartBeat, this);
 					}

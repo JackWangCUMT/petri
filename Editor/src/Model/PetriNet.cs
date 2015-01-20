@@ -227,16 +227,19 @@ namespace Petri
 
 
 		// Recursively gets all of the Action/PetriNet
-		protected List<Entity> BuildActionsList() {
+		protected List<Entity> BuildEntitiesList() {
 			var l = new List<Entity>();
 			l.AddRange(this.States);
 
 			for(int i = 0; i < this.States.Count; ++i) {
 				var s = l[i] as PetriNet;
 				if(s != null) {
-					l.AddRange(s.BuildActionsList());
+					l.AddRange(s.BuildEntitiesList());
 				}
 			}
+
+			l.AddRange(this.Transitions);
+			l.AddRange(this.Comments);
 
 			return l;
 		}

@@ -42,9 +42,10 @@ namespace Petri
 			set;
 		}
 
-		public Tuple<Cpp.Generator, string> GenerateCpp()
-		{
+		public Tuple<Cpp.Generator, string> GenerateCpp(string prefix) {
 			var source = new Cpp.Generator();
+
+			source += "#define PREFIX \"" + prefix + "\"\n";
 
 			string h = this.GenerateCpp(source, new IDManager(Document.LastEntityID));
 
@@ -115,7 +116,7 @@ namespace Petri
 		// Use this to scale down the IDs of entities to 0...N, with N = number of entities
 		public void Canonize()
 		{
-			var entities = this.BuildActionsList();
+			var entities = this.BuildEntitiesList();
 			entities.Add(this);
 			entities.AddRange(this.Transitions);
 			entities.AddRange(this.Comments);

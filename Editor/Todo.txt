@@ -28,5 +28,5 @@ FIXME:
 
 	Cible des raccourcis clavier (copier-coller, fermer…)
 	Parenthèses A && B && C
-	Chemin relatif lib.so
-	Chemin relatif compilation
+
+	Ajout lib en chemin relatif

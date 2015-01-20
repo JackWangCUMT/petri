@@ -12,6 +12,10 @@ namespace Petri
 		public string Compile() {
 			Process p = new Process();
 
+			string cd = System.IO.Directory.GetCurrentDirectory();
+
+			System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(_document.Path).FullName);
+
 			p.StartInfo.UseShellExecute = false;
 			p.StartInfo.RedirectStandardOutput = true;
 			p.StartInfo.RedirectStandardError = true;
@@ -28,6 +32,8 @@ namespace Petri
 			string output = p.StandardOutput.ReadToEnd();
 			output += p.StandardError.ReadToEnd();
 			p.WaitForExit();
+
+			System.IO.Directory.SetCurrentDirectory(cd);
 
 			return output;
 		}

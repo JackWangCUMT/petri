@@ -12,6 +12,9 @@ ManagedMemoryHeap.cpp
 DebugServer.cpp
 PetriDebug.cpp
 PetriNet.cpp
+jsoncpp/src/json_reader.cpp
+jsoncpp/src/json_value.cpp
+jsoncpp/src/json_writer.cpp
 """)
 
 env.StaticLibrary('Petri', src_list)

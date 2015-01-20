@@ -16,7 +16,7 @@
 #include "ManagedMemoryHeap.h"
 #include <csignal>
 #include "setjmp.h"
-#include "Log.h"
+#include "Commun.h"
 
 #define stop_point KillableThread::stopIfRequested()
 

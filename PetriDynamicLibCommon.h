@@ -77,14 +77,6 @@ public:
 	virtual uint16_t port() const = 0;
 
 	/**
-	 * Unloads the code of the dynamic library previously loaded, and loads the code contained in a possibly updated dylib.
-	 */
-	void reload() {
-		this->unload();
-		this->load();
-	}
-
-	/**
 	 * Returns whether the dylib code resides in memory or not
 	 * @return The loaded state of the dynamic library
 	 */
@@ -110,11 +102,21 @@ public:
 		_hashPtr = nullptr;
 	}
 
+	/**
+	 * Unloads the code of the dynamic library previously loaded, and loads the code contained in a possibly updated dylib.
+	 */
+	void reload() {
+		this->unload();
+		this->load();
+	}
+
 protected:
 	void *_libHandle = nullptr;
 	void *(*_createPtr)() = nullptr;
 	void *(*_createDebugPtr)() = nullptr;
 	char const *(*_hashPtr)() = nullptr;
+
+	std::string _relativePath;
 };
 
 #endif

@@ -18,7 +18,6 @@
 #include <mutex>
 #include <thread>
 #include <deque>
-#include "Log.h"
 #include "Commun.h"
 
 class Action;

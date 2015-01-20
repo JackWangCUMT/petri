@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include <functional>
 #include <atomic>
-#include "Log.h"
+#include "Commun.h"
 
 #define safe_alloc ManagedMemoryHeap::make_unique
 
