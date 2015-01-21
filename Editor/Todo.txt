@@ -8,9 +8,6 @@ Gestion des modifications des headers en cours de route par un programme extéri
 	En cas de changements incompatibles, proposer une résolution à la main ?
 	Impossibilité de trouver un en-tête au chargement ?
 
-Débuggeur graphique
-	Timeout des communications sur le socket
-
 Commenter le code :3
 Documentation
 
@@ -21,12 +18,8 @@ Actions/Transitions : ajustement des dimensions à la longueur du titre
 Barre d'outils
 Fonction recherche
 
-Modification/ajout de macros dans le logiciel
-
 FIXME:
 	état interne des Conditions pas thread-safe
 
 	Cible des raccourcis clavier (copier-coller, fermer…)
 	Parenthèses A && B && C
-
-	Ajout lib en chemin relatif

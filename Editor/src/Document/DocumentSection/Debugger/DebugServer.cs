@@ -48,7 +48,18 @@ namespace Petri
 							this.sendObject(new JObject(new JProperty("type", "resume")));
 						}
 					}
-					catch(Exception) {}
+					catch(Exception e) {
+						GLib.Timeout.Add(0, () => {
+							MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
+							d.AddButton("Annuler", ResponseType.Cancel);
+							d.Run();
+							d.Destroy();
+
+							return false;
+						});
+
+						this.StopSession();
+					}
 				}
 				else {
 					_pause = false;
@@ -68,7 +79,8 @@ namespace Petri
 			_receiverThread = new Thread(this.receiver);
 			_pause = false;
 			_receiverThread.Start();
-			while(_socket == null);
+			DateTime time = DateTime.Now.AddSeconds(1);
+			while(_socket == null && DateTime.Now.CompareTo(time) < 0);
 		}
 
 		public void StopSession() {
@@ -87,9 +99,14 @@ namespace Petri
 				}
 				catch(Exception) {}
 
-				if(_receiverThread != null)
+				if(_receiverThread != null && !_receiverThread.Equals(Thread.CurrentThread)) {
 					_receiverThread.Join();
+				}
 				_sessionRunning = false;
+			}
+
+			lock(_document.DebugController.ActiveStates) {
+				_document.DebugController.ActiveStates.Clear();
 			}
 		}
 
@@ -99,8 +116,16 @@ namespace Petri
 				if(!_petriRunning)
 					this.sendObject(new JObject(new JProperty("type", "start"), new JProperty("payload", new JObject(new JProperty("hash", _document.GetHash())))));
 			}
-			catch(Exception) {
-				// TODO: present error
+			catch(Exception e) {
+				GLib.Timeout.Add(0, () => {
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
+					d.AddButton("Annuler", ResponseType.Cancel);
+					d.Run();
+					d.Destroy();
+
+					return false;
+				});
+
 				this.StopSession();
 			}
 		}
@@ -111,8 +136,16 @@ namespace Petri
 				if(_petriRunning)
 					this.sendObject(new JObject(new JProperty("type", "stop")));
 			}
-			catch(Exception) {
-				// TODO: present error
+			catch(Exception e) {
+				GLib.Timeout.Add(0, () => {
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
+					d.AddButton("Annuler", ResponseType.Cancel);
+					d.Run();
+					d.Destroy();
+
+					return false;
+				});
+
 				this.StopSession();
 			}
 		}
@@ -127,8 +160,15 @@ namespace Petri
 				try {
 					this.sendObject(new JObject(new JProperty("type", "reload")));
 				}
-				catch(Exception) {
-					// TODO: present error
+				catch(Exception e) {
+					GLib.Timeout.Add(0, () => {
+						MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
+						d.AddButton("Annuler", ResponseType.Cancel);
+						d.Run();
+						d.Destroy();
+
+						return false;
+					});
 					this.StopSession();
 				}
 			}
@@ -157,14 +197,36 @@ namespace Petri
 				throw new Exception("Invalid message received from debugger (expected ehlo)");
 			}
 			catch(Exception e) {
-				Console.WriteLine("Couldn't connect to C++ debugger: " + e);
-				_sessionRunning = false;
+				GLib.Timeout.Add(0, () => {
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
+					d.AddButton("Annuler", ResponseType.Cancel);
+					d.Run();
+					d.Destroy();
+
+					return false;
+				});
+				this.StopSession();
 				_document.Window.DebugGui.UpdateToolbar();
 			}
 		}
 
 		private void receiver() {
-			_socket = new TcpClient(_document.Settings.Hostname, _document.Settings.Port);
+			try {
+				_socket = new TcpClient(_document.Settings.Hostname, _document.Settings.Port);
+			}
+			catch(Exception e) {
+				this.StopSession();
+
+				GLib.Timeout.Add(0, () => {
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Impossible de se connecter au serveur : " + e.Message));
+					d.AddButton("Annuler", ResponseType.Cancel);
+					d.Run();
+					d.Destroy();
+
+					return false;
+				});
+				return;
+			}
 			this.Hello();
 
 			try {
@@ -248,8 +310,14 @@ namespace Petri
 				}
 			}
 			catch(Exception e) {
-				Console.WriteLine(e);
-				Console.WriteLine("Exception in the debugger, exiting session");
+				GLib.Timeout.Add(0, () => {
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
+					d.AddButton("Annuler", ResponseType.Cancel);
+					d.Run();
+					d.Destroy();
+
+					return false;
+				});
 				this.StopSession();
 			}
 
@@ -268,7 +336,7 @@ namespace Petri
 					return JObject.Parse(val);
 
 				if(++count > 5) {
-					throw new Exception("Remote debugger not available anymore!");
+					throw new Exception("Remote debugger isn't available anymore!");
 				}
 				Thread.Sleep(1);
 			}

@@ -15,7 +15,8 @@ std::string DebugServer::getVersion() {
 std::chrono::system_clock::time_point DebugServer::getAPIdate() {
 	char const *format = "%a %b %d %H:%M:%S %Y";
 	std::tm tm;
-
+	std::memset(&tm, 0, sizeof(tm));
+	
 	strptime(__TIMESTAMP__, format, &tm);
 	return std::chrono::system_clock::from_time_t(std::mktime(&tm));
 }
@@ -88,8 +89,10 @@ void DebugSession::serverCommunication() {
 		}
 	}
 
+	logInfo("Debug session for Petri net ", _petriNetFactory.name(), " started.");
+
 	while(_running) {
-		logInfo("Debug session for Petri net ", _petriNetFactory.name(), " started. Waiting for the debugger to attach…");
+		logInfo("Waiting for the debugger to attach…");
 		_socket.accept(_client);
 		logDebug0("Debugger connected!");
 
@@ -162,6 +165,7 @@ void DebugSession::serverCommunication() {
 				else if(type == "reload") {
 					this->clearPetri();
 					_petriNetFactory.reload();
+					_petriNetFactory.hash();
 					_petri = _petriNetFactory.createDebug();
 					_petri->setObserver(this);
 				}

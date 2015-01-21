@@ -39,9 +39,8 @@ void PetriNet::stop() {
 	if(this->running()) {
 		_running = false;
 		_activationCondition.notify_all();
-
-		_actionsPool.cancel();
 	}
+	_actionsPool.cancel();
 }
 
 void PetriNet::join() {
@@ -104,6 +103,9 @@ void PetriNet::executeState(Action &a) {
 					}
 
 					it = transitionsToTest.erase(it);
+				}
+				else {
+					++it;
 				}
 			}
 

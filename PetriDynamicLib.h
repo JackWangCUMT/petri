@@ -54,7 +54,7 @@ public:
 		auto serverDate = DebugServer::getAPIdate();
 		auto const path = this->name() + ".so";
 
-		_libHandle = dlopen(path.c_str(), RTLD_LAZY);
+		_libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
 
 		if(_libHandle == nullptr) {
 			logError("Unable to load the dynamic library at path \"", path, "\"!\n", "Reason: ", dlerror());
@@ -68,12 +68,15 @@ public:
 		auto APIDatePtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, PREFIX "_getAPIDate"));
 		char const *format = "%b %d %Y %H:%M:%S";
 		std::tm tm;
+		std::memset(&tm, 0, sizeof(tm));
+		
 		strptime(APIDatePtr(), format, &tm);
 		auto libDate = std::chrono::system_clock::from_time_t(std::mktime(&tm));
 
 		if(serverDate > libDate) {
 			this->unload();
 
+			logError("The dynamic library  for Petri net ", PREFIX, " is out of date and must be recompiled!");
 			throw std::runtime_error("The dynamic library is out of date and must be recompiled!");
 		}
 	}

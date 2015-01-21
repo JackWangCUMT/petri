@@ -42,10 +42,10 @@ namespace Petri
 			set;
 		}
 
-		public Tuple<Cpp.Generator, string> GenerateCpp(string prefix) {
+		public Tuple<Cpp.Generator, string> GenerateCpp() {
 			var source = new Cpp.Generator();
 
-			source += "#define PREFIX \"" + prefix + "\"\n";
+			source += "#define PREFIX \"" + Document.Settings.Name + "\"\n";
 
 			string h = this.GenerateCpp(source, new IDManager(Document.LastEntityID));
 
@@ -54,6 +54,8 @@ namespace Petri
 
 		public string GetHash() {
 			var source = new Cpp.Generator();
+
+			source += "#define PREFIX \"" + Document.Settings.Name + "\"\n";
 
 			var hash = this.GenerateCpp(source, new IDManager(Document.LastEntityID));
 
@@ -78,9 +80,14 @@ namespace Petri
 
 			string toHash = source.Value;
 
+			Console.WriteLine(source.Value);
+
 			System.Security.Cryptography.SHA1 sha = new System.Security.Cryptography.SHA1CryptoServiceProvider(); 
 			// This is one implementation of the abstract class SHA1.
 			string hash = BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(toHash))).Replace("-", "");
+
+			Console.WriteLine(hash);
+
 
 			source += "";
 

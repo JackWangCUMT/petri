@@ -505,10 +505,7 @@ namespace Petri
 
 			string path = _settings.Name;
 
-			string className = _settings.Name;
-			string prefix = _settings.Name;
-
-			var cppGen = PetriNet.GenerateCpp(prefix);
+			var cppGen = PetriNet.GenerateCpp();
 			cppGen.Item1.AddHeader("\"" + path + ".h\"");
 			cppGen.Item1.Write(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, path) + ".cpp");
 
@@ -518,8 +515,8 @@ namespace Petri
 			generator += "#ifndef PETRI_" + cppGen.Item2 + "_H";
 			generator += "#define PETRI_" + cppGen.Item2 + "_H\n";
 
-			generator += "#define CLASS_NAME " + className;
-			generator += "#define PREFIX \"" + prefix + "\"";
+			generator += "#define CLASS_NAME " + _settings.Name;
+			generator += "#define PREFIX \"" + _settings.Name + "\"";
 
 			generator += "#define PORT " + _settings.Port;
 

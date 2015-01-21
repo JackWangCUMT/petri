@@ -93,8 +93,9 @@ public:
 	 * Removes the dynamic library associated to this wrapper from memory.
 	 */
 	void unload() {
-		if(this->loaded())
+		if(this->loaded()) {
 			dlclose(_libHandle);
+		}
 
 		_libHandle = nullptr;
 		_createPtr = nullptr;

@@ -183,6 +183,7 @@ namespace Petri
 			var comments = from e in entities
 				           where (e is Comment)
 						   select (e as Comment);
+
 			var transitions = new List<Transition>(from e in entities
 			                                       where e is Transition
 			                                       select (e as Transition));
@@ -218,6 +219,12 @@ namespace Petri
 				// Same as with the transitions. Could not do that before, as we needed the ID to remain the same for the states for the deserialization to work
 				UpdateID(s, destination);
 				cloned.Add(s);
+
+				// If some transitions were removed as they didn't fully belong to the cloned set, we have to take account of the posibly too big required tokens count.
+				// Didn't think of a better way than this.
+				if(s.RequiredTokens > s.TransitionsBefore.Count) {
+					s.RequiredTokens = s.TransitionsBefore.Count;
+				}
 			}
 
 			return cloned;
