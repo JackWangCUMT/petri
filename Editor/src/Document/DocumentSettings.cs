@@ -187,7 +187,7 @@ namespace Petri
 			get {
 				string val = "";
 
-				val += "-shared -undefined dynamic_lookup ";
+				val += "-shared ";
 
 				foreach(var f in CompilerFlags) {
 					val += f + " ";

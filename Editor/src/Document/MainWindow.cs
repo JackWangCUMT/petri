@@ -360,7 +360,7 @@ namespace Petri
 			_menuBar.Append(document);
 			_menuBar.Append(help);
 
-			_vbox.PackStart(_menuBar);
+			_vbox.PackStart(_menuBar, false, false, 0);
 		}
 
 		Document _document;

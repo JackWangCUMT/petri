@@ -10,6 +10,7 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>
+#include <cstring>
 
 #if !defined(PREFIX) || !defined(CLASS_NAME) || !defined(PORT)
 #error "Do not include this file manually, let the C++ code generator use it for you!"
@@ -55,7 +56,7 @@ public:
 			return;
 		}
 
-		auto const path = this->name() + ".so";
+		auto const path = "./" + this->name() + ".so";
 
 		_libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
 
