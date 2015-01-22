@@ -23,3 +23,6 @@ FIXME:
 
 	Cible des raccourcis clavier (copier-coller, fermer…)
 	Parenthèses A && B && C
+
+Fenêtre erreur compil
+-fPIC compilateur
