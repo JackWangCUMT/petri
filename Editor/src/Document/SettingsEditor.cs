@@ -287,7 +287,8 @@ namespace Petri
 		private void OnAdd(object sender, EventArgs e) {
 			string title = "";
 			FileChooserAction action = FileChooserAction.Open;
-			var filter = new FileFilter();
+
+			FileFilter filter = null;
 
 			if(sender == _addHeaderSearchPath) {
 				title = "Sélectionnez le dossier où rechercher les headers…";
@@ -300,6 +301,9 @@ namespace Petri
 			else if(sender == _addLib) {
 				title = "Sélectionnez la librairie…";
 				action = FileChooserAction.Open;
+				filter = new FileFilter();
+				filter.Name = "Librairie";
+
 				filter.AddPattern("*.a");
 				filter.AddPattern("*.lib");
 				filter.AddPattern("*.so");
@@ -311,19 +315,28 @@ namespace Petri
 				action,
 				new object[]{"Annuler",ResponseType.Cancel,
 					"Ouvrir",ResponseType.Accept});
-			fc.AddFilter(filter);
+			if(filter != null) {
+				fc.AddFilter(filter);
+			}
 
 			if(fc.Run() == (int)ResponseType.Accept) {
+				string relativePath = _document.GetRelativeToDoc(fc.Filename);
+
 				if(sender == _addHeaderSearchPath) {
-					_document.Settings.IncludePaths.Add(Tuple.Create(fc.Filename, false));
+					_document.Settings.IncludePaths.Add(Tuple.Create(relativePath, false));
 					this.BuildHeadersSearchPath();
 				}
 				else if(sender == _addLibSearchPath) {
-					_document.Settings.LibPaths.Add(Tuple.Create(fc.Filename, false));
+					_document.Settings.LibPaths.Add(Tuple.Create(relativePath, false));
 					this.BuildLibsSearchPath();
 				}
 				else if(sender == _addLib) {
-					_document.Settings.Libs.Add(fc.Filename);
+					string filename = System.IO.Path.GetFileName(fc.Filename);
+					if(filename.StartsWith("lib")) {
+						filename = filename.Substring(3);
+					}
+					filename = System.IO.Path.GetFileNameWithoutExtension(filename);
+					_document.Settings.Libs.Add(filename);
 					this.BuildLibs();
 				}
 				_document.Settings.Modified = true;

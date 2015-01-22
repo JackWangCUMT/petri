@@ -112,7 +112,7 @@ namespace Petri
 			if(fc.Run() == (int)ResponseType.Accept) {
 				string filename = fc.Filename;
 				if(b.Active) {
-					filename = Configuration.GetRelativePath(filename, System.IO.Directory.GetParent(_document.Path).FullName);
+					filename = _document.GetRelativeToDoc(filename);
 				}
 				_document.AddHeader(filename);
 			}

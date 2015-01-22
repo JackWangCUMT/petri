@@ -283,6 +283,16 @@ namespace Petri
 			}
 		}
 
+		public string GetRelativeToDoc(string path) {
+			if(!System.IO.Path.IsPathRooted(path)) {
+				path = System.IO.Path.GetFullPath(path);
+			}
+
+			string parent = System.IO.Directory.GetParent(Path).FullName;
+
+			return Configuration.GetRelativePath(path, parent);
+		}
+
 		public void SaveAs() {
 			string filename = null;
 
@@ -548,7 +558,7 @@ namespace Petri
 
 					if(fc.Run() == (int)ResponseType.Accept) {
 						string old = _settings.SourceOutputPath;
-						this._settings.SourceOutputPath = Configuration.GetRelativePath(fc.Filename, System.IO.Directory.GetParent(this.Path).FullName);
+						this._settings.SourceOutputPath = GetRelativeToDoc(fc.Filename);
 						Modified = old != _settings.SourceOutputPath;
 
 						this.SaveCppDontAsk();
