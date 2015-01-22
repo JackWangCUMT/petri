@@ -68,7 +68,7 @@ namespace Petri
 				source.AddHeader("\"" + s + "\"");
 			}
 
-			source += "#define EXPORT __attribute__((visibility(\"default\"))) extern \"C\"";
+			source += "#define EXPORT extern \"C\"";
 
 			source += "";
 

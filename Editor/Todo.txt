@@ -26,3 +26,4 @@ FIXME:
 
 Fenêtre erreur compil
 -fPIC compilateur
+attribution
