@@ -7,6 +7,7 @@
 
 #include "DebugServer.h"
 #include "Commun.h"
+#include <cstring>
 
 std::string DebugServer::getVersion() {
 	return "0.1";
