@@ -46,12 +46,15 @@ public:
 		return PORT;
 	}
 
+	/**
+	 * Loads the dynamic library associated to this wrapper.
+	 * @throws std::runtime_error on two occasions: when the dylib could not be found (wrong path, missing file, wrong architecture or other error), or when the debug server's code has been changed (impliying the dylib has to be recompiled).
+	 */
 	virtual void load() override {
 		if(_libHandle != nullptr) {
 			return;
 		}
 
-		auto serverDate = DebugServer::getAPIdate();
 		auto const path = this->name() + ".so";
 
 		_libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
@@ -61,10 +64,13 @@ public:
 
 			throw std::runtime_error("Unable to load the dynamic library at path \"" + path + "\"!");
 		}
+
+		// Accesses the newly loaded symbols
 		_createPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_create"));
 		_createDebugPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, PREFIX "_createDebug"));
 		_hashPtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, PREFIX "_getHash"));
 
+		// Checks that the dylib is more recent than the last change to the debug server
 		auto APIDatePtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, PREFIX "_getAPIDate"));
 		char const *format = "%b %d %Y %H:%M:%S";
 		std::tm tm;
@@ -72,6 +78,7 @@ public:
 		
 		strptime(APIDatePtr(), format, &tm);
 		auto libDate = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+		auto serverDate = DebugServer::getAPIdate();
 
 		if(serverDate > libDate) {
 			this->unload();

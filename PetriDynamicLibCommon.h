@@ -86,6 +86,7 @@ public:
 
 	/**
 	 * Loads the dynamic library associated to this wrapper.
+	 * @throws std::runtime_error on two occasions: when the dylib could not be found (wrong path, missing file, wrong architecture or other error), or when the debug server's code has been changed (impliying the dylib has to be recompiled).
 	 */
 	virtual void load() = 0;
 
