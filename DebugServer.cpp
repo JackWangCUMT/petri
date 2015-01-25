@@ -139,9 +139,12 @@ void DebugSession::serverCommunication() {
 							else if(_petri->running())
 								throw std::runtime_error("Petri net is already running!");
 
-							_petri->run();
-
 							this->sendObject(this->json("ack", "start"));
+
+							auto const root = this->receiveObject();
+							this->updateBreakpoints(root["payload"]);
+
+							_petri->run();
 						}
 					}
 				}
@@ -171,17 +174,7 @@ void DebugSession::serverCommunication() {
 					_petri->setObserver(this);
 				}
 				else if(type == "breakpoints") {
-					Json::Value breakpoints = root["payload"];
-					if(breakpoints.type() != Json::arrayValue) {
-						throw std::runtime_error("Invalid breakpoint specifying format!");
-					}
-
-					std::lock_guard<std::mutex> lk(_breakpointsMutex);
-					_breakpoints.clear();
-					for(Json::ArrayIndex i = Json::ArrayIndex(0); i != breakpoints.size(); ++i) {
-						auto id = breakpoints[i].asUInt64();
-						_breakpoints.insert(_petri->stateWithID(id));
-					}
+					this->updateBreakpoints(root["payload"]);
 				}
 			}
 		}
@@ -205,6 +198,19 @@ void DebugSession::serverCommunication() {
 
 	if(_petri)
 		_petri->stop();
+}
+
+void DebugSession::updateBreakpoints(Json::Value const &breakpoints) {
+	if(breakpoints.type() != Json::arrayValue) {
+		throw std::runtime_error("Invalid breakpoint specifying format!");
+	}
+
+	std::lock_guard<std::mutex> lk(_breakpointsMutex);
+	_breakpoints.clear();
+	for(Json::ArrayIndex i = Json::ArrayIndex(0); i != breakpoints.size(); ++i) {
+		auto id = breakpoints[i].asUInt64();
+		_breakpoints.insert(_petri->stateWithID(id));
+	}
 }
 
 void DebugSession::heartBeat() {
@@ -269,7 +275,11 @@ Json::Value DebugSession::receiveObject() {
 }
 
 void DebugSession::sendObject(Json::Value const &o) {
+	std::lock_guard<std::mutex> lk(_sendMutex);
+	
 	Json::FastWriter writer;
+	writer.omitEndingLineFeed();
+
 	std::string s = writer.write(o);
 
 	_socket.sendMsg(_client, s.c_str(), s.size());

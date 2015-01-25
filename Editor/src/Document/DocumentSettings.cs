@@ -191,6 +191,9 @@ namespace Petri
 				if(Configuration.RunningPlatform == Platform.Mac) {
 					val += "-undefined dynamic_lookup ";
 				}
+				else if(Configuration.RunningPlatform == Platform.Linux) {
+					val += "-fPIC ";
+				}
 
 				foreach(var f in CompilerFlags) {
 					val += f + " ";

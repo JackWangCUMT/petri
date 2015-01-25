@@ -42,10 +42,10 @@ namespace Petri
 				if(PetriRunning) {
 					try {
 						if(value) {
-							this.sendObject(new JObject(new JProperty("type", "pause")));
+							this.SendObject(new JObject(new JProperty("type", "pause")));
 						}
 						else {
-							this.sendObject(new JObject(new JProperty("type", "resume")));
+							this.SendObject(new JObject(new JProperty("type", "resume")));
 						}
 					}
 					catch(Exception e) {
@@ -76,7 +76,7 @@ namespace Petri
 
 		public void StartSession() {
 			_sessionRunning = true;
-			_receiverThread = new Thread(this.receiver);
+			_receiverThread = new Thread(this.Receiver);
 			_pause = false;
 			_receiverThread.Start();
 			DateTime time = DateTime.Now.AddSeconds(1);
@@ -95,7 +95,7 @@ namespace Petri
 				}
 
 				try {
-					this.sendObject(new JObject(new JProperty("type", "exit")));
+					this.SendObject(new JObject(new JProperty("type", "exit")));
 				}
 				catch(Exception) {}
 
@@ -114,7 +114,7 @@ namespace Petri
 			_pause = false;
 			try {
 				if(!_petriRunning)
-					this.sendObject(new JObject(new JProperty("type", "start"), new JProperty("payload", new JObject(new JProperty("hash", _document.GetHash())))));
+					this.SendObject(new JObject(new JProperty("type", "start"), new JProperty("payload", new JObject(new JProperty("hash", _document.GetHash())))));
 			}
 			catch(Exception e) {
 				GLib.Timeout.Add(0, () => {
@@ -134,7 +134,7 @@ namespace Petri
 			_pause = false;
 			try {
 				if(_petriRunning)
-					this.sendObject(new JObject(new JProperty("type", "stop")));
+					this.SendObject(new JObject(new JProperty("type", "stop")));
 			}
 			catch(Exception e) {
 				GLib.Timeout.Add(0, () => {
@@ -158,7 +158,7 @@ namespace Petri
 			}
 			else {
 				try {
-					this.sendObject(new JObject(new JProperty("type", "reload")));
+					this.SendObject(new JObject(new JProperty("type", "reload")));
 				}
 				catch(Exception e) {
 					GLib.Timeout.Add(0, () => {
@@ -175,18 +175,20 @@ namespace Petri
 		}
 
 		public void UpdateBreakpoints() {
-			var breakpoints = new JArray();
-			foreach(var p in _document.DebugController.Breakpoints) {
-				breakpoints.Add(new JValue(p.ID));
+			if(PetriRunning) {
+				var breakpoints = new JArray();
+				foreach(var p in _document.DebugController.Breakpoints) {
+					breakpoints.Add(new JValue(p.ID));
+				}
+				this.SendObject(new JObject(new JProperty("type", "breakpoints"), new JProperty("payload", breakpoints)));
 			}
-			this.sendObject(new JObject(new JProperty("type", "breakpoints"), new JProperty("payload", breakpoints)));
 		}
 
 		private void Hello() {
 			try {
-				this.sendObject(new JObject(new JProperty("type", "hello"), new JProperty("payload", new JObject(new JProperty("version", Version)))));
+				this.SendObject(new JObject(new JProperty("type", "hello"), new JProperty("payload", new JObject(new JProperty("version", Version)))));
 		
-				var ehlo = this.receiveObject();
+				var ehlo = this.ReceiveObject();
 				if(ehlo != null && ehlo["type"].ToString() == "ehlo") {
 					_document.Window.DebugGui.UpdateToolbar();
 					return;
@@ -210,7 +212,7 @@ namespace Petri
 			}
 		}
 
-		private void receiver() {
+		private void Receiver() {
 			try {
 				_socket = new TcpClient(_document.Settings.Hostname, _document.Settings.Port);
 			}
@@ -227,11 +229,12 @@ namespace Petri
 				});
 				return;
 			}
-			this.Hello();
 
 			try {
+				this.Hello();
+
 				while(_sessionRunning && _socket.Connected) {
-					JObject msg = this.receiveObject();
+					JObject msg = this.ReceiveObject();
 					if(msg == null)
 						break;
 
@@ -239,6 +242,7 @@ namespace Petri
 						if(msg["payload"].ToString() == "start") {
 							_petriRunning = true;
 							_document.Window.DebugGui.UpdateToolbar();
+							this.UpdateBreakpoints();
 						}
 						else if(msg["payload"].ToString() == "stop") {
 							_petriRunning = false;
@@ -328,10 +332,10 @@ namespace Petri
 			_document.Window.DebugGui.UpdateToolbar();
 		}
 
-		private JObject receiveObject() {
+		private JObject ReceiveObject() {
 			int count = 0;
 			while(_sessionRunning) {
-				string val = this.receiveString();
+				string val = this.ReceiveString();
 				if(val.Length > 0)
 					return JObject.Parse(val);
 
@@ -344,11 +348,11 @@ namespace Petri
 			return null;
 		}
 
-		private void sendObject(JObject o) {
-			this.sendString(o.ToString());
+		private void SendObject(JObject o) {
+			this.SendString(o.ToString());
 		}
 
-		private string receiveString() {
+		private string ReceiveString() {
 			byte[] msg;
 
 			lock(_downLock) {
@@ -370,7 +374,7 @@ namespace Petri
 			return System.Text.Encoding.UTF8.GetString(msg);
 		}
 
-		private void sendString(string s) {
+		private void SendString(string s) {
 			var msg = System.Text.Encoding.UTF8.GetBytes(s);
 
 			UInt32 count = (UInt32)msg.Length;

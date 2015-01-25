@@ -59,7 +59,7 @@ namespace Petri
 			_window.AllowShrink = true;
 
 			ScrolledWindow scrolledWindow = new ScrolledWindow();
-			scrolledWindow.SetPolicy(PolicyType.Never, PolicyType.Never);
+			scrolledWindow.SetPolicy(PolicyType.Automatic, PolicyType.Automatic);
 
 			Viewport viewport = new Viewport();
 
@@ -85,7 +85,7 @@ namespace Petri
 			scrolledWindow.Add(viewport);
 
 			var hbox = new HBox(false, 0);
-			hbox.PackStart(scrolledWindow, false, false, 0);
+			hbox.PackStart(scrolledWindow, true, true, 0);
 			_window.Add(hbox);
 
 			_window.DeleteEvent += (o, args) => this.Hide();

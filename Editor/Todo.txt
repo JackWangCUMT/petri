@@ -1,7 +1,5 @@
 ﻿Fonctions builtin ?
 
-Autocomplétion des expressions
-
 Gestion des timeouts
 
 Gestion des modifications des headers en cours de route par un programme extérieur
@@ -18,13 +16,12 @@ Actions/Transitions : ajustement des dimensions à la longueur du titre
 Barre d'outils
 Fonction recherche
 
+Évaluation en direct d'expressions C++ dans le débuggeur
+
+Zoom
+
 FIXME:
 	état interne des Conditions pas thread-safe
 
 	Cible des raccourcis clavier (copier-coller, fermer…)
 	Parenthèses A && B && C
-	Crash en cas de modif de breakpoints avec le serveur déconnecté
-	Parsage JSON vide ?
-
-Fenêtre erreur compil
-attribution

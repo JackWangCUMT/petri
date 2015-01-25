@@ -49,6 +49,8 @@ protected:
 
 	void setPause(bool pause);
 
+	void updateBreakpoints(Json::Value const &breakpoints);
+
 	Json::Value receiveObject();
 	void sendObject(Json::Value const &o);
 
@@ -68,7 +70,7 @@ protected:
 
 	PetriDynamicLibCommon &_petriNetFactory;
 	std::unique_ptr<PetriDebug> _petri;
-
+	std::mutex _sendMutex;
 	std::mutex _breakpointsMutex;
 	std::set<Action *> _breakpoints;
 };
