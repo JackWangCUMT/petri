@@ -10,6 +10,7 @@ namespace Petri
 			Server = new DebugServer(doc);
 			ActiveStates = new Dictionary<State, int>();
 			Breakpoints = new HashSet<Action>();
+			DebugEditor = new DebugEditor(doc);
 		}
 
 		public Document Document {
@@ -20,6 +21,11 @@ namespace Petri
 		public DebugServer Server {
 			get;
 			private set;
+		}
+
+		public DebugEditor DebugEditor {
+			get;
+			set;
 		}
 
 		public Dictionary<State, int> ActiveStates {

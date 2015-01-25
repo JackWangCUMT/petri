@@ -7,22 +7,29 @@
 
 #include "DebugServer.h"
 #include "Commun.h"
+#include "PetriDynamicLibCommon.h"
 #include <cstring>
+#include "PetriUtils.h"
 
 std::string DebugServer::getVersion() {
-	return "0.1";
+	return "0.2";
 }
 
 std::chrono::system_clock::time_point DebugServer::getAPIdate() {
+	logMagenta(__TIMESTAMP__);
+	return DebugServer::getDateFromTimestamp(__TIMESTAMP__);
+}
+
+std::chrono::system_clock::time_point DebugServer::getDateFromTimestamp(char const *timestamp) {
 	char const *format = "%a %b %d %H:%M:%S %Y";
 	std::tm tm;
 	std::memset(&tm, 0, sizeof(tm));
-	
-	strptime(__TIMESTAMP__, format, &tm);
+
+	strptime(timestamp, format, &tm);
 	return std::chrono::system_clock::from_time_t(std::mktime(&tm));
 }
 
-DebugSession::DebugSession(PetriDynamicLibCommon &petri) : _socket(SockProtocol::TCP), _client(SockProtocol::TCP), _petriNetFactory(petri) {}
+DebugSession::DebugSession(PetriDynamicLibCommon &petri) : _socket(SockProtocol::TCP), _client(SockProtocol::TCP), _petriNetFactory(petri), _evaluator(petri.prefix()) {}
 
 DebugSession::~DebugSession() {
 	if(_receptionThread.joinable())
@@ -38,6 +45,7 @@ void DebugSession::start() {
 
 void DebugSession::stop() {
 	_running = false;
+	
 	if(_receptionThread.joinable())
 		_receptionThread.join();
 	if(_heartBeat.joinable())
@@ -176,6 +184,17 @@ void DebugSession::serverCommunication() {
 				else if(type == "breakpoints") {
 					this->updateBreakpoints(root["payload"]);
 				}
+				else if(type == "evaluate") {
+					std::string result;
+					try {
+						_evaluator.reload();
+						result = _evaluator.evaluate();
+					}
+					catch(std::exception &e) {
+						result = "<could not evaluate the symbol>";
+					}
+					this->sendObject(this->json("evaluation", result));
+				}
 			}
 		}
 		catch(std::exception &e) {
@@ -215,6 +234,9 @@ void DebugSession::updateBreakpoints(Json::Value const &breakpoints) {
 
 void DebugSession::heartBeat() {
 	setThreadName("DebugSession "s + _petriNetFactory.name() + " heart beat"s);
+	auto lastSendDate = std::chrono::system_clock::now();
+	auto const minDelayBetweenSend = 100ms;
+
 	while(_running && _client.getState() == SOCK_ACCEPTED) {
 		std::unique_lock<std::mutex> lk(_stateChangeMutex);
 		_stateChangeCondition.wait(lk, [this]() {
@@ -223,6 +245,11 @@ void DebugSession::heartBeat() {
 
 		if(!_running || _client.getState() != SOCK_ACCEPTED)
 			break;
+
+		auto delaySinceLastSend = std::chrono::system_clock::now() - lastSendDate;
+		if(delaySinceLastSend < minDelayBetweenSend) {
+			std::this_thread::sleep_until(lastSendDate + minDelayBetweenSend);
+		}
 
 		Json::Value states(Json::arrayValue);
 

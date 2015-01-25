@@ -28,6 +28,13 @@ namespace Petri
 			_toolbar.PackStart(_reload, false, false, 0);
 			_toolbar.PackStart(_switchToEditor, false, false, 0);
 
+			_paned = new HPaned();
+			this.PackStart(_paned, true, true, 0);
+
+			_paned.SizeRequested += (object o, SizeRequestedArgs args) => {
+				_document.DebugController.DebugEditor.Resize((o as HPaned).Child2.Allocation.Width);
+			};
+
 			_view = new DebugView(doc);
 			_view.CanFocus = true;
 			_view.CanDefault = true;
@@ -50,7 +57,9 @@ namespace Petri
 
 			scrolledWindow.Add(viewport);
 
-			this.PackStart(scrolledWindow, true, true, 0);
+			_paned.Pack1(scrolledWindow, true, true);
+			_editor = new Fixed();
+			_paned.Pack2(_editor, false, true);
 		}
 
 		public DebugView View {
@@ -88,16 +97,20 @@ namespace Petri
 				if(_document.DebugController.Server.PetriRunning) {
 					((Label)_startStopPetri.Child).Text = "Stopper";
 					_playPause.Sensitive = true;
+					_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
 					if(_document.DebugController.Server.Pause) {
 						((Label)_playPause.Child).Text = "Continuer";
+						_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
 					}
 					else {
 						((Label)_playPause.Child).Text = "Pause";
+						_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
 					}
 				}
 				else {
 					((Label)_startStopPetri.Child).Text = "Exécuter";
 					_playPause.Sensitive = false;
+					_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
 					((Label)_playPause.Child).Text = "Pause";
 				}
 			}
@@ -107,7 +120,18 @@ namespace Petri
 				_startStopPetri.Sensitive = false;
 				_reload.Sensitive = false;
 				_playPause.Sensitive = false;
+				_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
 				((Label)_playPause.Child).Text = "Pause";
+			}
+		}
+
+		public void OnEvaluate(string result) {
+			_document.DebugController.DebugEditor.OnEvaluate(result);
+		}
+
+		public override Fixed Editor {
+			get {
+				return _editor;
 			}
 		}
 
@@ -144,6 +168,8 @@ namespace Petri
 				return _document.DebugController.Server;
 			}
 		}
+
+		Fixed _editor;
 
 		DebugView _view;
 		Document _document;

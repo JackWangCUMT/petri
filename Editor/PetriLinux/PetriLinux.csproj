@@ -65,6 +65,7 @@
     </Reference>
     <Reference Include="Mono.Cairo" />
     <Reference Include="System.Configuration" />
+	<Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>
@@ -174,6 +175,12 @@
     <Compile Include="..\src\Document\DocumentSection\Editor\EntityEditor.cs">
       <Link>Document\DocumentSection\Editor\EntityEditor.cs</Link>
     </Compile>
+	<Compile Include="..src\Document\DocumentSection\Debugger\DebugEditor.cs">
+		<Link>Document\DocumentSection\Debugger\DebugEditor.cs</Link>
+	</Compile>
+	<Compile Include="..src\Document\DocumentSection\PaneEditor.cs">
+		<Link>Document\DocumentSection\PaneEditor.cs</Link>
+	</Compile>
     <Compile Include="..\src\Model\Action.cs">
       <Link>Model\Action.cs</Link>
     </Compile>

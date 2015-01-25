@@ -8,11 +8,11 @@
 #ifndef IA_Pe_tri_DebugServer_h
 #define IA_Pe_tri_DebugServer_h
 
-#include "PetriDynamicLibCommon.h"
 #include <string>
-#include "PetriNet.h"
 #include "Commun.h"
+#include "PetriNet.h"
 #include "jsoncpp/include/json.h"
+#include "SymbolEvaluator.h"
 #include <set>
 
 using namespace std::string_literals;
@@ -20,7 +20,11 @@ using namespace std::string_literals;
 namespace DebugServer {
 	extern std::string getVersion();
 	extern std::chrono::system_clock::time_point getAPIdate();
+	extern std::chrono::system_clock::time_point getDateFromTimestamp(char const *timestamp);
 }
+
+class PetriDynamicLibCommon;
+class PetriDebug;
 
 class DebugSession {
 public:
@@ -73,6 +77,8 @@ protected:
 	std::mutex _sendMutex;
 	std::mutex _breakpointsMutex;
 	std::set<Action *> _breakpoints;
+
+	SymbolEvaluator _evaluator;
 };
 
 #endif

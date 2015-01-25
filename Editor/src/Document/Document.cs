@@ -40,6 +40,7 @@ namespace Petri
 			this.Restore();
 			Window.PresentWindow();
 			Window.EditorGui.Paned.Position = Window.Allocation.Width - 260;
+			Window.DebugGui.Paned.Position = Window.Allocation.Width - 200;
 			AssociatedWindows = new HashSet<Window>();
 		}
 
@@ -507,6 +508,12 @@ namespace Petri
 			Window.Gui = Window.EditorGui;
 		}
 
+		public string CppPrefix {
+			get {
+				return _settings.Name;
+			}
+		}
+
 		public void SaveCppDontAsk() {
 			if(this._settings.SourceOutputPath.Length == 0) {
 				this.SaveCpp();
@@ -526,7 +533,7 @@ namespace Petri
 			generator += "#define PETRI_" + cppGen.Item2 + "_H\n";
 
 			generator += "#define CLASS_NAME " + _settings.Name;
-			generator += "#define PREFIX \"" + _settings.Name + "\"";
+			generator += "#define PREFIX \"" + CppPrefix + "\"";
 
 			generator += "#define PORT " + _settings.Port;
 
@@ -578,7 +585,7 @@ namespace Petri
 		public bool Compile() {
 			if(this.Path != "") {
 				var c = new CppCompiler(this);
-				var o = c.Compile();
+				var o = c.CompileSource(Settings.Name + ".cpp", Settings.Name);
 				if(o != "") {
 					MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, "La compilation a échoué. Souhaitez-vous consulter les erreurs générées ?");
 					d.AddButton("Non", ResponseType.Cancel);
@@ -589,6 +596,8 @@ namespace Petri
 
 					d.Destroy();
 					if(result == ResponseType.Accept) {
+						string sourcePath = Settings.GetSourcePath(Settings.Name + ".cpp");
+						o = "Invocation du compilateur :\n" + Settings.Compiler + " " + Settings.CompilerArgumentsForSource(sourcePath, Settings.Name) + "\n\nErreurs :\n" + o;
 						new CompilationErrorPresenter(this, o).Show();
 					}
 

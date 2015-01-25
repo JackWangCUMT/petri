@@ -70,7 +70,7 @@ namespace Petri
 
 		public string Version {
 			get {
-				return "0.1";
+				return "0.2";
 			}
 		}
 
@@ -184,6 +184,52 @@ namespace Petri
 			}
 		}
 
+		public void Evaluate(Cpp.Expression expression) {
+			string filename = System.IO.Path.GetTempFileName();
+
+			string cppExpr;
+			if(expression is Cpp.LitteralExpression) {
+				cppExpr = expression.MakeCpp();
+			}
+			else {
+				cppExpr = expression.MakeCpp() + "->operator()()";
+			}
+
+			Cpp.Generator generator = new Cpp.Generator();
+			foreach(string header in _document.Headers) {
+				generator.AddHeader("\"" + header + "\"");
+			}
+			generator.AddHeader("\"PetriUtils.h\"");
+			generator.AddHeader("<string>");
+			generator.AddHeader("<sstream>");
+
+			generator += "extern \"C\" char const *" + _document.CppPrefix + "_evaluate() {";
+			generator += "static std::string result;";
+			generator += "std::ostringstream oss;";
+			generator += "oss << " + cppExpr + ";";
+			generator += "result = oss.str();";
+			generator += "return result.c_str();";
+			generator += "}\n";
+
+			generator.Write(filename);
+
+			var c = new CppCompiler(_document);
+			var o = c.CompileSource(filename, _document.Settings.Name + "_evaluator");
+			if(o != "") {
+				throw new Exception("Erreur de compilation : " + o);
+			}
+			else {
+				try {
+					this.SendObject(new JObject(new JProperty("type", "evaluate")));
+				}
+				catch(Exception e) {
+					this.StopSession();
+					_document.Window.DebugGui.UpdateToolbar();
+					throw e;
+				}
+			}
+		}
+
 		private void Hello() {
 			try {
 				this.SendObject(new JObject(new JProperty("type", "hello"), new JProperty("payload", new JObject(new JProperty("version", Version)))));
@@ -194,7 +240,7 @@ namespace Petri
 					return;
 				}
 				else if(ehlo != null && ehlo["type"].ToString() == "error") {
-					throw new Exception("An error was returned by the debugger: " + ehlo["error"]);
+					throw new Exception("An error was returned by the debugger: " + ehlo["payload"]);
 				}
 				throw new Exception("Invalid message received from debugger (expected ehlo)");
 			}
@@ -308,6 +354,12 @@ namespace Petri
 
 						_document.Window.DebugGui.View.Redraw();
 					}
+					else if(msg["type"].ToString() == "evaluation") {
+						GLib.Timeout.Add(0, () => {
+							_document.Window.DebugGui.OnEvaluate(msg["payload"].ToString());
+							return false;
+						});
+					}
 				}
 				if(_sessionRunning) {
 					throw new Exception("Socket unexpectedly disconnected");
@@ -336,6 +388,7 @@ namespace Petri
 			int count = 0;
 			while(_sessionRunning) {
 				string val = this.ReceiveString();
+
 				if(val.Length > 0)
 					return JObject.Parse(val);
 

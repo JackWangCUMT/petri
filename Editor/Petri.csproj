@@ -62,6 +62,7 @@
       <HintPath>Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="pango-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -120,6 +121,8 @@
     <Compile Include="src\Document\DocumentSection\RenderView.cs" />
     <Compile Include="src\Document\DocumentSection\RenderEntityDraw.cs" />
     <Compile Include="src\Document\MacrosManager.cs" />
+    <Compile Include="src\Document\DocumentSection\Debugger\DebugEditor.cs" />
+    <Compile Include="src\Document\DocumentSection\PaneEditor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

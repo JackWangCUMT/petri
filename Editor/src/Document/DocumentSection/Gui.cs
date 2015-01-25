@@ -17,6 +17,18 @@ namespace Petri
 		public abstract PetriView BaseView {
 			get;
 		}
+
+		public abstract Fixed Editor {
+			get;
+		}
+
+		public HPaned Paned {
+			get {
+				return _paned;
+			}
+		}
+
+		protected HPaned _paned;
 	}
 }
 

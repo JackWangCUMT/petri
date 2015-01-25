@@ -10,7 +10,6 @@
 
 #include <functional>
 #include <memory>
-#include <dlfcn.h>
 #include "Commun.h"
 #include "Condition.h"
 #include "PetriNet.h"

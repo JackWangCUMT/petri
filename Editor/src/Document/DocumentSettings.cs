@@ -183,57 +183,63 @@ namespace Petri
 			set;
 		}
 
-		public string CompilerArguments {
-			get {
-				string val = "";
-
-				val += "-shared ";
-				if(Configuration.RunningPlatform == Platform.Mac) {
-					val += "-undefined dynamic_lookup ";
-				}
-				else if(Configuration.RunningPlatform == Platform.Linux) {
-					val += "-fPIC ";
-				}
-
-				foreach(var f in CompilerFlags) {
-					val += f + " ";
-				}
-
-				foreach(var i in IncludePaths) {
-					// Recursive?
-					if(i.Item2) {
-						var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
-						foreach(var dir in directories) {
-							val += "-I'" + dir + "' ";
-						}
-					}
-					val += "-iquote'" + i.Item1 + "' ";
-					val += "-I'" + i.Item1 + "' ";
-				}
-				val += "-iquote'" + SourceOutputPath + "' ";
-				val += "-I'" + SourceOutputPath + "' ";
-
-				foreach(var i in LibPaths) {
-					// Recursive?
-					if(i.Item2) {
-						var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
-						foreach(var dir in directories) {
-							val += "-L'" + dir + "' ";
-						}
-					}
-					val += "-L'" + i.Item1 + "' ";
-				}
-
-				foreach(var l in Libs) {
-					val += "-l'" + l + "' ";
-				}
-
-				val += "-o '" + System.IO.Path.Combine(LibOutputPath, Name + ".so") + "' ";
-
-				val += "'" + System.IO.Path.Combine(SourceOutputPath, Name) + ".cpp'";
-
-				return val;
+		public string GetSourcePath(string source) {
+			if(!System.IO.Path.IsPathRooted(source)) {
+				source = System.IO.Path.Combine(SourceOutputPath, source);
 			}
+
+			return source;
+		}
+
+		public string CompilerArgumentsForSource(string source, string lib) {
+			string val = "";
+
+			val += "-shared ";
+			if(Configuration.RunningPlatform == Platform.Mac) {
+				val += "-undefined dynamic_lookup -flat_namespace ";
+			}
+			else if(Configuration.RunningPlatform == Platform.Linux) {
+				val += "-fPIC ";
+			}
+
+			foreach(var f in CompilerFlags) {
+				val += f + " ";
+			}
+
+			foreach(var i in IncludePaths) {
+				// Recursive?
+				if(i.Item2) {
+					var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
+					foreach(var dir in directories) {
+						val += "-I'" + dir + "' ";
+					}
+				}
+				val += "-iquote'" + i.Item1 + "' ";
+				val += "-I'" + i.Item1 + "' ";
+			}
+			val += "-iquote'" + SourceOutputPath + "' ";
+			val += "-I'" + SourceOutputPath + "' ";
+
+			foreach(var i in LibPaths) {
+				// Recursive?
+				if(i.Item2) {
+					var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
+					foreach(var dir in directories) {
+						val += "-L'" + dir + "' ";
+					}
+				}
+				val += "-L'" + i.Item1 + "' ";
+			}
+
+			foreach(var l in Libs) {
+				val += "-l'" + l + "' ";
+			}
+
+			val += "-o '" + System.IO.Path.Combine(LibOutputPath, lib + ".so") + "' ";
+
+			val += "-x c++ '" + source + "'";
+
+			return val;
 		}
 	}
 }

@@ -90,15 +90,9 @@ namespace Petri
 			}
 		}
 
-		public Fixed Editor {
+		public override Fixed Editor {
 			get {
 				return _editor;
-			}
-		}
-
-		public HPaned Paned {
-			get {
-				return _paned;
 			}
 		}
 
@@ -114,7 +108,6 @@ namespace Petri
 			_petriView.Redraw();
 		}
 
-		HPaned _paned;
 		HBox _toolbar;
 		EditorView _petriView;
 		Fixed _editor;

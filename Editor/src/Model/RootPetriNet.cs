@@ -109,7 +109,7 @@ namespace Petri
 			source += "";
 
 			source += "EXPORT char const *" + Document.Settings.Name + "_getAPIDate() {";
-			source += "return \"" + System.DateTime.Now.ToString("MMM dd yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) + "\";";
+			source += "return __TIMESTAMP__;";
 			source += "}";
 
 			return hash;

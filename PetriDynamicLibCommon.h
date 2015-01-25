@@ -8,13 +8,15 @@
 #ifndef IA_Pe_tri_PetriDynamicLibCommon_h
 #define IA_Pe_tri_PetriDynamicLibCommon_h
 
+#include "DynamicLib.h"
 #include <memory>
 #include "PetriUtils.h"
+#include "DebugServer.h"
 
-class PetriDynamicLibCommon {
+class PetriDynamicLibCommon : public DynamicLib {
 public:
 	/**
-	 * Creates the dynamic library wrapper, and loads it, making possible to create the PetriNet objects.
+	 * Creates the dynamic library wrapper. It still needs to be loaded to make it possible to create the PetriNet objects.
 	 */
 	PetriDynamicLibCommon() = default;
 	PetriDynamicLibCommon(PetriDynamicLibCommon const &pn) = delete;
@@ -22,9 +24,7 @@ public:
 
 	PetriDynamicLibCommon(PetriDynamicLibCommon &&pn) = default;
 	PetriDynamicLibCommon &operator=(PetriDynamicLibCommon &&pn) = default;
-	virtual ~PetriDynamicLibCommon() {
-		this->unload();
-	}
+	virtual ~PetriDynamicLibCommon() = default;
 
 	/**
 	 * Creates the PetriNet object according to the code contained in the dynamic library.
@@ -77,48 +77,50 @@ public:
 	virtual uint16_t port() const = 0;
 
 	/**
-	 * Returns whether the dylib code resides in memory or not
-	 * @return The loaded state of the dynamic library
-	 */
-	bool loaded() const {
-		return _libHandle != nullptr;
-	}
-
-	/**
 	 * Loads the dynamic library associated to this wrapper.
 	 * @throws std::runtime_error on two occasions: when the dylib could not be found (wrong path, missing file, wrong architecture or other error), or when the debug server's code has been changed (impliying the dylib has to be recompiled).
 	 */
-	virtual void load() = 0;
-
-	/**
-	 * Removes the dynamic library associated to this wrapper from memory.
-	 */
-	void unload() {
+	virtual void load() override {
 		if(this->loaded()) {
-			dlclose(_libHandle);
+			return;
 		}
 
-		_libHandle = nullptr;
-		_createPtr = nullptr;
-		_createDebugPtr = nullptr;
-		_hashPtr = nullptr;
+		this->DynamicLib::load();
+
+		std::string const prefix = this->prefix();
+
+		// Accesses the newly loaded symbols
+		_createPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, (prefix + "_create").c_str()));
+		_createDebugPtr = reinterpret_cast<void *(*)()>(dlsym(_libHandle, (prefix + "_createDebug").c_str()));
+		_hashPtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, (prefix + "_getHash").c_str()));
+
+		// Checks that the dylib is more recent than the last change to the debug server
+		auto APIDatePtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, (prefix + "_getAPIDate").c_str()));
+		auto libDate = DebugServer::getDateFromTimestamp(APIDatePtr());
+		auto serverDate = DebugServer::getAPIdate();
+
+		if(serverDate > libDate) {
+			this->unload();
+
+			logError("The dynamic library for Petri net ", prefix, " is out of date and must be recompiled!");
+			throw std::runtime_error("The dynamic library is out of date and must be recompiled!");
+		}
+	}
+	
+	/**
+	 * Gives access to the path of the dynamic library archive, relative to the executable path.
+	 * @return The relative path of the dylib
+	 */
+	virtual std::string path() const override {
+		return "./" + this->name() + ".so";
 	}
 
-	/**
-	 * Unloads the code of the dynamic library previously loaded, and loads the code contained in a possibly updated dylib.
-	 */
-	void reload() {
-		this->unload();
-		this->load();
-	}
+	virtual char const *prefix() const = 0;
 
 protected:
-	void *_libHandle = nullptr;
 	void *(*_createPtr)() = nullptr;
 	void *(*_createDebugPtr)() = nullptr;
 	char const *(*_hashPtr)() = nullptr;
-
-	std::string _relativePath;
 };
 
 #endif

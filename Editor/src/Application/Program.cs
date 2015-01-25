@@ -27,7 +27,7 @@ namespace Petri
 		}
 
 		public static String SafeMarkupFromString(string s) {
-			return s.Replace("&", "&amp;");
+			return System.Web.HttpUtility.HtmlEncode(s);
 		}
 
 		public static void Main(string[] args)

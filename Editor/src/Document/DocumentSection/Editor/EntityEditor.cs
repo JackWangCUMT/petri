@@ -4,7 +4,7 @@ using Gtk;
 
 namespace Petri
 {
-	public abstract class EntityEditor
+	public abstract class EntityEditor : PaneEditor
 	{
 		public static EntityEditor GetEditor(Entity e, Document doc) {
 			EntityEditor editor;
@@ -41,7 +41,7 @@ namespace Petri
 			private set;
 		}
 
-		protected EntityEditor(Entity e, Document doc) {
+		protected EntityEditor(Entity e, Document doc) : base(doc, doc.Window.EditorGui.Editor) {
 			Entity = e;
 			_document = doc;
 
@@ -54,87 +54,6 @@ namespace Petri
 		}
 
 		protected enum ModifLocation {None, EntityChange, Name, RequiredTokens, Active, Function, Condition, Param0}; 
-		
-		protected ComboBox ComboHelper(string selectedItem, List<string> items)
-		{
-			var funcList = ComboBox.NewText();
-
-			foreach(string func in items) {
-				funcList.AppendText(func);
-			}
-
-			{
-				TreeIter iter;
-				funcList.Model.GetIterFirst(out iter);
-				do {
-					GLib.Value thisRow = new GLib.Value();
-					funcList.Model.GetValue(iter, 0, ref thisRow);
-					if((thisRow.Val as string).Equals(selectedItem)) {
-						funcList.SetActiveIter(iter);
-						break;
-					}
-				} while (funcList.Model.IterNext(ref iter));
-			}
-
-			return funcList;
-		}
-
-		protected Label CreateLabel(int indentation, string text) {
-			var label = new Label(text);
-			this.AddWidget(label, false, indentation);
-
-			return label;
-		}
-
-		protected WidgetType CreateWidget<WidgetType>(bool resizeable, int indentation, params object[] widgetConstructionArgs) where WidgetType : Widget
-		{
-			WidgetType w = (WidgetType)Activator.CreateInstance(typeof(WidgetType), widgetConstructionArgs);
-			this.AddWidget(w, resizeable, indentation);
-			return w;
-		}
-
-		protected void AddWidget(Widget w, bool resizeable, int indentation) {
-			_objectList.Add(Tuple.Create(w, indentation, resizeable));
-		}
-
-		public void Resize(int width) {
-			foreach(var tuple in _objectList) {
-				if(tuple.Item3) {
-					tuple.Item1.WidthRequest = width - 20 - tuple.Item2;
-				}
-			}
-		}
-
-		protected void FormatAndShow()
-		{
-			foreach(Widget w in _document.Window.EditorGui.Editor.AllChildren) {
-				_document.Window.EditorGui.Editor.Remove(w);
-			}
-
-			int lastX = 20, lastY = 0;
-			for(int i = 0; i < _objectList.Count; ++i) {
-				Widget w = _objectList[i].Item1;
-				_document.Window.EditorGui.Editor.Add(w);
-				if(w is Label) {
-					lastY += 20;
-				}
-				else if(w is CheckButton) {
-					lastY += 10;
-				}
-				else if(w is ColorButton) {
-					lastY += 10;
-				}
-
-				Fixed.FixedChild w2 = ((Fixed.FixedChild)(_document.Window.EditorGui.Editor[w]));
-				w2.X = lastX + _objectList[i].Item2;
-				w2.Y = lastY;
-
-				lastY += w.Allocation.Height + 20;
-				w.Show();
-			}
-
-			_document.Window.EditorGui.View.Redraw();
-		}
 
 		// Here's a way to signal that we want all the previous GuiActions stored before to be posted as one.
 		// The signal is done either when we edit another Entity, or when we edit another field of the current one.
@@ -170,10 +89,8 @@ namespace Petri
 			_actions.Clear();
 		}
 
-		protected Document _document;
 		ModifLocation _lastLocation = ModifLocation.None;
 		List<GuiAction> _actions;
-		protected List<Tuple<Widget, int, bool>> _objectList = new List<Tuple<Widget, int, bool>>();
 	}
 
 	public class ActionEditor : EntityEditor {

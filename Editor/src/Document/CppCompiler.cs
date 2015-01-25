@@ -9,20 +9,23 @@ namespace Petri
 			_document = doc;
 		}
 
-		public string Compile() {
+		public string CompileSource(string source, string lib) {
 			Process p = new Process();
 
 			string cd = System.IO.Directory.GetCurrentDirectory();
 
 			System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(_document.Path).FullName);
 
+			source = _document.Settings.GetSourcePath(source);
+			System.IO.File.SetLastWriteTime(source, DateTime.Now);
+
 			p.StartInfo.UseShellExecute = false;
 			p.StartInfo.RedirectStandardOutput = true;
 			p.StartInfo.RedirectStandardError = true;
 			p.StartInfo.FileName = _document.Settings.Compiler;
-			string s = _document.Settings.CompilerArguments;
+			string s = _document.Settings.CompilerArgumentsForSource(source, lib);
 			if(s.Length < 5000) {
-				p.StartInfo.Arguments = _document.Settings.CompilerArguments;
+				p.StartInfo.Arguments = s;
 			}
 			else {
 				return "Erreur : l'invocation du compilateur est trop longue (" + s.Length.ToString() + " caractères. Essayez de supprimer des chemins d'inclusion récursifs.";
