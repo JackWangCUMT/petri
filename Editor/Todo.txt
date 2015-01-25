@@ -23,7 +23,8 @@ FIXME:
 
 	Cible des raccourcis clavier (copier-coller, fermer…)
 	Parenthèses A && B && C
+	Crash en cas de modif de breakpoints avec le serveur déconnecté
+	Parsage JSON vide ?
 
 Fenêtre erreur compil
--fPIC compilateur
 attribution

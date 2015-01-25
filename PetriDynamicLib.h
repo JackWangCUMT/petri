@@ -58,7 +58,7 @@ public:
 
 		auto const path = "./" + this->name() + ".so";
 
-		_libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_GLOBAL);
+		_libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
 
 		if(_libHandle == nullptr) {
 			logError("Unable to load the dynamic library at path \"", path, "\"!\n", "Reason: ", dlerror());

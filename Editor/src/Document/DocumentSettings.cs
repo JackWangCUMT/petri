@@ -188,6 +188,9 @@ namespace Petri
 				string val = "";
 
 				val += "-shared ";
+				if(Configuration.RunningPlatform == Platform.Mac) {
+					val += "-undefined dynamic_lookup ";
+				}
 
 				foreach(var f in CompilerFlags) {
 					val += f + " ";
