@@ -1,7 +1,7 @@
 # Petri/SConstruct
 
 import sys
-sys.path.append('../../../..')
+sys.path.append('../..')
 from scons_tools import *
 
 env = createEnvironment(['pthreads', 'Outils'])
