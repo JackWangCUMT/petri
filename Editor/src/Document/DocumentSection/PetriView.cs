@@ -59,7 +59,20 @@ namespace Petri
 					_lastClickPosition.X = ev.X;
 					_lastClickPosition.Y = ev.Y;
 
-					this.ManageOneButtonPress(ev.Button, ev.X / Zoom, ev.Y / Zoom);
+					if(ev.X / Zoom >= 15 && ev.X / Zoom < _parentHierarchy[_parentHierarchy.Count - 1].extents.Width + 15
+					   && ev.Y / Zoom >= 15 && ev.Y / Zoom < _parentHierarchy[_parentHierarchy.Count - 1].extents.Height + 15) {
+						double currX = 15;
+						foreach(var item in _parentHierarchy) {
+							if(item.petriNet != null && ev.X / Zoom - currX < item.extents.Width + pathSeparatorLenth) {
+								_nextPetriNet = item.petriNet;
+								break;
+							}
+							currX += item.extents.Width + pathSeparatorLenth;
+						}
+					}
+					else {
+						this.ManageOneButtonPress(ev.Button, ev.X / Zoom, ev.Y / Zoom);
+					}
 				}
 			}
 
@@ -67,11 +80,18 @@ namespace Petri
 		}
 
 		protected override bool OnButtonReleaseEvent(Gdk.EventButton ev) {
-			this.ManageButtonRelease(ev.Button, ev.X / Zoom, ev.Y / Zoom);
+			if(_nextPetriNet != null) {
+				CurrentPetriNet = _nextPetriNet;
+				this.Redraw();
+			}
+			else {
+				this.ManageButtonRelease(ev.Button, ev.X / Zoom, ev.Y / Zoom);
+			}
 			return base.OnButtonReleaseEvent(ev);
 		}
 
 		protected override bool OnMotionNotifyEvent(Gdk.EventMotion ev) {
+			_nextPetriNet = null;
 			this.ManageMotion(ev.X / Zoom, ev.Y / Zoom);
 			return base.OnMotionNotifyEvent(ev);
 		}
@@ -118,9 +138,38 @@ namespace Petri
 				context.SetSourceRGBA(0.0, 0.6, 0.2, 1);
 				context.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Normal);
 				context.SetFontSize(16);
-				string val = petriNet.Name;
-				TextExtents te = context.TextExtents(val);
-				context.MoveTo(15 - te.XBearing, 15 - te.YBearing);
+
+				string val = "";
+				PetriNet petri = CurrentPetriNet;
+				if(_parentHierarchy.Count == 0) {
+					pathSeparatorLenth = context.TextExtents(" / ").Width;
+					do {
+						ParentStruct pStruct = new ParentStruct();
+						pStruct.petriNet = petri;
+						string sep = petri.Parent == null ? "" : " / ";
+						pStruct.extents = context.TextExtents(sep + petri.Name);
+						val = sep + petri.Name + val;
+						_parentHierarchy.Insert(0, pStruct);
+						petri = petri.Parent;
+					} while(petri != null);
+
+					ParentStruct path = new ParentStruct();
+					path.petriNet = null;
+					path.extents = context.TextExtents(val);
+					_parentHierarchy.Add(path);
+				}
+				else {
+					do {
+						ParentStruct pStruct = new ParentStruct();
+						pStruct.petriNet = petri;
+						string sep = petri.Parent == null ? "" : " / ";
+						val = sep + petri.Name + val;
+						petri = petri.Parent;
+					} while(petri != null);
+				}
+
+				TextExtents ext = _parentHierarchy[_parentHierarchy.Count - 1].extents;
+				context.MoveTo(15 - ext.XBearing, 15 - ext.YBearing);
 				context.TextPath(val);
 				context.Fill();
 			}
@@ -199,6 +248,8 @@ namespace Petri
 			set {
 				_document.EditorController.EditedObject = null;
 				_editedPetriNet = value;
+				_parentHierarchy.Clear();
+				_nextPetriNet = null;
 			}
 		}
 
@@ -227,6 +278,11 @@ namespace Petri
 			return PetriView.Normalized(new PointD(x, y));
 		}
 
+		private struct ParentStruct {
+			public PetriNet petriNet;
+			public TextExtents extents;
+		}
+
 		protected Document _document;
 
 		protected PetriNet _editedPetriNet;
@@ -237,5 +293,9 @@ namespace Petri
 
 		PointD _lastClickPosition;
 		System.DateTime _lastClickDate;
+
+		private PetriNet _nextPetriNet;
+		private double pathSeparatorLenth;
+		private List<ParentStruct> _parentHierarchy = new List<ParentStruct>();
 	}
 }

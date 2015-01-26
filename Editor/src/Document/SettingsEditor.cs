@@ -12,8 +12,9 @@ namespace Petri
 			_window = new Window(WindowType.Toplevel);
 			_window.Title = "Réglages du document " + doc.Window.Title;
 
-			_window.DefaultWidth = 300;
-			_window.DefaultHeight = 400;
+			_window.DefaultWidth = 400;
+			_window.DefaultHeight = 600;
+
 
 			_window.SetPosition(WindowPosition.Center);
 			int x, y;
@@ -22,7 +23,15 @@ namespace Petri
 			_window.BorderWidth = 15;
 
 			var vbox = new VBox(false, 5);
-			_window.Add(vbox);
+			ScrolledWindow scrolledWindow = new ScrolledWindow();
+			scrolledWindow.SetPolicy(PolicyType.Automatic, PolicyType.Automatic);
+
+			Viewport viewport = new Viewport();
+
+			viewport.Add(vbox);
+
+			scrolledWindow.Add(viewport);
+			_window.Add(scrolledWindow);
 
 			{
 				Label label = new Label("Nom C++ du réseau de pétri :");

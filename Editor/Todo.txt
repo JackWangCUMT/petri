@@ -2,10 +2,6 @@
 
 Gestion des timeouts
 
-Gestion des modifications des headers en cours de route par un programme extérieur
-	En cas de changements incompatibles, proposer une résolution à la main ?
-	Impossibilité de trouver un en-tête au chargement ?
-
 Commenter le code :3
 Documentation
 
