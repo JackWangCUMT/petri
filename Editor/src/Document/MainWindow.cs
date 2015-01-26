@@ -198,20 +198,38 @@ namespace Petri
 				if(_document.CloseAndConfirm())
 					this.Destroy();
 			}
-			else if(sender == _showEditor) {
+			else if(sender == _showEditorItem) {
 				_document.SwitchToEditor();
 			}
-			else if(sender == _showDebugger) {
+			else if(sender == _showDebuggerItem) {
 				_document.SwitchToDebug();
 			}
-			else if(sender == _manageHeaders) {
+			else if(sender == _manageHeadersItem) {
 				_document.ManageHeaders();
 			}
-			else if(sender == _manageMacros) {
+			else if(sender == _manageMacrosItem) {
 				_document.ManageMacros();
 			}
-			else if(sender == _documentSettings) {
+			else if(sender == _documentSettingsItem) {
 				_document.EditSettings();
+			}
+			else if(sender == _actualSizeItem) {
+				_document.Window.Gui.BaseView.Zoom = 1;
+				_document.Window.Gui.BaseView.Redraw();
+			}
+			else if(sender == _zoomInItem) {
+				_document.Window.Gui.BaseView.Zoom /= 0.8f;
+				if(_document.Window.Gui.BaseView.Zoom > 8f) {
+					_document.Window.Gui.BaseView.Zoom = 8f;
+				}
+				_document.Window.Gui.BaseView.Redraw();
+			}
+			else if(sender == _zoomOutItem) {
+				_document.Window.Gui.BaseView.Zoom *= 0.8f;
+				if(_document.Window.Gui.BaseView.Zoom < 0.01f) {
+					_document.Window.Gui.BaseView.Zoom = 0.01f;
+				}
+				_document.Window.Gui.BaseView.Redraw();
 			}
 		}
 
@@ -223,14 +241,17 @@ namespace Petri
 
 			Menu fileMenu = new Menu();
 			Menu editMenu = new Menu();
+			Menu viewMenu = new Menu();
 			Menu documentMenu = new Menu();
 			Menu helpMenu = new Menu();
 			MenuItem file = new MenuItem("Fichier");
 			MenuItem edit = new MenuItem("Édition");
+			MenuItem view = new MenuItem("Affichage");
 			MenuItem document = new MenuItem("Document");
 			MenuItem help = new MenuItem("Aide");
 			file.Submenu = fileMenu;
 			edit.Submenu = editMenu;
+			view.Submenu = viewMenu;
 			document.Submenu = documentMenu;
 			help.Submenu = helpMenu;
 
@@ -318,26 +339,40 @@ namespace Petri
 			_copyItem.Sensitive = false;
 			_pasteItem.Sensitive = false;
 
-			_showEditor = new MenuItem("Afficher l'éditeur");
-			_showEditor.Activated += OnClickMenu;
-			_showEditor.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
-			_showDebugger = new MenuItem("Afficher le débuggueur");
-			_showDebugger.Activated += OnClickMenu;
-			_showDebugger.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.d, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
-			_manageHeaders = new MenuItem("Gérer les headers…");
-			_manageHeaders.Activated += OnClickMenu;
-			_manageMacros = new MenuItem("Gérer les macros…");
-			_manageMacros.Activated += OnClickMenu;
-			_documentSettings = new MenuItem("Réglages…");
-			_documentSettings.Activated += OnClickMenu;
-			_documentSettings.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.comma, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
+			_actualSizeItem = new MenuItem("Taille réelle");
+			_actualSizeItem.Activated += OnClickMenu;
+			_actualSizeItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.Key_0, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
+			_zoomInItem = new MenuItem("Zoom avant");
+			_zoomInItem.Activated += OnClickMenu;
+			_zoomInItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.plus, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
+			_zoomOutItem = new MenuItem("Zoom arrière");
+			_zoomOutItem.Activated += OnClickMenu;
+			_zoomOutItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.minus, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			documentMenu.Append(_showEditor);
-			documentMenu.Append(_showDebugger);
+			viewMenu.Append(_actualSizeItem);
+			viewMenu.Append(_zoomInItem);
+			viewMenu.Append(_zoomOutItem);
+
+			_showEditorItem = new MenuItem("Afficher l'éditeur");
+			_showEditorItem.Activated += OnClickMenu;
+			_showEditorItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
+			_showDebuggerItem = new MenuItem("Afficher le débuggueur");
+			_showDebuggerItem.Activated += OnClickMenu;
+			_showDebuggerItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.d, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
+			_manageHeadersItem = new MenuItem("Gérer les headers…");
+			_manageHeadersItem.Activated += OnClickMenu;
+			_manageMacrosItem = new MenuItem("Gérer les macros…");
+			_manageMacrosItem.Activated += OnClickMenu;
+			_documentSettingsItem = new MenuItem("Réglages…");
+			_documentSettingsItem.Activated += OnClickMenu;
+			_documentSettingsItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.comma, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
+
+			documentMenu.Append(_showEditorItem);
+			documentMenu.Append(_showDebuggerItem);
 			documentMenu.Append(new SeparatorMenuItem());
-			documentMenu.Append(_manageHeaders);
-			documentMenu.Append(_manageMacros);
-			documentMenu.Append(_documentSettings);
+			documentMenu.Append(_manageHeadersItem);
+			documentMenu.Append(_manageMacrosItem);
+			documentMenu.Append(_documentSettingsItem);
 
 
 			_showHelpItem = new MenuItem("Aide…");
@@ -357,6 +392,7 @@ namespace Petri
 
 			_menuBar.Append(file);
 			_menuBar.Append(edit);
+			_menuBar.Append(view);
 			_menuBar.Append(document);
 			_menuBar.Append(help);
 
@@ -388,13 +424,17 @@ namespace Petri
 		MenuItem _pasteItem;
 		MenuItem _selectAllItem;
 
-		MenuItem _showHelpItem;
+		MenuItem _showEditorItem;
+		MenuItem _showDebuggerItem;
+		MenuItem _manageHeadersItem;
+		MenuItem _manageMacrosItem;
+		MenuItem _documentSettingsItem;
 
-		MenuItem _showEditor;
-		MenuItem _showDebugger;
-		MenuItem _manageHeaders;
-		MenuItem _manageMacros;
-		MenuItem _documentSettings;
+		MenuItem _actualSizeItem;
+		MenuItem _zoomInItem;
+		MenuItem _zoomOutItem;
+
+		MenuItem _showHelpItem;
 
 		AccelGroup _accelGroup;
 

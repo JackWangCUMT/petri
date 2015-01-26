@@ -52,7 +52,7 @@ namespace Petri
 			_commentsLayout = new Pango.Layout(Gdk.PangoHelper.ContextGet());
 
 			_commentsLayout.FontDescription = new Pango.FontDescription();
-			_commentsLayout.FontDescription.Family = "Lucida Grande";
+			_commentsLayout.FontDescription.Family = "Arial";
 			_commentsLayout.FontDescription.Size = Pango.Units.FromPixels(12);
 
 			_commentsLayout.SetText(c.Name);
@@ -123,7 +123,7 @@ namespace Petri
 
 		protected virtual void InitContextForName(State s, Context context) {
 			context.SetSourceRGBA(0, 0, 0, 1);
-			context.SelectFontFace("Lucida Grande", FontSlant.Normal, FontWeight.Normal);
+			context.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Normal);
 			context.SetFontSize(12);
 		}
 		protected virtual void DrawName(State s, Context context) {
@@ -217,7 +217,7 @@ namespace Petri
 
 		protected virtual void InitContextForText(Transition t, Context context) {
 			context.SetSourceRGBA(0.1, 0.6, 1, 1);
-			context.SelectFontFace("Lucida Grande", FontSlant.Normal, FontWeight.Normal);
+			context.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Normal);
 			context.SetFontSize(12);
 		}
 		protected virtual void DrawText(Transition t, Context context) {

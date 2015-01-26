@@ -51,11 +51,11 @@ namespace Petri
 			base.FocusOut();
 		}
 
-		protected override void ManageTwoButtonPress(Gdk.EventButton ev) {
-			if(ev.Button == 1) {
+		protected override void ManageTwoButtonPress(uint button, double x, double y) {
+			if(button == 1) {
 				// Add new action
 				if(_selectedEntities.Count == 0) {
-					_document.PostAction(new AddStateAction(new Action(this.CurrentPetriNet.Document, CurrentPetriNet, false, new PointD(ev.X, ev.Y))));
+					_document.PostAction(new AddStateAction(new Action(this.CurrentPetriNet.Document, CurrentPetriNet, false, new PointD(x, y))));
 					_hoveredItem = SelectedEntity;
 				}
 				else if(_selectedEntities.Count == 1) {
@@ -112,19 +112,19 @@ namespace Petri
 					}
 				}
 			}
-			else if(ev.Button == 3) {
+			else if(button == 3) {
 				if(_selectedEntities.Count == 0) {
-					_document.PostAction(new AddCommentAction(new Comment(this.CurrentPetriNet.Document, CurrentPetriNet, new PointD(ev.X, ev.Y))));
+					_document.PostAction(new AddCommentAction(new Comment(this.CurrentPetriNet.Document, CurrentPetriNet, new PointD(x, y))));
 					_hoveredItem = SelectedEntity;
 				}
 			}
 		}
 
-		protected override void ManageOneButtonPress(Gdk.EventButton ev) {
-			if(ev.Button == 1) {
+		protected override void ManageOneButtonPress(uint button, double x, double y) {
+			if(button == 1) {
 				if(_currentAction == EditorAction.None) {
-					_deltaClick.X = ev.X;
-					_deltaClick.Y = ev.Y;
+					_deltaClick.X = x;
+					_deltaClick.Y = y;
 
 					_hoveredItem = CurrentPetriNet.StateAtPosition(_deltaClick);
 
@@ -159,7 +159,7 @@ namespace Petri
 						}
 						else if(_motionReference is Comment) {
 							Comment c = _motionReference as Comment;
-							if(Math.Abs(ev.X - _motionReference.Position.X - c.Size.X / 2) < 8 || Math.Abs(ev.X - _motionReference.Position.X + (_motionReference as Comment).Size.X / 2) < 8) {
+							if(Math.Abs(x - _motionReference.Position.X - c.Size.X / 2) < 8 || Math.Abs(x - _motionReference.Position.X + (_motionReference as Comment).Size.X / 2) < 8) {
 								_currentAction = EditorAction.ResizingComment;
 								_beforeResize.X = c.Size.X;
 								_beforeResize.Y = c.Size.Y;
@@ -168,8 +168,8 @@ namespace Petri
 								_currentAction = EditorAction.MovingComment;
 							}
 						}
-						_deltaClick.X = ev.X - _originalPosition.X;
-						_deltaClick.Y = ev.Y - _originalPosition.Y;
+						_deltaClick.X = x - _originalPosition.X;
+						_deltaClick.Y = y - _originalPosition.Y;
 					}
 					else {
 						if(!(_ctrlDown || _shiftDown)) {
@@ -179,12 +179,12 @@ namespace Petri
 							_selectedFromRect = new HashSet<Entity>(_selectedEntities);
 						}
 						_currentAction = EditorAction.SelectionRect;
-						_originalPosition.X = ev.X;
-						_originalPosition.Y = ev.Y;
+						_originalPosition.X = x;
+						_originalPosition.Y = y;
 					}
 				}
 			}
-			else if(ev.Button == 3) {
+			else if(button == 3) {
 				if(_currentAction == EditorAction.None && _hoveredItem != null && _hoveredItem is State) {
 					SelectedEntity = _hoveredItem;
 					_currentAction = EditorAction.CreatingTransition;
@@ -195,7 +195,7 @@ namespace Petri
 			}
 		}
 
-		protected override bool OnButtonReleaseEvent(Gdk.EventButton ev) {
+		protected override void ManageButtonRelease(uint button, double x, double y) {
 			if(_currentAction == EditorAction.MovingAction || _currentAction == EditorAction.MovingTransition || _currentAction == EditorAction.MovingComment) {
 				if(_shouldUnselect) {
 					SelectedEntity = _hoveredItem;
@@ -213,7 +213,7 @@ namespace Petri
 				}
 				_currentAction = EditorAction.None;
 			}
-			else if(_currentAction == EditorAction.CreatingTransition && ev.Button == 1) {
+			else if(_currentAction == EditorAction.CreatingTransition && button == 1) {
 				_currentAction = EditorAction.None;
 				if(_hoveredItem != null && _hoveredItem is State) {
 					_document.PostAction(new AddTransitionAction(new Transition(CurrentPetriNet.Document, CurrentPetriNet, SelectedEntity as State, _hoveredItem as State), true));
@@ -238,12 +238,9 @@ namespace Petri
 				_document.PostAction(new ResizeCommentAction(_hoveredItem as Comment, newSize));
 
 			}
-
-			return base.OnButtonReleaseEvent(ev);
 		}
 
-		protected override bool OnMotionNotifyEvent(Gdk.EventMotion ev)
-		{
+		protected override void ManageMotion(double x, double y) {
 			_shouldUnselect = false;
 
 			if(_currentAction == EditorAction.MovingAction || _currentAction == EditorAction.MovingTransition || _currentAction == EditorAction.MovingComment) {
@@ -254,15 +251,15 @@ namespace Petri
 				else {
 					SelectedEntity = _motionReference;
 				}
-				var delta = new PointD(ev.X - _deltaClick.X - _motionReference.Position.X, ev.Y - _deltaClick.Y - _motionReference.Position.Y);
+				var delta = new PointD(x - _deltaClick.X - _motionReference.Position.X, y - _deltaClick.Y - _motionReference.Position.Y);
 				foreach(var e in _selectedEntities) {
 					e.Position = new PointD(e.Position.X + delta.X, e.Position.Y + delta.Y);
 				}
 				this.Redraw();
 			}
 			else if(_currentAction == EditorAction.SelectionRect) {
-				_deltaClick.X = ev.X;
-				_deltaClick.Y = ev.Y;
+				_deltaClick.X = x;
+				_deltaClick.Y = y;
 
 				var oldSet = new HashSet<Entity>(_selectedEntities);
 				_selectedFromRect = new HashSet<Entity>();
@@ -293,13 +290,13 @@ namespace Petri
 			}
 			else if(_currentAction == EditorAction.ResizingComment) {
 				Comment comment = _hoveredItem as Comment;
-				double w = Math.Abs(ev.X - comment.Position.X) * 2;
+				double w = Math.Abs(x - comment.Position.X) * 2;
 				comment.Size = new PointD(w, 0);
 				this.Redraw();
 			}
 			else {
-				_deltaClick.X = ev.X;
-				_deltaClick.Y = ev.Y;
+				_deltaClick.X = x;
+				_deltaClick.Y = y;
 
 				_hoveredItem = CurrentPetriNet.StateAtPosition(_deltaClick);
 
@@ -313,8 +310,6 @@ namespace Petri
 
 				this.Redraw();
 			}
-
-			return base.OnMotionNotifyEvent(ev);
 		}
 
 		[GLib.ConnectBefore()]
@@ -370,47 +365,47 @@ namespace Petri
 		}
 
 		protected override void SpecializedDrawing(Cairo.Context context) {
-				if(_currentAction == EditorAction.CreatingTransition) {
-					Color color = new Color(1, 0, 0, 1);
-					double lineWidth = 2;
+			if(_currentAction == EditorAction.CreatingTransition) {
+				Color color = new Color(1, 0, 0, 1);
+				double lineWidth = 2;
 
-					if(_hoveredItem != null && _hoveredItem is State) {
-						color.R = 0;
-						color.G = 1;
-					}
-
-					PointD direction = new PointD(_deltaClick.X - SelectedEntity.Position.X, _deltaClick.Y - SelectedEntity.Position.Y);
-					if(PetriView.Norm(direction) > (SelectedEntity as State).Radius) {
-						direction = PetriView.Normalized(direction);
-
-						PointD origin = new PointD(SelectedEntity.Position.X + direction.X * (SelectedEntity as State).Radius, SelectedEntity.Position.Y + direction.Y * (SelectedEntity as State).Radius);
-						PointD destination = _deltaClick;
-
-						context.LineWidth = lineWidth;
-						context.SetSourceRGBA(color.R, color.G, color.B, color.A);
-
-						double arrowLength = 12;
-
-						context.MoveTo(origin);
-						context.LineTo(new PointD(destination.X - 0.99 * direction.X * arrowLength, destination.Y - 0.99 * direction.Y * arrowLength));
-						context.Stroke();
-						EntityDraw.DrawArrow(context, direction, destination, arrowLength);
-					}
+				if(_hoveredItem != null && _hoveredItem is State) {
+					color.R = 0;
+					color.G = 1;
 				}
-				else if(_currentAction == EditorAction.SelectionRect) {
-					double xm = Math.Min(_deltaClick.X, _originalPosition.X);
-					double ym = Math.Min(_deltaClick.Y, _originalPosition.Y);
-					double xM = Math.Max(_deltaClick.X, _originalPosition.X);
-					double yM = Math.Max(_deltaClick.Y, _originalPosition.Y);
 
-					context.LineWidth = 1;
-					context.MoveTo(xm, ym);
-					context.SetSourceRGBA(0.4, 0.4, 0.4, 0.6);
-					context.Rectangle(xm, ym, xM - xm, yM - ym);
-					context.StrokePreserve();
-					context.SetSourceRGBA(0.8, 0.8, 0.8, 0.3);
-					context.Fill();
+				PointD direction = new PointD(_deltaClick.X - SelectedEntity.Position.X, _deltaClick.Y - SelectedEntity.Position.Y);
+				if(PetriView.Norm(direction) > (SelectedEntity as State).Radius) {
+					direction = PetriView.Normalized(direction);
+
+					PointD origin = new PointD(SelectedEntity.Position.X + direction.X * (SelectedEntity as State).Radius, SelectedEntity.Position.Y + direction.Y * (SelectedEntity as State).Radius);
+					PointD destination = _deltaClick;
+
+					context.LineWidth = lineWidth;
+					context.SetSourceRGBA(color.R, color.G, color.B, color.A);
+
+					double arrowLength = 12;
+
+					context.MoveTo(origin);
+					context.LineTo(new PointD(destination.X - 0.99 * direction.X * arrowLength, destination.Y - 0.99 * direction.Y * arrowLength));
+					context.Stroke();
+					EntityDraw.DrawArrow(context, direction, destination, arrowLength);
 				}
+			}
+			else if(_currentAction == EditorAction.SelectionRect) {
+				double xm = Math.Min(_deltaClick.X, _originalPosition.X);
+				double ym = Math.Min(_deltaClick.Y, _originalPosition.Y);
+				double xM = Math.Max(_deltaClick.X, _originalPosition.X);
+				double yM = Math.Max(_deltaClick.Y, _originalPosition.Y);
+
+				context.LineWidth = 1;
+				context.MoveTo(xm, ym);
+				context.SetSourceRGBA(0.4, 0.4, 0.4, 0.6);
+				context.Rectangle(xm, ym, xM - xm, yM - ym);
+				context.StrokePreserve();
+				context.SetSourceRGBA(0.8, 0.8, 0.8, 0.3);
+				context.Fill();
+			}
 		}
 
 		public override PetriNet CurrentPetriNet {

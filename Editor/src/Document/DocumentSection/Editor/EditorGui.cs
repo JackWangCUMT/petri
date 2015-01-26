@@ -15,14 +15,20 @@ namespace Petri
 			_cpp = new Button(new Label("Générer C++…"));
 			_manageHeaders = new Button(new Label("Ouvrir un .h…"));
 			_compile = new Button(new Label("Compiler le code généré…"));
+			_zoomIn = new Button(new Label("+"));
+			_zoomOut = new Button(new Label("-"));
 			_switchToDebug = new Button(new Label("Debug"));
 			_cpp.Clicked += this.OnClick;
 			_manageHeaders.Clicked += this.OnClick;
 			_compile.Clicked += this.OnClick;
+			_zoomIn.Clicked += this.OnClick;
+			_zoomOut.Clicked += this.OnClick;
 			_switchToDebug.Clicked += this.OnClick;
 			_toolbar.PackStart(_cpp, false, false, 0);
 			_toolbar.PackStart(_manageHeaders, false, false, 0);
 			_toolbar.PackStart(_compile, false, false, 0);
+			_toolbar.PackStart(_zoomIn, false, false, 0);
+			_toolbar.PackStart(_zoomOut, false, false, 0);
 			_toolbar.PackStart(_switchToDebug, false, false, 0);
 
 			_paned = new HPaned();
@@ -74,6 +80,20 @@ namespace Petri
 			else if(sender == _switchToDebug) {
 				_document.SwitchToDebug();
 			}
+			else if(sender == _zoomIn) {
+				_petriView.Zoom /= 0.8f;
+				if(_petriView.Zoom > 8f) {
+					_petriView.Zoom = 8f;
+				}
+				_petriView.Redraw();
+			}
+			else if(sender == _zoomOut) {
+				_petriView.Zoom *= 0.8f;
+				if(_petriView.Zoom < 0.01f) {
+					_petriView.Zoom = 0.01f;
+				}
+				_petriView.Redraw();
+			}
 		}
 
 		public override void UpdateToolbar() {}
@@ -112,6 +132,7 @@ namespace Petri
 		EditorView _petriView;
 		Fixed _editor;
 		Button _manageHeaders, _cpp, _compile, _switchToDebug;
+		Button _zoomIn, _zoomOut;
 
 		Document _document;
 	}

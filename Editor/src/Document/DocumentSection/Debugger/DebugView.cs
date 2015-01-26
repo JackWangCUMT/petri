@@ -19,9 +19,9 @@ namespace Petri
 			base.FocusOut();
 		}
 
-		protected override void ManageTwoButtonPress(Gdk.EventButton ev) {
-			if(ev.Button == 1) {
-				var entity = CurrentPetriNet.StateAtPosition(new PointD(ev.X, ev.Y));
+		protected override void ManageTwoButtonPress(uint button, double x, double y) {
+			if(button == 1) {
+				var entity = CurrentPetriNet.StateAtPosition(new PointD(x, y));
 				if(entity is InnerPetriNet) {
 					this.CurrentPetriNet = entity as InnerPetriNet;
 				}
@@ -37,20 +37,13 @@ namespace Petri
 			}
 		}
 
-		protected override void ManageOneButtonPress(Gdk.EventButton ev) {
-			if(ev.Button == 1) {
+		protected override void ManageOneButtonPress(uint button, double x, double y) {
+			if(button == 1) {
 
 			}
-			else if(ev.Button == 3) {
+			else if(button == 3) {
+
 			}
-		}
-
-		protected override bool OnButtonReleaseEvent(Gdk.EventButton ev) {
-			return base.OnButtonReleaseEvent(ev);
-		}
-
-		protected override bool OnMotionNotifyEvent(Gdk.EventMotion ev) {
-			return base.OnMotionNotifyEvent(ev);
 		}
 
 		[GLib.ConnectBefore()]

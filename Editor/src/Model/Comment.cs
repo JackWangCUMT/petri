@@ -75,7 +75,7 @@ namespace Petri
 			var layout = new Pango.Layout(Gdk.PangoHelper.ContextGet());
 
 			layout.FontDescription = new Pango.FontDescription();
-			layout.FontDescription.Family = "Lucida Grande";
+			layout.FontDescription.Family = "Arial";
 			layout.FontDescription.Size = Pango.Units.FromPixels(12);
 
 			layout.SetText(Name);

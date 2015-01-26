@@ -17,6 +17,8 @@ namespace Petri
 			_lastClickDate = DateTime.Now;
 			_lastClickPosition = new PointD(0, 0);
 
+			Zoom = 1.0f;
+
 			this.ButtonPressEvent += (object o, ButtonPressEventArgs args) => {
 				this.HasFocus = true;
 			};
@@ -39,8 +41,10 @@ namespace Petri
 			this.Redraw();
 		}
 
-		protected virtual void ManageTwoButtonPress(Gdk.EventButton ev) {}
-		protected virtual void ManageOneButtonPress(Gdk.EventButton ev) {}
+		protected virtual void ManageTwoButtonPress(uint button, double x, double y) {}
+		protected virtual void ManageOneButtonPress(uint button, double x, double y) {}
+		protected virtual void ManageButtonRelease(uint button, double x, double y) {}
+		protected virtual void ManageMotion(double x, double y) {}
 
 		protected override bool OnButtonPressEvent(Gdk.EventButton ev) {
 			if(ev.Type == Gdk.EventType.ButtonPress) {
@@ -48,20 +52,28 @@ namespace Petri
 				if(/*ev.Type == Gdk.EventType.TwoButtonPress || */(_lastClickPosition.X == ev.X && _lastClickPosition.Y == ev.Y && (DateTime.Now - _lastClickDate).TotalMilliseconds < 500)) {
 					_lastClickPosition.X = -12345;
 
-					this.ManageTwoButtonPress(ev);
+					this.ManageTwoButtonPress(ev.Button, ev.X / Zoom, ev.Y / Zoom);
 				}
 				else {
 					_lastClickDate = DateTime.Now;
 					_lastClickPosition.X = ev.X;
 					_lastClickPosition.Y = ev.Y;
 
-					this.ManageOneButtonPress(ev);
+					this.ManageOneButtonPress(ev.Button, ev.X / Zoom, ev.Y / Zoom);
 				}
 			}
 
-			this.Redraw();
-
 			return base.OnButtonPressEvent(ev);
+		}
+
+		protected override bool OnButtonReleaseEvent(Gdk.EventButton ev) {
+			this.ManageButtonRelease(ev.Button, ev.X / Zoom, ev.Y / Zoom);
+			return base.OnButtonReleaseEvent(ev);
+		}
+
+		protected override bool OnMotionNotifyEvent(Gdk.EventMotion ev) {
+			this.ManageMotion(ev.X / Zoom, ev.Y / Zoom);
+			return base.OnMotionNotifyEvent(ev);
 		}
 			
 		public void KeyPress(Gdk.EventKey ev)
@@ -78,6 +90,7 @@ namespace Petri
 			base.OnExposeEvent(ev);
 
 			using(Cairo.Context context = Gdk.CairoHelper.Create(this.GdkWindow)) {
+				context.Scale(this.Zoom, this.Zoom);
 				this.RenderInternal(context, CurrentPetriNet);
 			}
 
@@ -87,10 +100,9 @@ namespace Petri
 		protected void RenderInternal(Context context, PetriNet petriNet) {
 			_needsRedraw = false;
 
-
 			var extents = new PointD();
-			extents.X = Math.Max(petriNet.Size.X, Allocation.Size.Width);
-			extents.Y = Math.Max(petriNet.Size.Y, Allocation.Size.Height);
+			extents.X = Math.Max(petriNet.Size.X, Allocation.Size.Width / Zoom);
+			extents.Y = Math.Max(petriNet.Size.Y, Allocation.Size.Height / Zoom);
 
 			context.LineWidth = 4;
 			context.MoveTo(0, 0);
@@ -104,7 +116,7 @@ namespace Petri
 
 			{
 				context.SetSourceRGBA(0.0, 0.6, 0.2, 1);
-				context.SelectFontFace("Lucida Grande", FontSlant.Normal, FontWeight.Normal);
+				context.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Normal);
 				context.SetFontSize(16);
 				string val = petriNet.Name;
 				TextExtents te = context.TextExtents(val);
@@ -156,6 +168,9 @@ namespace Petri
 			minX += 50;
 			minY += 50;
 
+			minX *= Zoom;
+			minY *= Zoom;
+
 			int prevX, prevY;
 			this.GetSizeRequest(out prevX, out prevY);
 			this.SetSizeRequest((int)minX, (int)minY);
@@ -165,6 +180,11 @@ namespace Petri
 		}
 
 		protected abstract void SpecializedDrawing(Cairo.Context context);
+
+		public float Zoom {
+			get;
+			set;
+		}
 
 		public RootPetriNet RootPetriNet {
 			get {
