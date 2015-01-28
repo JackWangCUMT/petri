@@ -12,20 +12,23 @@ namespace Petri
 			this.PackStart(_toolbar, false, false, 0);
 			_toolbar.HeightRequest = 40;
 
-			_startStopSession = new Button(new Label("Démarrer session"));
+			_attachDetach = new Button(new Label("Connexion"));
 			_startStopPetri = new Button(new Label("Exécuter"));
 			_playPause = new Button(new Label("Pause"));
 			_reload = new Button(new Label("Fix"));
+			_exit = new Button(new Label("Terminer la session"));
 			_switchToEditor = new Button(new Label("Éditeur"));
-			_startStopSession.Clicked += this.OnClick;
+			_attachDetach.Clicked += this.OnClick;
 			_startStopPetri.Clicked += this.OnClick;
 			_playPause.Clicked += this.OnClick;
 			_reload.Clicked += this.OnClick;
+			_exit.Clicked += this.OnClick;
 			_switchToEditor.Clicked += this.OnClick;
-			_toolbar.PackStart(_startStopSession, false, false, 0);
+			_toolbar.PackStart(_attachDetach, false, false, 0);
 			_toolbar.PackStart(_startStopPetri, false, false, 0);
 			_toolbar.PackStart(_playPause, false, false, 0);
 			_toolbar.PackStart(_reload, false, false, 0);
+			_toolbar.PackStart(_exit, false, false, 0);
 			_toolbar.PackStart(_switchToEditor, false, false, 0);
 
 			_paned = new HPaned();
@@ -90,9 +93,9 @@ namespace Petri
 			if(_document.DebugController.Server.SessionRunning) {
 				_startStopPetri.Sensitive = true;
 				_reload.Sensitive = true;
+				_exit.Sensitive = true;
 
-
-				((Label)_startStopSession.Child).Text = "Stopper la session";
+				((Label)_attachDetach.Child).Text = "Déconnexion";
 
 				if(_document.DebugController.Server.PetriRunning) {
 					((Label)_startStopPetri.Child).Text = "Stopper";
@@ -115,11 +118,12 @@ namespace Petri
 				}
 			}
 			else {
-				((Label)_startStopSession.Child).Text = "Démarrer la session";
+				((Label)_attachDetach.Child).Text = "Connexion";
 				((Label)_startStopPetri.Child).Text = "Exécuter";
 				_startStopPetri.Sensitive = false;
 				_reload.Sensitive = false;
 				_playPause.Sensitive = false;
+				_exit.Sensitive = false;
 				_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
 				((Label)_playPause.Child).Text = "Pause";
 			}
@@ -136,12 +140,12 @@ namespace Petri
 		}
 
 		protected void OnClick(object sender, EventArgs e) {
-			if(sender == _startStopSession) {
+			if(sender == _attachDetach) {
 				if(Server.SessionRunning) {
-					Server.StopSession();
+					Server.Detach();
 				}
 				else {
-					Server.StartSession();
+					Server.Attach();
 				}
 			}
 			else if(sender == _startStopPetri) {
@@ -161,6 +165,9 @@ namespace Petri
 			else if(sender == _switchToEditor) {
 				_document.SwitchToEditor();
 			}
+			else if(sender == _exit) {
+				Server.StopSession();
+			}
 		}
 
 		protected DebugServer Server {
@@ -174,7 +181,7 @@ namespace Petri
 		DebugView _view;
 		Document _document;
 		HBox _toolbar;
-		Button _startStopSession, _startStopPetri, _playPause, _reload, _switchToEditor;
+		Button _attachDetach, _startStopPetri, _playPause, _reload, _exit, _switchToEditor;
 	}
 }
 

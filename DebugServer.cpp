@@ -162,6 +162,13 @@ void DebugSession::serverCommunication() {
 
 					break;
 				}
+				else if(type == "exitSession") {
+					this->clearPetri();
+					this->sendObject(this->json("exitSession", "kbye"));
+					_running = false;
+					
+					break;
+				}
 				else if(type == "stop") {
 					this->clearPetri();
 					this->sendObject(this->json("ack", "stop"));

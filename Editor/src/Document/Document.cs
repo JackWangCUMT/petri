@@ -214,7 +214,7 @@ namespace Petri
 				ResponseType result = (ResponseType)d.Run();
 
 				if(result == ResponseType.Yes) {
-					DebugController.Server.StopSession();
+					DebugController.Server.Detach();
 					d.Destroy();
 				}
 				else {

@@ -12,6 +12,8 @@ Actions/Transitions : ajustement des dimensions à la longueur du titre
 Barre d'outils
 Fonction recherche
 
+Compilateur de réseau de Pétri en ligne de commande pour appel à Scons
+
 FIXME:
 	état interne des Conditions pas thread-safe
 

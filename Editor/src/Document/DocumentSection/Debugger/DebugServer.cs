@@ -58,7 +58,7 @@ namespace Petri
 							return false;
 						});
 
-						this.StopSession();
+						this.Detach();
 					}
 				}
 				else {
@@ -74,7 +74,7 @@ namespace Petri
 			}
 		}
 
-		public void StartSession() {
+		public void Attach() {
 			_sessionRunning = true;
 			_receiverThread = new Thread(this.Receiver);
 			_pause = false;
@@ -83,7 +83,15 @@ namespace Petri
 			while(_socket == null && DateTime.Now.CompareTo(time) < 0);
 		}
 
+		public void Detach() {
+			this.StopOrDetach(false);
+		}
+
 		public void StopSession() {
+			this.StopOrDetach(true);
+		}
+
+		private void StopOrDetach(bool stop) {
 			_pause = false;
 			if(_sessionRunning) {
 				if(PetriRunning) {
@@ -95,7 +103,12 @@ namespace Petri
 				}
 
 				try {
-					this.SendObject(new JObject(new JProperty("type", "exit")));
+					if(stop) {
+						this.SendObject(new JObject(new JProperty("type", "exitSession")));
+					}
+					else {
+						this.SendObject(new JObject(new JProperty("type", "exit")));
+					}
 				}
 				catch(Exception) {}
 
@@ -126,7 +139,7 @@ namespace Petri
 					return false;
 				});
 
-				this.StopSession();
+				this.Detach();
 			}
 		}
 
@@ -146,7 +159,7 @@ namespace Petri
 					return false;
 				});
 
-				this.StopSession();
+				this.Detach();
 			}
 		}
 
@@ -169,7 +182,7 @@ namespace Petri
 
 						return false;
 					});
-					this.StopSession();
+					this.Detach();
 				}
 			}
 		}
@@ -223,7 +236,7 @@ namespace Petri
 					this.SendObject(new JObject(new JProperty("type", "evaluate")));
 				}
 				catch(Exception e) {
-					this.StopSession();
+					this.Detach();
 					_document.Window.DebugGui.UpdateToolbar();
 					throw e;
 				}
@@ -253,7 +266,7 @@ namespace Petri
 
 					return false;
 				});
-				this.StopSession();
+				this.Detach();
 				_document.Window.DebugGui.UpdateToolbar();
 			}
 		}
@@ -263,7 +276,7 @@ namespace Petri
 				_socket = new TcpClient(_document.Settings.Hostname, _document.Settings.Port);
 			}
 			catch(Exception e) {
-				this.StopSession();
+				this.Detach();
 
 				GLib.Timeout.Add(0, () => {
 					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Impossible de se connecter au serveur : " + e.Message));
@@ -324,7 +337,7 @@ namespace Petri
 							this.StopPetri();
 						}
 					}
-					else if(msg["type"].ToString() == "exit") {
+					else if(msg["type"].ToString() == "exit" || msg["type"].ToString() == "exitSession") {
 						if(msg["payload"].ToString() == "kbye") {
 							_sessionRunning = false;
 							_petriRunning = false;
@@ -374,7 +387,7 @@ namespace Petri
 
 					return false;
 				});
-				this.StopSession();
+				this.Detach();
 			}
 
 			try {
