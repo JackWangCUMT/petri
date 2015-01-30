@@ -198,7 +198,7 @@ void DebugSession::serverCommunication() {
 						result = _evaluator.evaluate();
 					}
 					catch(std::exception &e) {
-						result = "<could not evaluate the symbol>";
+						result = "could not evaluate the symbol, reason: "s + e.what();
 					}
 					this->sendObject(this->json("evaluation", result));
 				}
