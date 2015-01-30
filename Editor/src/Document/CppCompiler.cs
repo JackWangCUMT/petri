@@ -5,7 +5,7 @@ using Gtk;
 namespace Petri
 {
 	public class CppCompiler {
-		public CppCompiler(Document doc) {
+		public CppCompiler(HeadlessDocument doc) {
 			_document = doc;
 		}
 
@@ -41,7 +41,7 @@ namespace Petri
 			return output;
 		}
 
-		Document _document;
+		HeadlessDocument _document;
 	}
 
 	public class CompilationErrorPresenter {

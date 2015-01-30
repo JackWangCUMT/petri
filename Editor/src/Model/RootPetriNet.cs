@@ -7,9 +7,9 @@ namespace Petri
 {
 	public class RootPetriNet : PetriNet
 	{
-		public RootPetriNet(Document doc) : base(doc, null, true, new Cairo.PointD(0, 0)) {}
+		public RootPetriNet(HeadlessDocument doc) : base(doc, null, true, new Cairo.PointD(0, 0)) {}
 
-		public RootPetriNet(Document doc, XElement descriptor) : base(doc, null, descriptor) {}
+		public RootPetriNet(HeadlessDocument doc, XElement descriptor) : base(doc, null, descriptor) {}
 
 		public override bool Active {
 			get {
@@ -37,7 +37,7 @@ namespace Petri
 			}
 		}
 
-		public override Document Document {
+		public override HeadlessDocument Document {
 			get;
 			set;
 		}
@@ -132,8 +132,6 @@ namespace Petri
 				o.ID = Document.LastEntityID;
 				++Document.LastEntityID;
 			}
-
-			Document.Modified = true;
 		}
 	}
 }

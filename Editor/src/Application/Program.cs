@@ -3,6 +3,7 @@ using Gtk;
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Linq;
+using System.Collections;
 
 namespace Petri
 {
@@ -30,14 +31,76 @@ namespace Petri
 			return System.Web.HttpUtility.HtmlEncode(s);
 		}
 
-		public static void Main(string[] args)
-		{
-			Application.Init();
+		private static int PrintUsage() {
+			Console.WriteLine("Usage: mono Petri.exe [--generate] [--compile \"document.petri\"]");
+			return 1;
+		}
 
-			var doc = new Document("");
-			AddDocument(doc);
+		public static int Main(string[] args) {
+			if(args.Length > 1) {
+				bool generate = args[0] == "--generate";
+				bool compile = generate ? args.Length == 3 && args[1] == "--compile" : args[0] == "--compile";
+				string path = generate && compile ? args[2] : args[1];
 
-			Application.Run();
+				if(!compile && !generate) {
+					return PrintUsage();
+				}
+
+				try {
+					HeadlessDocument document = new HeadlessDocument(path);
+					document.Load();
+
+					bool forceGeneration = false;
+					if(!generate && compile) {
+						if(!document.GenerationDate.HasValue || document.GenerationDate < document.ModificationDate
+							|| !System.IO.File.Exists(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, document.Settings.Name) + ".cpp")
+							|| !System.IO.File.Exists(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, document.Settings.Name) + ".h")) {
+							generate = true;
+							forceGeneration = true;
+						}
+						else {
+							Console.WriteLine("Previously generated C++ code is up to date, no need for code generation!");
+						}
+					}
+
+					if(generate) {
+						if(forceGeneration) {
+							Console.WriteLine("Previously generated C++ code is outdated or nonexistent, generating new code…");
+						}
+						document.SaveCppDontAsk();
+						document.Save();
+						Console.WriteLine("Successfully generated C++ code!");
+					}
+
+					if(compile) {
+						Console.WriteLine("Compiling the C++ code…");
+						bool res = document.Compile();
+						if(!res) {
+							Console.WriteLine("Compilation failed, aborting!");
+							return 3;
+						}
+						else {
+							Console.WriteLine("Compilation successful!");
+						}
+					}
+				}
+				catch(Exception e) {
+					Console.WriteLine("An exception occurred: " + e.Message);
+					return 2;
+				}
+
+				return 0;
+			}
+			else {
+				Application.Init();
+
+				var doc = new Document("");
+				AddDocument(doc);
+
+				Application.Run();
+
+				return 0;
+			}
 		}
 
 		public static void AddDocument(Document doc) {

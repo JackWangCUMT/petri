@@ -7,11 +7,11 @@ namespace Petri
 {
 	public sealed class ExitPoint : NonRootState
 	{
-		public ExitPoint(Document doc, PetriNet parent, Cairo.PointD pos) : base(doc, parent, false, pos)
+		public ExitPoint(HeadlessDocument doc, PetriNet parent, Cairo.PointD pos) : base(doc, parent, false, pos)
 		{
 			this.Radius = 25;
 		}
-		public ExitPoint(Document doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {}
+		public ExitPoint(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {}
 
 		public override XElement GetXml() {
 			var elem = new XElement("Exit");

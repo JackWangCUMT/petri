@@ -11,7 +11,7 @@ namespace Petri
 			REUSSI, RATE, BLOQUE_PAR_ADV, TIMEOUT, BLOQUE
 		};
 
-		public Action (Document doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos)
+		public Action (HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos)
 		{
 			this.Position = pos;
 			this.Radius = 20;
@@ -21,7 +21,7 @@ namespace Petri
 			this.Function = this.DefaultAction();
 		}
 
-		public Action(Document doc, PetriNet parent, XElement descriptor, IEnumerable<Cpp.Function> functions, IDictionary<string, string> macros) : base(doc, parent, descriptor) {
+		public Action(HeadlessDocument doc, PetriNet parent, XElement descriptor, IEnumerable<Cpp.Function> functions, IDictionary<string, string> macros) : base(doc, parent, descriptor) {
 			this.Function = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>(descriptor.Attribute("Function").Value, this, functions, macros);
 		}
 
@@ -54,8 +54,6 @@ namespace Petri
 				_function = value;
 				if(this.IsDefault())
 					_function = this.DefaultAction();
-					
-				Document.Modified = true;
 			}
 		}
 

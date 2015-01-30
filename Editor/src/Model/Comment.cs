@@ -8,7 +8,7 @@ namespace Petri
 {
 	public class Comment : Entity
 	{
-		public Comment(Document doc, PetriNet parent, Cairo.PointD pos) : base(doc, parent) {
+		public Comment(HeadlessDocument doc, PetriNet parent, Cairo.PointD pos) : base(doc, parent) {
 			this.Position = pos;
 			this.Name = "Commentaire";
 			this.SizeToFit();
@@ -16,7 +16,7 @@ namespace Petri
 			this.Color = new Color(1, 1, 0.7, 1);
 		}
 
-		public Comment(Document doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
+		public Comment(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
 			var size = new PointD();
 			size.X = XmlConvert.ToDouble(descriptor.Attribute("Width").Value);
 			size.Y = XmlConvert.ToDouble(descriptor.Attribute("Height").Value);

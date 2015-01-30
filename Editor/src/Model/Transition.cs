@@ -8,7 +8,7 @@ namespace Petri
 {
 	public class Transition : Entity
 	{
-		public Transition(Document doc, PetriNet s, State before, State after) : base(doc, s)
+		public Transition(HeadlessDocument doc, PetriNet s, State before, State after) : base(doc, s)
 		{
 			this.Before = before;
 			this.After = after;
@@ -28,7 +28,7 @@ namespace Petri
 			this.UpdatePosition();
 		}
 
-		public Transition(Document doc, PetriNet parent, XElement descriptor, IDictionary<UInt64, State> statesTable, IEnumerable<Cpp.Function> conditions, IDictionary<string, string> macros) : base(doc, parent, descriptor) {
+		public Transition(HeadlessDocument doc, PetriNet parent, XElement descriptor, IDictionary<UInt64, State> statesTable, IEnumerable<Cpp.Function> conditions, IDictionary<string, string> macros) : base(doc, parent, descriptor) {
 			this.Before = statesTable[UInt64.Parse(descriptor.Attribute("BeforeID").Value)];
 			this.After = statesTable[UInt64.Parse(descriptor.Attribute("AfterID").Value)];
 
@@ -79,7 +79,6 @@ namespace Petri
 			double norm = PetriView.Norm(this.Direction());
 			PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
 			this.Position = new PointD(center.X + Shift.X * norm / ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1), center.Y + Shift.Y * norm / ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1));
-			Document.Modified = true;
 		}
 
 		public State Before {
@@ -104,7 +103,6 @@ namespace Petri
 					ShiftAmplitude = PetriView.Norm(this.Direction());
 					PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
 					Shift = new PointD(value.X - center.X, value.Y - center.Y);
-					Document.Modified = true;
 				}
 			}
 		}

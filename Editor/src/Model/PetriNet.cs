@@ -8,7 +8,7 @@ namespace Petri
 {
 	public abstract class PetriNet : NonRootState
 	{
-		public PetriNet(Document doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos) {
+		public PetriNet(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos) {
 			Comments = new List<Comment>();
 			States = new List<State>();
 			Transitions = new List<Transition>();
@@ -17,7 +17,7 @@ namespace Petri
 			this.Size = new Cairo.PointD(0, 0);
 		}
 
-		public PetriNet(Document doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
+		public PetriNet(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
 			Comments = new List<Comment>();
 			States = new List<State>();
 			Transitions = new List<Transition>();

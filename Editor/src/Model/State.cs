@@ -7,7 +7,7 @@ namespace Petri
 {
 	public abstract class State : Entity
 	{
-		public State(Document doc, PetriNet parent, bool active, int requiredTokens, Cairo.PointD pos) : base(doc, parent) {
+		public State(HeadlessDocument doc, PetriNet parent, bool active, int requiredTokens, Cairo.PointD pos) : base(doc, parent) {
 			this.TransitionsBefore = new List<Transition>();
 			this.TransitionsAfter = new List<Transition>();
 
@@ -17,7 +17,7 @@ namespace Petri
 			this.Name = this.ID.ToString();
 		}
 
-		public State(Document doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
+		public State(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
 			this.TransitionsBefore = new List<Transition>();
 			this.TransitionsAfter = new List<Transition>();
 
@@ -87,8 +87,6 @@ namespace Petri
 						t.UpdatePosition();
 					}
 				}
-
-				Document.Modified = true;
 			}
 		}
 
@@ -113,9 +111,9 @@ namespace Petri
 	}
 
 	public abstract class NonRootState : State {
-		public NonRootState(Document doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, 0, pos) {}
+		public NonRootState(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, 0, pos) {}
 
-		public NonRootState(Document doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {}
+		public NonRootState(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {}
 	}
 }
 

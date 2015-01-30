@@ -6,29 +6,11 @@ using System.Collections.Generic;
 
 namespace Petri
 {
-	public class Document {
-		public Document(string path) {
+	public class Document : HeadlessDocument {
+		public Document(string path) : base(path) {
 			Window = new MainWindow(this);
 
 			this.UndoManager = new UndoManager();
-			this.Headers = new List<string>();
-			CppActions = new List<Cpp.Function>();
-			AllFunctions = new List<Cpp.Function>();
-			CppConditions = new List<Cpp.Function>();
-
-			AllFunctions = new List<Cpp.Function>();
-			CppActions = new List<Cpp.Function>();
-			CppConditions = new List<Cpp.Function>();
-
-			CppMacros = new Dictionary<string, string>();
-
-			var timeout = new Cpp.Function(new Cpp.Type("Timeout", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "Timeout", false);
-			timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>", Cpp.Scope.EmptyScope()), "timeout"));
-			CppConditions.Add(timeout);
-
-			var defaultAction = Action.DefaultFunction();
-			CppActions.Insert(0, defaultAction);
-			AllFunctions.Insert(0, defaultAction);
 
 			EditorController = new EditorController(this);
 			DebugController = new DebugController(this);
@@ -79,11 +61,6 @@ namespace Petri
 			Window.Gui = Window.EditorGui;
 		}
 
-		public string Path {
-			get;
-			set;
-		}
-
 		public bool Blank {
 			get;
 			set;
@@ -114,78 +91,52 @@ namespace Petri
 			Window.Gui.Redraw();
 		}
 
-		public List<string> Headers {
-			get;
-			private set;
+		protected override Tuple<int, int> GetWindowSize() {
+			int w, h;
+			Window.GetSize(out w, out h);
+			return Tuple.Create(w, h);
 		}
 
-		public void AddHeader(string header) {
-			if(header.Length == 0 || Headers.Contains(header))
-				return;
+		protected override void SetWindowSize(int w, int h) {
+			Window.Resize(w, h);
+		}
+
+		protected override Tuple<int, int> GetWindowPosition() {
+			int x, y;
+			Window.GetPosition(out x, out y);
+			return Tuple.Create(x, y);
+		}
+
+		protected override void SetWindowPosition(int x, int y) {
+			Window.Move(x, y);
+		}
+
+		public override void AddHeader(string header) {
+			base.AddHeader(header);
 
 			if(header.Length > 0) {
-				string filename = header;
-
-				// If path is relative, then make it absolute
-				if(!System.IO.Path.IsPathRooted(header)) {
-					filename = System.IO.Path.Combine(System.IO.Directory.GetParent(this.Path).FullName, filename);
-				}
-
-				var functions = Cpp.Parser.Parse(filename);
-				foreach(var func in functions) {
-					if(func.ReturnType.Equals("ResultatAction")) {
-						CppActions.Add(func);
-					}
-					else if(func.ReturnType.Equals("bool")) {
-						CppConditions.Add(func);
-					}
-					AllFunctions.Add(func);
-				}
-
-				Headers.Add(header);
-
 				Modified = true;
 			}
 		}
 
 		// Performs the removal if possible
-		public bool RemoveHeader(string header) {
-			if(PetriNet.UsesHeader(header))
-				return false;
+		public override bool RemoveHeader(string header) {
+			bool result = base.RemoveHeader(header);
+			if(result) {
+				Modified = true;
+			}
 
-			CppActions.RemoveAll(a => a.Header == header);
-			CppConditions.RemoveAll(c => c.Header == header);
-			AllFunctions.RemoveAll(s => s.Header == header);
-			Headers.Remove(header);
-
-			Modified = true;
-
-			return true;
+			return result;
 		}
 
-		public Dictionary<string, string> CppMacros {
-			get;
-			private set;
-		}
-
-		public List<Cpp.Function> CppConditions {
-			get;
-			private set;
-		}
-
-		public List<Cpp.Function> AllFunctions {
-			get;
-			private set;
-		}
-
-		public List<Cpp.Function> CppActions {
-			get;
-			private set;
-		}
-
-		public RootPetriNet PetriNet {
-			get;
-			set;
+		public override void Save() {
+			if(Path == "") {
+				this.SaveAs();
+			}
+			else {
+				base.Save();
+			}
+			Modified = false;
 		}
 
 		public bool Modified {
@@ -196,10 +147,12 @@ namespace Petri
 				_modified = value;
 				if(value == true) {
 					this.Blank = false;
+					ModificationDate = DateTime.Now;
 				}
 				else {
 					// We require the current undo stack to represent an unmodified state
 					_guiActionToMatchSave = UndoManager.NextUndo;
+					ModificationDate = InitialModificationDate;
 				}
 			}
 		}
@@ -284,16 +237,6 @@ namespace Petri
 			}
 		}
 
-		public string GetRelativeToDoc(string path) {
-			if(!System.IO.Path.IsPathRooted(path)) {
-				path = System.IO.Path.GetFullPath(path);
-			}
-
-			string parent = System.IO.Directory.GetParent(Path).FullName;
-
-			return Configuration.GetRelativePath(path, parent);
-		}
-
 		public void SaveAs() {
 			string filename = null;
 
@@ -329,78 +272,6 @@ namespace Petri
 			this.Save();
 		}
 
-		public void Save() {
-			string tempFileName = "";
-			try {
-				if(Path == "") {
-					this.SaveAs();
-					return;
-				}
-
-				var doc = new XDocument();
-				var root = new XElement("Document");
-
-				root.Add(_settings.GetXml());
-
-				var winConf = new XElement("Window");
-				{
-					int w, h, x, y;
-					Window.GetSize(out w, out h);
-					Window.GetPosition(out x, out y);
-					winConf.SetAttributeValue("X", x.ToString());
-					winConf.SetAttributeValue("Y", y.ToString());
-					winConf.SetAttributeValue("W", w.ToString());
-					winConf.SetAttributeValue("H", h.ToString());
-				}
-
-				var headers = new XElement("Headers");
-				foreach(var h in Headers) {
-					var hh = new XElement("Header");
-					hh.SetAttributeValue("File", h);
-					headers.Add(hh);
-				}
-				var macros = new XElement("Macros");
-				foreach(var m in CppMacros) {
-					var mm = new XElement("Macro");
-					mm.SetAttributeValue("Name", m.Key);
-					mm.SetAttributeValue("Value", m.Value);
-					macros.Add(mm);
-				}
-				doc.Add(root);
-				root.Add(winConf);
-				root.Add(headers);
-				root.Add(macros);
-				root.Add(PetriNet.GetXml());
-
-				// Write to a temporary file to avoid corrupting the existing document on error
-				tempFileName = System.IO.Path.GetTempFileName();
-				XmlWriterSettings xsettings = new XmlWriterSettings();
-				xsettings.Indent = true;
-				XmlWriter writer = XmlWriter.Create(tempFileName, xsettings);
-
-				doc.Save(writer);
-				writer.Flush();
-				writer.Close();
-
-				if(System.IO.File.Exists(this.Path))
-					System.IO.File.Delete(this.Path);
-				System.IO.File.Move(tempFileName, this.Path);
-				tempFileName = "";
-
-				Modified = false;
-				Settings.Modified = false;
-			}
-			catch(Exception e) {
-				if(tempFileName.Length > 0)
-					System.IO.File.Delete(tempFileName);
-
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue lors de l'enregistrement : " + e.ToString()));
-				d.AddButton("OK", ResponseType.Cancel);
-				d.Run();
-				d.Destroy();
-			}
-		}
-
 		public void Restore()
 		{
 			if(Modified) {
@@ -421,7 +292,7 @@ namespace Petri
 			var oldPetriNet = PetriNet;
 
 			this.ResetID();
-			_settings = null;
+			Settings = null;
 
 			try {
 				if(Path == "") {
@@ -441,41 +312,10 @@ namespace Petri
 					Blank = true;
 				}
 				else {
-					var document = XDocument.Load(Path);
-
-					var elem = document.FirstNode as XElement;
-
-					_settings = DocumentSettings.CreateSettings(elem.Element("Settings"));
-
-					var winConf = elem.Element("Window");
-					Window.Move(int.Parse(winConf.Attribute("X").Value), int.Parse(winConf.Attribute("Y").Value));
-					Window.Resize(int.Parse(winConf.Attribute("W").Value), int.Parse(winConf.Attribute("H").Value));
-
-					while(this.Headers.Count > 0) {
-						this.RemoveHeader(this.Headers[0]);
-					}
-
-					CppMacros.Clear();
-
-					var node = elem.Element("Headers");
-					if(node != null) {
-						foreach(var e in node.Elements()) {
-							this.AddHeader(e.Attribute("File").Value);
-						}
-					}
-
-					node = elem.Element("Macros");
-					if(node != null) {
-						foreach(var e in node.Elements()) {
-							CppMacros.Add(e.Attribute("Name").Value, e.Attribute("Value").Value);
-						}
-					}
-
-					PetriNet = new RootPetriNet(this, elem.Element("PetriNet"));
-					PetriNet.Canonize();
-					Window.Title = System.IO.Path.GetFileName(this.Path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
-					this.Blank = false;
+					this.Load();
+					Blank = false;
 					Modified = false;
+					Window.Title = System.IO.Path.GetFileName(this.Path).Split(new string[]{".petri"}, StringSplitOptions.None)[0];
 				}
 			}
 			catch(Exception e) {
@@ -487,7 +327,7 @@ namespace Petri
 					// If it is a fresh opening, just get back to an empty state.
 					PetriNet = new RootPetriNet(this);
 					Window.EditorGui.View.CurrentPetriNet = PetriNet;
-					_settings = null;
+					Settings = null;
 					Modified = false;
 					this.Blank = true;
 				}
@@ -498,8 +338,8 @@ namespace Petri
 				d.Run();
 				d.Destroy();
 			}
-			if(_settings == null) {
-				_settings = DocumentSettings.GetDefaultSettings();
+			if(Settings == null) {
+				Settings = DocumentSettings.GetDefaultSettings();
 			}
 			Window.EditorGui.View.CurrentPetriNet = PetriNet;
 			Window.DebugGui.View.CurrentPetriNet = PetriNet;
@@ -508,52 +348,9 @@ namespace Petri
 			Window.Gui = Window.EditorGui;
 		}
 
-		public string CppPrefix {
-			get {
-				return _settings.Name;
-			}
-		}
-
-		public void SaveCppDontAsk() {
-			if(this._settings.SourceOutputPath.Length == 0) {
-				this.SaveCpp();
-				return;
-			}
-
-			string path = _settings.Name;
-
-			var cppGen = PetriNet.GenerateCpp();
-			cppGen.Item1.AddHeader("\"" + path + ".h\"");
-			cppGen.Item1.Write(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, path) + ".cpp");
-
-			var generator = new Cpp.Generator();
-			generator.AddHeader("\"PetriUtils.h\"");
-
-			generator += "#ifndef PETRI_" + cppGen.Item2 + "_H";
-			generator += "#define PETRI_" + cppGen.Item2 + "_H\n";
-
-			generator += "#define CLASS_NAME " + _settings.Name;
-			generator += "#define PREFIX \"" + CppPrefix + "\"";
-
-			generator += "#define PORT " + _settings.Port;
-
-			generator += "";
-
-			generator += "#include \"PetriDynamicLib.h\"\n";
-
-			generator += "#undef PORT";
-
-			generator += "#undef PREFIX";
-			generator += "#undef CLASS_NAME\n";
-
-			generator += "#endif"; // ifndef header guard
-
-			System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, path) + ".h", generator.Value);
-		}
-
 		public void SaveCpp() {
 			if(Path != "") {
-				if(_settings.SourceOutputPath != "") {
+				if(Settings.SourceOutputPath != "") {
 					this.SaveCppDontAsk();
 				}
 				else {
@@ -564,9 +361,9 @@ namespace Petri
 						});
 
 					if(fc.Run() == (int)ResponseType.Accept) {
-						string old = _settings.SourceOutputPath;
-						this._settings.SourceOutputPath = GetRelativeToDoc(fc.Filename);
-						Modified = old != _settings.SourceOutputPath;
+						string old = Settings.SourceOutputPath;
+						this.Settings.SourceOutputPath = GetRelativeToDoc(fc.Filename);
+						Modified = old != Settings.SourceOutputPath;
 
 						this.SaveCppDontAsk();
 					}
@@ -582,7 +379,7 @@ namespace Petri
 			}
 		}
 
-		public bool Compile() {
+		public override bool Compile() {
 			if(this.Path != "") {
 				var c = new CppCompiler(this);
 				var o = c.CompileSource(Settings.Name + ".cpp", Settings.Name);
@@ -656,25 +453,6 @@ namespace Petri
 			}
 		}
 
-		public UInt64 LastEntityID {
-			get;
-			set;
-		}
-
-		public Entity EntityFromID(UInt64 id) {
-			return PetriNet.EntityFromID(id);
-		}
-
-		public void ResetID() {
-			this.LastEntityID = 0;
-		}
-
-		public DocumentSettings Settings {
-			get {
-				return _settings;
-			}
-		}
-
 		public UndoManager UndoManager {
 			get;
 			private set;
@@ -698,14 +476,9 @@ namespace Petri
 			Window.RedoItem.Sensitive = UndoManager.NextRedo != null;
 		}
 
-		public string GetHash() {
-			return PetriNet.GetHash();
-		}
-
 		GuiAction _guiActionToMatchSave = null;
 		HeadersManager _headersManager;
 		MacrosManager _macrosManager;
-		DocumentSettings _settings;
 		SettingsEditor _settingsEditor;
 		bool _modified;
 	}

@@ -19,13 +19,13 @@ namespace Petri
 
 	public abstract class Entity
 	{
-		public Entity(Document doc, PetriNet parent) {
+		public Entity(HeadlessDocument doc, PetriNet parent) {
 			_parent = parent;
 			this.Document = doc;
 			this.ID = Document.LastEntityID++;
 		}
 
-		public static Entity EntityFromXml(Document document, XElement descriptor, PetriNet parent, IDictionary<UInt64, State> statesTable) {
+		public static Entity EntityFromXml(HeadlessDocument document, XElement descriptor, PetriNet parent, IDictionary<UInt64, State> statesTable) {
 			switch(descriptor.Name.ToString()) {
 			case "Action":
 				return new Action(document, parent, descriptor, document.AllFunctions, document.CppMacros);
@@ -45,7 +45,7 @@ namespace Petri
 			}
 		}
 
-		public Entity(Document doc, PetriNet parent, XElement descriptor) {
+		public Entity(HeadlessDocument doc, PetriNet parent, XElement descriptor) {
 			_parent = parent;
 			this.Document = doc;
 
@@ -96,7 +96,7 @@ namespace Petri
 			}
 		}
 
-		public virtual Document Document {
+		public virtual HeadlessDocument Document {
 			get {
 				return this.Parent.Document;
 			}

@@ -6,14 +6,14 @@ namespace Petri
 {
 	public sealed class InnerPetriNet : PetriNet
 	{
-		public InnerPetriNet(Document doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos)
+		public InnerPetriNet(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos)
 		{
 			_exitPoint = new ExitPoint(doc, this, new Cairo.PointD(300, 100));
 			this.AddState(this.ExitPoint);
 			this.EntryPointID = Document.LastEntityID++;
 		}
 
-		public InnerPetriNet(Document doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
+		public InnerPetriNet(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
 			EntryPointID = UInt64.Parse(descriptor.Attribute("EntryPointID").Value);
 
 			foreach(var s in this.States) {

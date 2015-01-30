@@ -123,6 +123,7 @@
     <Compile Include="src\Document\MacrosManager.cs" />
     <Compile Include="src\Document\DocumentSection\Debugger\DebugEditor.cs" />
     <Compile Include="src\Document\DocumentSection\PaneEditor.cs" />
+    <Compile Include="src\Document\HeadlessDocument.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
