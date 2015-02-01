@@ -26,10 +26,6 @@ namespace Petri
 			CppActions.Insert(0, defaultAction);
 			AllFunctions.Insert(0, defaultAction);
 
-			GenerationDate = null;
-			ModificationDate = DateTime.Now;
-			InitialModificationDate = DateTime.Now;
-
 			this.Path = path;
 		}
 
@@ -145,11 +141,6 @@ namespace Petri
 			var doc = new XDocument();
 			var root = new XElement("Document");
 
-			root.SetAttributeValue("ModificationDate", ModificationDate.ToString());
-			if(GenerationDate.HasValue) {
-				root.SetAttributeValue("GenerationDate", GenerationDate.ToString());
-			}
-
 			root.Add(Settings.GetXml());
 
 			var winConf = new XElement("Window");
@@ -203,16 +194,6 @@ namespace Petri
 			var document = XDocument.Load(Path);
 
 			var elem = document.FirstNode as XElement;
-
-			if(elem.Attribute("GenerationDate") != null) {
-				GenerationDate = DateTime.Parse(elem.Attribute("GenerationDate").Value);
-			}
-
-			if(elem.Attribute("ModificationDate") != null) {
-				ModificationDate = DateTime.Parse(elem.Attribute("ModificationDate").Value);
-			}
-
-			InitialModificationDate = ModificationDate;
 
 			Settings = DocumentSettings.CreateSettings(elem.Element("Settings"));
 
@@ -283,29 +264,13 @@ namespace Petri
 			generator += "#endif"; // ifndef header guard
 
 			System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.Name) + ".h", generator.Value);
-			GenerationDate = DateTime.Now;
-		}
-
-		public DateTime InitialModificationDate {
-			get;
-			private set;
-		}
-
-		public DateTime ModificationDate {
-			get;
-			protected set;
-		}
-
-		public DateTime? GenerationDate {
-			get;
-			private set;
 		}
 
 		public virtual bool Compile() {
 			var c = new CppCompiler(this);
 			var o = c.CompileSource(Settings.Name + ".cpp", Settings.Name);
 			if(o != "") {
-				Console.WriteLine("Compilation failed with error:\n" + o);
+				Console.WriteLine("Compilation failed with error:\n" + "Invocation du compilateur :\n" + Settings.Compiler + " " + Settings.CompilerArgumentsForSource(Settings.GetSourcePath(Settings.Name + ".cpp"), Settings.Name) + "\n\nErreurs :\n" + o);
 				return false;
 			}
 

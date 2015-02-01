@@ -147,12 +147,10 @@ namespace Petri
 				_modified = value;
 				if(value == true) {
 					this.Blank = false;
-					ModificationDate = DateTime.Now;
 				}
 				else {
 					// We require the current undo stack to represent an unmodified state
 					_guiActionToMatchSave = UndoManager.NextUndo;
-					ModificationDate = InitialModificationDate;
 				}
 			}
 		}

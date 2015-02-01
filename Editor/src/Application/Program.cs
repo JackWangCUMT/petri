@@ -49,17 +49,19 @@ namespace Petri
 				try {
 					HeadlessDocument document = new HeadlessDocument(path);
 					document.Load();
+					Console.WriteLine("Processing Petri net " + document.Settings.Name + "…");
+
+					string cppPath = System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, document.Settings.Name) + ".cpp";
 
 					bool forceGeneration = false;
 					if(!generate && compile) {
-						if(!document.GenerationDate.HasValue || document.GenerationDate < document.ModificationDate
-							|| !System.IO.File.Exists(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, document.Settings.Name) + ".cpp")
-							|| !System.IO.File.Exists(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, document.Settings.Name) + ".h")) {
+						if(!System.IO.File.Exists(cppPath)
+							|| System.IO.File.GetLastWriteTime(cppPath) < System.IO.File.GetLastWriteTime(document.Path)) {
 							generate = true;
 							forceGeneration = true;
 						}
 						else {
-							Console.WriteLine("Previously generated C++ code is up to date, no need for code generation!");
+							Console.WriteLine("Previously generated C++ code is up to date, no need for code generation");
 						}
 					}
 
@@ -69,18 +71,24 @@ namespace Petri
 						}
 						document.SaveCppDontAsk();
 						document.Save();
-						Console.WriteLine("Successfully generated C++ code!");
+						Console.WriteLine("Successfully generated C++ code");
 					}
-
 					if(compile) {
-						Console.WriteLine("Compiling the C++ code…");
-						bool res = document.Compile();
-						if(!res) {
-							Console.WriteLine("Compilation failed, aborting!");
-							return 3;
+						string dylibPath = System.IO.Path.Combine(document.Settings.LibOutputPath, document.Settings.Name  + ".so");
+						if(!System.IO.File.Exists(dylibPath)
+							|| System.IO.File.GetLastWriteTime(dylibPath) < System.IO.File.GetLastWriteTime(cppPath)) {
+							Console.WriteLine("Compiling the C++ code…");
+							bool res = document.Compile();
+							if(!res) {
+								Console.WriteLine("Compilation failed, aborting!");
+								return 3;
+							}
+							else {
+								Console.WriteLine("Compilation successful!");
+							}
 						}
 						else {
-							Console.WriteLine("Compilation successful!");
+							Console.WriteLine("Previously compiled dylib is up to date, no need for recompilation");
 						}
 					}
 				}
