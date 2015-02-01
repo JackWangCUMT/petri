@@ -6,7 +6,7 @@
     <ProjectGuid>{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>PetriLinux</RootNamespace>
-    <AssemblyName>PetriLinux</AssemblyName>
+    <AssemblyName>Petri</AssemblyName>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
@@ -14,7 +14,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
+    <OutputPath>..\bin\Debug</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -23,7 +23,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
+    <OutputPath>..\bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -210,6 +210,9 @@
     </Compile>
     <Compile Include="..\src\Document\DocumentSection\Debugger\DebugEditor.cs">
       <Link>Document\DocumentSection\Debugger\DebugEditor.cs</Link>
+    </Compile>
+    <Compile Include="..\src\Document\HeadlessDocument.cs">
+      <Link>Document\HeadlessDocument.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
