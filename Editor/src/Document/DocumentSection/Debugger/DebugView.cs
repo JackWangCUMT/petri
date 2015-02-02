@@ -24,6 +24,7 @@ namespace Petri
 				var entity = CurrentPetriNet.StateAtPosition(new PointD(x, y));
 				if(entity is InnerPetriNet) {
 					this.CurrentPetriNet = entity as InnerPetriNet;
+					this.Redraw();
 				}
 				else if(entity is Action) {
 					var a = entity as Action;
@@ -33,6 +34,8 @@ namespace Petri
 					else {
 						_document.DebugController.AddBreakpoint(a);
 					}
+
+					this.Redraw();
 				}
 			}
 		}

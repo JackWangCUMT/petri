@@ -250,6 +250,7 @@ namespace Petri
 				_editedPetriNet = value;
 				_parentHierarchy.Clear();
 				_nextPetriNet = null;
+				this.Redraw();
 			}
 		}
 

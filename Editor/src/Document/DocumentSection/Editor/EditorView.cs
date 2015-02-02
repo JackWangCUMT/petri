@@ -109,6 +109,7 @@ namespace Petri
 
 					if(selected is InnerPetriNet) {
 						this.CurrentPetriNet = selected as InnerPetriNet;
+						this.Redraw();
 					}
 				}
 			}
