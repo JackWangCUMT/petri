@@ -46,7 +46,7 @@ namespace Petri
 		}
 
 		protected virtual void InitContextForBackground(Comment c, Context context) {
-			context.SetSourceColor(c.Color);
+			context.SetSourceRGBA(c.Color.R, c.Color.G, c.Color.B, c.Color.A);
 		}
 		protected virtual void DrawBackground(Comment c, Context context) {
 			_commentsLayout = new Pango.Layout(Gdk.PangoHelper.ContextGet());
