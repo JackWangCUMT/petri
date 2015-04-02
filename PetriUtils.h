@@ -75,6 +75,10 @@ namespace PetriUtils {
 		logInfo("Action " + a->name() + ", ID " + std::to_string(a->ID()) + " exécutée.");
 		return ResultatAction::REUSSI;
 	}
+
+	inline ResultatAction doNothing(ResultatAction resultat) {
+		return resultat;
+	}
 }
 
 #endif

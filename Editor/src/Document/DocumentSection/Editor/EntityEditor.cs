@@ -157,6 +157,7 @@ namespace Petri
 						var val = combo.Model.GetValue(iter, 0) as string;
 						if(val == defaultFunction) {
 							a.Function = a.DefaultAction();
+							EditInvocation(a, false, editorFields);
 						}
 						else if(val == manual) {
 							EditInvocation(a, true, editorFields);

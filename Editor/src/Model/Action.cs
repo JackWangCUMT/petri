@@ -37,13 +37,29 @@ namespace Petri
 		}
 
 		public Cpp.FunctionInvocation DefaultAction() {
-			return new Petri.Cpp.FunctionInvocation(Action.DefaultFunction(), new Petri.Cpp.EntityExpression(this, "this")); 
+			return new Petri.Cpp.FunctionInvocation(Action.DefaultFunction, new Petri.Cpp.EntityExpression(this, "this"));
 		}
 
-		public static Cpp.Function DefaultFunction() {
-			var f = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope()), "defaultAction", false);
-			f.AddParam(new Cpp.Param(new Cpp.Type("Action *", Cpp.Scope.EmptyScope()), "action"));
-			return f;
+		public static Cpp.Function DefaultFunction {
+			get {
+				if(_defaultFunction == null) {
+					_defaultFunction = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope()), "defaultAction", false);
+					_defaultFunction.AddParam(new Cpp.Param(new Cpp.Type("Action *", Cpp.Scope.EmptyScope()), "action"));
+				}
+
+				return _defaultFunction;
+			}
+		}
+
+		public static Cpp.Function DoNothingFunction {
+			get {
+				if(_doNothingFunction == null) {
+					_doNothingFunction = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope()), "doNothing", false);
+					_doNothingFunction.AddParam(new Cpp.Param(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), "resultat"));
+				}
+
+				return _doNothingFunction;
+			}
 		}
 
 		public Cpp.FunctionInvocation Function {
@@ -79,6 +95,8 @@ namespace Petri
 		}
 
 		Cpp.FunctionInvocation _function;
+		static Cpp.Function _defaultFunction;
+		static Cpp.Function _doNothingFunction;
 	}
 }
 
