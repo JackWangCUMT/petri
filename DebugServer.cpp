@@ -6,10 +6,8 @@
 //
 
 #include "DebugServer.h"
-#include "Commun.h"
 #include "PetriDynamicLibCommon.h"
 #include <cstring>
-#include "PetriUtils.h"
 
 std::string DebugServer::getVersion() {
 	return "0.2";

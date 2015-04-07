@@ -14,6 +14,7 @@
 #include "jsoncpp/include/json.h"
 #include "SymbolEvaluator.h"
 #include <set>
+#include <sockets/Socket.h>
 
 using namespace std::string_literals;
 
