@@ -10,6 +10,8 @@ namespace Petri
 		}
 
 		public string CompileSource(string source, string lib) {
+			System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(_document.Path).FullName);
+
 			if(!System.IO.File.Exists(source)) {
 				return "Erreur : le fichier \"" + source + "\" n'existe pas. Veuillez générer le code avant de compiler.";
 			}
@@ -17,8 +19,6 @@ namespace Petri
 			Process p = new Process();
 
 			string cd = System.IO.Directory.GetCurrentDirectory();
-
-			System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(_document.Path).FullName);
 
 			source = _document.Settings.GetSourcePath(source);
 			System.IO.File.SetLastWriteTime(source, DateTime.Now);
