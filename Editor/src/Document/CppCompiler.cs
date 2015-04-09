@@ -10,6 +10,10 @@ namespace Petri
 		}
 
 		public string CompileSource(string source, string lib) {
+			if(!System.IO.File.Exists(source)) {
+				return "Erreur : le fichier \"" + source + "\" n'existe pas. Veuillez générer le code avant de compiler.";
+			}
+
 			Process p = new Process();
 
 			string cd = System.IO.Directory.GetCurrentDirectory();
