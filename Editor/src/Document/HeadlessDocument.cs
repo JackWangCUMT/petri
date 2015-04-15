@@ -240,7 +240,7 @@ namespace Petri
 
 			var cppGen = PetriNet.GenerateCpp();
 			cppGen.Item1.AddHeader("\"" + Settings.Name + ".h\"");
-			cppGen.Item1.Write(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.Name) + ".cpp");
+			cppGen.Item1.Write(System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.SourceOutputPath), Settings.Name) + ".cpp");
 
 			var generator = new Cpp.Generator();
 			generator.AddHeader("\"PetriUtils.h\"");
@@ -264,14 +264,14 @@ namespace Petri
 
 			generator += "#endif"; // ifndef header guard
 
-			System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.Name) + ".h", generator.Value);
+			System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.SourceOutputPath), Settings.Name) + ".h", generator.Value);
 		}
 
 		public virtual bool Compile() {
 			var c = new CppCompiler(this);
-			var o = c.CompileSource(Settings.Name + ".cpp", Settings.Name);
+			var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
 			if(o != "") {
-				Console.WriteLine("Compilation failed with error:\n" + "Invocation du compilateur :\n" + Settings.Compiler + " " + Settings.CompilerArgumentsForSource(Settings.GetSourcePath(Settings.Name + ".cpp"), Settings.Name) + "\n\nErreurs :\n" + o);
+				Console.WriteLine("Compilation failed with error:\n" + "Invocation du compilateur :\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath, Settings.LibPath) + "\n\nErreurs :\n" + o);
 				return false;
 			}
 

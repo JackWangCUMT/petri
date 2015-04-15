@@ -183,15 +183,19 @@ namespace Petri
 			set;
 		}
 
-		public string GetSourcePath(string source) {
-			if(!System.IO.Path.IsPathRooted(source)) {
-				source = System.IO.Path.Combine(SourceOutputPath, source);
+		public string SourcePath {
+			get {
+				return System.IO.Path.Combine(SourceOutputPath, this.Name + ".cpp");
 			}
-
-			return source;
 		}
 
-		public string CompilerArgumentsForSource(string source, string lib) {
+		public string LibPath {
+			get {
+				return System.IO.Path.Combine(LibOutputPath, this.Name + ".so");
+			}
+		}
+
+		public string CompilerArguments(string source, string lib) {
 			string val = "";
 
 			val += "-shared ";
@@ -235,7 +239,7 @@ namespace Petri
 				val += "-l'" + l + "' ";
 			}
 
-			val += "-o '" + System.IO.Path.Combine(LibOutputPath, lib + ".so") + "' ";
+			val += "-o '" + lib + "' ";
 
 			val += "-x c++ '" + source + "'";
 

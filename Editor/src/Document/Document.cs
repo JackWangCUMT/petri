@@ -380,7 +380,7 @@ namespace Petri
 		public override bool Compile() {
 			if(this.Path != "") {
 				var c = new CppCompiler(this);
-				var o = c.CompileSource(Settings.Name + ".cpp", Settings.Name);
+				var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
 				if(o != "") {
 					MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, "La compilation a échoué. Souhaitez-vous consulter les erreurs générées ?");
 					d.AddButton("Non", ResponseType.Cancel);
@@ -391,8 +391,7 @@ namespace Petri
 
 					d.Destroy();
 					if(result == ResponseType.Accept) {
-						string sourcePath = Settings.GetSourcePath(Settings.Name + ".cpp");
-						o = "Invocation du compilateur :\n" + Settings.Compiler + " " + Settings.CompilerArgumentsForSource(sourcePath, Settings.Name) + "\n\nErreurs :\n" + o;
+						o = "Invocation du compilateur :\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath, Settings.LibPath) + "\n\nErreurs :\n" + o;
 						new CompilationErrorPresenter(this, o).Show();
 					}
 

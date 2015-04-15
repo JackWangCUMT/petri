@@ -10,24 +10,22 @@ namespace Petri
 		}
 
 		public string CompileSource(string source, string lib) {
+			string cd = System.IO.Directory.GetCurrentDirectory();
 			System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(_document.Path).FullName);
-
+			Console.WriteLine(System.IO.Directory.GetParent(_document.Path).FullName);
 			if(!System.IO.File.Exists(source)) {
 				return "Erreur : le fichier \"" + source + "\" n'existe pas. Veuillez générer le code avant de compiler.";
 			}
 
-			Process p = new Process();
-
-			string cd = System.IO.Directory.GetCurrentDirectory();
-
-			source = _document.Settings.GetSourcePath(source);
 			System.IO.File.SetLastWriteTime(source, DateTime.Now);
+
+			Process p = new Process();
 
 			p.StartInfo.UseShellExecute = false;
 			p.StartInfo.RedirectStandardOutput = true;
 			p.StartInfo.RedirectStandardError = true;
 			p.StartInfo.FileName = _document.Settings.Compiler;
-			string s = _document.Settings.CompilerArgumentsForSource(source, lib);
+			string s = _document.Settings.CompilerArguments(source, lib);
 			if(s.Length < 5000) {
 				p.StartInfo.Arguments = s;
 			}

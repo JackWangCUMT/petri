@@ -14,6 +14,11 @@ Fonction recherche
 
 Scénario d'exécution
 
+Feedback complétion des étapes
+màj headers
+génération invocation compilateur
+Vérifier l'évaluation du pendant le debug
+
 FIXME:
 	état interne des Conditions pas thread-safe
 

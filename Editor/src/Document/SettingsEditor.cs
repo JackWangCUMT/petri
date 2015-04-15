@@ -14,6 +14,7 @@ namespace Petri
 
 			_window.DefaultWidth = 400;
 			_window.DefaultHeight = 600;
+			_window.SetSizeRequest(300, 600);
 
 
 			_window.SetPosition(WindowPosition.Center);
@@ -86,8 +87,8 @@ namespace Petri
 
 
 				label = new Label("Chemin où générer le code (relatif au document) :");
-				entry = new Entry(_document.Settings.SourceOutputPath);
-				entry.FocusOutEvent += (obj, eventInfo) => {
+				_sourceOutputPath = new Entry(_document.Settings.SourceOutputPath);
+				_sourceOutputPath.FocusOutEvent += (obj, eventInfo) => {
 					_document.Settings.SourceOutputPath = (obj as Entry).Text;
 					_document.Settings.Modified = true;
 				};
@@ -95,11 +96,18 @@ namespace Petri
 				hbox = new HBox(false, 5);
 				hbox.PackStart(label, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
-				vbox.PackStart(entry, false, false, 0);
+
+				_selectSourceOutputPath = new Button("…");
+				_selectSourceOutputPath.Clicked += OnAdd;
+
+				hbox = new HBox(false, 5);
+				hbox.PackStart(_sourceOutputPath, true, true, 0);
+				hbox.PackStart(_selectSourceOutputPath, false, false, 0);
+				vbox.PackStart(hbox, false, false, 0);
 
 				label = new Label("Chemin où créer la librairie dynamique (relatif au document) :");
-				entry = new Entry(_document.Settings.LibOutputPath);
-				entry.FocusOutEvent += (obj, eventInfo) => {
+				_libOutputPath = new Entry(_document.Settings.LibOutputPath);
+				_libOutputPath.FocusOutEvent += (obj, eventInfo) => {
 					_document.Settings.LibOutputPath = (obj as Entry).Text;
 					_document.Settings.Modified = true;
 				};
@@ -107,7 +115,14 @@ namespace Petri
 				hbox = new HBox(false, 5);
 				hbox.PackStart(label, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
-				vbox.PackStart(entry, false, false, 0);
+
+				_selectLibOutputPath = new Button("…");
+				_selectLibOutputPath.Clicked += OnAdd;
+
+				hbox = new HBox(false, 5);
+				hbox.PackStart(_libOutputPath, true, true, 0);
+				hbox.PackStart(_selectLibOutputPath, false, false, 0);
+				vbox.PackStart(hbox, false, false, 0);
 
 				label = new Label("Nom d'hôte du débuggeur :");
 				entry = new Entry(_document.Settings.Hostname);
@@ -318,7 +333,14 @@ namespace Petri
 				filter.AddPattern("*.so");
 				filter.AddPattern("*.dylib");
 			}
-
+			else if(sender == _selectSourceOutputPath) {
+				title = "Sélectionnez le dossier dans lequel générer le C++…";
+				action = FileChooserAction.SelectFolder;
+			}
+			else if(sender == _selectLibOutputPath) {
+				title = "Sélectionnez le dossier dans lequel générer la librairie…";
+				action = FileChooserAction.SelectFolder;
+			}
 
 			var fc = new Gtk.FileChooserDialog(title, _window,
 				action,
@@ -348,6 +370,17 @@ namespace Petri
 					_document.Settings.Libs.Add(filename);
 					this.BuildLibs();
 				}
+				else if(sender == _selectSourceOutputPath) {
+					string filename = _document.GetRelativeToDoc(fc.Filename);
+					_sourceOutputPath.Text = filename;
+					_document.Settings.SourceOutputPath = filename;
+				}
+				else if(sender == _selectLibOutputPath) {
+					string filename = _document.GetRelativeToDoc(fc.Filename);
+					_libOutputPath.Text = filename;
+					_document.Settings.LibOutputPath = filename;
+				}
+
 				_document.Settings.Modified = true;
 			}
 			fc.Destroy();
@@ -416,6 +449,9 @@ namespace Petri
 
 		Window _window;
 		Document _document;
+
+		Entry _libOutputPath, _sourceOutputPath;
+		Button _selectLibOutputPath, _selectSourceOutputPath;
 
 		TreeView _headersSearchPath;
 		ListStore _headersSearchPathStore;
