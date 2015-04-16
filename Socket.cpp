@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <memory>
 
+namespace PetriDetails {
 Socket::Socket() {
 	_fd = socket(AF_INET, SOCK_STREAM, 0); // AF_INET : internet; SOCK_STREAM : par flux; 0 : protocol (TCP)
 
@@ -176,4 +177,6 @@ void Socket::shutdown() {
 		::shutdown(_fd, 2);
 		_state = SOCK_FREE;
 	}
+}
+
 }

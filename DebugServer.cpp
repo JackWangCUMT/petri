@@ -27,7 +27,7 @@ std::chrono::system_clock::time_point DebugServer::getDateFromTimestamp(char con
 	return std::chrono::system_clock::from_time_t(std::mktime(&tm));
 }
 
-DebugSession::DebugSession(PetriDynamicLibCommon &petri) : _socket(SockProtocol::TCP), _client(SockProtocol::TCP), _petriNetFactory(petri), _evaluator(petri.prefix()) {}
+DebugSession::DebugSession(PetriDynamicLibCommon &petri) : _socket(), _client(), _petriNetFactory(petri), _evaluator(petri.prefix()) {}
 
 DebugSession::~DebugSession() {
 	if(_receptionThread.joinable())
@@ -104,7 +104,7 @@ void DebugSession::serverCommunication() {
 		logDebug0("Debugger connected!");
 
 		try {
-			while(_running && _client.getState() == SOCK_ACCEPTED) {
+			while(_running && _client.getState() == PetriDetails::Socket::SOCK_ACCEPTED) {
 				auto const root = this->receiveObject();
 				auto const &type = root["type"];
 
@@ -206,7 +206,7 @@ void DebugSession::serverCommunication() {
 			this->sendObject(this->json("exit", e.what()));
 			logError("Caught exception, exiting debugger: ", e.what());
 		}
-		_client.shutDown();
+		_client.shutdown();
 		_stateChangeCondition.notify_all();
 		if(_heartBeat.joinable())
 			_heartBeat.join();
@@ -217,7 +217,7 @@ void DebugSession::serverCommunication() {
 	}
 
 	_running = false;
-	_socket.shutDown();
+	_socket.shutdown();
 	_stateChangeCondition.notify_all();
 
 	if(_petri)
@@ -242,13 +242,13 @@ void DebugSession::heartBeat() {
 	auto lastSendDate = std::chrono::system_clock::now();
 	auto const minDelayBetweenSend = 100ms;
 
-	while(_running && _client.getState() == SOCK_ACCEPTED) {
+	while(_running && _client.getState() == PetriDetails::Socket::SOCK_ACCEPTED) {
 		std::unique_lock<std::mutex> lk(_stateChangeMutex);
 		_stateChangeCondition.wait(lk, [this]() {
-			return _stateChange || !_running || _client.getState() != SOCK_ACCEPTED;
+			return _stateChange || !_running || _client.getState() != PetriDetails::Socket::SOCK_ACCEPTED;
 		});
 
-		if(!_running || _client.getState() != SOCK_ACCEPTED)
+		if(!_running || _client.getState() != PetriDetails::Socket::SOCK_ACCEPTED)
 			break;
 
 		auto delaySinceLastSend = std::chrono::system_clock::now() - lastSendDate;

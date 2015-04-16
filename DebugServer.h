@@ -14,7 +14,7 @@
 #include "jsoncpp/include/json.h"
 #include "SymbolEvaluator.h"
 #include <set>
-#include <sockets/Socket.h>
+#include "Socket.h"
 
 using namespace std::string_literals;
 
@@ -69,8 +69,8 @@ protected:
 
 	std::thread _receptionThread;
 	std::thread _heartBeat;
-	Socket _socket;
-	Socket _client;
+	PetriDetails::Socket _socket;
+	PetriDetails::Socket _client;
 	std::atomic_bool _running = {false};
 
 	PetriDynamicLibCommon &_petriNetFactory;
