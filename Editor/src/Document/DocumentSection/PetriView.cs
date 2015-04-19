@@ -228,7 +228,9 @@ namespace Petri
 				this.RenderInternal(context, petriNet);
 		}
 
-		protected abstract void SpecializedDrawing(Cairo.Context context);
+		protected virtual void SpecializedDrawing(Cairo.Context context) {
+
+		}
 
 		public float Zoom {
 			get;

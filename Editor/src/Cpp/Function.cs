@@ -65,8 +65,7 @@ namespace Petri
 				private set;
 			}
 
-			public void AddParam(Param p)
-			{
+			public void AddParam(Param p) {
 				Parameters.Add(p);
 			}
 

@@ -55,10 +55,17 @@ namespace Petri
 					Configuration._instance = Configuration._config.Sections["CustomSection"] as Configuration;
 				}
 				catch(System.Configuration.ConfigurationErrorsException err) {
-					Console.WriteLine("CreateConfigurationFile: {0}", err.ToString());
+					try {
+						string s = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
+						System.IO.File.Delete(s);
+					}
+					catch(System.Exception) {}
+					Console.WriteLine("CreateConfigurationFile: {0}", err.Message);
+					return Configuration.Get();
 				}
 				if(Configuration._instance == null) {
 					Configuration._instance = new Configuration();
+					Configuration._config.Sections.Remove("CustomSection");
 					Configuration._config.Sections.Add("CustomSection", Configuration._instance);
 				}
 			}
@@ -147,8 +154,6 @@ namespace Petri
 			}
 		}
 
-		public Configuration() {}
-
 		public static string GetRelativePath(string file, string folder) {
 			Uri pathUri = new Uri(file);
 			if (!folder.EndsWith(Path.DirectorySeparatorChar.ToString())) {
@@ -159,6 +164,7 @@ namespace Petri
 		}
 
 					
+		public Configuration() {}
 		private static System.Configuration.Configuration _config = null;
 		private static Configuration _instance = null;
 		private static Platform _platform;

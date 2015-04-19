@@ -13,6 +13,7 @@
 #include "PetriUtils.h"
 #include "DebugServer.h"
 
+template<typename _ActionResult>
 class PetriDynamicLibCommon : public DynamicLib {
 public:
 	/**
@@ -30,26 +31,26 @@ public:
 	 * Creates the PetriNet object according to the code contained in the dynamic library.
 	 * @return The PetriNet object wrapped in a std::unique_ptr
 	 */
-	std::unique_ptr<PetriNet> create() {
+	std::unique_ptr<PetriNet<_ActionResult>> create() {
 		if(!this->loaded()) {
 			throw std::runtime_error("Dynamic library not loaded!");
 		}
 
 		void *ptr = _createPtr();
-		return std::unique_ptr<PetriNet>(static_cast<PetriNet *>(ptr));
+		return std::unique_ptr<PetriNet<_ActionResult>>(static_cast<PetriNet<_ActionResult> *>(ptr));
 	}
 
 	/**
 	 * Creates the PetriDebug object according to the code contained in the dynamic library.
 	 * @return The PetriDebug object wrapped in a std::unique_ptr
 	 */
-	std::unique_ptr<PetriDebug> createDebug() {
+	std::unique_ptr<PetriDebug<_ActionResult>> createDebug() {
 		if(!this->loaded()) {
 			throw std::runtime_error("Dynamic library not loaded!");
 		}
 
 		void *ptr = _createDebugPtr();
-		return std::unique_ptr<PetriDebug>(static_cast<PetriDebug *>(ptr));
+		return std::unique_ptr<PetriDebug<_ActionResult>>(static_cast<PetriDebug<_ActionResult> *>(ptr));
 	}
 
 	/**
@@ -102,7 +103,7 @@ public:
 		if(serverDate > libDate) {
 			this->unload();
 
-			logError("The dynamic library for Petri net ", prefix, " is out of date and must be recompiled!");
+			std::cerr << "The dynamic library for Petri net " << prefix << " is out of date and must be recompiled!" << std::endl;
 			throw std::runtime_error("The dynamic library is out of date and must be recompiled!");
 		}
 	}

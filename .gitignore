@@ -1,0 +1,8 @@
+.DS_Store
+.log
+.mdb
+.config
+
+/Editor/obj
+/Editor/bin
+/Editor/Petri.userprefs

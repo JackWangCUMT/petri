@@ -7,10 +7,6 @@ namespace Petri
 {
 	public sealed class Action : NonRootState
 	{
-		public enum ResultatAction {
-			REUSSI, RATE, BLOQUE_PAR_ADV, TIMEOUT, BLOQUE
-		};
-
 		public Action (HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos)
 		{
 			this.Position = pos;
@@ -22,7 +18,18 @@ namespace Petri
 		}
 
 		public Action(HeadlessDocument doc, PetriNet parent, XElement descriptor, IEnumerable<Cpp.Function> functions, IDictionary<string, string> macros) : base(doc, parent, descriptor) {
-			this.Function = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>(descriptor.Attribute("Function").Value, this, functions, macros);
+			Cpp.FunctionInvocation exp;
+			try {
+				exp = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>(descriptor.Attribute("Function").Value, this, functions, macros);
+				if(!exp.Function.ReturnType.Equals(doc.Settings.Enum.Type)) {
+					doc.Conflicting.Add(this);
+				}
+				Function = exp;
+			}
+			catch(Exception e) {
+				doc.Conflicting.Add(this);
+				// TODO: which invocation?
+			}
 		}
 
 		public override XElement GetXml() {
@@ -37,29 +44,21 @@ namespace Petri
 		}
 
 		public Cpp.FunctionInvocation DefaultAction() {
-			return new Petri.Cpp.FunctionInvocation(Action.DefaultFunction, new Petri.Cpp.EntityExpression(this, "this"));
+			return new Petri.Cpp.FunctionInvocation(DefaultFunction(Document), new Petri.Cpp.EntityExpression(this, "this"));
 		}
 
-		public static Cpp.Function DefaultFunction {
-			get {
-				if(_defaultFunction == null) {
-					_defaultFunction = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope()), "defaultAction", false);
-					_defaultFunction.AddParam(new Cpp.Param(new Cpp.Type("Action *", Cpp.Scope.EmptyScope()), "action"));
-				}
+		public static Cpp.Function DefaultFunction(HeadlessDocument doc) {
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "defaultAction", false);
+			f.AddParam(new Cpp.Param(new Cpp.Type("Action *", Cpp.Scope.EmptyScope), "action"));
 
-				return _defaultFunction;
-			}
+			return f;
 		}
 
-		public static Cpp.Function DoNothingFunction {
-			get {
-				if(_doNothingFunction == null) {
-					_doNothingFunction = new Cpp.Function(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope()), "doNothing", false);
-					_doNothingFunction.AddParam(new Cpp.Param(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()), "resultat"));
-				}
+		public static Cpp.Function DoNothingFunction(HeadlessDocument doc) {
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "doNothing", false);
+			f.AddParam(new Cpp.Param(doc.Settings.Enum.Type, "resultat"));
 
-				return _doNothingFunction;
-			}
+			return f;
 		}
 
 		public Cpp.FunctionInvocation Function {
@@ -73,13 +72,13 @@ namespace Petri
 			}
 		}
 
-		public override bool UsesHeader(string h) {
-			return this.Function.Function.Header == h;
+		public override bool UsesFunction(Cpp.Function f) {
+			return Function.UsesFunction(f);
 		}
 
 		public bool IsDefault()
 		{
-			return this.Function.Function.Name == "defaultAction" && this.Function.Function.Enclosing.Equals(Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope()));
+			return this.Function.Function.Name == "defaultAction" && this.Function.Function.Enclosing.Equals(Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope));
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
@@ -95,8 +94,6 @@ namespace Petri
 		}
 
 		Cpp.FunctionInvocation _function;
-		static Cpp.Function _defaultFunction;
-		static Cpp.Function _doNothingFunction;
 	}
 }
 

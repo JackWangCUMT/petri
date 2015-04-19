@@ -57,7 +57,7 @@ namespace Petri
 			set;
 		}
 
-		public override bool UsesHeader(string Header) {
+		public override bool UsesFunction(Cpp.Function f) {
 			return false;
 		}
 

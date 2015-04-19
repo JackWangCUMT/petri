@@ -18,13 +18,14 @@
 #include <mutex>
 #include <thread>
 #include <deque>
-#include "Commun.h"
+#include "Common.h"
 
 using namespace std::chrono_literals;
 
 #include "Transition.h"
 #include "Action.h"
 
+template<typename _ActionResult>
 class PetriNet {
 	enum {InitialThreadsActions = 1};
 public:
@@ -40,7 +41,7 @@ public:
 	 * @param action The action to add
 	 * @param active Controls whether the action is active as soon as the net is started or not
 	 */
-	virtual void addAction(std::shared_ptr<Action> &action, bool active = false);
+	virtual void addAction(std::shared_ptr<Action<_ActionResult>> &action, bool active = false);
 
 	/**
 	 * Checks whether the net is running.
@@ -70,26 +71,27 @@ protected:
 	using ClockType = std::conditional<std::chrono::high_resolution_clock::is_steady, std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
 
 	// This method is executed concurrently on the thread pool.
-	virtual void executeState(Action &a);
+	virtual void executeState(Action<_ActionResult> &a);
 
-	virtual void stateEnabled(Action &a) {}
-	virtual void stateDisabled(Action &a) {}
+	virtual void stateEnabled(Action<_ActionResult> &a) {}
+	virtual void stateDisabled(Action<_ActionResult> &a) {}
 
-	void enableState(Action &a);
-	void disableState(Action &a);
-	void swapStates(Action &oldAction, Action &newAction);
+	void enableState(Action<_ActionResult> &a);
+	void disableState(Action<_ActionResult> &a);
+	void swapStates(Action<_ActionResult> &oldAction, Action<_ActionResult> &newAction);
 
 	std::condition_variable _activationCondition;
-	std::multiset<Action *> _activeStates;
+	std::multiset<Action<_ActionResult> *> _activeStates;
 	std::mutex _activationMutex;
 
 	std::atomic_bool _running = {false};
 	ThreadPool<void> _actionsPool;
 
 	std::string const _name;
-	std::list<std::pair<std::shared_ptr<Action>, bool>> _states;
-	std::list<Transition> _transitions;
+	std::list<std::pair<std::shared_ptr<Action<_ActionResult>>, bool>> _states;
+	std::list<Transition<_ActionResult>> _transitions;
 };
 
+#include "PetriNet.hpp"
 
 #endif

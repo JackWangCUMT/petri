@@ -67,6 +67,18 @@ namespace Petri
 		}
 
 		public void PostAction(GuiAction a) {
+			if(a is ConditionChangeAction) {
+				Transition t = (a as ConditionChangeAction).Transition;
+				if(Conflicts(t)) {
+					Conflicting.Remove(t);
+				}
+			}
+			else if(a is InvocationChangeAction) {
+				Action action = (a as InvocationChangeAction).Action;
+				if(Conflicts(action)) {
+					Conflicting.Remove(action);
+				}
+			}
 			Modified = true;
 			UndoManager.PostAction(a);
 			UpdateUndo();
@@ -118,15 +130,24 @@ namespace Petri
 				Modified = true;
 			}
 		}
+					
+		public void RemoveHeader(string header) {
+			var list = PetriNet.BuildEntitiesList();
 
-		// Performs the removal if possible
-		public override bool RemoveHeader(string header) {
-			bool result = base.RemoveHeader(header);
-			if(result) {
-				Modified = true;
+			var toRemove = new List<Cpp.Function>();
+			foreach(var f in AllFunctions) {
+				if(f.Header == header) {
+					toRemove.Add(f);
+				}
 			}
 
-			return result;
+			foreach(var f in toRemove) {
+				foreach(var e in list) {
+					if(e.UsesFunction(f)) {
+						
+					}
+				}
+			}
 		}
 
 		public override void Save() {
@@ -212,7 +233,7 @@ namespace Petri
 			var fc = new Gtk.FileChooserDialog("Exporter le PDF sous…", Window,
 				FileChooserAction.Save,
 				new object[]{"Annuler",ResponseType.Cancel,
-					"Enregistrer",ResponseType.Accept});
+					"Enregistrer", ResponseType.Accept});
 
 			if(Configuration.SavePath.Length > 0) {
 				fc.SetCurrentFolder(System.IO.Directory.GetParent(Configuration.SavePath).FullName);
@@ -331,7 +352,7 @@ namespace Petri
 				}
 
 
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue lors de du chargement du document : " + e.ToString()));
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue lors de du chargement du document : " + e.Message));
 				d.AddButton("OK", ResponseType.Cancel);
 				d.Run();
 				d.Destroy();
@@ -437,7 +458,7 @@ namespace Petri
 		public void EditSettings() {
 			if(this.Path != "") {
 				if(_settingsEditor == null) {
-					_settingsEditor = new SettingsEditor(this);
+					_settingsEditor = new DocumentSettingsEditor(this);
 				}
 
 				_settingsEditor.Show();
@@ -476,7 +497,7 @@ namespace Petri
 		GuiAction _guiActionToMatchSave = null;
 		HeadersManager _headersManager;
 		MacrosManager _macrosManager;
-		SettingsEditor _settingsEditor;
+		DocumentSettingsEditor _settingsEditor;
 		bool _modified;
 	}
 }

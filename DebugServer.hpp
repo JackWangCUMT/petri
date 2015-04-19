@@ -9,16 +9,15 @@
 #include "PetriDynamicLibCommon.h"
 #include <cstring>
 
-std::string DebugServer::getVersion() {
+inline std::string DebugServer::getVersion() {
 	return "0.2";
 }
 
-std::chrono::system_clock::time_point DebugServer::getAPIdate() {
-	logMagenta(__TIMESTAMP__);
+inline std::chrono::system_clock::time_point DebugServer::getAPIdate() {
 	return DebugServer::getDateFromTimestamp(__TIMESTAMP__);
 }
 
-std::chrono::system_clock::time_point DebugServer::getDateFromTimestamp(char const *timestamp) {
+inline std::chrono::system_clock::time_point DebugServer::getDateFromTimestamp(char const *timestamp) {
 	char const *format = "%a %b %d %H:%M:%S %Y";
 	std::tm tm;
 	std::memset(&tm, 0, sizeof(tm));
@@ -27,21 +26,25 @@ std::chrono::system_clock::time_point DebugServer::getDateFromTimestamp(char con
 	return std::chrono::system_clock::from_time_t(std::mktime(&tm));
 }
 
-DebugSession::DebugSession(PetriDynamicLibCommon &petri) : _socket(), _client(), _petriNetFactory(petri), _evaluator(petri.prefix()) {}
+template<typename _ActionResult>
+inline DebugSession<_ActionResult>::DebugSession(PetriDynamicLibCommon<_ActionResult> &petri) : _socket(), _client(), _petriNetFactory(petri), _evaluator(petri.prefix()) {}
 
-DebugSession::~DebugSession() {
+template<typename _ActionResult>
+inline DebugSession<_ActionResult>::~DebugSession() {
 	if(_receptionThread.joinable())
 		_receptionThread.join();
 	if(_heartBeat.joinable())
 		_heartBeat.join();
 }
 
-void DebugSession::start() {
+template<typename _ActionResult>
+inline void DebugSession<_ActionResult>::start() {
 	_running = true;
-	_receptionThread = std::thread(&DebugSession::serverCommunication, this);
+	_receptionThread = std::thread(&DebugSession<_ActionResult>::serverCommunication, this);
 }
 
-void DebugSession::stop() {
+template<typename _ActionResult>
+inline void DebugSession<_ActionResult>::stop() {
 	_running = false;
 	
 	if(_receptionThread.joinable())
@@ -50,11 +53,13 @@ void DebugSession::stop() {
 		_heartBeat.join();
 }
 
-bool DebugSession::running() const {
+template<typename _ActionResult>
+inline bool DebugSession<_ActionResult>::running() const {
 	return _running;
 }
 
-void DebugSession::addActiveState(Action &a) {
+template<typename _ActionResult>
+inline void DebugSession<_ActionResult>::addActiveState(Action<_ActionResult> &a) {
 	{
 		std::lock_guard<std::mutex> lk(_breakpointsMutex);
 		if(_breakpoints.count(&a) > 0) {
@@ -69,7 +74,8 @@ void DebugSession::addActiveState(Action &a) {
 	_stateChangeCondition.notify_all();
 }
 
-void DebugSession::removeActiveState(Action &a) {
+template<typename _ActionResult>
+inline void DebugSession<_ActionResult>::removeActiveState(Action<_ActionResult> &a) {
 	std::lock_guard<std::mutex> lk(_stateChangeMutex);
 	auto it = _activeStates.find(&a);
 	if(it == _activeStates.end() || it->second == 0)
@@ -80,7 +86,8 @@ void DebugSession::removeActiveState(Action &a) {
 	_stateChangeCondition.notify_all();
 }
 
-void DebugSession::serverCommunication() {
+template<typename _ActionResult>
+inline void DebugSession<_ActionResult>::serverCommunication() {
 	setThreadName("DebugSession "s + _petriNetFactory.name());
 
 	int attempts = 0;
@@ -88,23 +95,23 @@ void DebugSession::serverCommunication() {
 		if(_socket.listen(_petriNetFactory.port()))
 			break;
 
-		sleep(1_s);
-		logError("Could not bind socket to requested port (attempt ", ++attempts, ")");
+		std::this_thread::sleep_for(1s);
+		std::cerr << "Could not bind socket to requested port (attempt " << ++attempts << ")" << std::endl;
 		if(attempts > 20) {
 			_running = false;
 			break;
 		}
 	}
 
-	logInfo("Debug session for Petri net ", _petriNetFactory.name(), " started.");
+	std::cout << "Debug session for Petri net " << _petriNetFactory.name() << " started." << std::endl;
 
 	while(_running) {
-		logInfo("Waiting for the debugger to attach…");
+		std::cout << "Waiting for the debugger to attach…" << std::endl;
 		_socket.accept(_client);
-		logDebug0("Debugger connected!");
+		std::cout << "Debugger connected!" << std::endl;
 
 		try {
-			while(_running && _client.getState() == PetriDetails::Socket::SOCK_ACCEPTED) {
+			while(_running && _client.getState() == Petri::Socket::SOCK_ACCEPTED) {
 				auto const root = this->receiveObject();
 				auto const &type = root["type"];
 
@@ -118,7 +125,7 @@ void DebugSession::serverCommunication() {
 						ehlo["type"] = "ehlo";
 						ehlo["version"] = DebugServer::getVersion();
 						this->sendObject(ehlo);
-						_heartBeat = std::thread(&DebugSession::heartBeat, this);
+						_heartBeat = std::thread(&DebugSession<_ActionResult>::heartBeat, this);
 					}
 				}
 				else if(type == "start") {
@@ -128,13 +135,13 @@ void DebugSession::serverCommunication() {
 						}
 						catch(std::exception &e) {
 							this->sendObject(this->error("The PetriNet API has been updated after the compilation of the dynamic library, please recompile to allow debugging!"));
-							logError("The PetriNet API has been updated after the compilation of the dynamic library, please recompile to allow debugging!");
+							std::cerr << "The PetriNet API has been updated after the compilation of the dynamic library, please recompile to allow debugging!" << std::endl;
 						}
 					}
 					if(_petriNetFactory.loaded()) {
 						if(root["payload"]["hash"] != _petriNetFactory.hash()) {
 							this->sendObject(this->error("You are trying to run a Petri net that is different from the one which is compiled!"));
-							logError("You are trying to run a Petri net that is different from the one which is compiled!");
+							std::cerr << "You are trying to run a Petri net that is different from the one which is compiled!" << std::endl;
 							_petriNetFactory.unload();
 						}
 						else {
@@ -204,7 +211,7 @@ void DebugSession::serverCommunication() {
 		}
 		catch(std::exception &e) {
 			this->sendObject(this->json("exit", e.what()));
-			logError("Caught exception, exiting debugger: ", e.what());
+			std::cerr << "Caught exception, exiting debugger: " << e.what() << std::endl;
 		}
 		_client.shutdown();
 		_stateChangeCondition.notify_all();
@@ -213,7 +220,7 @@ void DebugSession::serverCommunication() {
 
 		this->clearPetri();
 
-		logDebug0("Disconnected!");
+		std::cout << "Disconnected!" << std::endl;
 	}
 
 	_running = false;
@@ -224,7 +231,8 @@ void DebugSession::serverCommunication() {
 		_petri->stop();
 }
 
-void DebugSession::updateBreakpoints(Json::Value const &breakpoints) {
+template<typename _ActionResult>
+inline void DebugSession<_ActionResult>::updateBreakpoints(Json::Value const &breakpoints) {
 	if(breakpoints.type() != Json::arrayValue) {
 		throw std::runtime_error("Invalid breakpoint specifying format!");
 	}
@@ -237,18 +245,19 @@ void DebugSession::updateBreakpoints(Json::Value const &breakpoints) {
 	}
 }
 
-void DebugSession::heartBeat() {
+template<typename _ActionResult>
+inline void DebugSession<_ActionResult>::heartBeat() {
 	setThreadName("DebugSession "s + _petriNetFactory.name() + " heart beat"s);
 	auto lastSendDate = std::chrono::system_clock::now();
 	auto const minDelayBetweenSend = 100ms;
 
-	while(_running && _client.getState() == PetriDetails::Socket::SOCK_ACCEPTED) {
+	while(_running && _client.getState() == Petri::Socket::SOCK_ACCEPTED) {
 		std::unique_lock<std::mutex> lk(_stateChangeMutex);
 		_stateChangeCondition.wait(lk, [this]() {
-			return _stateChange || !_running || _client.getState() != PetriDetails::Socket::SOCK_ACCEPTED;
+			return _stateChange || !_running || _client.getState() != Petri::Socket::SOCK_ACCEPTED;
 		});
 
-		if(!_running || _client.getState() != PetriDetails::Socket::SOCK_ACCEPTED)
+		if(!_running || _client.getState() != Petri::Socket::SOCK_ACCEPTED)
 			break;
 
 		auto delaySinceLastSend = std::chrono::system_clock::now() - lastSendDate;
@@ -272,14 +281,16 @@ void DebugSession::heartBeat() {
 	}
 }
 
-void DebugSession::clearPetri() {
+template<typename _ActionResult>
+inline void DebugSession<_ActionResult>::clearPetri() {
 	if(_petri != nullptr) {
 		_petri = nullptr;
 	}
 	_activeStates.clear();
 }
 
-void DebugSession::setPause(bool pause) {
+template<typename _ActionResult>
+inline void DebugSession<_ActionResult>::setPause(bool pause) {
 	if(!_petri || !_petri->running())
 		throw std::runtime_error("Petri net is not running!");
 
@@ -291,7 +302,8 @@ void DebugSession::setPause(bool pause) {
 	}
 }
 
-Json::Value DebugSession::receiveObject() {
+template<typename _ActionResult>
+inline Json::Value DebugSession<_ActionResult>::receiveObject() {
 	std::vector<uint8_t> vect = _socket.receiveNewMsg(_client);
 
 	std::string msg(vect.begin(), vect.end());
@@ -299,14 +311,15 @@ Json::Value DebugSession::receiveObject() {
 	Json::Value root;
 	Json::Reader reader;
 	if(!reader.parse(&msg.data()[0], &msg.data()[msg.length()], root)) {
-		logError("Invalid debug message received from server: ", msg);
+		std::cerr << "Invalid debug message received from server: " << msg << std::endl;
 		throw std::runtime_error("Invalid debug message received!");
 	}
 
 	return root;
 }
 
-void DebugSession::sendObject(Json::Value const &o) {
+template<typename _ActionResult>
+inline void DebugSession<_ActionResult>::sendObject(Json::Value const &o) {
 	std::lock_guard<std::mutex> lk(_sendMutex);
 	
 	Json::FastWriter writer;
@@ -317,7 +330,8 @@ void DebugSession::sendObject(Json::Value const &o) {
 	_socket.sendMsg(_client, s.c_str(), s.size());
 }
 
-Json::Value DebugSession::json(std::string const &type, Json::Value const &payload) {
+template<typename _ActionResult>
+inline Json::Value DebugSession<_ActionResult>::json(std::string const &type, Json::Value const &payload) {
 	Json::Value err;
 	err["type"] = type;
 	err["payload"] = payload;
@@ -325,6 +339,7 @@ Json::Value DebugSession::json(std::string const &type, Json::Value const &paylo
 	return err;
 }
 
-Json::Value DebugSession::error(std::string const &error) {
+template<typename _ActionResult>
+inline Json::Value DebugSession<_ActionResult>::error(std::string const &error) {
 	return this->json("error", error);
 }

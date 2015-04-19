@@ -14,6 +14,8 @@ namespace Petri {
 				Unexpanded = "";
 			}
 
+			public abstract bool UsesFunction(Function f);
+
 			public abstract string MakeCpp();
 			public abstract string MakeUserReadable();
 
@@ -174,7 +176,7 @@ namespace Petri {
 										// 2 cases where the operator is actually unary: we can find a binary operator before, or nothing at all.
 										if(opIndex == 1)
 											continue;
-										foreach(var op2 in Enum.GetValues(typeof(Cpp.Operator.Name)).Cast<Cpp.Operator.Name>()) {
+										foreach(var op2 in System.Enum.GetValues(typeof(Cpp.Operator.Name)).Cast<Cpp.Operator.Name>()) {
 											if(Cpp.Operator.Properties[op2].type == Petri.Cpp.Operator.Type.Binary) {
 												int opIndex2 = s.Substring(0, opIndex).IndexOf(Cpp.Operator.Properties[op2].cpp);
 												if(opIndex2 == -1) {
@@ -218,7 +220,7 @@ namespace Petri {
 								})) as Cpp.Method;
 
 								if(m == null) {
-									throw new Exception("Aucune méthode ne correspond à l'expression demandée");
+									throw new Exception("Aucune méthode ne correspond à l'expression demandée (" + GetStringFromPreprocessed(s, subexprs) + ")");
 								}
 
 								return new MethodInvocation(m, Expression.CreateFromPreprocessedString(e1, entity, funcList, subexprs), foundOperator == Cpp.Operator.Name.SelectionPtr, param.ToArray());
@@ -253,7 +255,7 @@ namespace Petri {
 								});
 							
 								if(f == null) {
-									throw new Exception("Aucune fonction ne correspond à l'expression demandée");
+									throw new Exception("Aucune fonction ne correspond à l'expression demandée (" + GetStringFromPreprocessed(s, subexprs) + ")");
 								}
 							
 								return new FunctionInvocation(f, param.ToArray());
@@ -355,6 +357,10 @@ namespace Petri {
 		public class EmptyExpression : Expression {
 			public EmptyExpression() : base(Cpp.Operator.Name.None) {}
 
+			public override bool UsesFunction(Function f) {
+				return false;
+			}
+
 			public override string MakeCpp() {
 				throw new Exception("Expression vide !");
 			}
@@ -372,6 +378,10 @@ namespace Petri {
 			public string Expression {
 				get;
 				private set;
+			}
+
+			public override bool UsesFunction(Function f) {
+				return false;
 			}
 
 			public override string MakeCpp() {
@@ -399,6 +409,10 @@ namespace Petri {
 				private set;
 			}
 
+			public override bool UsesFunction(Function f) {
+				return false;
+			}
+
 			public override string MakeCpp() {
 				return this.Entity.CppName + ".get()";
 			}
@@ -416,6 +430,10 @@ namespace Petri {
 			public Expression Expression {
 				get;
 				private set;
+			}
+
+			public override bool UsesFunction(Function f) {
+				return Expression.UsesFunction(f);
 			}
 
 			public override string MakeCpp() {
@@ -491,6 +509,10 @@ namespace Petri {
 			public Expression Expression2 {
 				get;
 				private set;
+			}
+
+			public override bool UsesFunction(Function f) {
+				return Expression1.UsesFunction(f) || Expression2.UsesFunction(f);
 			}
 
 			public override string MakeCpp() {
@@ -633,10 +655,12 @@ namespace Petri {
 			}
 
 			public override string MakeCpp() {
+				// TODO: tbd
 				throw new Exception("Operator not implemented!");
 			}
 
 			public override string MakeUserReadable() {
+				// TODO: tbd
 				throw new Exception("Operator not implemented!");
 			}
 		}

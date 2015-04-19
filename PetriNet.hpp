@@ -8,13 +8,16 @@
 #include "PetriNet.h"
 #include <cassert>
 
-PetriNet::PetriNet(std::string const &name) : _actionsPool(InitialThreadsActions, name), _name(name) {}
+template<typename _ActionResult>
+inline PetriNet<_ActionResult>::PetriNet(std::string const &name) : _actionsPool(InitialThreadsActions, name), _name(name) {}
 
-PetriNet::~PetriNet() {
+template<typename _ActionResult>
+inline PetriNet<_ActionResult>::~PetriNet() {
 	this->stop();
 }
 
-void PetriNet::addAction(std::shared_ptr<Action> &action, bool active) {
+template<typename _ActionResult>
+inline void PetriNet<_ActionResult>::addAction(std::shared_ptr<Action<_ActionResult>> &action, bool active) {
 	if(this->running()) {
 		throw std::runtime_error("Cannot modify running state chart!");
 	}
@@ -22,7 +25,8 @@ void PetriNet::addAction(std::shared_ptr<Action> &action, bool active) {
 	_states.emplace_back(action, active);
 }
 
-void PetriNet::run() {
+template<typename _ActionResult>
+inline void PetriNet<_ActionResult>::run() {
 	if(this->running()) {
 		throw std::runtime_error("Already running!");
 	}
@@ -35,7 +39,8 @@ void PetriNet::run() {
 	}
 }
 
-void PetriNet::stop() {
+template<typename _ActionResult>
+inline void PetriNet<_ActionResult>::stop() {
 	if(this->running()) {
 		_running = false;
 		_activationCondition.notify_all();
@@ -43,22 +48,24 @@ void PetriNet::stop() {
 	_actionsPool.cancel();
 }
 
-void PetriNet::join() {
+template<typename _ActionResult>
+inline void PetriNet<_ActionResult>::join() {
 	// Quick and dirty…
 	while(this->running()) {
 		std::this_thread::sleep_for(std::chrono::nanoseconds(1'000'000));
 	}
 }
 
-void PetriNet::executeState(Action &a) {	
-	Action *nextState = nullptr;
+template<typename _ActionResult>
+inline void PetriNet<_ActionResult>::executeState(Action<_ActionResult> &a) {
+	Action<_ActionResult> *nextState = nullptr;
 
 	for(auto &t : a.transitions()) {
 		t->actionStarted();
 	}
 
 	// Runs the Callable
-	ResultatAction res = a.action()();
+	auto res = a.action()();
 
 	for(auto &t : a.transitions()) {
 		t->actionEnded();
@@ -89,7 +96,7 @@ void PetriNet::executeState(Action &a) {
 				}
 
 				if(isFulfilled) {
-					Action &a = (**it)->next();
+					Action<_ActionResult> &a = (**it)->next();
 					std::lock_guard<std::mutex> tokensLock(a.tokensMutex());
 					if(++a.currentTokens() >= a.requiredTokens()) {
 						a.currentTokens() -= a.requiredTokens();
@@ -130,7 +137,8 @@ void PetriNet::executeState(Action &a) {
 	}
 }
 
-void PetriNet::swapStates(Action &oldAction, Action &newAction) {
+template<typename _ActionResult>
+inline void PetriNet<_ActionResult>::swapStates(Action<_ActionResult> &oldAction, Action<_ActionResult> &newAction) {
 	{
 		std::lock_guard<std::mutex> lk(_activationMutex);
 		_activeStates.insert(&newAction);
@@ -146,7 +154,8 @@ void PetriNet::swapStates(Action &oldAction, Action &newAction) {
 	_actionsPool.addTask(make_callable_ptr(std::bind(&PetriNet::executeState, std::ref(*this), std::placeholders::_1), std::ref(newAction)));
 }
 
-void PetriNet::enableState(Action &a) {
+template<typename _ActionResult>
+inline void PetriNet<_ActionResult>::enableState(Action<_ActionResult> &a) {
 	{
 		std::lock_guard<std::mutex> lk(_activationMutex);
 		_activeStates.insert(&a);
@@ -160,7 +169,8 @@ void PetriNet::enableState(Action &a) {
 	_actionsPool.addTask(make_callable_ptr(std::bind(&PetriNet::executeState, std::ref(*this), std::placeholders::_1), std::ref(a)));
 }
 
-void PetriNet::disableState(Action &a) {
+template<typename _ActionResult>
+inline void PetriNet<_ActionResult>::disableState(Action<_ActionResult> &a) {
 	std::lock_guard<std::mutex> lk(_activationMutex);
 
 	auto it = _activeStates.find(&a);

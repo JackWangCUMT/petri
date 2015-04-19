@@ -54,7 +54,7 @@ namespace Petri
 
 			// Adding an entry point
 			source += "auto " + name + " = std::make_shared<Action>();";
-			source += name + "->setAction(" + "make_callable_ptr([](){ return ResultatAction::REUSSI; })" + ");";
+			source += name + "->setAction(" + "make_callable_ptr([](){ return " + Document.Settings.Enum.Name + "(); })" + ");";
 			source += name + "->setRequiredTokens(" + this.RequiredTokens.ToString() + ");";
 
 			source += name + "->setName(\"" + this.Name + "_Entry" + "\");";

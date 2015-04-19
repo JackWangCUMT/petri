@@ -8,24 +8,17 @@ namespace Petri
 	public class HeadlessDocument {
 		public HeadlessDocument(string path) {
 			this.Headers = new List<string>();
-			CppActions = new List<Cpp.Function>();
+			CppActionsList = new List<Cpp.Function>();
 			AllFunctions = new List<Cpp.Function>();
-			CppConditions = new List<Cpp.Function>();
-
-			AllFunctions = new List<Cpp.Function>();
-			CppActions = new List<Cpp.Function>();
 			CppConditions = new List<Cpp.Function>();
 
 			CppMacros = new Dictionary<string, string>();
 
-			var timeout = new Cpp.Function(new Cpp.Type("Timeout", Cpp.Scope.EmptyScope()), Cpp.Scope.EmptyScope(), "Timeout", false);
-			timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>", Cpp.Scope.EmptyScope()), "timeout"));
-			CppConditions.Add(timeout);
+			Conflicting = new HashSet<Entity>();
 
-			CppActions.Insert(0, Action.DefaultFunction);
-			CppActions.Insert(0, Action.DoNothingFunction);
-			AllFunctions.Insert(0, Action.DefaultFunction);
-			AllFunctions.Insert(0, Action.DoNothingFunction);
+			var timeout = new Cpp.Function(new Cpp.Type("Timeout", Cpp.Scope.EmptyScope), Cpp.Scope.EmptyScope, "Timeout", false);
+			timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>", Cpp.Scope.EmptyScope), "timeout"));
+			CppConditions.Add(timeout);
 
 			this.Path = path;
 		}
@@ -54,8 +47,8 @@ namespace Petri
 
 				var functions = Cpp.Parser.Parse(filename);
 				foreach(var func in functions) {
-					if(func.ReturnType.Equals("ResultatAction")) {
-						CppActions.Add(func);
+					if(func.ReturnType.Equals(Settings.Enum.Type)) {
+						CppActionsList.Add(func);
 					}
 					else if(func.ReturnType.Equals("bool")) {
 						CppConditions.Add(func);
@@ -65,19 +58,6 @@ namespace Petri
 
 				Headers.Add(header);
 			}
-		}
-
-		// Performs the removal if possible
-		public virtual bool RemoveHeader(string header) {
-			if(PetriNet.UsesHeader(header))
-				return false;
-
-			CppActions.RemoveAll(a => a.Header == header);
-			CppConditions.RemoveAll(c => c.Header == header);
-			AllFunctions.RemoveAll(s => s.Header == header);
-			Headers.Remove(header);
-
-			return true;
 		}
 
 		public Dictionary<string, string> CppMacros {
@@ -95,9 +75,31 @@ namespace Petri
 			private set;
 		}
 
-		public List<Cpp.Function> CppActions {
+		public List<Cpp.Function> CppActionsList {
 			get;
 			private set;
+		}
+
+		public IEnumerable<Cpp.Function> CppActions {
+			get {
+				Cpp.Function[] ff = new Cpp.Function[CppActionsList.Count + 2];
+				ff[0] = Action.DefaultFunction(this);
+				ff[1] = Action.DoNothingFunction(this);
+				for(int i = 0; i < CppActionsList.Count; ++i) {
+					ff[i + 2] = CppActionsList[i];
+				}
+
+				return ff;
+			}
+		}
+
+		public void DispatchFunctions() {
+			CppActionsList.Clear();
+			foreach(Cpp.Function f in AllFunctions) {
+				if(f.ReturnType.Equals(new Cpp.Type(Settings.Enum.Name, Cpp.Scope.EmptyScope))) {
+					CppActionsList.Add(f);
+				}
+			}
 		}
 
 		public RootPetriNet PetriNet {
@@ -202,9 +204,10 @@ namespace Petri
 			SetWindowPosition(int.Parse(winConf.Attribute("X").Value), int.Parse(winConf.Attribute("Y").Value));
 			SetWindowSize(int.Parse(winConf.Attribute("W").Value), int.Parse(winConf.Attribute("H").Value));
 
-			while(this.Headers.Count > 0) {
-				this.RemoveHeader(this.Headers[0]);
-			}
+			Headers.Clear();
+			CppActionsList.Clear();
+			AllFunctions.Clear();
+			CppConditions.Clear();
 
 			CppMacros.Clear();
 
@@ -224,6 +227,8 @@ namespace Petri
 
 			PetriNet = new RootPetriNet(this, elem.Element("PetriNet"));
 			PetriNet.Canonize();
+
+			DispatchFunctions();
 		}
 
 		public string CppPrefix {
@@ -237,7 +242,6 @@ namespace Petri
 				throw new Exception("No source output path defined. Please open the Petri net with the graphical editor and generate the C++ code once.");
 			}
 
-
 			var cppGen = PetriNet.GenerateCpp();
 			cppGen.Item1.AddHeader("\"" + Settings.Name + ".h\"");
 			cppGen.Item1.Write(System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.SourceOutputPath), Settings.Name) + ".cpp");
@@ -248,19 +252,21 @@ namespace Petri
 			generator += "#ifndef PETRI_" + cppGen.Item2 + "_H";
 			generator += "#define PETRI_" + cppGen.Item2 + "_H\n";
 
-			generator += "#define CLASS_NAME " + Settings.Name;
-			generator += "#define PREFIX \"" + CppPrefix + "\"";
+			generator += "#define PETRI_CLASS_NAME " + Settings.Name;
+			generator += "#define PETRI_PREFIX \"" + CppPrefix + "\"";
+			generator += "#define PETRI_ENUM TODOTODOTODO";
+			generator += "#define PETRI_PORT " + Settings.Port;
 
-			generator += "#define PORT " + Settings.Port;
 
 			generator += "";
 
 			generator += "#include \"PetriDynamicLib.h\"\n";
 
-			generator += "#undef PORT";
+			generator += "#undef PETRI_PORT";
 
-			generator += "#undef PREFIX";
-			generator += "#undef CLASS_NAME\n";
+			generator += "#undef PETRI_ENUM";
+			generator += "#undef PETRI_PREFIX";
+			generator += "#undef PETRI_CLASS_NAME\n";
 
 			generator += "#endif"; // ifndef header guard
 
@@ -298,6 +304,26 @@ namespace Petri
 
 		public string GetHash() {
 			return PetriNet.GetHash();
+		}
+
+		public HashSet<Entity> Conflicting {
+			get;
+			private set;
+		}
+
+		public bool Conflicts(Entity e) {
+			if(Conflicting.Contains(e)) {
+				return true;
+			}
+			else if(e is PetriNet) {
+				foreach(var ee in Conflicting) {
+					if(((PetriNet)e).EntityFromID(ee.ID) != null) {
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 
 		int _wX, _wY, _wW, _wH;

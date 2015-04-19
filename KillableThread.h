@@ -16,7 +16,6 @@
 #include "ManagedMemoryHeap.h"
 #include <csignal>
 #include "setjmp.h"
-#include "Commun.h"
 
 #define stop_point KillableThread::stopIfRequested()
 
@@ -187,7 +186,7 @@ private:
 
 		}
 		catch(KillThread const &) {
-			logDebug1("Ending thread");
+			std::cout << "Ending thread" << std::endl;
 		}
 
 		state->_alive = false;

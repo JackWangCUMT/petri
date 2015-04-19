@@ -28,7 +28,7 @@ namespace Petri
 				}
 				else if(s is InnerPetriNet) {
 					foreach(var a in _document.DebugController.ActiveStates) {
-						if((s as InnerPetriNet).ContainsEntity(a.Key.ID)) {
+						if((s as InnerPetriNet).EntityFromID(a.Key.ID) != null) {
 							if(_document.DebugController.Server.Pause) {
 								color.R = 0.7;
 								color.G = 0.4;

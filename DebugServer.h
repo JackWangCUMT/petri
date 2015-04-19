@@ -9,7 +9,6 @@
 #define IA_Pe_tri_DebugServer_h
 
 #include <string>
-#include "Commun.h"
 #include "PetriNet.h"
 #include "jsoncpp/include/json.h"
 #include "SymbolEvaluator.h"
@@ -24,12 +23,16 @@ namespace DebugServer {
 	extern std::chrono::system_clock::time_point getDateFromTimestamp(char const *timestamp);
 }
 
+template<typename _ActionResult>
 class PetriDynamicLibCommon;
+
+template<typename _ActionResult>
 class PetriDebug;
 
+template<typename _ActionResult>
 class DebugSession {
 public:
-	DebugSession(PetriDynamicLibCommon &petri);
+	DebugSession(PetriDynamicLibCommon<_ActionResult> &petri);
 	
 	~DebugSession();
 
@@ -43,8 +46,8 @@ public:
 	void stop();
 	bool running() const;
 
-	void addActiveState(Action &a);
-	void removeActiveState(Action &a);
+	void addActiveState(Action<_ActionResult> &a);
+	void removeActiveState(Action<_ActionResult> &a);
 
 protected:
 	void serverCommunication();
@@ -62,24 +65,26 @@ protected:
 	Json::Value json(std::string const &type, Json::Value const &payload);
 	Json::Value error(std::string const &error);
 
-	std::map<Action *, std::size_t> _activeStates;
+	std::map<Action<_ActionResult> *, std::size_t> _activeStates;
 	bool _stateChange = false;
 	std::condition_variable _stateChangeCondition;
 	std::mutex _stateChangeMutex;
 
 	std::thread _receptionThread;
 	std::thread _heartBeat;
-	PetriDetails::Socket _socket;
-	PetriDetails::Socket _client;
+	Petri::Socket _socket;
+	Petri::Socket _client;
 	std::atomic_bool _running = {false};
 
-	PetriDynamicLibCommon &_petriNetFactory;
-	std::unique_ptr<PetriDebug> _petri;
+	PetriDynamicLibCommon<_ActionResult> &_petriNetFactory;
+	std::unique_ptr<PetriDebug<_ActionResult>> _petri;
 	std::mutex _sendMutex;
 	std::mutex _breakpointsMutex;
-	std::set<Action *> _breakpoints;
+	std::set<Action<_ActionResult> *> _breakpoints;
 
 	SymbolEvaluator _evaluator;
 };
+
+#include "DebugServer.hpp"
 
 #endif

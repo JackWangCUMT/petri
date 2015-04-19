@@ -15,7 +15,6 @@
 #include <unordered_map>
 #include <functional>
 #include <atomic>
-#include "Commun.h"
 
 #define safe_alloc ManagedMemoryHeap::make_unique
 
@@ -118,7 +117,7 @@ public:
 				std::free(ptr);
 			}
 			else {
-				logError("Leaked object:", pair.first);
+				std::cerr << "Leaked object: " << pair.first << std::endl;
 				_allocatedObjects.erase(pair);
 			}
 		}

@@ -110,7 +110,7 @@ namespace Petri
 
 				// The tuple contains the current Scope as its first element, current scope's braces nesting level and visibility (only used into classes and structs)
 				var currentScope = new Stack<Tuple<Scope, int, Visibility>>();
-				currentScope.Push(new Tuple<Scope, int, Visibility>(Cpp.Scope.EmptyScope(), 0, Visibility.Public));
+				currentScope.Push(new Tuple<Scope, int, Visibility>(Cpp.Scope.EmptyScope, 0, Visibility.Public));
 				int braces = 0;
 				foreach(string l in lines) {
 					if(l == "{")
@@ -205,7 +205,7 @@ namespace Petri
 				System.Text.RegularExpressions.Match match = Function.Regex.Match(l);
 
 				if(match.Success) {
-					Function function = new Function(new Type(match.Groups["type"].Value, Cpp.Scope.EmptyScope()), enclosing, match.Groups["name"].Value, match.Groups["template"].Value != "");
+					Function function = new Function(new Type(match.Groups["type"].Value, Cpp.Scope.EmptyScope), enclosing, match.Groups["name"].Value, match.Groups["template"].Value != "");
 
 					Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + NamePattern + ")?");
 					string[] parameters = match.Groups["parameters"].Value.Split(',');
@@ -213,7 +213,7 @@ namespace Petri
 					foreach(string parameter in parameters) {
 						System.Text.RegularExpressions.Match paramMatch = param.Match(parameter);
 						if(paramMatch.Success) {
-							Param p = new Param(new Type(paramMatch.Groups["type"].Value, Cpp.Scope.EmptyScope()), paramMatch.Groups["name"].Value);
+							Param p = new Param(new Type(paramMatch.Groups["type"].Value, Cpp.Scope.EmptyScope), paramMatch.Groups["name"].Value);
 							function.AddParam(p);
 						}
 					}
@@ -230,7 +230,7 @@ namespace Petri
 				var match = Method.Regex.Match(l);
 
 				if(match.Success) {
-					var meth = new Method(classType, new Type(match.Groups["type"].Value, Cpp.Scope.EmptyScope()), match.Groups["name"].Value, match.Groups["attributes"].Value, match.Groups["template"].Value != "");
+					var meth = new Method(classType, new Type(match.Groups["type"].Value, Cpp.Scope.EmptyScope), match.Groups["name"].Value, match.Groups["attributes"].Value, match.Groups["template"].Value != "");
 
 					Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + NamePattern + ")?");
 					string[] parameters = match.Groups["parameters"].Value.Split(',');
@@ -238,7 +238,7 @@ namespace Petri
 					foreach(string parameter in parameters) {
 						System.Text.RegularExpressions.Match paramMatch = param.Match(parameter);
 						if(paramMatch.Success) {
-							Param p = new Param(new Type(paramMatch.Groups["type"].Value, Cpp.Scope.EmptyScope()), paramMatch.Groups["name"].Value);
+							Param p = new Param(new Type(paramMatch.Groups["type"].Value, Cpp.Scope.EmptyScope), paramMatch.Groups["name"].Value);
 							meth.AddParam(p);
 						}
 					}
@@ -255,7 +255,7 @@ namespace Petri
 				int index = name.LastIndexOf("::");
 				Tuple<Scope, string> tup;
 				if(index == -1)
-					return new Tuple<Scope, string>(Cpp.Scope.EmptyScope(), name);
+					return new Tuple<Scope, string>(Cpp.Scope.EmptyScope, name);
 				else
 					tup = ExtractScope(name.Substring(0, index));
 

@@ -1,0 +1,22 @@
+﻿<Properties MonoDevelop.MonoMac.LastXamMacNagTime="17/04/2015 18:18:29" StartupItem="Petri.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="src/Document/Document.cs">
+    <Files>
+      <File FileName="src/Document/Document.cs" Line="294" Column="15" />
+      <File FileName="src/Document/HeadlessDocument.cs" Line="224" Column="34" />
+      <File FileName="src/Document/DocumentSection/Editor/EditorEntityDraw.cs" Line="119" Column="1" />
+      <File FileName="src/Document/DocumentSection/Editor/EditorView.cs" Line="38" Column="24" />
+      <File FileName="src/Document/DocumentSection/PetriView.cs" Line="238" Column="4" />
+      <File FileName="src/Document/HeadersManager.cs" Line="90" Column="17" />
+      <File FileName="src/Document/DocumentSection/Editor/EntityEditor.cs" Line="350" Column="1" />
+      <File FileName="src/Document/DocumentSection/PaneEditor.cs" Line="100" Column="3" />
+      <File FileName="src/Document/UndoManager.cs" Line="341" Column="10" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/remi/Documents/Programmation/C#/Petri/Editor/src/Document/Document.cs" line="334" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

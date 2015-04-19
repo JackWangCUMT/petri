@@ -18,13 +18,14 @@
 #include <mutex>
 #include <thread>
 #include <deque>
-#include "Commun.h"
 
+template<typename _ActionResult>
 class Action;
 
 /**
  * A transition linking 2 Action, composing a PetriNet.
  */
+template<typename _ActionResult>
 class Transition : public CallableTimeout<uint64_t> {
 public:
 	/**
@@ -33,14 +34,14 @@ public:
 	 * @param previous The starting point of the Transition
 	 * @param next The arrival point of the Transition
 	 */
-	Transition(Action &previous, Action &next) : CallableTimeout(0), _previous(previous), _next(next) {}
+	Transition(Action<_ActionResult> &previous, Action<_ActionResult> &next) : CallableTimeout(0), _previous(previous), _next(next) {}
 
 	/**
 	 * Checks whether the Transition can be crossed
 	 * @param resultatAction The result of the Action 'previous'. This is useful when the Transition's test uses this value.
 	 * @return The result of the test, true meaning that the Transition can be crossed to enable the action 'next'
 	 */
-	bool isFulfilled(ResultatAction resultatAction) const {
+	bool isFulfilled(_ActionResult resultatAction) const {
 		_result = resultatAction;
 
 		return _test->isFulfilled();
@@ -90,7 +91,7 @@ public:
 	 * @param result The Action return code to test the execution of 'previous' Action against
 	 * @return The default Condition of the Transition
 	 */
-	std::shared_ptr<ConditionBase> compareResult(ResultatAction result) const {
+	std::shared_ptr<ConditionBase> compareResult(_ActionResult result) const {
 		return make_condition_ptr<Condition>(make_callable(&Transition::checkResult, std::cref(_result), result));
 	}
 
@@ -98,7 +99,7 @@ public:
 	 * Gets the Action 'previous', the starting point of the Transition.
 	 * @return The Action 'previous', the starting point of the Transition.
 	 */
-	Action &previous() {
+	Action<_ActionResult> &previous() {
 		return _previous;
 	}
 
@@ -106,7 +107,7 @@ public:
 	 * Gets the Action 'next', the arrival point of the Transition.
 	 * @return The Action 'next', the arrival point of the Transition.
 	 */
-	Action &next() {
+	Action<_ActionResult> &next() {
 		return _next;
 	}
 
@@ -144,15 +145,15 @@ public:
 	}
 
 private:
-	static bool checkResult(std::atomic<ResultatAction> const &r1, ResultatAction r2) {
+	static bool checkResult(std::atomic<_ActionResult> const &r1, _ActionResult r2) {
 		return r1 == r2;
 	}
 
 	std::shared_ptr<ConditionBase> _test;
-	Action &_previous;
-	Action &_next;
+	Action<_ActionResult> &_previous;
+	Action<_ActionResult> &_next;
 	std::string _name;
-	mutable std::atomic<ResultatAction> _result;
+	mutable std::atomic<_ActionResult> _result;
 
 	// Default delay between evaluation
 	std::chrono::nanoseconds _delayBetweenEvaluation = 10ms;

@@ -7,7 +7,6 @@
 #ifndef Club_Robot_DynamicLib_h
 #define Club_Robot_DynamicLib_h
 
-#include "../../commun/Commun.h"
 #include <string>
 #include <stdexcept>
 #include <dlfcn.h>
@@ -55,7 +54,7 @@ public:
 		_libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
 
 		if(_libHandle == nullptr) {
-			logError("Unable to load the dynamic library at path \"", path, "\"!\n", "Reason: ", dlerror());
+			std::cerr <<"Unable to load the dynamic library at path \"" << path << "\"!\n" << "Reason: " << dlerror() << std::endl;
 
 			throw std::runtime_error("Unable to load the dynamic library at path \"" + path + "\"!");
 		}

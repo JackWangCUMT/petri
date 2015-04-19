@@ -75,12 +75,12 @@ namespace Petri
 			return elem;
 		}
 
-		public override bool UsesHeader(string h) {
+		public override bool UsesFunction(Cpp.Function f) {
 			foreach(var t in Transitions)
-				if(t.UsesHeader(h))
+				if(t.UsesFunction(f))
 					return true;
 			foreach(var s in States)
-				if(s.UsesHeader(h))
+				if(s.UsesFunction(f))
 					return true;
 
 			return false;
@@ -200,34 +200,16 @@ namespace Petri
 				if(t.ID == id)
 					return t;
 			}
+			foreach(var c in Comments) {
+				if(c.ID == id)
+					return c;
+			}
 
 			return null;
 		}
 
-		public bool ContainsEntity(UInt64 id) {
-			foreach(var s in States) {
-				if(s.ID == id)
-					return true;
-				if(s is PetriNet) {
-					Entity e = (s as PetriNet).EntityFromID(id);
-					if(e != null)
-						return true;
-				}
-				if(s is InnerPetriNet && (s as InnerPetriNet).EntryPointID == id) {
-					return true;
-				}
-			}
-			foreach(var t in Transitions) {
-				if(t.ID == id)
-					return true;
-			}
-
-			return false;
-		}
-
-
-		// Recursively gets all of the Action/PetriNet
-		protected List<Entity> BuildEntitiesList() {
+		// Recursively gets all of the Action/PetriNet/Transitions
+		public List<Entity> BuildEntitiesList() {
 			var l = new List<Entity>();
 			l.AddRange(this.States);
 

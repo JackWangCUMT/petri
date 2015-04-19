@@ -17,7 +17,7 @@
 #include <future>
 #include "KillableThread.h"
 #include "Callable.h"
-#include "Commun.h"
+#include "Common.h"
 
 template<typename _ReturnType>
 class ThreadPool {
@@ -126,11 +126,11 @@ public:
 
 	~ThreadPool() {
 		if(_pendingTasks > 0) {
-			logError("Some tasks are still running!");
+			std::cerr << "Some tasks are still running!" << std::endl;
 			throw std::runtime_error("The thread pool is being destroyed while some of its tasks are still pending!");
 		}
 		if(_alive) {
-			logError("Thread pool is still alive!");
+			std::cerr << "Thread pool is still alive!" << std::endl;
 			throw std::runtime_error("The thread pool is strill alive!");
 		}
 	}
@@ -225,7 +225,7 @@ public:
 
 private:
 	void work(std::string const &name) {
-		setThreadName(name);
+		PetriCommon::setThreadName(name);
 
 		while(_alive) {
 			std::unique_lock<std::mutex> lk(_availabilityMutex);

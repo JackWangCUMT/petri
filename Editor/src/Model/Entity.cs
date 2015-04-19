@@ -115,7 +115,7 @@ namespace Petri
 			}
 		}
 
-		public abstract bool UsesHeader(string header);
+		public abstract bool UsesFunction(Cpp.Function f);
 		public abstract string GenerateCpp(Cpp.Generator source, IDManager lastID);
 		public abstract string CppName {
 			get;

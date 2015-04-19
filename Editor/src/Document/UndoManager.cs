@@ -313,22 +313,22 @@ namespace Petri
 
 	public class ConditionChangeAction : GuiAction {
 		public ConditionChangeAction(Transition t, ConditionBase newCondition) {
-			_transition = t;
+			Transition = t;
 			_oldCondition = t.Condition;
 			_newCondition = newCondition;
 		}
 
 		public override void Apply() {
-			_transition.Condition = _newCondition;
+			Transition.Condition = _newCondition;
 		}
 
 		public override GuiAction Reverse() {
-			return new ConditionChangeAction(_transition, _oldCondition); 
+			return new ConditionChangeAction(Transition, _oldCondition); 
 		}
 
 		public override object Focus {
 			get {
-				return _transition;
+				return Transition;
 			}
 		}
 
@@ -338,28 +338,32 @@ namespace Petri
 			}
 		}
 
-		Transition _transition;
+		public Transition Transition {
+			get;
+			private set;
+		}
+
 		ConditionBase _newCondition, _oldCondition;
 	}
 
 	public class InvocationChangeAction : GuiAction {
 		public InvocationChangeAction(Action a, Cpp.FunctionInvocation i) {
-			_action = a;
+			Action = a;
 			_oldInvocation = a.Function;
 			_newInvocation = i;
 		}
 
 		public override void Apply() {
-			_action.Function = _newInvocation;
+			Action.Function = _newInvocation;
 		}
 
 		public override GuiAction Reverse() {
-			return new InvocationChangeAction(_action, _oldInvocation); 
+			return new InvocationChangeAction(Action, _oldInvocation); 
 		}
 
 		public override object Focus {
 			get {
-				return _action;
+				return Action;
 			}
 		}
 
@@ -369,7 +373,11 @@ namespace Petri
 			}
 		}
 
-		Action _action;
+		public Action Action {
+			get;
+			private set;
+		}
+
 		Cpp.FunctionInvocation _newInvocation, _oldInvocation;
 	}
 

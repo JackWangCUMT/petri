@@ -10,12 +10,16 @@
 
 #include <functional>
 #include <memory>
-#include "Commun.h"
 #include "Condition.h"
 #include "PetriNet.h"
 #include "PetriDebug.h"
 
 using namespace std::chrono_literals;
+
+enum class ActionResult {
+	OK,
+	NOK
+};
 
 namespace PetriUtils {
 	struct indirect {
@@ -71,13 +75,15 @@ namespace PetriUtils {
 }
 
 namespace PetriUtils {
-	inline ResultatAction defaultAction(Action *a) {
-		logInfo("Action " + a->name() + ", ID " + std::to_string(a->ID()) + " exécutée.");
-		return ResultatAction::REUSSI;
+	template<typename _ActionResult>
+	inline _ActionResult defaultAction(Action<_ActionResult> *a) {
+		std::cout << "Action " << a->name() << ", ID " << std::to_string(a->ID()) << " exécutée." << std::endl;
+		return _ActionResult{};
 	}
 
-	inline ResultatAction doNothing(ResultatAction resultat) {
-		return resultat;
+	template<typename _ActionResult>
+	inline _ActionResult doNothing(_ActionResult result) {
+		return result;
 	}
 }
 

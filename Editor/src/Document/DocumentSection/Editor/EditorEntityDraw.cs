@@ -45,6 +45,25 @@ namespace Petri
 			}
 		}
 
+		protected override void InitContextForBackground(State s, Context context) {
+			Color color = new Color(1, 1, 1, 1);
+
+			if(_editor.RootPetriNet.Document.Conflicts(s)) {
+				if(s is PetriNet) {
+					color.R = 1;
+					color.G = 0.7;
+					color.B = 0.3;
+				}
+				else {
+					color.R = 1;
+					color.G = 0.6;
+					color.B = 0.6;
+				}
+			}
+
+			context.SetSourceRGBA(color.R, color.G, color.B, color.A);
+		}
+
 		protected override void InitContextForBorder(State s, Context context) {
 			Color color = new Color(0, 0, 0, 1);
 			double lineWidth = 3;
@@ -66,7 +85,6 @@ namespace Petri
 			if(_editor.EntitySelected(s)) {
 				context.SetSourceRGBA(1, 0, 0, 1);
 			}
-
 		}
 
 		protected override double GetArrowScale(Transition t) {
@@ -90,6 +108,17 @@ namespace Petri
 			context.LineWidth = lineWidth;
 		}
 
+		protected override void InitContextForBackground(Transition t, Context context) {
+			Color color = new Color(1, 1, 1, 1);
+
+			if(_editor.RootPetriNet.Document.Conflicts(t)) {
+				color.R = 1;
+				color.G = 0.6;
+				color.B = 0.6;
+			}
+
+			context.SetSourceRGBA(color.R, color.G, color.B, color.A);
+		}
 
 		private EditorView _editor;
 	}

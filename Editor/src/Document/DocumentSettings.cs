@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Petri
 {
@@ -17,6 +18,7 @@ namespace Petri
 		public XElement GetXml() {
 			var elem = new XElement("Settings");
 			elem.SetAttributeValue("Name", Name);
+			elem.SetAttributeValue("Enum", Enum.ToString());
 			elem.SetAttributeValue("SourceOutputPath", SourceOutputPath);
 			elem.SetAttributeValue("LibOutputPath", LibOutputPath);
 			elem.SetAttributeValue("Hostname", Hostname);
@@ -73,6 +75,7 @@ namespace Petri
 			this.Port = 12345;
 
 			Name = "MyPetriNet";
+			Enum = DefaultEnum;
 
 			if(elem == null) {
 				CompilerFlags.Add("-std=c++1y");
@@ -82,6 +85,10 @@ namespace Petri
 				if(elem.Attribute("Name") != null)
 					Name = elem.Attribute("Name").Value;
 
+				if(elem.Attribute("Enum") != null) {
+					Enum = new Cpp.Enum(elem.Attribute("Enum").Value);
+				}
+				
 				if(elem.Attribute("SourceOutputPath") != null)
 					SourceOutputPath = elem.Attribute("SourceOutputPath").Value;
 				if(elem.Attribute("LibOutputPath") != null)
@@ -135,6 +142,17 @@ namespace Petri
 		public string Name {
 			get;
 			set;
+		}
+
+		public Cpp.Enum Enum {
+			get;
+			set;
+		}
+
+		public Cpp.Enum DefaultEnum {
+			get {
+				return new Cpp.Enum("ActionResult", new string[]{"OK", "NOK"});
+			}
 		}
 
 		// The bool stands for "recursive or not"

@@ -1,12 +1,13 @@
 ﻿using System;
 using Gtk;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Petri
 {
-	public class SettingsEditor
+	public class DocumentSettingsEditor
 	{
-		public SettingsEditor(Document doc) {
+		public DocumentSettingsEditor(Document doc) {
 			_document = doc;
 
 			_window = new Window(WindowType.Toplevel);
@@ -42,7 +43,7 @@ namespace Petri
 					Match nameMatch = name.Match((obj as Entry).Text);
 
 					if(!nameMatch.Success || nameMatch.Value != (obj as Entry).Text) {
-						MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "Le nom du réseau de Pétri n'est pas un identificateur C++ valide.");
+						MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Le nom du réseau de Pétri n'est pas un identificateur C++ valide.");
 						d.AddButton("Annuler", ResponseType.Cancel);
 						d.Run();
 						d.Destroy();
@@ -59,6 +60,86 @@ namespace Petri
 				hbox.PackStart(label, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(entry, false, false, 0);
+
+				label = new Label("Enum \"Résultat Action\" :");
+				_customEnumEditor = new Entry("");
+
+				_customEnumEditor.FocusOutEvent += (obj, eventInfo) => {
+					Cpp.Enum e = null;
+					try {
+						e = new Cpp.Enum((obj as Entry).Text);
+						_document.Settings.Enum = e;
+						_document.Settings.Modified = true;
+					}
+					catch(Exception) {
+						MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Nom invalide pour l'enum ou pour une de ses valeurs.");
+						d.AddButton("Annuler", ResponseType.Cancel);
+						d.Run();
+						d.Destroy();
+
+						(obj as Entry).Text = _document.Settings.Enum.ToString();
+						if(_document.Settings.Enum.Equals(_document.Settings.DefaultEnum)) {
+							_defaultEnum.Active = true;
+							_customEnum.Active = false;
+							((Entry)obj).Sensitive = false;
+						}
+					}
+				};
+
+				var radioVBox = new VBox(true, 2);
+				_defaultEnum = new RadioButton("Utiliser l'enum par défaut (ActionResult)");
+				_defaultEnum.Toggled += (object sender, EventArgs e) => {
+					if((sender as RadioButton).Active) {
+						_customEnumEditor.Sensitive = false;
+						_customEnumEditor.Text = "";
+						_document.Settings.Enum = _document.Settings.DefaultEnum;
+						_document.Modified = true;
+					}
+				};
+				_customEnum = new RadioButton(_defaultEnum, "Utiliser l'enum suivante (nom, valeur1, valeur2…) :");
+				_customEnum.Toggled += (object sender, EventArgs e) => {
+					if((sender as RadioButton).Active) {
+						_customEnumEditor.Sensitive = true;
+						_customEnumEditor.Text = _document.Settings.Enum.ToString();
+					}
+				};
+				radioVBox.PackStart(_defaultEnum, true, true, 2);
+				radioVBox.PackStart(_customEnum, true, true, 2);
+
+				if(_document.Settings.Enum.Equals(_document.Settings.DefaultEnum)) {
+					_defaultEnum.Active = true;
+					_customEnum.Active = false;
+					_customEnumEditor.Sensitive = false;
+				}
+				else {
+					_defaultEnum.Active = false;
+					_customEnum.Active = true;
+					_customEnumEditor.Sensitive = true;
+					_customEnumEditor.Text = _document.Settings.Enum.ToString();
+				}
+
+				hbox = new HBox(false, 5);
+				hbox.PackStart(label, false, false, 0);
+				vbox.PackStart(hbox, false, false, 0);
+				vbox.PackStart(radioVBox, false, false, 0);
+				vbox.PackStart(_customEnumEditor, false, false, 0);
+
+					/*	GtkWidget *window, *radio1, *radio2, *box, *entry;
+				// Create a radio button with a GtkEntry widget
+				radio1 = gtk_radio_button_new (NULL);
+				entry = gtk_entry_new ();
+				gtk_container_add (GTK_CONTAINER (radio1), entry);
+
+
+				// Create a radio button with a label
+				radio2 = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON (radio1),
+					"I’m the second radio button.");
+
+				// Pack them into a box, then show all the widgets
+				gtk_box_pack_start (GTK_BOX (box), radio1, TRUE, TRUE, 2);
+				gtk_box_pack_start (GTK_BOX (box), radio2, TRUE, TRUE, 2);
+				gtk_container_add (GTK_CONTAINER (window), box);
+				gtk_widget_show_all (window);*/
 
 				label = new Label("Chemin vers le compilateur C++ :");
 				entry = new Entry(_document.Settings.Compiler);
@@ -449,6 +530,9 @@ namespace Petri
 
 		Window _window;
 		Document _document;
+
+		RadioButton _defaultEnum, _customEnum;
+		Entry _customEnumEditor;
 
 		Entry _libOutputPath, _sourceOutputPath;
 		Button _selectLibOutputPath, _selectSourceOutputPath;

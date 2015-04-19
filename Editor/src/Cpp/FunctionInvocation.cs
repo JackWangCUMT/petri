@@ -33,6 +33,16 @@ namespace Petri
 				private set;
 			}
 
+			public override bool UsesFunction(Function f) {
+				bool res = false;
+				res = res || Function == f;
+				foreach(var e in Arguments) {
+					res = res || e.UsesFunction(f);
+				}
+
+				return res;
+			}
+
 			public override string MakeCpp() {
 				string args = "";
 				foreach(var arg in Arguments) {

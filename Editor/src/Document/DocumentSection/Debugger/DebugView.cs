@@ -70,10 +70,6 @@ namespace Petri
 			get;
 			set;
 		}
-		
-		protected override void SpecializedDrawing(Cairo.Context context) {
-
-		}
 	}
 }
 

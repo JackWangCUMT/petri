@@ -36,7 +36,6 @@ namespace Petri
 		}
 
 		public override void FocusIn() {
-			_shiftDown = true;
 			_shiftDown = false;
 			_ctrlDown = false;
 			_currentAction = EditorAction.None;

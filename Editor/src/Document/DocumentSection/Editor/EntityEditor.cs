@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Gtk;
+using System.Linq;
 
 namespace Petri
 {
-	public abstract class EntityEditor : PaneEditor
-	{
+	public abstract class EntityEditor : PaneEditor {
 		public static EntityEditor GetEditor(Entity e, Document doc) {
 			EntityEditor editor;
 
@@ -43,54 +43,12 @@ namespace Petri
 
 		protected EntityEditor(Entity e, Document doc) : base(doc, doc.Window.EditorGui.Editor) {
 			Entity = e;
-			_document = doc;
-
-			this.PostAction(ModifLocation.EntityChange, null);
 
 			if(!_document.Window.EditorGui.View.MultipleSelection && e != null) {
 				var label = CreateLabel(0, "ID de l'entité : " + e.ID.ToString());
 				label.Markup = "<span color=\"grey\">" + label.Text + "</span>";
 			}
 		}
-
-		protected enum ModifLocation {None, EntityChange, Name, RequiredTokens, Active, Function, Condition, Param0}; 
-
-		// Here's a way to signal that we want all the previous GuiActions stored before to be posted as one.
-		// The signal is done either when we edit another Entity, or when we edit another field of the current one.
-		protected void PostAction(ModifLocation location, GuiAction guiAction) {
-			if(_lastLocation == ModifLocation.None) {
-				_actions = new List<GuiAction>();
-			}
-			// If we already started adding some actions
-			else if((location != _lastLocation) && _actions.Count > 0) {
-				if(_lastLocation != ModifLocation.EntityChange) {
-					this.PostActions();
-				}
-			}
-			_lastLocation = location;
-
-			if(guiAction == null) {
-				if(location != ModifLocation.EntityChange)
-					throw new ArgumentNullException("guiAction", "This parameter should be null only when location == ModifLocation.EntityChange!");
-			}
-			else {
-				_actions.Add(guiAction);
-			}
-
-			// FIXME: (maybe) causes a lot of undo/redo
-			if(_actions.Count > 0) {//location == ModifLocation.Active) {
-				this.PostActions();
-			}
-		}
-
-		protected void PostActions() {
-			var wrapper = new GuiActionList(_actions, _actions[0].Description);
-			_document.PostAction(wrapper);
-			_actions.Clear();
-		}
-
-		ModifLocation _lastLocation = ModifLocation.None;
-		List<GuiAction> _actions;
 	}
 
 	public class ActionEditor : EntityEditor {
@@ -98,13 +56,13 @@ namespace Petri
 			CreateLabel(0, "Nom de l'action :");
 			var name = CreateWidget<Entry>(true, 0, a.Name);
 			name.Changed += (obj, eventInfo) => {
-				this.PostAction(ModifLocation.Name, new ChangeNameAction(a, (obj as Entry).Text));
+				_document.PostAction(new ChangeNameAction(a, (obj as Entry).Text));
 			};
 
 			var active = CreateWidget<CheckButton>(false, 0, "Active à t = 0 :");
 			active.Active = a.Active;
 			active.Toggled += (sender, e) => {
-				this.PostAction(ModifLocation.Active, new ToggleActiveAction(a));
+				_document.PostAction(new ToggleActiveAction(a));
 			};
 
 			if(a.TransitionsBefore.Count > 0) {
@@ -125,15 +83,15 @@ namespace Petri
 					if(combo.GetActiveIter(out iter)) {
 						var val = combo.Model.GetValue(iter, 0) as string;
 						int nbTok = int.Parse(val);
-						this.PostAction(ModifLocation.RequiredTokens, new ChangeRequiredTokensAction(a, nbTok));
+						_document.PostAction(new ChangeRequiredTokensAction(a, nbTok));
 					}
 				};
 			}
 			// Manage C++ function
 			{
-				var editorFields = new List<Widget>();
-
 				CreateLabel(0, "Action associée :");
+
+				var editorFields = new List<Widget>();
 
 				var list = new List<string>();
 				string defaultFunction = "Afficher ID + Nom action";
@@ -141,7 +99,7 @@ namespace Petri
 				list.Add(defaultFunction);
 				list.Add(manual);
 				foreach(var func in _document.CppActions) {
-					if(func.Name != "defaultAction" && func.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope())))
+					if(func.Name != "defaultAction" && func.ReturnType.Equals(_document.Settings.Enum.Type))
 						list.Add(func.Signature);
 				}
 				string activeFunction = a.IsDefault() ? defaultFunction : (!a.Function.NeedsExpansion && list.Contains(a.Function.Function.Signature) ? a.Function.Function.Signature : manual);
@@ -163,7 +121,7 @@ namespace Petri
 							EditInvocation(a, true, editorFields);
 						}
 						else {
-							var f = _document.CppActions.Find(delegate(Cpp.Function ff) {
+							var f = _document.CppActions.FirstOrDefault(delegate(Cpp.Function ff) {
 								return ff.Signature == val;
 							});
 
@@ -179,7 +137,7 @@ namespace Petri
 								else {
 									invocation = new Cpp.FunctionInvocation(f, pp.ToArray());
 								}
-								this.PostAction(ModifLocation.Function, new InvocationChangeAction(a, invocation));
+								_document.PostAction(new InvocationChangeAction(a, invocation));
 								EditInvocation(a, false, editorFields);
 							}
 							else {
@@ -193,7 +151,7 @@ namespace Petri
 			}
 		}
 
-		private void EditInvocation(Action a, bool manual, List<Widget> editorFields) {
+		protected void EditInvocation(Action a, bool manual, List<Widget> editorFields) {
 			foreach(var e in editorFields) {
 				_objectList.RemoveAll(((Tuple<Widget, int, bool> obj) => obj.Item1 == e));
 			}
@@ -216,10 +174,10 @@ namespace Petri
 					Cpp.FunctionInvocation funcInvocation = null;
 					try {
 						funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, _document.AllFunctions, _document.CppMacros);
-						if(!funcInvocation.Function.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope()))) {
+						if(!funcInvocation.Function.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope))) {
 							throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
 						}
-						PostAction(ModifLocation.Function, new InvocationChangeAction(a, funcInvocation));
+						_document.PostAction(new InvocationChangeAction(a, funcInvocation));
 					}
 					catch(Exception ex) {
 						MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("L'expression spécifiée est invalide (" + ex.Message + ")."));
@@ -227,7 +185,7 @@ namespace Petri
 						d.Run();
 						d.Destroy();
 
-						(obj as Entry).Text = a.Function.MakeUserReadable();
+						(obj as Entry).Text = userReadable;
 					}
 				};
 			}
@@ -251,7 +209,7 @@ namespace Petri
 										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, _document.AllFunctions, _document.CppMacros));
 								}
 							}
-							this.PostAction(ModifLocation.Function, new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions, _document.CppMacros), false, args.ToArray())));
+							_document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions, _document.CppMacros), false, args.ToArray())));
 						};
 					}
 					for(int i = 0; i < a.Function.Function.Parameters.Count; ++i) {
@@ -279,7 +237,7 @@ namespace Petri
 							else {
 								invocation = new Cpp.FunctionInvocation(a.Function.Function, args.ToArray());
 							}
-							this.PostAction(ModifLocation.Function, new InvocationChangeAction(a, invocation));
+							_document.PostAction(new InvocationChangeAction(a, invocation));
 						};
 					}
 				}
@@ -327,7 +285,7 @@ namespace Petri
 			_button = new ColorButton();
 			_button.ColorSet += (object sender, EventArgs e) => {
 				var newColor = (sender as ColorButton).Color;
-				this.PostAction(ModifLocation.None, new ChangeCommentColorAction(c, new Cairo.Color(newColor.Red / 65535.0, newColor.Green / 65535.0, newColor.Blue / 65535.0)));
+				_document.PostAction(new ChangeCommentColorAction(c, new Cairo.Color(newColor.Red / 65535.0, newColor.Green / 65535.0, newColor.Blue / 65535.0)));
 			};
 
 			this.EditColor(c, _colorNames[colorIndex], false);
@@ -341,7 +299,7 @@ namespace Petri
 			comment.WrapMode = WrapMode.Word;
 
 			comment.FocusOutEvent += (obj, eventInfo) => {
-				this.PostAction(ModifLocation.Name, new ChangeNameAction(c, (obj as TextView).Buffer.Text));
+				_document.PostAction(new ChangeNameAction(c, (obj as TextView).Buffer.Text));
 			};
 		}
 
@@ -357,7 +315,7 @@ namespace Petri
 					_objectList.RemoveAt(index);
 				}
 
-				this.PostAction(ModifLocation.None, new ChangeCommentColorAction(comment, _colors[_colorNames.IndexOf(color)]));
+				_document.PostAction(new ChangeCommentColorAction(comment, _colors[_colorNames.IndexOf(color)]));
 			}
 			_document.Window.EditorGui.View.Redraw();
 			this.FormatAndShow();
@@ -373,7 +331,7 @@ namespace Petri
 			CreateLabel(0, "Nom de la transition :");
 			var name = CreateWidget<Entry>(true, 0, t.Name);
 			name.Changed += (obj, eventInfo) => {
-				this.PostAction(ModifLocation.Name, new ChangeNameAction(t, (obj as Entry).Text));
+				_document.PostAction(new ChangeNameAction(t, (obj as Entry).Text));
 			};
 
 			CreateLabel(0, "Condition de la transition :");
@@ -387,8 +345,8 @@ namespace Petri
 			var condition = CreateWidget<Entry>(true, 0, userReadable);
 			condition.FocusOutEvent += (obj, eventInfo) => {
 				try {
-					var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, t, _document.AllFunctions, _document.CppMacros));
-					PostAction(ModifLocation.Condition, cond);
+					var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, doc.Settings.Enum, t, _document.AllFunctions, _document.CppMacros));
+					_document.PostAction(cond);
 				}
 				catch(Exception e) {
 					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("La condition spécifiée est invalide (" + e.Message + ")."));
@@ -396,25 +354,24 @@ namespace Petri
 					d.Run();
 					d.Destroy();
 
-					(obj as Entry).Text = t.Condition.MakeUserReadable();
+					(obj as Entry).Text = userReadable;
 				}
 			};
 		}
 	}
 
 	public class InnerPetriNetEditor : EntityEditor {
-		public InnerPetriNetEditor(InnerPetriNet i, Document doc) : base(i, doc)
-		{
+		public InnerPetriNetEditor(InnerPetriNet i, Document doc) : base(i, doc) {
 			CreateLabel(0, "Nom du graphe :");
 			var name = CreateWidget<Entry>(true, 0, i.Name);
 			name.Changed += (obj, eventInfo) => {
-				this.PostAction(ModifLocation.Name, new ChangeNameAction(i, (obj as Entry).Text));
+				_document.PostAction(new ChangeNameAction(i, (obj as Entry).Text));
 			};
 
 			var active = CreateWidget<CheckButton>(false, 0, "Actif à t = 0 :");
 			active.Active = i.Active;
 			active.Toggled += (sender, e) => {
-				this.PostAction(ModifLocation.Active, new ToggleActiveAction(i));
+				_document.PostAction(new ToggleActiveAction(i));
 			};
 		}
 	}

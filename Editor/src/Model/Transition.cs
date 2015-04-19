@@ -23,7 +23,7 @@ namespace Petri
 
 			base.Position = new PointD(0, 0);
 
-			this.Condition = new CheckResultCondition(this, Action.ResultatAction.REUSSI);
+			this.Condition = new CheckResultCondition(this, doc.Settings.Enum.Name, doc.Settings.Enum.Members[0]);
 
 			this.UpdatePosition();
 		}
@@ -33,7 +33,7 @@ namespace Petri
 			this.After = statesTable[UInt64.Parse(descriptor.Attribute("AfterID").Value)];
 
 
-			this.Condition = ConditionBase.ConditionFromString(descriptor.Attribute("Condition").Value, this, conditions, macros);
+			this.Condition = ConditionBase.ConditionFromString(descriptor.Attribute("Condition").Value, doc.Settings.Enum, this, conditions, macros);
 
 			this.Width = double.Parse(descriptor.Attribute("W").Value);
 			this.Height = double.Parse(descriptor.Attribute("H").Value);
@@ -65,17 +65,15 @@ namespace Petri
 			elem.SetAttributeValue("ShiftAmplitude", this.ShiftAmplitude);
 		}
 
-		public override bool UsesHeader(string h) {
-			return this.Condition.UsesHeader(h);
+		public override bool UsesFunction(Cpp.Function f) {
+			return Condition.UsesFunction(f);
 		}
 
-		public PointD Direction()
-		{
+		public PointD Direction() {
 			return new PointD(After.Position.X - Before.Position.X, After.Position.Y - Before.Position.Y);
 		}
 
-		public void UpdatePosition()
-		{
+		public void UpdatePosition() {
 			double norm = PetriView.Norm(this.Direction());
 			PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
 			this.Position = new PointD(center.X + Shift.X * norm / ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1), center.Y + Shift.Y * norm / ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1));

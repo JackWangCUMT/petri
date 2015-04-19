@@ -18,7 +18,6 @@
 #include <mutex>
 #include <thread>
 #include <deque>
-#include "Commun.h"
 #include "Transition.h"
 
 using namespace std::chrono_literals;
@@ -26,6 +25,7 @@ using namespace std::chrono_literals;
 /**
  * A state composing a PetriNet.
  */
+template<typename _ActionResult>
 class Action : public CallableTimeout<uint64_t> {
 public:
 	/**
@@ -37,13 +37,13 @@ public:
 	 * Creates an empty action, associated to a copy ofthe specified Callable.
 	 * @param action The Callable which will be copied
 	 */
-	Action(CallableBase<ResultatAction> const &action) : CallableTimeout(0), _action(action.copy_ptr()), _requiredTokens(1) {}
+	Action(CallableBase<_ActionResult> const &action) : CallableTimeout(0), _action(action.copy_ptr()), _requiredTokens(1) {}
 
 	/**
 	 * Adds a Transition to the Action.
 	 * @param transition the transition to be added
 	 */
-	void addTransition(std::shared_ptr<Transition> &transition) {
+	void addTransition(std::shared_ptr<Transition<_ActionResult>> &transition) {
 		_transitions.push_back(transition);
 	}
 
@@ -51,7 +51,7 @@ public:
 	 * Returns the Callable asociated to the action. An Action with a null Callable must not invoke this method!
 	 * @return The Callable of the Action
 	 */
-	CallableBase<ResultatAction> &action() {
+	CallableBase<_ActionResult> &action() {
 		return *_action;
 	}
 
@@ -59,7 +59,7 @@ public:
 	 * Changes the Callable associated to the Action
 	 * @param action The Callable which will be copied and put in the Action
 	 */
-	void setAction(CallableBase<ResultatAction> const &action) {
+	void setAction(CallableBase<_ActionResult> const &action) {
 		_action = action.copy_ptr();
 	}
 
@@ -67,7 +67,7 @@ public:
 	 * Changes the Callable associated to the Action
 	 * @param action The Callable which will be put in the Action
 	 */
-	void setAction(std::shared_ptr<CallableBase<ResultatAction>> const &action) {
+	void setAction(std::shared_ptr<CallableBase<_ActionResult>> const &action) {
 		_action = action;
 	}
 
@@ -119,13 +119,13 @@ public:
 	 * Returns the transitions exiting the Action.
 	 * @param name The exiting transitions of the Action
 	 */
-	std::list<std::shared_ptr<Transition>> const &transitions() const {
+	std::list<std::shared_ptr<Transition<_ActionResult>>> const &transitions() const {
 		return _transitions;
 	}
 
 private:
-	std::list<std::shared_ptr<Transition>> _transitions;
-	std::shared_ptr<CallableBase<ResultatAction>> _action;
+	std::list<std::shared_ptr<Transition<_ActionResult>>> _transitions;
+	std::shared_ptr<CallableBase<_ActionResult>> _action;
 	std::string _name;
 	std::size_t _requiredTokens;
 

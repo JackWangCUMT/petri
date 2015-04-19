@@ -247,8 +247,10 @@ namespace Petri
 				return inner;
 			}
 
-			public static Scope EmptyScope() {
-				return MakeFromNamespace("", null);
+			public static Scope EmptyScope {
+				get {
+					return MakeFromNamespace("", null);
+				}
 			}
 
 			public bool IsClass {
