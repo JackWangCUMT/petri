@@ -128,4 +128,16 @@
     <Compile Include="src\Cpp\Enum.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\cpp.png">
+      <LogicalName>cpp</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\bug.png">
+      <LogicalName>bug</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\build.png">
+      <LogicalName>build</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\fix.png" />
+  </ItemGroup>
 </Project>

@@ -9,7 +9,6 @@ Compilation du code : formattage des erreurs de compilation
 
 Actions/Transitions : ajustement des dimensions à la longueur du titre
 
-Barre d'outils
 Fonction recherche
 
 Scénario d'exécution

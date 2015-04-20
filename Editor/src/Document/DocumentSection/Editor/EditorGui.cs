@@ -1,5 +1,6 @@
 ﻿using System;
 using Gtk;
+using Gdk;
 
 namespace Petri
 {
@@ -8,28 +9,49 @@ namespace Petri
 		public EditorGui(Document doc) {
 			_document = doc;
 
-			_toolbar = new HBox(false, 20);
+			_toolbar = new Toolbar();
+			_toolbar.ToolbarStyle = ToolbarStyle.Both;
 			this.PackStart(_toolbar, false, false, 0);
-			_toolbar.HeightRequest = 40;
 
-			_cpp = new Button(new Label("Générer C++…"));
-			_manageHeaders = new Button(new Label("Ouvrir un .h…"));
-			_compile = new Button(new Label("Compiler le code généré…"));
-			_zoomIn = new Button(new Label("+"));
-			_zoomOut = new Button(new Label("-"));
-			_switchToDebug = new Button(new Label("Debug"));
-			_cpp.Clicked += this.OnClick;
-			_manageHeaders.Clicked += this.OnClick;
-			_compile.Clicked += this.OnClick;
-			_zoomIn.Clicked += this.OnClick;
-			_zoomOut.Clicked += this.OnClick;
-			_switchToDebug.Clicked += this.OnClick;
-			_toolbar.PackStart(_cpp, false, false, 0);
-			_toolbar.PackStart(_manageHeaders, false, false, 0);
-			_toolbar.PackStart(_compile, false, false, 0);
-			_toolbar.PackStart(_zoomIn, false, false, 0);
-			_toolbar.PackStart(_zoomOut, false, false, 0);
-			_toolbar.PackStart(_switchToDebug, false, false, 0);
+			_save = new ToolButton(Stock.Save);
+			_save.Label = "Enregistrer";
+
+			Pixbuf buf = Pixbuf.LoadFromResource("cpp");
+			IconTheme.AddBuiltinIcon("CppGen", buf.Width, buf);
+			_cpp = new ToolButton("CppGen");
+			_cpp.IconName = "CppGen";
+			_cpp.Label = "Générer C++";
+
+			buf = Pixbuf.LoadFromResource("build");
+			IconTheme.AddBuiltinIcon("Build", (int)(buf.Width / 0.8), buf);
+			_compile = new ToolButton("Build");
+			_compile.IconName = "Build";
+			_compile.Label = "Compiler";
+
+			buf = Pixbuf.LoadFromResource("bug");
+			IconTheme.AddBuiltinIcon("Debug", (int)(buf.Width / 0.8), buf);
+			_switchToDebug = new ToolButton("Debug");
+			_switchToDebug.IconName = "Debug";
+			_switchToDebug.Label = "Mode debug";
+
+			_zoomIn = new ToolButton(Stock.ZoomIn);
+			_zoomIn.Label = "Agrandir";
+			_zoomOut = new ToolButton(Stock.ZoomOut);
+			_zoomOut.Label = "Réduire";
+
+			_save.Clicked += OnClick;
+			_cpp.Clicked += OnClick;
+			_compile.Clicked += OnClick;
+			_switchToDebug.Clicked += OnClick;
+			_zoomIn.Clicked += OnClick;
+			_zoomOut.Clicked += OnClick;
+
+			_toolbar.Insert(_save, -1);
+			_toolbar.Insert(_cpp, -1);
+			_toolbar.Insert(_compile, -1);
+			_toolbar.Insert(_switchToDebug, -1);
+			_toolbar.Insert(_zoomIn, -1);
+			_toolbar.Insert(_zoomOut, -1);
 
 			_paned = new HPaned();
 			this.PackStart(_paned, true, true, 0);
@@ -68,11 +90,11 @@ namespace Petri
 
 		protected void OnClick(object sender, EventArgs e)
 		{
-			if(sender == _cpp) {
-				_document.SaveCpp();
+			if(sender == _save) {
+				_document.Save();
 			}
-			else if(sender == _manageHeaders) {
-				_document.ManageHeaders();
+			else if(sender == _cpp) {
+				_document.SaveCpp();
 			}
 			else if(sender == _compile) {
 				_document.Compile();
@@ -128,11 +150,11 @@ namespace Petri
 			_petriView.Redraw();
 		}
 
-		HBox _toolbar;
 		EditorView _petriView;
 		Fixed _editor;
-		Button _manageHeaders, _cpp, _compile, _switchToDebug;
-		Button _zoomIn, _zoomOut;
+
+		Toolbar _toolbar;
+		ToolButton _save, _cpp, _compile, _switchToDebug, _zoomIn, _zoomOut;
 
 		Document _document;
 	}

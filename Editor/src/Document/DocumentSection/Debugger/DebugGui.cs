@@ -1,5 +1,6 @@
 ﻿using System;
 using Gtk;
+using Gdk;
 
 namespace Petri
 {
@@ -8,28 +9,37 @@ namespace Petri
 		public DebugGui(Document doc) {
 			_document = doc;
 
-			_toolbar = new HBox(false, 20);
+			_toolbar = new Toolbar();
+			_toolbar.ToolbarStyle = ToolbarStyle.Both;
 			this.PackStart(_toolbar, false, false, 0);
-			_toolbar.HeightRequest = 40;
 
-			_attachDetach = new Button(new Label("Connexion"));
-			_startStopPetri = new Button(new Label("Exécuter"));
-			_playPause = new Button(new Label("Pause"));
-			_reload = new Button(new Label("Fix"));
-			_exit = new Button(new Label("Terminer la session"));
-			_switchToEditor = new Button(new Label("Éditeur"));
+			_attachDetach = new ToolButton(Stock.Network);
+
+			_startStopPetri = new ToolButton(Stock.MediaPlay);
+			_playPause = new ToolButton(Stock.MediaPause);
+			Pixbuf buf = Pixbuf.LoadFromResource("fix");
+			IconTheme.AddBuiltinIcon("Fix", buf.Width, buf);
+			_reload = new ToolButton("Fix");
+			_reload.IconName = "Fix";
+			_reload.Label = "Fix";
+			_exit = new ToolButton(Stock.Quit);
+			_exit.Label = "Terminer la session";
+			_switchToEditor = new ToolButton(Stock.Edit);
+			_switchToEditor.Label = "Éditeur";
+
 			_attachDetach.Clicked += this.OnClick;
 			_startStopPetri.Clicked += this.OnClick;
 			_playPause.Clicked += this.OnClick;
 			_reload.Clicked += this.OnClick;
 			_exit.Clicked += this.OnClick;
 			_switchToEditor.Clicked += this.OnClick;
-			_toolbar.PackStart(_attachDetach, false, false, 0);
-			_toolbar.PackStart(_startStopPetri, false, false, 0);
-			_toolbar.PackStart(_playPause, false, false, 0);
-			_toolbar.PackStart(_reload, false, false, 0);
-			_toolbar.PackStart(_exit, false, false, 0);
-			_toolbar.PackStart(_switchToEditor, false, false, 0);
+
+			_toolbar.Insert(_attachDetach, -1);
+			_toolbar.Insert(_startStopPetri, -1);
+			_toolbar.Insert(_playPause, -1);
+			_toolbar.Insert(_reload, -1);
+			_toolbar.Insert(_exit, -1);
+			_toolbar.Insert(_switchToEditor, -1);
 
 			_paned = new HPaned();
 			this.PackStart(_paned, true, true, 0);
@@ -95,37 +105,44 @@ namespace Petri
 				_reload.Sensitive = true;
 				_exit.Sensitive = true;
 
-				((Label)_attachDetach.Child).Text = "Déconnexion";
+				_attachDetach.Label = "Déconnexion";
 
 				if(_document.DebugController.Server.PetriRunning) {
-					((Label)_startStopPetri.Child).Text = "Stopper";
+					_startStopPetri.Label = "Stopper";
+					_startStopPetri.IconName = Stock.Stop;
 					_playPause.Sensitive = true;
 					_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
 					if(_document.DebugController.Server.Pause) {
-						((Label)_playPause.Child).Text = "Continuer";
+						_playPause.Label = "Continuer";
+						_playPause.IconName = Stock.MediaPlay;
 						_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
 					}
 					else {
-						((Label)_playPause.Child).Text = "Pause";
+						_playPause.Label = "Pause";
+						_playPause.IconName = Stock.MediaPause;
 						_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
 					}
 				}
 				else {
-					((Label)_startStopPetri.Child).Text = "Exécuter";
+					_startStopPetri.Label = "Exécuter";
+					_startStopPetri.IconName = Stock.MediaPlay;
 					_playPause.Sensitive = false;
 					_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
-					((Label)_playPause.Child).Text = "Pause";
+					_playPause.Label = "Pause";
+					_playPause.IconName = Stock.MediaPause;
 				}
 			}
 			else {
-				((Label)_attachDetach.Child).Text = "Connexion";
-				((Label)_startStopPetri.Child).Text = "Exécuter";
+				_attachDetach.Label = "Connexion";
+				_startStopPetri.Label = "Exécuter";
+				_startStopPetri.IconName = Stock.MediaPlay;
 				_startStopPetri.Sensitive = false;
 				_reload.Sensitive = false;
 				_playPause.Sensitive = false;
 				_exit.Sensitive = false;
 				_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
-				((Label)_playPause.Child).Text = "Pause";
+				_playPause.Label = "Pause";
+				_playPause.IconName = Stock.MediaPause;
 			}
 		}
 
@@ -180,8 +197,8 @@ namespace Petri
 
 		DebugView _view;
 		Document _document;
-		HBox _toolbar;
-		Button _attachDetach, _startStopPetri, _playPause, _reload, _exit, _switchToEditor;
+		ToolButton _attachDetach, _startStopPetri, _playPause, _reload, _exit, _switchToEditor;
+		Toolbar _toolbar;
 	}
 }
 
