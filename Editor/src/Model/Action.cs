@@ -17,19 +17,27 @@ namespace Petri
 			this.Function = this.DefaultAction();
 		}
 
-		public Action(HeadlessDocument doc, PetriNet parent, XElement descriptor, IEnumerable<Cpp.Function> functions, IDictionary<string, string> macros) : base(doc, parent, descriptor) {
+		public Action(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
+			TrySetFunction(descriptor.Attribute("Function").Value);
+		}
+
+		private void TrySetFunction(string s) {
 			Cpp.FunctionInvocation exp;
 			try {
-				exp = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>(descriptor.Attribute("Function").Value, this, functions, macros);
-				if(!exp.Function.ReturnType.Equals(doc.Settings.Enum.Type)) {
-					doc.Conflicting.Add(this);
+				exp = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>(s, this, Document.AllFunctions, Document.CppMacros);
+				if(!exp.Function.ReturnType.Equals(Document.Settings.Enum.Type)) {
+					Document.Conflicting.Add(this);
 				}
 				Function = exp;
 			}
-			catch(Exception e) {
-				doc.Conflicting.Add(this);
-				// TODO: which invocation?
+			catch(Exception) {
+				Document.Conflicting.Add(this);
+				Function = new Cpp.ConflictFunctionInvocation(s);
 			}
+		}
+
+		public override void UpdateConflicts() {
+			this.TrySetFunction(Function.MakeUserReadable());
 		}
 
 		public override XElement GetXml() {
@@ -48,15 +56,17 @@ namespace Petri
 		}
 
 		public static Cpp.Function DefaultFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "defaultAction", false);
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "defaultAction", true);
 			f.AddParam(new Cpp.Param(new Cpp.Type("Action *", Cpp.Scope.EmptyScope), "action"));
+			f.TemplateArguments = doc.Settings.Enum.Name;
 
 			return f;
 		}
 
 		public static Cpp.Function DoNothingFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "doNothing", false);
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "doNothing", true);
 			f.AddParam(new Cpp.Param(doc.Settings.Enum.Type, "resultat"));
+			f.TemplateArguments = doc.Settings.Enum.Name;
 
 			return f;
 		}
@@ -82,7 +92,7 @@ namespace Petri
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
-			source += "auto " + this.CppName + " = std::make_shared<Action>();";
+			source += "auto " + this.CppName + " = std::make_shared<Action<" + Document.Settings.Enum.Name + ">>();";
 			source += this.CppName + "->setAction(" + this.Function.MakeCpp() + ");";
 			source += this.CppName + "->setRequiredTokens(" + this.RequiredTokens.ToString() + ");";
 

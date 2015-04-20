@@ -77,17 +77,9 @@ namespace Petri
 			TreeIter iter;
 			TreePath[] treePath = _table.Selection.GetSelectedRows();
 
-			var cnt = _document.Conflicting.Count;
-
 			for (int i  = treePath.Length; i > 0; i--) {
 				_headersStore.GetIter(out iter, treePath[(i - 1)]);
 				_document.RemoveHeader(_headersStore.GetValue(iter, 0) as string);
-			}
-
-			if(_document.Conflicting.Count > cnt) {
-				MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Cette suppression de header a proviqué des conflits une gestion de conflits.");
-				d.AddButton("OK", ResponseType.Accept);
-				d.Destroy();
 			}
 
 			this.BuildList();

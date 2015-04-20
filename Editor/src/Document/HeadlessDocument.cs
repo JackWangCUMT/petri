@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Xml;
+using System.Linq;
 
 namespace Petri
 {
 	public class HeadlessDocument {
 		public HeadlessDocument(string path) {
 			this.Headers = new List<string>();
-			CppActionsList = new List<Cpp.Function>();
-			AllFunctions = new List<Cpp.Function>();
+			CppActions = new List<Cpp.Function>();
+			AllFunctionsList = new List<Cpp.Function>();
 			CppConditions = new List<Cpp.Function>();
 
 			CppMacros = new Dictionary<string, string>();
@@ -34,6 +35,11 @@ namespace Petri
 		}
 
 		public virtual void AddHeader(string header) {
+			AddHeaderNoUpdate(header);
+			UpdateConflicts();
+		}
+
+		public void AddHeaderNoUpdate(string header) {
 			if(header.Length == 0 || Headers.Contains(header))
 				return;
 
@@ -47,13 +53,7 @@ namespace Petri
 
 				var functions = Cpp.Parser.Parse(filename);
 				foreach(var func in functions) {
-					if(func.ReturnType.Equals(Settings.Enum.Type)) {
-						CppActionsList.Add(func);
-					}
-					else if(func.ReturnType.Equals("bool")) {
-						CppConditions.Add(func);
-					}
-					AllFunctions.Add(func);
+					AllFunctionsList.Add(func);
 				}
 
 				Headers.Add(header);
@@ -70,34 +70,40 @@ namespace Petri
 			private set;
 		}
 
-		public List<Cpp.Function> AllFunctions {
+		public List<Cpp.Function> AllFunctionsList {
 			get;
 			private set;
 		}
 
-		public List<Cpp.Function> CppActionsList {
-			get;
-			private set;
-		}
-
-		public IEnumerable<Cpp.Function> CppActions {
+		public IEnumerable<Cpp.Function> AllFunctions {
 			get {
-				Cpp.Function[] ff = new Cpp.Function[CppActionsList.Count + 2];
+				Cpp.Function[] ff = new Cpp.Function[AllFunctionsList.Count + 2];
 				ff[0] = Action.DefaultFunction(this);
 				ff[1] = Action.DoNothingFunction(this);
-				for(int i = 0; i < CppActionsList.Count; ++i) {
-					ff[i + 2] = CppActionsList[i];
+				for(int i = 0; i < AllFunctionsList.Count; ++i) {
+					ff[i + 2] = AllFunctionsList[i];
 				}
 
 				return ff;
 			}
 		}
 
+		public List<Cpp.Function> CppActions {
+			get;
+			private set;
+		}
+
 		public void DispatchFunctions() {
-			CppActionsList.Clear();
+			CppActions.Clear();
+			CppConditions.Clear();
+			Cpp.Type e = Settings.Enum.Type, b = new Cpp.Type("bool", Cpp.Scope.EmptyScope);
+
 			foreach(Cpp.Function f in AllFunctions) {
-				if(f.ReturnType.Equals(new Cpp.Type(Settings.Enum.Name, Cpp.Scope.EmptyScope))) {
-					CppActionsList.Add(f);
+				if(f.ReturnType.Equals(e)) {
+					CppActions.Add(f);
+				}
+				else if(f.ReturnType.Equals(b)) {
+					CppConditions.Add(f);
 				}
 			}
 		}
@@ -205,16 +211,14 @@ namespace Petri
 			SetWindowSize(int.Parse(winConf.Attribute("W").Value), int.Parse(winConf.Attribute("H").Value));
 
 			Headers.Clear();
-			CppActionsList.Clear();
-			AllFunctions.Clear();
-			CppConditions.Clear();
+			AllFunctionsList.Clear();
 
 			CppMacros.Clear();
 
 			var node = elem.Element("Headers");
 			if(node != null) {
 				foreach(var e in node.Elements()) {
-					this.AddHeader(e.Attribute("File").Value);
+					this.AddHeaderNoUpdate(e.Attribute("File").Value);
 				}
 			}
 
@@ -225,10 +229,10 @@ namespace Petri
 				}
 			}
 
+			DispatchFunctions();
+
 			PetriNet = new RootPetriNet(this, elem.Element("PetriNet"));
 			PetriNet.Canonize();
-
-			DispatchFunctions();
 		}
 
 		public string CppPrefix {
@@ -240,6 +244,9 @@ namespace Petri
 		public void SaveCppDontAsk() {
 			if(this.Settings.SourceOutputPath.Length == 0) {
 				throw new Exception("No source output path defined. Please open the Petri net with the graphical editor and generate the C++ code once.");
+			}
+			else if(Conflicts(PetriNet)) {
+				throw new Exception("The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts.");
 			}
 
 			var cppGen = PetriNet.GenerateCpp();
@@ -254,7 +261,7 @@ namespace Petri
 
 			generator += "#define PETRI_CLASS_NAME " + Settings.Name;
 			generator += "#define PETRI_PREFIX \"" + CppPrefix + "\"";
-			generator += "#define PETRI_ENUM TODOTODOTODO";
+			generator += "#define PETRI_ENUM " + Settings.Enum.Name;
 			generator += "#define PETRI_PORT " + Settings.Port;
 
 
@@ -324,6 +331,11 @@ namespace Petri
 			}
 
 			return false;
+		}
+
+		public void UpdateConflicts() {
+			Conflicting.Clear();
+			PetriNet.UpdateConflicts();
 		}
 
 		int _wX, _wY, _wW, _wH;

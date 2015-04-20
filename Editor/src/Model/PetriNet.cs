@@ -38,7 +38,7 @@ namespace Petri
 			}
 
 			foreach(var e in descriptor.Element("Transitions").Elements("Transition")) {
-				var t = new Transition(doc, this, e, statesTable, Document.AllFunctions, Document.CppMacros);
+				var t = new Transition(doc, this, e, statesTable);
 				this.AddTransition(t);
 				t.Before.AddTransitionAfter(t);
 				t.After.AddTransitionBefore(t);
@@ -84,6 +84,13 @@ namespace Petri
 					return true;
 
 			return false;
+		}
+
+		public override void UpdateConflicts() {
+			foreach(var t in Transitions)
+				t.UpdateConflicts();
+			foreach(var s in States)
+				s.UpdateConflicts();
 		}
 
 		public void AddComment(Comment c) {

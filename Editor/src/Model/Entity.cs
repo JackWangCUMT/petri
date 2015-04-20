@@ -28,7 +28,7 @@ namespace Petri
 		public static Entity EntityFromXml(HeadlessDocument document, XElement descriptor, PetriNet parent, IDictionary<UInt64, State> statesTable) {
 			switch(descriptor.Name.ToString()) {
 			case "Action":
-				return new Action(document, parent, descriptor, document.AllFunctions, document.CppMacros);
+				return new Action(document, parent, descriptor);
 			case "Exit":
 				return new ExitPoint(document, parent, descriptor);
 			case "PetriNet":
@@ -37,7 +37,7 @@ namespace Petri
 				else
 					return new InnerPetriNet(document, parent, descriptor);
 			case "Transition":
-				return new Transition(document, parent, descriptor, statesTable, document.AllFunctions, document.CppMacros);
+				return new Transition(document, parent, descriptor, statesTable);
 			case "Comment":
 				return new Comment(document, parent, descriptor);
 			default:

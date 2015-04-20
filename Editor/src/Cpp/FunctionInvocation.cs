@@ -50,7 +50,12 @@ namespace Petri
 					args += arg.MakeCpp();
 				}
 
-				return "make_callable_ptr(" + Function.QualifiedName + args + ")";
+				string template = "";
+				if(Function.Template) {
+					template = "<" + Function.TemplateArguments + ">";
+				}
+
+				return "make_callable_ptr(&" + Function.QualifiedName + template + args + ")";
 			}
 
 			public override string MakeUserReadable() {
@@ -81,15 +86,6 @@ namespace Petri
 				private set;
 			}
 
-			public override string MakeCpp() {
-				string args = "";
-				foreach(var arg in Arguments) {
-					args += ", ";
-					args += arg.MakeCpp();
-				}
-				return "make_callable_ptr(&" + Function.QualifiedName + ", " + This.MakeCpp() + args + ")";
-			}
-
 			public override string MakeUserReadable() {
 				string args = "";
 				foreach(var arg in Arguments) {
@@ -100,6 +96,32 @@ namespace Petri
 
 				return This.MakeUserReadable() + (Indirection ? "->" : ".") + Function.QualifiedName + "(" + args + ")";
 			}
+		}
+
+		public class ConflictFunctionInvocation : FunctionInvocation {
+			public ConflictFunctionInvocation(string value) : base(Dummy) {
+				_value = value;
+			}
+
+			public override string MakeCpp() {
+				throw new InvalidOperationException("La fonction est en conflit");
+			}
+
+			public override string MakeUserReadable() {
+				return _value;
+			}
+
+			static Function Dummy {
+				get {
+					if(_dummy == null) {
+						_dummy = new Cpp.Function(new Type("void", Scope.EmptyScope), Scope.EmptyScope, "dummy", false);
+					}
+					return _dummy;
+				}
+			}
+
+			string _value;
+			static Cpp.Function _dummy;
 		}
 	}
 }

@@ -17,13 +17,14 @@ namespace Petri
 		public class Function
 		{
 			// With 'enclosing', you can create a static method, or a namespace-enclosed function
-			public Function(Type returnType, Scope enclosing, string name, bool template)
-			{
+			public Function(Type returnType, Scope enclosing, string name, bool template) {
 				this.ReturnType = returnType;
 				this.Name = name.Trim();
 
 				Parameters = new List<Param>();
 				this.Enclosing = enclosing;
+
+				Template = template;
 			}
 
 			public Type ReturnType {
@@ -41,11 +42,17 @@ namespace Petri
 				private set;
 			}
 
+			public string TemplateArguments {
+				get;
+				set;
+			}
+
 			public string QualifiedName {
 				get {
 					string qn = "";
 					if(Enclosing != null)
 						qn = Enclosing.ToString();
+					
 					return qn + Name;
 				}
 			}
@@ -82,6 +89,16 @@ namespace Petri
 
 					return s;
 				}
+			}
+
+			public string Prototype {
+				get {
+					return ReturnType.ToString() + " " + Signature;
+				}
+			}
+
+			public override string ToString() {
+				return Prototype;
 			}
 
 			public static string ParameterPattern {

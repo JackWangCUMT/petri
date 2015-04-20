@@ -41,6 +41,7 @@ namespace Petri
 			_currentAction = EditorAction.None;
 			base.FocusIn();
 			_hoveredItem = null;
+			_document.ReloadHeaders();
 		}
 
 		public override void FocusOut() {

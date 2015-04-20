@@ -2,20 +2,30 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="src/Document/Document.cs">
     <Files>
-      <File FileName="src/Document/Document.cs" Line="294" Column="15" />
-      <File FileName="src/Document/HeadlessDocument.cs" Line="224" Column="34" />
-      <File FileName="src/Document/DocumentSection/Editor/EditorEntityDraw.cs" Line="119" Column="1" />
-      <File FileName="src/Document/DocumentSection/Editor/EditorView.cs" Line="38" Column="24" />
-      <File FileName="src/Document/DocumentSection/PetriView.cs" Line="238" Column="4" />
-      <File FileName="src/Document/HeadersManager.cs" Line="90" Column="17" />
-      <File FileName="src/Document/DocumentSection/Editor/EntityEditor.cs" Line="350" Column="1" />
-      <File FileName="src/Document/DocumentSection/PaneEditor.cs" Line="100" Column="3" />
-      <File FileName="src/Document/UndoManager.cs" Line="341" Column="10" />
+      <File FileName="src/Model/Action.cs" Line="40" Column="1" />
+      <File FileName="src/Model/Transition.cs" Line="56" Column="30" />
+      <File FileName="src/Cpp/Expression.cs" Line="258" Column="1" />
+      <File FileName="src/Cpp/FunctionInvocation.cs" Line="111" Column="22" />
+      <File FileName="src/Document/HeadlessDocument.cs" Line="323" Column="25" />
+      <File FileName="src/Document/Document.cs" Line="391" Column="10" />
+      <File FileName="src/Application/Program.cs" Line="152" Column="1" />
+      <File FileName="src/Model/RootPetriNet.cs" Line="12" Column="1" />
+      <File FileName="src/Document/DocumentSection/Editor/EntityEditor.cs" Line="178" Column="71" />
+      <File FileName="src/Model/PetriNet.cs" Line="89" Column="19" />
+      <File FileName="src/Model/Entity.cs" Line="40" Column="68" />
+      <File FileName="src/Model/State.cs" Line="113" Column="4" />
+      <File FileName="src/Model/ExitPoint.cs" Line="51" Column="26" />
+      <File FileName="src/Document/DocumentSection/Editor/EditorView.cs" Line="45" Column="1" />
+      <File FileName="src/Cpp/Parser.cs" Line="169" Column="21" />
+      <File FileName="src/Document/MainWindow.cs" Line="162" Column="1" />
+      <File FileName="src/Cpp/Enum.cs" Line="30" Column="6" />
+      <File FileName="src/Document/HeadersManager.cs" Line="91" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/Users/remi/Documents/Programmation/C#/Petri/Editor/src/Document/Document.cs" line="334" column="1" />
+      <Catchpoint enabled="false" exceptionName="System.Exception" includeSubclasses="True" />
+      <Breakpoint file="/Users/remi/Documents/Programmation/C#/Petri/Editor/src/Document/Document.cs" line="390" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />

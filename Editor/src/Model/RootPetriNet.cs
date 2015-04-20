@@ -73,7 +73,7 @@ namespace Petri
 			source += "";
 
 			source += "namespace {";
-			source += "void fill(PetriNet &petriNet) {";
+			source += "void fill(PetriNet<" + Document.Settings.Enum.Name + "> &petriNet) {";
 			base.GenerateCpp(source, lastID);
 			source += "}"; // fill()
 			source += "}"; // namespace
@@ -87,7 +87,7 @@ namespace Petri
 			source += "";
 
 			source += "EXPORT void *" + Document.Settings.Name + "_create() {";
-			source += "auto petriNet = std::make_unique<PetriNet>(PREFIX);";
+			source += "auto petriNet = std::make_unique<PetriNet<" + Document.Settings.Enum.Name + ">>(PREFIX);";
 			source += "fill(*petriNet);";
 			source += "return petriNet.release();";
 			source += "}"; // create()
@@ -95,7 +95,7 @@ namespace Petri
 			source += "";
 
 			source += "EXPORT void *" + Document.Settings.Name + "_createDebug() {";
-			source += "auto petriNet = std::make_unique<PetriDebug>(PREFIX);";
+			source += "auto petriNet = std::make_unique<PetriDebug<" + Document.Settings.Enum.Name + ">>(PREFIX);";
 			source += "fill(*petriNet);";
 			source += "return petriNet.release();";
 			source += "}"; // create()

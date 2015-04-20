@@ -13,6 +13,8 @@ namespace Petri
 			}
 
 			public Enum(string commaSeparatedList) {
+				commaSeparatedList = commaSeparatedList.Replace(" ", "");
+				commaSeparatedList = commaSeparatedList.Replace("\t", "");
 				var lst = commaSeparatedList.Split(new char[]{','}, StringSplitOptions.None);
 				Regex name = new Regex(Cpp.Parser.NamePattern);
 

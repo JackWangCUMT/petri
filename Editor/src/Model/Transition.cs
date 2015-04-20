@@ -28,12 +28,11 @@ namespace Petri
 			this.UpdatePosition();
 		}
 
-		public Transition(HeadlessDocument doc, PetriNet parent, XElement descriptor, IDictionary<UInt64, State> statesTable, IEnumerable<Cpp.Function> conditions, IDictionary<string, string> macros) : base(doc, parent, descriptor) {
+		public Transition(HeadlessDocument doc, PetriNet parent, XElement descriptor, IDictionary<UInt64, State> statesTable) : base(doc, parent, descriptor) {
 			this.Before = statesTable[UInt64.Parse(descriptor.Attribute("BeforeID").Value)];
 			this.After = statesTable[UInt64.Parse(descriptor.Attribute("AfterID").Value)];
 
-
-			this.Condition = ConditionBase.ConditionFromString(descriptor.Attribute("Condition").Value, doc.Settings.Enum, this, conditions, macros);
+			TrySetCondition(descriptor.Attribute("Condition").Value);
 
 			this.Width = double.Parse(descriptor.Attribute("W").Value);
 			this.Height = double.Parse(descriptor.Attribute("H").Value);
@@ -42,6 +41,20 @@ namespace Petri
 			this.ShiftAmplitude = XmlConvert.ToDouble(descriptor.Attribute("ShiftAmplitude").Value);
 
 			this.Position = this.Position;
+		}
+
+		private void TrySetCondition(string s) {
+			try {
+				this.Condition = ConditionBase.ConditionFromString(s, Document.Settings.Enum, this, Document.AllFunctions, Document.CppMacros);
+			}
+			catch(Exception) {
+				Document.Conflicting.Add(this);
+				this.Condition = new ExpressionCondition(new Cpp.LitteralExpression(s));
+			}
+		}
+
+		public void UpdateConflicts() {
+			this.TrySetCondition(Condition.MakeUserReadable());
 		}
 
 		public override XElement GetXml() {
@@ -165,7 +178,7 @@ namespace Petri
 				}
 			}
 
-			source += "auto " + this.CppName + " = std::make_shared<Transition>(*" + bName + ", *" + aName + ");";
+			source += "auto " + this.CppName + " = std::make_shared<Transition<" + Document.Settings.Enum.Name + ">>(*" + bName + ", *" + aName + ");";
 			source += this.CppName + "->setCondition(" + this.Condition.MakeCpp() + ");";
 		
 			source += this.CppName + "->setName(\"" + this.Name + "\");";

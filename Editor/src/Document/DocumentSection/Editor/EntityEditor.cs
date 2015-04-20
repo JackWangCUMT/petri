@@ -174,8 +174,8 @@ namespace Petri
 					Cpp.FunctionInvocation funcInvocation = null;
 					try {
 						funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, _document.AllFunctions, _document.CppMacros);
-						if(!funcInvocation.Function.ReturnType.Equals(new Cpp.Type("ResultatAction", Cpp.Scope.EmptyScope))) {
-							throw new Exception("Type de retour de la fonction incorrect : ResultatAction attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
+						if(!funcInvocation.Function.ReturnType.Equals(_document.Settings.Enum.Type)) {
+							throw new Exception("Type de retour de la fonction incorrect : " + _document.Settings.Enum.Name + "attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
 						}
 						_document.PostAction(new InvocationChangeAction(a, funcInvocation));
 					}

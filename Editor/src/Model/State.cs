@@ -108,6 +108,10 @@ namespace Petri
 
 			return false;
 		}
+
+		public virtual void UpdateConflicts() {
+			
+		}
 	}
 
 	public abstract class NonRootState : State {

@@ -130,24 +130,41 @@ namespace Petri
 				Modified = true;
 			}
 		}
-					
+
 		public void RemoveHeader(string header) {
-			var list = PetriNet.BuildEntitiesList();
+			RemoveHeaderNoUpdate(header);
+			DispatchFunctions();
+			UpdateConflicts();
 
-			var toRemove = new List<Cpp.Function>();
-			foreach(var f in AllFunctions) {
-				if(f.Header == header) {
-					toRemove.Add(f);
-				}
+			Modified = true;
+		}
+
+		private void RemoveHeaderNoUpdate(string header) {
+			string filename = header;
+
+			// If path is relative, then make it absolute
+			if(!System.IO.Path.IsPathRooted(header)) {
+				filename = System.IO.Path.Combine(System.IO.Directory.GetParent(this.Path).FullName, filename);
 			}
 
-			foreach(var f in toRemove) {
-				foreach(var e in list) {
-					if(e.UsesFunction(f)) {
-						
-					}
-				}
+			AllFunctionsList.RemoveAll(s => s.Header == filename);
+
+			Headers.Remove(header);
+		}
+
+		public void ReloadHeaders() {
+			var backup = Headers.ToArray();
+
+			foreach(var h in backup) {
+				RemoveHeaderNoUpdate(h);
 			}
+
+			foreach(var h in backup) {
+				AddHeaderNoUpdate(h);
+			}
+
+			DispatchFunctions();
+			UpdateConflicts();
 		}
 
 		public override void Save() {
@@ -157,6 +174,7 @@ namespace Petri
 			else {
 				base.Save();
 			}
+
 			Modified = false;
 		}
 
@@ -370,7 +388,15 @@ namespace Petri
 		public void SaveCpp() {
 			if(Path != "") {
 				if(Settings.SourceOutputPath != "") {
-					this.SaveCppDontAsk();
+					if(!Conflicts(PetriNet)) {
+						this.SaveCppDontAsk();
+					}
+					else {
+						MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Le réseau de Pétri contient des entités en conflit. Veuillez les résoudre avant de pouvoir générer le code.");
+						d.AddButton("OK", ResponseType.Accept);
+						d.Run();
+						d.Destroy();
+					}
 				}
 				else {
 					var fc = new Gtk.FileChooserDialog("Enregistrer le code généré sous…", Window,
