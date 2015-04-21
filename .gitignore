@@ -2,6 +2,7 @@
 .log
 .mdb
 .config
+*~
 
 /Editor/obj
 /Editor/bin

@@ -15,6 +15,7 @@
 #include "Socket.h"
 
 using namespace std::string_literals;
+using namespace std::chrono_literals;
 
 namespace DebugServer {
 	extern std::string getVersion();

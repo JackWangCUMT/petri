@@ -5,9 +5,11 @@
 //  Created by Rémi on 23/11/2014.
 //
 
+#include <cstring>
+#include <string>
+
 #include "DebugServer.h"
 #include "PetriDynamicLibCommon.h"
-#include <cstring>
 
 inline std::string DebugServer::getVersion() {
 	return "0.2";
@@ -88,7 +90,7 @@ inline void DebugSession<_ActionResult>::removeActiveState(Action<_ActionResult>
 
 template<typename _ActionResult>
 inline void DebugSession<_ActionResult>::serverCommunication() {
-	setThreadName("DebugSession "s + _petriNetFactory.name());
+	setThreadName(std::string("DebugSession ") + _petriNetFactory.name());
 
 	int attempts = 0;
 	while(true) {
@@ -118,8 +120,8 @@ inline void DebugSession<_ActionResult>::serverCommunication() {
 
 				if(type == "hello") {
 					if(root["payload"]["version"] != DebugServer::getVersion()) {
-						this->sendObject(this->error("The server (version "s + DebugServer::getVersion() + ") is incompatible with your client!"s));
-						throw std::runtime_error("The server (version "s + DebugServer::getVersion() + ") is incompatible with your client!"s);
+						this->sendObject(this->error(std::string("The server (version ") + DebugServer::getVersion() + std::string(") is incompatible with your client!")));
+						throw std::runtime_error(std::string("The server (version ") + DebugServer::getVersion() + std::string(") is incompatible with your client!"));
 					}
 					else {
 						Json::Value ehlo;
@@ -204,11 +206,11 @@ inline void DebugSession<_ActionResult>::serverCommunication() {
 						lib = root["payload"]["lib"].asString();
 						DynamicLib dl(lib);
 						dl.load();
-						auto eval = dl.loadSymbol<char const *()>(_petriNetFactory.prefix() + "_evaluate"s);
+						auto eval = dl.loadSymbol<char const *()>(_petriNetFactory.prefix() + std::string("_evaluate"));
 						result = eval();
 					}
 					catch(std::exception &e) {
-						result = "could not evaluate the symbol, reason: "s + e.what();
+						result = std::string("could not evaluate the symbol, reason: ") + e.what();
 					}
 					Json::Value payload;
 					payload["eval"] = result;
@@ -256,7 +258,7 @@ inline void DebugSession<_ActionResult>::updateBreakpoints(Json::Value const &br
 
 template<typename _ActionResult>
 inline void DebugSession<_ActionResult>::heartBeat() {
-	setThreadName("DebugSession "s + _petriNetFactory.name() + " heart beat"s);
+	setThreadName(std::string("DebugSession ") + _petriNetFactory.name() + std::string(" heart beat"));
 	auto lastSendDate = std::chrono::system_clock::now();
 	auto const minDelayBetweenSend = 100ms;
 
