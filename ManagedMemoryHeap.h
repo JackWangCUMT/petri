@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <functional>
 #include <atomic>
+#include <mutex>
 
 #define safe_alloc ManagedMemoryHeap::make_unique
 

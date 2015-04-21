@@ -1,6 +1,9 @@
-﻿Fonctions builtin ?
+﻿Cible des raccourcis clavier (copier-coller, fermer…)
+génération invocation compilateur
+état interne des Conditions pas thread-safe (Gestion des timeouts)
 
-Gestion des timeouts
+Parenthèses A && B && C
+
 
 Commenter le code :3
 Documentation
@@ -13,13 +16,4 @@ Fonction recherche
 
 Scénario d'exécution
 
-génération invocation compilateur
-Vérifier l'évaluation d'expressions pendant le debug
-
 std::packaged_task
-
-FIXME:
-	état interne des Conditions pas thread-safe
-
-	Cible des raccourcis clavier (copier-coller, fermer…)
-	Parenthèses A && B && C
