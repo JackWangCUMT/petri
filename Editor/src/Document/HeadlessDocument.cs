@@ -280,7 +280,7 @@ namespace Petri
 			System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.SourceOutputPath), Settings.Name) + ".h", generator.Value);
 		}
 
-		public virtual bool Compile() {
+		public virtual bool Compile(bool wait) {
 			var c = new CppCompiler(this);
 			var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
 			if(o != "") {
@@ -333,7 +333,7 @@ namespace Petri
 			return false;
 		}
 
-		public void UpdateConflicts() {
+		public virtual void UpdateConflicts() {
 			Conflicting.Clear();
 			PetriNet.UpdateConflicts();
 		}

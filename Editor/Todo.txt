@@ -13,7 +13,6 @@ Fonction recherche
 
 Scénario d'exécution
 
-Feedback complétion des étapes
 génération invocation compilateur
 Vérifier l'évaluation d'expressions pendant le debug
 

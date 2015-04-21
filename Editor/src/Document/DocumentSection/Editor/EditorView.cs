@@ -219,8 +219,6 @@ namespace Petri
 				if(_hoveredItem != null && _hoveredItem is State) {
 					_document.PostAction(new AddTransitionAction(new Transition(CurrentPetriNet.Document, CurrentPetriNet, SelectedEntity as State, _hoveredItem as State), true));
 				}
-
-				this.Redraw();
 			}
 			else if(_currentAction == EditorAction.SelectionRect) {
 				_currentAction = EditorAction.None;
@@ -237,8 +235,9 @@ namespace Petri
 				var newSize = new PointD((_hoveredItem as Comment).Size.X, (_hoveredItem as Comment).Size.Y);
 				(_hoveredItem as Comment).Size = _beforeResize;
 				_document.PostAction(new ResizeCommentAction(_hoveredItem as Comment, newSize));
-
 			}
+
+			this.Redraw();
 		}
 
 		protected override void ManageMotion(double x, double y) {

@@ -165,9 +165,15 @@ namespace Petri
 
 		public void ReloadPetri() {
 			this.StopPetri();
-			_document.SaveCppDontAsk();
-			if(!_document.Compile()) {
+			if(!_document.Compile(true)) {
+				GLib.Timeout.Add(0, () => {
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("La compilation a échoué."));
+					d.AddButton("Annuler", ResponseType.Cancel);
+					d.Run();
+					d.Destroy();
 
+					return false;
+				});
 			}
 			else {
 				try {
@@ -198,7 +204,7 @@ namespace Petri
 		}
 
 		public void Evaluate(Cpp.Expression expression) {
-			string filename = System.IO.Path.GetTempFileName();
+			string sourceName = System.IO.Path.GetTempFileName();
 
 			string cppExpr;
 			if(expression is Cpp.LitteralExpression) {
@@ -224,16 +230,18 @@ namespace Petri
 			generator += "return result.c_str();";
 			generator += "}\n";
 
-			generator.Write(filename);
+			generator.Write(sourceName);
+
+			string libName = System.IO.Path.GetTempFileName();
 
 			var c = new CppCompiler(_document);
-			var o = c.CompileSource(filename, _document.Settings.Name + "_evaluator");
+			var o = c.CompileSource(sourceName, libName);
 			if(o != "") {
 				throw new Exception("Erreur de compilation : " + o);
 			}
 			else {
 				try {
-					this.SendObject(new JObject(new JProperty("type", "evaluate")));
+					this.SendObject(new JObject(new JProperty("type", "evaluate"), new JProperty("payload", new JObject(new JProperty("lib", libName)))));
 				}
 				catch(Exception e) {
 					this.Detach();
@@ -241,6 +249,7 @@ namespace Petri
 					throw e;
 				}
 			}
+			System.IO.File.Delete(sourceName);
 		}
 
 		private void Hello() {
@@ -249,6 +258,10 @@ namespace Petri
 		
 				var ehlo = this.ReceiveObject();
 				if(ehlo != null && ehlo["type"].ToString() == "ehlo") {
+					GLib.Timeout.Add(0, () => {
+						_document.Window.DebugGui.Status = "Connecté avec succès.";
+						return false;
+					});
 					_document.Window.DebugGui.UpdateToolbar();
 					return;
 				}
@@ -302,6 +315,10 @@ namespace Petri
 							_petriRunning = true;
 							_document.Window.DebugGui.UpdateToolbar();
 							this.UpdateBreakpoints();
+							GLib.Timeout.Add(0, () => {
+								_document.Window.DebugGui.Status = "Exécution en cours.";
+								return false;
+							});
 						}
 						else if(msg["payload"].ToString() == "stop") {
 							_petriRunning = false;
@@ -310,17 +327,33 @@ namespace Petri
 								_document.DebugController.ActiveStates.Clear();
 							}
 							_document.Window.DebugGui.View.Redraw();
+							GLib.Timeout.Add(0, () => {
+								_document.Window.DebugGui.Status = "Exécution terminée.";
+								return false;
+							});
 						}
 						else if(msg["payload"].ToString() == "reload") {
 							_document.Window.DebugGui.UpdateToolbar();
+							GLib.Timeout.Add(0, () => {
+								_document.Window.DebugGui.Status = "Le réseau de Pétri a été rechargé avec succès.";
+								return false;
+							});
 						}
 						else if(msg["payload"].ToString() == "pause") {
 							_pause = true;
 							_document.Window.DebugGui.UpdateToolbar();
+							GLib.Timeout.Add(0, () => {
+								_document.Window.DebugGui.Status = "En pause.";
+								return false;
+							});
 						}
 						else if(msg["payload"].ToString() == "resume") {
 							_pause = false;
 							_document.Window.DebugGui.UpdateToolbar();
+							GLib.Timeout.Add(0, () => {
+								_document.Window.DebugGui.Status = "Exécution cours.";
+								return false;
+							});
 						}
 					}
 					else if(msg["type"].ToString() == "error") {
@@ -342,6 +375,10 @@ namespace Petri
 							_sessionRunning = false;
 							_petriRunning = false;
 							_document.Window.DebugGui.UpdateToolbar();
+							GLib.Timeout.Add(0, () => {
+								_document.Window.DebugGui.Status = "Déconnecté.";
+								return false;
+							});
 						}
 						else {
 							_sessionRunning = false;
@@ -368,8 +405,12 @@ namespace Petri
 						_document.Window.DebugGui.View.Redraw();
 					}
 					else if(msg["type"].ToString() == "evaluation") {
+						var lib = msg["payload"]["lib"].ToString();
+						if(lib != "") {
+							System.IO.File.Delete(lib);
+						}
 						GLib.Timeout.Add(0, () => {
-							_document.Window.DebugGui.OnEvaluate(msg["payload"].ToString());
+							_document.Window.DebugGui.OnEvaluate(msg["payload"]["eval"].ToString());
 							return false;
 						});
 					}

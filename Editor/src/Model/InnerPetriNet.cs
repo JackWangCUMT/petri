@@ -53,7 +53,7 @@ namespace Petri
 			string name = this.EntryPointName;
 
 			// Adding an entry point
-			source += "auto " + name + " = std::make_shared<Action>();";
+			source += "auto " + name + " = std::make_shared<Action<" + Document.Settings.Enum.Name + ">>();";
 			source += name + "->setAction(" + "make_callable_ptr([](){ return " + Document.Settings.Enum.Name + "(); })" + ");";
 			source += name + "->setRequiredTokens(" + this.RequiredTokens.ToString() + ");";
 

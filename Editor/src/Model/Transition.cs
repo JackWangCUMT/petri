@@ -168,7 +168,7 @@ namespace Petri
 						var newID = lastID.Consume();
 						string name = this.CppName + "_Entry_" + newID.ToString();
 
-						source += "auto " + name + " = std::make_shared<Transition>(*" + aName + ", *" + s.CppName + ");";
+						source += "auto " + name + " = std::make_shared<Transition<" + Document.Settings.Enum.Name + ">>(*" + aName + ", *" + s.CppName + ");";
 						source += name + "->setCondition(" + "std::make_shared<Condition>(make_callable_ptr([](){ return true; }))" + ");";
 
 						source += name + "->setName(\"" + name + "\");";

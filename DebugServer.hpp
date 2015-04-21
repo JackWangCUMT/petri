@@ -27,7 +27,7 @@ inline std::chrono::system_clock::time_point DebugServer::getDateFromTimestamp(c
 }
 
 template<typename _ActionResult>
-inline DebugSession<_ActionResult>::DebugSession(PetriDynamicLibCommon<_ActionResult> &petri) : _socket(), _client(), _petriNetFactory(petri), _evaluator(petri.prefix()) {}
+inline DebugSession<_ActionResult>::DebugSession(PetriDynamicLibCommon<_ActionResult> &petri) : _socket(), _client(), _petriNetFactory(petri) {}
 
 template<typename _ActionResult>
 inline DebugSession<_ActionResult>::~DebugSession() {
@@ -99,6 +99,7 @@ inline void DebugSession<_ActionResult>::serverCommunication() {
 		std::cerr << "Could not bind socket to requested port (attempt " << ++attempts << ")" << std::endl;
 		if(attempts > 20) {
 			_running = false;
+			std::cerr << "Too many attemps, aborting." << std::endl;
 			break;
 		}
 	}
@@ -192,20 +193,28 @@ inline void DebugSession<_ActionResult>::serverCommunication() {
 					_petriNetFactory.hash();
 					_petri = _petriNetFactory.createDebug();
 					_petri->setObserver(this);
+					this->sendObject(this->json("ack", "reload"));
 				}
 				else if(type == "breakpoints") {
 					this->updateBreakpoints(root["payload"]);
 				}
 				else if(type == "evaluate") {
-					std::string result;
+					std::string result, lib;
 					try {
-						_evaluator.reload();
-						result = _evaluator.evaluate();
+						lib = root["payload"]["lib"].asString();
+						DynamicLib dl(lib);
+						dl.load();
+						auto eval = dl.loadSymbol<char const *()>(_petriNetFactory.prefix() + "_evaluate"s);
+						result = eval();
 					}
 					catch(std::exception &e) {
 						result = "could not evaluate the symbol, reason: "s + e.what();
 					}
-					this->sendObject(this->json("evaluation", result));
+					Json::Value payload;
+					payload["eval"] = result;
+					payload["lib"] = lib;
+
+					this->sendObject(this->json("evaluation", payload));
 				}
 			}
 		}

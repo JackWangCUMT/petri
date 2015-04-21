@@ -49,9 +49,9 @@ namespace Petri
 			_toolbar.Insert(_save, -1);
 			_toolbar.Insert(_cpp, -1);
 			_toolbar.Insert(_compile, -1);
-			_toolbar.Insert(_switchToDebug, -1);
 			_toolbar.Insert(_zoomIn, -1);
 			_toolbar.Insert(_zoomOut, -1);
+			_toolbar.Insert(_switchToDebug, -1);
 
 			_paned = new HPaned();
 			this.PackStart(_paned, true, true, 0);
@@ -97,7 +97,7 @@ namespace Petri
 				_document.SaveCpp();
 			}
 			else if(sender == _compile) {
-				_document.Compile();
+				_document.Compile(false);
 			}
 			else if(sender == _switchToDebug) {
 				_document.SwitchToDebug();
@@ -148,6 +148,17 @@ namespace Petri
 
 		public override void Redraw() {
 			_petriView.Redraw();
+		}
+
+		public bool Compilation {
+			set {
+				if(value) {
+					_compile.Sensitive = false;
+				}
+				else {
+					_compile.Sensitive = true;
+				}
+			}
 		}
 
 		EditorView _petriView;

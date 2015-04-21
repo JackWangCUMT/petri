@@ -11,7 +11,6 @@
 #include <string>
 #include "PetriNet.h"
 #include "jsoncpp/include/json.h"
-#include "SymbolEvaluator.h"
 #include <set>
 #include "Socket.h"
 
@@ -81,8 +80,6 @@ protected:
 	std::mutex _sendMutex;
 	std::mutex _breakpointsMutex;
 	std::set<Action<_ActionResult> *> _breakpoints;
-
-	SymbolEvaluator _evaluator;
 };
 
 #include "DebugServer.hpp"

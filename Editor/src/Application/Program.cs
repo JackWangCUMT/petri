@@ -78,7 +78,7 @@ namespace Petri
 						if(!System.IO.File.Exists(dylibPath)
 							|| System.IO.File.GetLastWriteTime(dylibPath) < System.IO.File.GetLastWriteTime(cppPath)) {
 							Console.WriteLine("Compiling the C++ code…");
-							bool res = document.Compile();
+							bool res = document.Compile(false);
 							if(!res) {
 								Console.WriteLine("Compilation failed, aborting!");
 								return 3;

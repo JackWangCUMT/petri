@@ -53,7 +53,7 @@ namespace Petri
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
-			source += "auto " + this.CppName + " = std::make_shared<Action>();";
+			source += "auto " + this.CppName + " = std::make_shared<Action<" + Document.Settings.Enum.Name + ">>();";
 			source += this.CppName + "->setAction(" + "make_callable_ptr([](){ return " + Document.Settings.Enum.Name + "(); })" + ");";
 			source += this.CppName + "->setRequiredTokens(" + this.RequiredTokens.ToString() + ");";
 

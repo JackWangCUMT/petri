@@ -1,5 +1,5 @@
 /**
- * This source file was orinally written in 2005 by Lionel Fuentes. It is provided as-is and any kind of warranty is disclaimed by its original author.
+ * This source file was orinally written in 2005 by Lionel Fuentes. It has since been modified, and is provided as-is and any kind of warranty is disclaimed by the author.
  */
 
 #ifndef SOCKET_H

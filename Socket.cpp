@@ -1,5 +1,5 @@
 /*
- * This source file was orinally written in 2005 by Lionel Fuentes. It is provided as-is and any kind of warranty is disclaimed by the author.
+ * This source file was orinally written in 2005 by Lionel Fuentes. It has since been modified, and is provided as-is and any kind of warranty is disclaimed by the author.
  */
 
 #include "Socket.h"
@@ -134,13 +134,15 @@ namespace Petri {
 
 		// On associe la socket a un port et a une adresse, definis dans server_addr :
 		if(bind(_fd, (struct sockaddr*)&_addr, sizeof(struct sockaddr_in)) < 0) {
+			perror("SockErr");
 			fprintf(stderr, "Erreur lors de l'association de la socket avec l'adresse\n");
 			_state = SOCK_FREE;
 		}
 		else {
 			// On se met sur ecoute
 			if(::listen(_fd, 1) < 0) {
-				fprintf(stderr, "Erreur lors de la mise sur ecoute\n");
+				perror("SockErr");
+				fprintf(stderr, "Erreur lors de la mise sur écoute\n");
 				_state = SOCK_FREE;
 			}
 			else

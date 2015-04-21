@@ -3,6 +3,7 @@ using System.Xml.Linq;
 using System.Xml;
 using Gtk;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Petri
 {
@@ -186,6 +187,7 @@ namespace Petri
 				_modified = value;
 				if(value == true) {
 					this.Blank = false;
+					_modifiedSinceGeneration = true;
 				}
 				else {
 					// We require the current undo stack to represent an unmodified state
@@ -390,6 +392,8 @@ namespace Petri
 				if(Settings.SourceOutputPath != "") {
 					if(!Conflicts(PetriNet)) {
 						this.SaveCppDontAsk();
+						_modifiedSinceGeneration = false;
+						Window.EditorGui.Status = "Le code C++ a été généré avec succès.";
 					}
 					else {
 						MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Le réseau de Pétri contient des entités en conflit. Veuillez les résoudre avant de pouvoir générer le code.");
@@ -424,11 +428,36 @@ namespace Petri
 			}
 		}
 
-		public override bool Compile() {
+		public override bool Compile(bool wait) {
+			if(_modifiedSinceGeneration) {
+				SaveCpp();
+			}
 			if(this.Path != "") {
-				var c = new CppCompiler(this);
-				var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
-				if(o != "") {
+				Window.Gui.Status = "Compilation en cours…";
+				Task t = Task.Run((System.Action)CompileTask);
+				if(wait) {
+					t.Wait();
+				}
+				return true;
+			}
+			else {
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, "Veuillez enregistrer le document avant de le compiler.");
+
+				d.Run();
+				d.Destroy();
+
+				return true;
+			}
+		}
+
+		private void CompileTask() {
+			Window.EditorGui.Compilation = true;
+			Window.DebugGui.Compilation = true;
+
+			var c = new CppCompiler(this);
+			var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
+			if(o != "") {
+				GLib.Timeout.Add(0, () => {
 					MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, "La compilation a échoué. Souhaitez-vous consulter les erreurs générées ?");
 					d.AddButton("Non", ResponseType.Cancel);
 					d.AddButton("Oui", ResponseType.Accept);
@@ -442,19 +471,20 @@ namespace Petri
 						new CompilationErrorPresenter(this, o).Show();
 					}
 
-					return false;
-				}
+					Window.Gui.Status = "La compilation a échoué.";
 
-				return true;
+					return false;
+				});
 			}
 			else {
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, "Veuillez enregistrer le document avant de le compiler.");
-
-				d.Run();
-				d.Destroy();
-
-				return true;
+				GLib.Timeout.Add (0, () => { 
+					Window.Gui.Status = "La compilation s'est terminée avec succès.";
+					return false;
+				});
 			}
+
+			Window.EditorGui.Compilation = false;
+			Window.DebugGui.Compilation = false;
 		}
 
 		public void ManageMacros() {
@@ -520,11 +550,25 @@ namespace Petri
 			Window.RedoItem.Sensitive = UndoManager.NextRedo != null;
 		}
 
+		public override void UpdateConflicts() {
+			base.UpdateConflicts();
+			if(Conflicting.Count > 1) {
+				Window.EditorGui.Status = Conflicting.Count.ToString() + " entités en conflit.";
+			}
+			else {
+				Window.EditorGui.Status = Conflicting.Count.ToString() + " entité en conflit.";
+			}
+			if(Conflicting.Count > 0) {
+				Window.EditorGui.Status += " Les conflits devront être résolus avant l'étape de génération/compilation.";
+			}
+		}
+
 		GuiAction _guiActionToMatchSave = null;
 		HeadersManager _headersManager;
 		MacrosManager _macrosManager;
 		DocumentSettingsEditor _settingsEditor;
 		bool _modified;
+		bool _modifiedSinceGeneration = true;
 	}
 }
 

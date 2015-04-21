@@ -26,6 +26,10 @@ namespace Petri
 			_exit.Label = "Terminer la session";
 			_switchToEditor = new ToolButton(Stock.Edit);
 			_switchToEditor.Label = "Éditeur";
+			_zoomIn = new ToolButton(Stock.ZoomIn);
+			_zoomIn.Label = "Agrandir";
+			_zoomOut = new ToolButton(Stock.ZoomOut);
+			_zoomOut.Label = "Réduire";
 
 			_attachDetach.Clicked += this.OnClick;
 			_startStopPetri.Clicked += this.OnClick;
@@ -33,12 +37,16 @@ namespace Petri
 			_reload.Clicked += this.OnClick;
 			_exit.Clicked += this.OnClick;
 			_switchToEditor.Clicked += this.OnClick;
+			_zoomIn.Clicked += OnClick;
+			_zoomOut.Clicked += OnClick;
 
 			_toolbar.Insert(_attachDetach, -1);
 			_toolbar.Insert(_startStopPetri, -1);
 			_toolbar.Insert(_playPause, -1);
 			_toolbar.Insert(_reload, -1);
 			_toolbar.Insert(_exit, -1);
+			_toolbar.Insert(_zoomIn, -1);
+			_toolbar.Insert(_zoomOut, -1);
 			_toolbar.Insert(_switchToEditor, -1);
 
 			_paned = new HPaned();
@@ -100,50 +108,54 @@ namespace Petri
 		}
 
 		public override void UpdateToolbar() {
-			if(_document.DebugController.Server.SessionRunning) {
-				_startStopPetri.Sensitive = true;
-				_reload.Sensitive = true;
-				_exit.Sensitive = true;
+			GLib.Timeout.Add(0, () => {
+				if(_document.DebugController.Server.SessionRunning) {
+					_startStopPetri.Sensitive = true;
+					_reload.Sensitive = true;
+					_exit.Sensitive = true;
 
-				_attachDetach.Label = "Déconnexion";
+					_attachDetach.Label = "Déconnexion";
 
-				if(_document.DebugController.Server.PetriRunning) {
-					_startStopPetri.Label = "Stopper";
-					_startStopPetri.IconName = Stock.Stop;
-					_playPause.Sensitive = true;
-					_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
-					if(_document.DebugController.Server.Pause) {
-						_playPause.Label = "Continuer";
-						_playPause.IconName = Stock.MediaPlay;
-						_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
+					if(_document.DebugController.Server.PetriRunning) {
+						_startStopPetri.Label = "Stopper";
+						_startStopPetri.StockId = Stock.Stop;
+						_playPause.Sensitive = true;
+						_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
+						if(_document.DebugController.Server.Pause) {
+							_playPause.Label = "Continuer";
+							_playPause.StockId = Stock.MediaPlay;
+							_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
+						}
+						else {
+							_playPause.Label = "Pause";
+							_playPause.StockId = Stock.MediaPause;
+							_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
+						}
 					}
 					else {
+						_startStopPetri.Label = "Exécuter";
+						_startStopPetri.StockId = Stock.MediaPlay;
+						_playPause.Sensitive = false;
+						_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
 						_playPause.Label = "Pause";
-						_playPause.IconName = Stock.MediaPause;
-						_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
+						_playPause.StockId = Stock.MediaPause;
 					}
 				}
 				else {
+					_attachDetach.Label = "Connexion";
 					_startStopPetri.Label = "Exécuter";
-					_startStopPetri.IconName = Stock.MediaPlay;
+					_startStopPetri.StockId = Stock.MediaPlay;
+					_startStopPetri.Sensitive = false;
+					_reload.Sensitive = false;
 					_playPause.Sensitive = false;
-					_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
+					_exit.Sensitive = false;
+					_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
 					_playPause.Label = "Pause";
-					_playPause.IconName = Stock.MediaPause;
+					_playPause.StockId = Stock.MediaPause;
 				}
-			}
-			else {
-				_attachDetach.Label = "Connexion";
-				_startStopPetri.Label = "Exécuter";
-				_startStopPetri.IconName = Stock.MediaPlay;
-				_startStopPetri.Sensitive = false;
-				_reload.Sensitive = false;
-				_playPause.Sensitive = false;
-				_exit.Sensitive = false;
-				_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
-				_playPause.Label = "Pause";
-				_playPause.IconName = Stock.MediaPause;
-			}
+
+				return false;
+			});
 		}
 
 		public void OnEvaluate(string result) {
@@ -185,6 +197,20 @@ namespace Petri
 			else if(sender == _exit) {
 				Server.StopSession();
 			}
+			else if(sender == _zoomIn) {
+				_view.Zoom /= 0.8f;
+				if(_view.Zoom > 8f) {
+					_view.Zoom = 8f;
+				}
+				_view.Redraw();
+			}
+			else if(sender == _zoomOut) {
+				_view.Zoom *= 0.8f;
+				if(_view.Zoom < 0.01f) {
+					_view.Zoom = 0.01f;
+				}
+				_view.Redraw();
+			}
 		}
 
 		protected DebugServer Server {
@@ -193,11 +219,22 @@ namespace Petri
 			}
 		}
 
+		public bool Compilation {
+			set {
+				if(value) {
+					_reload.Sensitive = false;
+				}
+				else {
+					_reload.Sensitive = true;
+				}
+			}
+		}
+
 		Fixed _editor;
 
 		DebugView _view;
 		Document _document;
-		ToolButton _attachDetach, _startStopPetri, _playPause, _reload, _exit, _switchToEditor;
+		ToolButton _attachDetach, _startStopPetri, _playPause, _reload, _exit, _zoomIn, _zoomOut, _switchToEditor;
 		Toolbar _toolbar;
 	}
 }
