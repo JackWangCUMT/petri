@@ -74,9 +74,8 @@ namespace Petri
 						Console.WriteLine("Successfully generated C++ code");
 					}
 					if(compile) {
-						string dylibPath = System.IO.Path.Combine(document.Settings.LibOutputPath, document.Settings.Name  + ".so");
-						if(!System.IO.File.Exists(dylibPath)
-							|| System.IO.File.GetLastWriteTime(dylibPath) < System.IO.File.GetLastWriteTime(cppPath)) {
+						string dylibPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, System.IO.Path.Combine(document.Settings.LibOutputPath, document.Settings.Name  + ".so")));
+						if(!System.IO.File.Exists(dylibPath) || System.IO.File.GetLastWriteTime(dylibPath) < System.IO.File.GetLastWriteTime(cppPath)) {
 							Console.WriteLine("Compiling the C++ code…");
 							bool res = document.Compile(false);
 							if(!res) {
