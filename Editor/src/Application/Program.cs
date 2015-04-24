@@ -28,7 +28,7 @@ namespace Petri
 		}
 
 		public static String SafeMarkupFromString(string s) {
-			return System.Web.HttpUtility.HtmlEncode(s);
+			return System.Web.HttpUtility.HtmlEncode(s).Replace("{", "{{").Replace("}", "}}");
 		}
 
 		private static int PrintUsage() {

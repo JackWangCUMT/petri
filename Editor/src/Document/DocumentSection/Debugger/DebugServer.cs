@@ -164,6 +164,10 @@ namespace Petri
 		}
 
 		public void ReloadPetri() {
+			GLib.Timeout.Add(0, () => {
+				_document.Window.DebugGui.Status = "Rechargement du réseau de pétri…";
+				return false;
+			});
 			this.StopPetri();
 			if(!_document.Compile(true)) {
 				GLib.Timeout.Add(0, () => {

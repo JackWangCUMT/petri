@@ -109,7 +109,9 @@
     <Compile Include="src\Document\DocumentSection\PetriView.cs" />
     <Compile Include="src\Document\DocumentSection\Debugger\DebugController.cs" />
     <Compile Include="src\Document\DocumentSection\Debugger\DebugEntityDraw.cs" />
-    <Compile Include="src\Document\DocumentSection\Debugger\DebugGui.cs" />
+    <Compile Include="src\Document\DocumentSection\Debugger\DebugGui.cs">
+      <LogicalName>fix</LogicalName>
+    </Compile>
     <Compile Include="src\Document\DocumentSection\Debugger\DebugServer.cs" />
     <Compile Include="src\Document\DocumentSection\Debugger\DebugView.cs" />
     <Compile Include="src\Document\DocumentSection\Editor\EditorController.cs" />
@@ -138,6 +140,8 @@
     <EmbeddedResource Include="Resources\build.png">
       <LogicalName>build</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\fix.png" />
+    <EmbeddedResource Include="Resources\fix.png">
+      <LogicalName>fix</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
