@@ -139,11 +139,11 @@ namespace Petri
 						 where e is State
 						 select (e as State);
 			var transitions = new HashSet<Transition>(from e in newEntities
-				where e is Transition
-				select (e as Transition));
+				                                      where e is Transition
+				                                      select (e as Transition));
 			var comments = from e in newEntities
-					where e is Comment
-				    select (e as Comment);
+						   where e is Comment
+				           select (e as Comment);
 
 			foreach(State s in states) {
 				// Change entity's owner
@@ -163,11 +163,6 @@ namespace Petri
 				// Change entity's owner
 				t.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
 				t.Name = t.Name + " 2";
-				actionList.Add(new DoNothingAction(t)); // To select the newly pasted transitions
-			}
-
-			foreach(Transition t in transitions) {
-				//t.Position = new Cairo.PointD(t.Position.X + 20, t.Position.Y + 20);
 				actionList.Add(new AddTransitionAction(t, false));
 			}
 
@@ -208,11 +203,14 @@ namespace Petri
 
 			foreach(Transition t in transitions) {
 				var xml = t.GetXml();
-				var newTransition = Entity.EntityFromXml(destination, xml, _document.Window.EditorGui.View.CurrentPetriNet, statesTable);
+				Transition newTransition = (Transition)Entity.EntityFromXml(destination, xml, _document.Window.EditorGui.View.CurrentPetriNet, statesTable);
 
 				// Reassigning an ID to the transitions to keep a unique one for each entity
 				newTransition.ID = _document.LastEntityID++;
 				cloned.Add(newTransition);
+
+				newTransition.Before.AddTransitionAfter(t);
+				newTransition.After.AddTransitionBefore(t);
 			}
 
 			foreach(State s in statesTable.Values) {

@@ -1,4 +1,7 @@
-﻿Cible des raccourcis clavier (copier-coller, fermer…)
+﻿Cliquer ailleurs
+{200_cm, 200_cm
+Évaluation symboles
+Cible des raccourcis clavier (copier-coller, fermer…)
 génération invocation compilateur
 état interne des Conditions pas thread-safe (Gestion des timeouts)
 
