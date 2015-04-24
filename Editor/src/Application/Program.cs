@@ -31,6 +31,24 @@ namespace Petri
 			return System.Web.HttpUtility.HtmlEncode(s).Replace("{", "{{").Replace("}", "}}");
 		}
 
+		public delegate void EntryValDel(Gtk.Entry e, params object[] args);
+
+		public static void RegisterValidation(Gtk.Entry e, bool change, EntryValDel a, params object[] p) {
+			if(change) {
+				e.Changed += (obj, eventInfo) => {
+					a(e, p);
+				};
+			}
+			else {
+				e.FocusOutEvent += (obj, eventInfo) => {
+					a(e, p);
+				};
+				e.Activated += (o, args) => {
+					a(e, p);
+				};
+			}
+		}
+
 		private static int PrintUsage() {
 			Console.WriteLine("Usage: mono Petri.exe [--generate] [--compile \"document.petri\"]");
 			return 1;

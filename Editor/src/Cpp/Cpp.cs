@@ -17,7 +17,7 @@ namespace Petri
 					return _value;
 				}
 				set {
-					Regex regex = new Regex(@"^[0-9]*(\.[0-9]+)?(_ns|_us|_ms|_s)");
+					Regex regex = new Regex(@"^[0-9]*(\.[0-9]+)?(ns|us|ms|s)");
 					var match = regex.Match(value);
 
 					if(!match.Success) {

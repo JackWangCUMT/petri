@@ -7,7 +7,7 @@ namespace Petri {
 	{
 		public abstract class Expression
 		{
-			private enum ExprType {Parenthesis, Invocation, Subscript, Template, Quote, DoubleQuote};
+			private enum ExprType {Parenthesis, Invocation, Subscript, Template, Quote, DoubleQuote, Brackets};
 
 			protected Expression(Operator.Name op) {
 				this.Operator = op;
@@ -84,7 +84,7 @@ namespace Petri {
 						nesting.Push(Tuple.Create(special ? ExprType.Invocation : ExprType.Parenthesis, i));
 						break;
 					case ')':
-						if(nesting.Peek().Item1 == ExprType.Invocation || nesting.Peek().Item1 == ExprType.Parenthesis) {
+						if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Invocation || nesting.Peek().Item1 == ExprType.Parenthesis) {
 							subexprs.Add(subexprs.Count, Tuple.Create(nesting.Peek().Item1, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
 							int oldSize = s.Length;
 							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + subexprs.Count.ToString() + "@" + (nesting.Peek().Item1 == ExprType.Invocation ? "()" : ""));
@@ -94,11 +94,25 @@ namespace Petri {
 						else
 							throw new Exception("Unexpected closing parenthesis found!");
 						break;
+					case '{':
+						nesting.Push(Tuple.Create(ExprType.Brackets, i));
+						break;
+					case '}':
+						if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Brackets) {
+							subexprs.Add(subexprs.Count, Tuple.Create(ExprType.Brackets, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
+							int oldSize = s.Length;
+							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + subexprs.Count.ToString() + "@");
+							i += s.Length - oldSize;
+							nesting.Pop();
+						}
+						else
+							throw new Exception("Unexpected closing bracket found!");
+						break;
 					case '[':
 						nesting.Push(Tuple.Create(ExprType.Subscript, i));
 						break;
 					case ']':
-						if(nesting.Peek().Item1 == ExprType.Subscript) {
+						if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Subscript) {
 							subexprs.Add(subexprs.Count, Tuple.Create(nesting.Peek().Item1, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
 							int oldSize = s.Length;
 							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + subexprs.Count.ToString() + "@");
@@ -114,7 +128,7 @@ namespace Petri {
 							nesting.Push(Tuple.Create(ExprType.DoubleQuote, i));
 						}
 						// Second quote
-						else if(nesting.Peek().Item1 == ExprType.DoubleQuote && s[i - 1] != '\\') {
+						else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.DoubleQuote && s[i - 1] != '\\') {
 							subexprs.Add(subexprs.Count, Tuple.Create(ExprType.DoubleQuote, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
 							int oldSize = s.Length;
 							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + subexprs.Count.ToString() + "@");
@@ -130,7 +144,7 @@ namespace Petri {
 							nesting.Push(Tuple.Create(ExprType.Quote, i));
 						}
 						// Second quote
-						else if(nesting.Peek().Item1 == ExprType.Quote && s[i - 1] != '\\') {
+						else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] != '\\') {
 							subexprs.Add(subexprs.Count, Tuple.Create(ExprType.Quote, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
 							int oldSize = s.Length;
 							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + subexprs.Count.ToString() + "@");
@@ -281,6 +295,7 @@ namespace Petri {
 					case ExprType.DoubleQuote:
 					case ExprType.Quote:
 					case ExprType.Parenthesis:
+					case ExprType.Brackets:
 					case ExprType.Subscript:
 						prep = prep.Remove(index, lastIndex - index + 1).Insert(index, subexprs[expr].Item2);
 						break;

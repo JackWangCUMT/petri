@@ -11,14 +11,6 @@ namespace Petri
 			this.EntityDraw = new DebugEntityDraw(_document);
 		}
 
-		public override void FocusIn() {
-			base.FocusIn();
-		}
-
-		public override void FocusOut() {
-			base.FocusOut();
-		}
-
 		protected override void ManageTwoButtonPress(uint button, double x, double y) {
 			if(button == 1) {
 				var entity = CurrentPetriNet.StateAtPosition(new PointD(x, y));

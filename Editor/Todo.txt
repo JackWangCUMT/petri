@@ -1,5 +1,5 @@
-﻿Cliquer ailleurs
-{200_cm, 200_cm
+﻿jetons par défaut à 1
+Signe -10_cm
 Évaluation symboles
 Cible des raccourcis clavier (copier-coller, fermer…)
 génération invocation compilateur

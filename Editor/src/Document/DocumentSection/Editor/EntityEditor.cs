@@ -55,9 +55,9 @@ namespace Petri
 		public ActionEditor(Action a, Document doc) : base(a, doc) {
 			CreateLabel(0, "Nom de l'action :");
 			var name = CreateWidget<Entry>(true, 0, a.Name);
-			name.Changed += (obj, eventInfo) => {
+			MainClass.RegisterValidation(name, true, (obj, p) => {
 				_document.PostAction(new ChangeNameAction(a, (obj as Entry).Text));
-			};
+			});
 
 			var active = CreateWidget<CheckButton>(false, 0, "Active à t = 0 :");
 			active.Active = a.Active;
@@ -170,7 +170,7 @@ namespace Petri
 
 				var invocation = CreateWidget<Entry>(true, 0, userReadable);
 				editorFields.Add(invocation);
-				invocation.FocusOutEvent += (obj, eventInfo) => {
+				MainClass.RegisterValidation(invocation, false, (obj, p) => {
 					Cpp.FunctionInvocation funcInvocation = null;
 					try {
 						funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, _document.AllFunctions, _document.CppMacros);
@@ -187,7 +187,7 @@ namespace Petri
 
 						(obj as Entry).Text = userReadable;
 					}
-				};
+				});
 			}
 			else {
 				if(!a.IsDefault()) {
@@ -198,19 +198,29 @@ namespace Petri
 
 						var valueEditor = CreateWidget<Entry>(true, 20, method.This.MakeUserReadable());
 						editorFields.Add(valueEditor);
-						valueEditor.Changed += (obj, eventInfo) => {
-							var args = new List<Cpp.Expression>();
-							for(int j = 2; j < editorFields.Count; ++j) {
-								Widget w = editorFields[j];
-								if(w.GetType() == typeof(Entry)) {
-									if((w as Entry).Text == "this")
-										args.Add(new Cpp.EntityExpression(a, "this"));
-									else
-										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, _document.AllFunctions, _document.CppMacros));
+						MainClass.RegisterValidation(valueEditor, false, (obj, p) => {
+							try {
+								var args = new List<Cpp.Expression>();
+								for(int j = 2; j < editorFields.Count; ++j) {
+									Widget w = editorFields[j];
+									if(w.GetType() == typeof(Entry)) {
+										if((w as Entry).Text == "this")
+											args.Add(new Cpp.EntityExpression(a, "this"));
+										else
+											args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, _document.AllFunctions, _document.CppMacros));
+									}
 								}
+								_document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions, _document.CppMacros), false, args.ToArray())));
 							}
-							_document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions, _document.CppMacros), false, args.ToArray())));
-						};
+							catch(Exception ex) {
+								MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("L'expression spécifiée est invalide (" + ex.Message + ")."));
+								d.AddButton("Annuler", ResponseType.Cancel);
+								d.Run();
+								d.Destroy();
+
+								(obj as Entry).Text = method.This.MakeUserReadable();
+							}
+						});
 					}
 					for(int i = 0; i < a.Function.Function.Parameters.Count; ++i) {
 						var p = a.Function.Function.Parameters[i];
@@ -219,26 +229,35 @@ namespace Petri
 
 						var valueEditor = CreateWidget<Entry>(true, 20, a.Function.Arguments[i].MakeUserReadable());
 						editorFields.Add(valueEditor);
-						valueEditor.Changed += (obj, eventInfo) => {
-							var args = new List<Cpp.Expression>();
-							for(int j = (a.Function.Function is Cpp.Method) ? 2 : 0; j < editorFields.Count; ++j) {
-								Widget w = editorFields[j];
-								if(w.GetType() == typeof(Entry)) {
-									if((w as Entry).Text == "this")
-										args.Add(new Cpp.EntityExpression(a, "this"));
-									else
-										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, _document.AllFunctions, _document.CppMacros));
+						MainClass.RegisterValidation(valueEditor, false, (obj, ii) => {
+							try {
+								var args = new List<Cpp.Expression>();
+								for(int j = (a.Function.Function is Cpp.Method) ? 2 : 0; j < editorFields.Count; ++j) {
+									Widget w = editorFields[j];
+									if(w.GetType() == typeof(Entry)) {
+										if((w as Entry).Text == "this")
+											args.Add(new Cpp.EntityExpression(a, "this"));
+										else
+											args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, _document.AllFunctions, _document.CppMacros));
+									}
 								}
+								Cpp.FunctionInvocation invocation;
+								if(a.Function.Function is Cpp.Method) {
+									invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions, _document.CppMacros), false, args.ToArray());
+								}
+								else {
+									invocation = new Cpp.FunctionInvocation(a.Function.Function, args.ToArray());
+								}
+								_document.PostAction(new InvocationChangeAction(a, invocation));
 							}
-							Cpp.FunctionInvocation invocation;
-							if(a.Function.Function is Cpp.Method) {
-								invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions, _document.CppMacros), false, args.ToArray());
+							catch(Exception ex) {
+								MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("L'expression spécifiée est invalide (" + ex.Message + ")."));
+								d.AddButton("Annuler", ResponseType.Cancel);
+								d.Run();
+								d.Destroy();
+								(obj as Entry).Text = a.Function.Arguments[(int)(ii[0])].MakeUserReadable();
 							}
-							else {
-								invocation = new Cpp.FunctionInvocation(a.Function.Function, args.ToArray());
-							}
-							_document.PostAction(new InvocationChangeAction(a, invocation));
-						};
+						}, new object[]{i});
 					}
 				}
 			}
@@ -330,9 +349,9 @@ namespace Petri
 		public TransitionEditor(Transition t, Document doc) : base(t, doc) {
 			CreateLabel(0, "Nom de la transition :");
 			var name = CreateWidget<Entry>(true, 0, t.Name);
-			name.Changed += (obj, eventInfo) => {
+			MainClass.RegisterValidation(name, true, (obj, p) => {
 				_document.PostAction(new ChangeNameAction(t, (obj as Entry).Text));
-			};
+			});
 
 			CreateLabel(0, "Condition de la transition :");
 			string userReadable;
@@ -343,7 +362,7 @@ namespace Petri
 				userReadable = t.Condition.MakeUserReadable();
 			}
 			var condition = CreateWidget<Entry>(true, 0, userReadable);
-			condition.FocusOutEvent += (obj, eventInfo) => {
+			MainClass.RegisterValidation(condition, false, (obj, p) => {
 				try {
 					var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, doc.Settings.Enum, t, _document.AllFunctions, _document.CppMacros));
 					_document.PostAction(cond);
@@ -356,7 +375,7 @@ namespace Petri
 
 					(obj as Entry).Text = userReadable;
 				}
-			};
+			});
 		}
 	}
 
@@ -364,9 +383,9 @@ namespace Petri
 		public InnerPetriNetEditor(InnerPetriNet i, Document doc) : base(i, doc) {
 			CreateLabel(0, "Nom du graphe :");
 			var name = CreateWidget<Entry>(true, 0, i.Name);
-			name.Changed += (obj, eventInfo) => {
+			MainClass.RegisterValidation(name, true, (obj, p) => {
 				_document.PostAction(new ChangeNameAction(i, (obj as Entry).Text));
-			};
+			});
 
 			var active = CreateWidget<CheckButton>(false, 0, "Actif à t = 0 :");
 			active.Active = i.Active;

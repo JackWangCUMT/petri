@@ -191,6 +191,7 @@ namespace Petri
 					_currentAction = EditorAction.CreatingTransition;
 				}
 				else if(_hoveredItem == null) {
+					_currentAction = EditorAction.None;
 					this.ResetSelection();
 				}
 			}

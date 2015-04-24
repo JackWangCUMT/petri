@@ -215,7 +215,7 @@ namespace Petri
 			context.Stroke();
 
 			minX += 50;
-			minY += 50;
+			minY += 50 + 300;
 
 			minX *= Zoom;
 			minY *= Zoom;

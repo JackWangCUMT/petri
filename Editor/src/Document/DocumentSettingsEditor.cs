@@ -38,7 +38,7 @@ namespace Petri
 			{
 				Label label = new Label("Nom C++ du réseau de pétri :");
 				Entry entry = new Entry(_document.Settings.Name);
-				entry.FocusOutEvent += (obj, eventInfo) => {
+				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					Regex name = new Regex(Cpp.Parser.NamePattern);
 					Match nameMatch = name.Match((obj as Entry).Text);
 
@@ -54,7 +54,7 @@ namespace Petri
 						_document.Settings.Name = (obj as Entry).Text;
 						_document.Settings.Modified = true;
 					}
-				};
+				});
 
 				var hbox = new HBox(false, 5);
 				hbox.PackStart(label, false, false, 0);
@@ -64,7 +64,7 @@ namespace Petri
 				label = new Label("Enum \"Résultat Action\" :");
 				_customEnumEditor = new Entry("");
 
-				_customEnumEditor.FocusOutEvent += (obj, eventInfo) => {
+				MainClass.RegisterValidation(_customEnumEditor, false, (obj, p) => {
 					Cpp.Enum e = null;
 					try {
 						e = new Cpp.Enum((obj as Entry).Text);
@@ -84,7 +84,7 @@ namespace Petri
 							((Entry)obj).Sensitive = false;
 						}
 					}
-				};
+				});
 
 				var radioVBox = new VBox(true, 2);
 				_defaultEnum = new RadioButton("Utiliser l'enum par défaut (ActionResult)");
@@ -143,10 +143,10 @@ namespace Petri
 
 				label = new Label("Chemin vers le compilateur C++ :");
 				entry = new Entry(_document.Settings.Compiler);
-				entry.FocusOutEvent += (obj, eventInfo) => {
+				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					_document.Settings.Compiler = (obj as Entry).Text;
 					_document.Settings.Modified = true;
-				};
+				});
 
 				hbox = new HBox(false, 5);
 				hbox.PackStart(label, false, false, 0);
@@ -155,11 +155,11 @@ namespace Petri
 
 				label = new Label("Flags passés au compilateur C++ :");
 				entry = new Entry(String.Join(" ", _document.Settings.CompilerFlags));
-				entry.FocusOutEvent += (obj, eventInfo) => {
+				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					_document.Settings.CompilerFlags.Clear();
 					_document.Settings.CompilerFlags.AddRange((obj as Entry).Text.Split(new char[]{' '}, StringSplitOptions.RemoveEmptyEntries));
 					_document.Settings.Modified = true;
-				};
+				});
 
 				hbox = new HBox(false, 5);
 				hbox.PackStart(label, false, false, 0);
@@ -169,10 +169,10 @@ namespace Petri
 
 				label = new Label("Chemin où générer le code (relatif au document) :");
 				_sourceOutputPath = new Entry(_document.Settings.SourceOutputPath);
-				_sourceOutputPath.FocusOutEvent += (obj, eventInfo) => {
+				MainClass.RegisterValidation(_sourceOutputPath, false, (obj, p) => {
 					_document.Settings.SourceOutputPath = (obj as Entry).Text;
 					_document.Settings.Modified = true;
-				};
+				});
 
 				hbox = new HBox(false, 5);
 				hbox.PackStart(label, false, false, 0);
@@ -188,10 +188,10 @@ namespace Petri
 
 				label = new Label("Chemin où créer la librairie dynamique (relatif au document) :");
 				_libOutputPath = new Entry(_document.Settings.LibOutputPath);
-				_libOutputPath.FocusOutEvent += (obj, eventInfo) => {
+				MainClass.RegisterValidation(_libOutputPath, false, (obj, p) => {
 					_document.Settings.LibOutputPath = (obj as Entry).Text;
 					_document.Settings.Modified = true;
-				};
+				});
 
 				hbox = new HBox(false, 5);
 				hbox.PackStart(label, false, false, 0);
@@ -207,10 +207,10 @@ namespace Petri
 
 				label = new Label("Nom d'hôte du débuggeur :");
 				entry = new Entry(_document.Settings.Hostname);
-				entry.FocusOutEvent += (obj, eventInfo) => {
+				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					_document.Settings.Hostname = (obj as Entry).Text;
 					_document.Settings.Modified = true;
-				};
+				});
 
 				hbox = new HBox(false, 5);
 				hbox.PackStart(label, false, false, 0);
@@ -219,7 +219,7 @@ namespace Petri
 
 				label = new Label("Port de communication avec le débuggueur :");
 				entry = new Entry(_document.Settings.Port.ToString());
-				entry.FocusOutEvent += (obj, eventInfo) => {
+				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					try {
 						_document.Settings.Port = UInt16.Parse((obj as Entry).Text);
 					}
@@ -227,7 +227,7 @@ namespace Petri
 						(obj as Entry).Text = _document.Settings.Port.ToString();
 					}
 					_document.Settings.Modified = true;
-				};
+				});
 
 				hbox = new HBox(false, 5);
 				hbox.PackStart(label, false, false, 0);
