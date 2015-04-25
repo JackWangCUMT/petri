@@ -1,9 +1,9 @@
 .DS_Store
-.log
-.mdb
-.config
+*.log
+*.mdb
+*.config
 *~
 
 /Editor/obj
-/Editor/bin
 /Editor/Petri.userprefs
+/Editor/MonoMac.dll

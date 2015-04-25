@@ -1,5 +1,4 @@
 ﻿taille debugeditor
-Package release (json)
 Défilement pendant sélection
 couper et mettre dans une macro -> ajouter la fonction et débugguer le couper qui duplique un état
 génération invocation compilateur
