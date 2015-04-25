@@ -11,6 +11,16 @@ namespace Petri
 			this.EntityDraw = new DebugEntityDraw(_document);
 		}
 
+		public Entity SelectedEntity {
+			get {
+				return _selection;
+			}
+			set {
+				_selection = value;
+				_document.DebugController.DebugEditor = new DebugEditor(_document, value);
+			}
+		}
+
 		protected override void ManageTwoButtonPress(uint button, double x, double y) {
 			if(button == 1) {
 				var entity = CurrentPetriNet.StateAtPosition(new PointD(x, y));
@@ -27,6 +37,8 @@ namespace Petri
 						_document.DebugController.AddBreakpoint(a);
 					}
 
+					SelectedEntity = entity;
+
 					this.Redraw();
 				}
 			}
@@ -34,7 +46,21 @@ namespace Petri
 
 		protected override void ManageOneButtonPress(uint button, double x, double y) {
 			if(button == 1) {
+				_deltaClick.X = x;
+				_deltaClick.Y = y;
 
+				Entity hovered = CurrentPetriNet.StateAtPosition(_deltaClick);
+
+				if(hovered == null) {
+					hovered = CurrentPetriNet.TransitionAtPosition(_deltaClick);
+
+					if(hovered == null) {
+						hovered = CurrentPetriNet.CommentAtPosition(_deltaClick);
+					}
+				}
+
+				SelectedEntity = hovered;
+				Redraw();
 			}
 			else if(button == 3) {
 
@@ -62,6 +88,8 @@ namespace Petri
 			get;
 			set;
 		}
+
+		Entity _selection;
 	}
 }
 

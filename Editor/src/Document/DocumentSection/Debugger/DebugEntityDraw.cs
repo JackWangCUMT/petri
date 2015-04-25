@@ -57,18 +57,25 @@ namespace Petri
 					context.LineWidth = 4;
 				}
 			}
+			if(s == _document.Window.DebugGui.View.SelectedEntity) {
+				context.LineWidth += 1;
+			}
 		}
-
-
+			
+		protected override void InitContextForBorder(Transition t, Context context) {
+			base.InitContextForBorder(t, context);
+			if(t == _document.Window.DebugGui.View.SelectedEntity) {
+				context.LineWidth += 1;
+			}
+		}
 		protected override void InitContextForLine(Transition t, Context context) {
-			Color c = new Color(0.1, 0.6, 1, 1);
-			double lineWidth = 2;
-
-			context.SetSourceRGBA(c.R, c.G, c.B, c.A);
-			context.LineWidth = lineWidth;
+			base.InitContextForLine(t, context);
+			if(t == _document.Window.DebugGui.View.SelectedEntity) {
+				context.LineWidth += 1;
+			}
 		}
 
-		private Document _document;
+		Document _document;
 	}
 }
 

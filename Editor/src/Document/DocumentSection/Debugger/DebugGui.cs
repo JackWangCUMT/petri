@@ -83,6 +83,11 @@ namespace Petri
 			_paned.Pack2(_editor, false, true);
 		}
 
+		public void ToNormalSize() {
+			// TODO: tbd
+			//_paned.Child2.WidthRequest = 300;
+		}
+
 		public DebugView View {
 			get {
 				return _view;
