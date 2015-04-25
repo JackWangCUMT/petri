@@ -176,16 +176,51 @@ namespace Petri
 				_document.Redo();
 			}
 			else if(sender == _copyItem) {
-				_document.CurrentController.Copy();
+				if(Focus == Gui.BaseView)
+					_document.CurrentController.Copy();
+				else if(Focus is Editable) {
+					(Focus as Editable).CopyClipboard();
+				}
+				else if(Focus is TextView) {
+					var v = Focus as TextView;
+					v.Buffer.CopyClipboard(v.GetClipboard(Gdk.Selection.Clipboard));
+				}
 			}
 			else if(sender == _cutItem) {
-				_document.CurrentController.Cut();
+				if(Focus == Gui.BaseView)
+					_document.CurrentController.Cut();
+				else if(Focus is Editable) {
+					(Focus as Editable).CutClipboard();
+				}
+				else if(Focus is TextView) {
+					var v = Focus as TextView;
+					v.Buffer.CutClipboard(v.GetClipboard(Gdk.Selection.Clipboard), true);
+				}
 			}
 			else if(sender == _pasteItem) {
-				_document.CurrentController.Paste();
+				if(Focus == Gui.BaseView)
+					_document.CurrentController.Paste();
+				else if(Focus is Editable) {
+					(Focus as Editable).PasteClipboard();
+				}
+				else if(Focus is TextView) {
+					var v = Focus as TextView;
+					v.Buffer.PasteClipboard(v.GetClipboard(Gdk.Selection.Clipboard));
+				}
 			}
 			else if(sender == _selectAllItem) {
-				_document.CurrentController.SelectAll();
+				if(Focus == Gui.BaseView)
+					_document.CurrentController.SelectAll();
+				else if(Focus is Editable) {
+					(Focus as Editable).SelectRegion(0, -1);
+				}
+				else if(Focus is TextView) {
+					var v = Focus as TextView;
+					TextIter start = v.Buffer.GetIterAtOffset(0), end = v.Buffer.GetIterAtOffset(0);
+					end.ForwardToEnd();
+
+					v.Buffer.SelectRange(start, end);
+				}
 			}
 			else if(sender == _openItem) {
 				MainClass.OpenDocument();

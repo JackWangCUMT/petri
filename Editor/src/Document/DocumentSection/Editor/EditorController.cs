@@ -95,6 +95,7 @@ namespace Petri
 			foreach(var c in _document.Window.EditorGui.View.CurrentPetriNet.Comments) {
 				selected.Add(c);
 			}
+			_document.Window.EditorGui.View.Redraw();
 
 			UpdateSelection();
 		}

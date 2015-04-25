@@ -1,15 +1,22 @@
-﻿<Properties MonoDevelop.MonoMac.LastXamMacNagTime="17/04/2015 18:18:29" StartupItem="Petri.csproj">
+﻿<Properties MonoDevelop.MonoMac.LastXamMacNagTime="24/04/2015 19:22:13" StartupItem="Petri.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="src/Document/DocumentSection/Debugger/DebugGui.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="src/Document/DocumentSection/PetriView.cs">
     <Files>
-      <File FileName="Todo.txt" Line="16" Column="34" />
-      <File FileName="src/Document/DocumentSection/Debugger/DebugServer.cs" Line="351" Column="7" />
-      <File FileName="src/Document/DocumentSection/Debugger/DebugGui.cs" Line="23" Column="19" />
+      <File FileName="src/Document/DocumentSection/Editor/EntityEditor.cs" Line="185" Column="15" />
+      <File FileName="src/Document/DocumentSection/Debugger/DebugGui.cs" Line="12" Column="29" />
+      <File FileName="src/Document/DocumentSection/Editor/EditorGui.cs" Line="19" Column="24" />
+      <File FileName="src/Application/Program.cs" Line="31" Column="63" />
+      <File FileName="src/Cpp/Expression.cs" Line="30" Column="1" />
+      <File FileName="src/Cpp/Parser.cs" Line="251" Column="17" />
+      <File FileName="src/Document/DocumentSection/Editor/EditorView.cs" Line="45" Column="4" />
+      <File FileName="Todo.txt" Line="9" Column="1" />
+      <File FileName="src/Document/DocumentSection/Debugger/DebugServer.cs" Line="1" Column="1" />
+      <File FileName="src/Document/DocumentSection/PetriView.cs" Line="218" Column="14" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Catchpoint enabled="false" exceptionName="System.Exception" includeSubclasses="True" />
+      <Breakpoint file="/Users/remi/Documents/Programmation/C#/Petri/Editor/src/Cpp/Expression.cs" line="30" column="64" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />

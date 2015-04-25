@@ -168,33 +168,37 @@ namespace Petri
 				_document.Window.DebugGui.Status = "Rechargement du réseau de pétri…";
 				return false;
 			});
-			this.StopPetri();
-			if(!_document.Compile(true)) {
-				GLib.Timeout.Add(0, () => {
-					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("La compilation a échoué."));
-					d.AddButton("Annuler", ResponseType.Cancel);
-					d.Run();
-					d.Destroy();
-
-					return false;
-				});
-			}
-			else {
-				try {
-					this.SendObject(new JObject(new JProperty("type", "reload")));
-				}
-				catch(Exception e) {
+			GLib.Timeout.Add(1, () => {
+				this.StopPetri();
+				if(!_document.Compile(true)) {
 					GLib.Timeout.Add(0, () => {
-						MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
+						MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("La compilation a échoué."));
 						d.AddButton("Annuler", ResponseType.Cancel);
 						d.Run();
 						d.Destroy();
 
 						return false;
 					});
-					this.Detach();
 				}
-			}
+				else {
+					try {
+						this.SendObject(new JObject(new JProperty("type", "reload")));
+					}
+					catch(Exception e) {
+						GLib.Timeout.Add(0, () => {
+							MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
+							d.AddButton("Annuler", ResponseType.Cancel);
+							d.Run();
+							d.Destroy();
+
+							return false;
+						});
+						this.Detach();
+					}
+				}
+
+				return false;
+			});
 		}
 
 		public void UpdateBreakpoints() {

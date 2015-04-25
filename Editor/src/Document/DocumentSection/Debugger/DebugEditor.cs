@@ -14,11 +14,12 @@ namespace Petri
 			_buf = new TextBuffer(new TextTagTable());
 			_buf.Text = "";
 			var result = CreateWidget<TextView>(true, 0, _buf);
+			result.Editable = false;
 			result.SetSizeRequest(200, 400);
 			result.WrapMode = WrapMode.Word;
 
 			Evaluate.Clicked += (sender, ev) => {
-				if(!_document.DebugController.Server.PetriRunning) {
+				if(!_document.DebugController.Server.PetriRunning || _document.DebugController.Server.Pause) {
 					string str = entry.Text;
 					try {
 						Cpp.Expression expr = Cpp.Expression.CreateFromString<Cpp.Expression>(str, null, _document.AllFunctions, _document.CppMacros);
