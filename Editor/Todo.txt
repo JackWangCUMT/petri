@@ -1,5 +1,5 @@
-﻿jetons par défaut à 1
-Signe -10_cm
+﻿Défilement pendant sélection
+couper et mettre dans une macro -> ajouter la fonction et débugguer le couper qui duplique un état
 Évaluation symboles
 Cible des raccourcis clavier (copier-coller, fermer…)
 génération invocation compilateur

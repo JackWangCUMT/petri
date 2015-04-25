@@ -429,10 +429,10 @@ namespace Petri
 		}
 
 		public override bool Compile(bool wait) {
-			if(_modifiedSinceGeneration) {
-				SaveCpp();
-			}
 			if(this.Path != "") {
+				if(_modifiedSinceGeneration) {
+					SaveCpp();
+				}
 				Window.Gui.Status = "Compilation en cours…";
 				Task t = Task.Run((System.Action)CompileTask);
 				if(wait) {

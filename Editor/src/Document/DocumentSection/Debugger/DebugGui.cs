@@ -221,12 +221,16 @@ namespace Petri
 
 		public bool Compilation {
 			set {
-				if(value) {
-					_reload.Sensitive = false;
-				}
-				else {
-					_reload.Sensitive = true;
-				}
+				GLib.Timeout.Add(0, () => { 
+					if(value) {
+						_reload.Sensitive = false;
+					}
+					else {
+						_reload.Sensitive = true;
+					}
+
+					return false;
+				});
 			}
 		}
 

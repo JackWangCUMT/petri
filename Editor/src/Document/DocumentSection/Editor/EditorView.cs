@@ -218,7 +218,7 @@ namespace Petri
 			else if(_currentAction == EditorAction.CreatingTransition && button == 1) {
 				_currentAction = EditorAction.None;
 				if(_hoveredItem != null && _hoveredItem is State) {
-					_document.PostAction(new AddTransitionAction(new Transition(CurrentPetriNet.Document, CurrentPetriNet, SelectedEntity as State, _hoveredItem as State), true));
+					_document.PostAction(new AddTransitionAction(new Transition(CurrentPetriNet.Document, CurrentPetriNet, SelectedEntity as State, _hoveredItem as State), (_hoveredItem as State).RequiredTokens == 0));
 				}
 			}
 			else if(_currentAction == EditorAction.SelectionRect) {

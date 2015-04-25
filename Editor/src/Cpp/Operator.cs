@@ -40,10 +40,10 @@ namespace Petri
 				Minus,
 				ShiftLeft, // <<
 				ShiftRight, // >>
-				Less,
 				LessEqual,
-				Greater,
+				Less,
 				GreaterEqual,
+				Greater,
 				Equal,
 				NotEqual,
 				BitwiseAnd, // &
@@ -143,16 +143,16 @@ namespace Petri
 				Properties[Name.Div] = new Op(Associativity.LeftToRight, Type.Binary, "/", 5, true, false);
 				Properties[Name.Mod] = new Op(Associativity.LeftToRight, Type.Binary, "%", 5, true, false);
 
-				Properties[Name.Plus] = new Op(Associativity.LeftToRight, Type.Binary, "+", 6, true, false);
-				Properties[Name.Minus] = new Op(Associativity.LeftToRight, Type.Binary, "-", 6, true, false);
+				Properties[Name.Plus] = new Op(Associativity.LeftToRight, Type.Binary, "+", 6, true, true);
+				Properties[Name.Minus] = new Op(Associativity.LeftToRight, Type.Binary, "-", 6, true, true);
 
 				Properties[Name.ShiftLeft] = new Op(Associativity.LeftToRight, Type.Binary, "<<", 7, true, false);
 				Properties[Name.ShiftRight] = new Op(Associativity.LeftToRight, Type.Binary, ">>", 7, true, false);
 
-				Properties[Name.Less] = new Op(Associativity.LeftToRight, Type.Binary, "<", 8, true, false);
 				Properties[Name.LessEqual] = new Op(Associativity.LeftToRight, Type.Binary, "<=", 8, true, false);
-				Properties[Name.Greater] = new Op(Associativity.LeftToRight, Type.Binary, ">", 8, true, false);
+				Properties[Name.Less] = new Op(Associativity.LeftToRight, Type.Binary, "<", 8, true, false);
 				Properties[Name.GreaterEqual] = new Op(Associativity.LeftToRight, Type.Binary, ">=", 8, true, false);
+				Properties[Name.Greater] = new Op(Associativity.LeftToRight, Type.Binary, ">", 8, true, false);
 
 				Properties[Name.Equal] = new Op(Associativity.LeftToRight, Type.Binary, "==", 9, true, false);
 				Properties[Name.NotEqual] = new Op(Associativity.LeftToRight, Type.Binary, "!=", 9, true, false);

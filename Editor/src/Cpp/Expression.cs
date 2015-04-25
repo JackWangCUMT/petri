@@ -186,17 +186,28 @@ namespace Petri {
 								// If the operator is ambiguous, we assume the ambiguity is that there exist a binary op with the same representation
 								// So we have to check if we have found a unary version
 								if(prop.ambiguous) {
-									if(prop.type == Petri.Cpp.Operator.Type.PrefixUnary) {
+									if(prop.type == Petri.Cpp.Operator.Type.Binary) {
 										// 2 cases where the operator is actually unary: we can find a binary operator before, or nothing at all.
-										if(opIndex == 1)
+										if(opIndex == 0)
 											continue;
+										var sub = s.Substring(0, opIndex);
+										bool found = false;
 										foreach(var op2 in System.Enum.GetValues(typeof(Cpp.Operator.Name)).Cast<Cpp.Operator.Name>()) {
-											if(Cpp.Operator.Properties[op2].type == Petri.Cpp.Operator.Type.Binary) {
-												int opIndex2 = s.Substring(0, opIndex).IndexOf(Cpp.Operator.Properties[op2].cpp);
+											if(op2 != Cpp.Operator.Name.None && Cpp.Operator.Properties[op2].implemented && Cpp.Operator.Properties[op2].type == Petri.Cpp.Operator.Type.Binary) {
+												int opIndex2 = sub.IndexOf(Cpp.Operator.Properties[op2].cpp);
 												if(opIndex2 == -1) {
 													continue;
 												}
+												else {
+													if(Cpp.Operator.Properties[op2].precedence <= Cpp.Operator.Properties[op].precedence) {
+														found = true;
+														break;
+													}
+												}
 											}
+										}
+										if(found) {
+											continue;
 										}
 									}
 								}
@@ -211,6 +222,13 @@ namespace Petri {
 
 						if(prop.type == Petri.Cpp.Operator.Type.Binary) {
 							string e1 = s.Substring(0, index);
+
+							/*// Unary minus unfortunately has the same representation as binary minus, so we try to detect it
+							if(foundOperator == Petri.Cpp.Operator.Name.Minus && e1 == "" || e1.EndsWith(",") || e1.EndsWith("=")) {
+								foundOperator = Petri.Cpp.Operator.Name.None;
+								continue;
+							}*/
+
 							string e2 = s.Substring(index + prop.cpp.Length);
 
 							// Method call
