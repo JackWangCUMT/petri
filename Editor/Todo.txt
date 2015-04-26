@@ -1,10 +1,13 @@
-﻿taille debugeditor
-couper et mettre dans une macro -> ajouter la fonction et débugguer le couper qui duplique un état
+﻿macro active à l'état initial mais en fait non
+Condition qui dépend du résultat de l'action ne parse pas correctement (!REUSSI)
+
+taille debugeditor
 génération invocation compilateur
 état interne des Conditions pas thread-safe (Gestion des timeouts)
 
 Parenthèses A && B && C
 
+Variables atomiques accessibles directement dans l'éditeur de RdP
 
 Commenter le code :3
 Documentation

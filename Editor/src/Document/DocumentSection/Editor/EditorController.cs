@@ -17,6 +17,7 @@ namespace Petri
 		public override void Copy() {
 			if(_document.Window.EditorGui.View.SelectedEntities.Count > 0) {
 				MainClass.Clipboard = new HashSet<Entity>(CloneEntities(_document.Window.EditorGui.View.SelectedEntities, _document));
+				MainClass.PasteCount = 0;
 
 				this.UpdateMenuItems();
 			}
@@ -24,6 +25,7 @@ namespace Petri
 
 		public override void Paste() {
 			if(MainClass.Clipboard.Count > 0) {
+				++MainClass.PasteCount;
 				var action = PasteAction();
 				_document.PostAction(action);
 
@@ -38,6 +40,87 @@ namespace Petri
 			if(_document.Window.EditorGui.View.SelectedEntities.Count > 0) {
 				Copy();
 				_document.PostAction(new GuiActionWrapper(this.RemoveSelection(), "Couper les entités"));
+			}
+		}
+
+		public void EmbedInMacro() {
+			var selected = _document.Window.EditorGui.View.SelectedEntities;
+			if(selected.Count > 0) {
+				var toRemove = new List<Entity>();
+				foreach(var e in selected) {
+					if(e is Transition) {
+						var t = (Transition)e;
+						if(!selected.Contains(t.After) || !selected.Contains(t.After))
+							toRemove.Add(t);
+					}
+					else if(e is State) {
+						var s = (State)e;
+						foreach(var t in s.TransitionsBefore) {
+							if(!selected.Contains(t)) {
+								toRemove.Add(t);
+							}
+						}
+						foreach(var t in s.TransitionsAfter) {
+							if(!selected.Contains(t)) {
+								toRemove.Add(t);
+							}
+						}
+					}
+				}
+
+				if(toRemove.Count > 0) {
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, MainClass.SafeMarkupFromString("Impossible d'encapsuler la sélection dans une macro : des entités qui sont reliées à la sélection ne sont pas sélectionnées."));
+					d.AddButton("OK", ResponseType.Cancel);
+					d.Run();
+					d.Destroy();
+					return;
+				}
+
+
+				var actions = new List<GuiAction>();
+
+				var pos = new Cairo.PointD(double.MaxValue, double.MaxValue);
+				foreach(var e in selected) {
+					if(e is State) {
+						pos.X = Math.Min(pos.X, e.Position.X);
+						pos.Y = Math.Min(pos.Y, e.Position.Y);
+					}
+				}
+				var macro = new InnerPetriNet(_document, _document.Window.EditorGui.View.CurrentPetriNet, false, pos);
+
+				foreach(var e in selected) {
+					if(e is Comment) {
+						actions.Add(new RemoveCommentAction(e as Comment));
+					}
+					else if(e is State) {
+						actions.Add(new RemoveStateAction(e as State));
+					}
+					else if(e is Transition) {
+						actions.Add(new RemoveTransitionAction(e as Transition, false));
+					}
+				}
+
+				foreach(var e in selected) {
+					actions.Add(new ChangeParentAction(e, macro));
+
+					if(e is Comment) {
+						actions.Add(new AddCommentAction(e as Comment));
+					}
+					else if(e is State) {
+						actions.Add(new AddStateAction(e as State));
+					}
+					else if(e is Transition) {
+						actions.Add(new AddTransitionAction(e as Transition, false));
+					}
+
+					if(!(e is Transition)) {
+						actions.Add(new MoveAction(e, new Cairo.PointD(-pos.X + 50, -pos.Y + 50)));
+					}
+				}
+
+				actions.Add(new AddStateAction(macro));
+
+				_document.PostAction(new GuiActionList(actions, "Regrouper dans une macro"));
 			}
 		}
 
@@ -114,6 +197,7 @@ namespace Petri
 			_document.Window.CopyItem.Sensitive = _document.Window.EditorGui.View.SelectedEntities.Count > 0;
 			_document.Window.CutItem.Sensitive = _document.Window.EditorGui.View.SelectedEntities.Count > 0;
 			_document.Window.PasteItem.Sensitive = MainClass.Clipboard.Count > 0;
+			_document.Window.EmbedItem.Sensitive = _document.Window.EditorGui.View.SelectedEntities.Count > 0;
 		}
 
 		public EntityEditor EntityEditor {
@@ -150,13 +234,13 @@ namespace Petri
 				// Change entity's owner
 				s.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
 				s.Name = s.Name + " 2";
-				s.Position = new Cairo.PointD(s.Position.X + 20, s.Position.Y + 20);
+				s.Position = new Cairo.PointD(s.Position.X + 20 * MainClass.PasteCount, s.Position.Y + 20 * MainClass.PasteCount);
 				actionList.Add(new AddStateAction(s));
 			}
 			foreach(Comment c in comments) {
 				// Change entity's owner
 				c.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
-				c.Position = new Cairo.PointD(c.Position.X + 20, c.Position.Y + 20);
+				c.Position = new Cairo.PointD(c.Position.X + 20 * MainClass.PasteCount, c.Position.Y + 20 * MainClass.PasteCount);
 				actionList.Add(new AddCommentAction(c));
 			}
 

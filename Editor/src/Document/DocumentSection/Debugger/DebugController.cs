@@ -53,7 +53,7 @@ namespace Petri
 		}
 
 		public override void UpdateMenuItems() {
-
+			Document.Window.EmbedItem.Sensitive = false;
 		}
 
 		public override void Copy() {

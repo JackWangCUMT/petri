@@ -137,6 +137,11 @@ namespace Petri
 				return _pasteItem;
 			}
 		}
+		public MenuItem EmbedItem {
+			get {
+				return _embedInMacro;
+			}
+		}
 
 		public MenuItem RevertItem {
 			get {
@@ -220,6 +225,11 @@ namespace Petri
 					end.ForwardToEnd();
 
 					v.Buffer.SelectRange(start, end);
+				}
+			}
+			else if(sender == _embedInMacro) {
+				if(_document.CurrentController == _document.EditorController) {
+					_document.EditorController.EmbedInMacro();
 				}
 			}
 			else if(sender == _openItem) {
@@ -355,6 +365,10 @@ namespace Petri
 			_pasteItem.Activated += OnClickMenu;
 			_pasteItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.v, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
+			_embedInMacro = new MenuItem("Regrouper dans une macro");
+			_embedInMacro.Activated += OnClickMenu;
+			_embedInMacro.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
+
 			_preferencesItem = new MenuItem("Préférences…");
 			_preferencesItem.Activated += OnClickMenu;
 			_preferencesItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.comma, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
@@ -367,6 +381,8 @@ namespace Petri
 			editMenu.Append(_pasteItem);
 			editMenu.Append(new SeparatorMenuItem());
 			editMenu.Append(_selectAllItem);
+			editMenu.Append(new SeparatorMenuItem());
+			editMenu.Append(_embedInMacro);
 
 			_undoItem.Sensitive = false;
 			_redoItem.Sensitive = false;
@@ -458,6 +474,7 @@ namespace Petri
 		MenuItem _copyItem;
 		MenuItem _pasteItem;
 		MenuItem _selectAllItem;
+		MenuItem _embedInMacro;
 
 		MenuItem _showEditorItem;
 		MenuItem _showDebuggerItem;

@@ -83,6 +83,9 @@ namespace Petri
 			Modified = true;
 			UndoManager.PostAction(a);
 			UpdateUndo();
+			if(a.Focus is Entity && CurrentController == EditorController) {
+				Window.EditorGui.View.SelectedEntity = (Entity)a.Focus;
+			}
 			Window.Gui.BaseView.Redraw();
 		}
 

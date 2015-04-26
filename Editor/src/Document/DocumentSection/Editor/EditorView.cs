@@ -8,6 +8,13 @@ namespace Petri
 {
 	public class EditorView : PetriView
 	{
+		public enum EditorTool {
+			Arrow,
+			Action,
+			Transition,
+			Comment
+		}
+
 		public enum EditorAction {
 			None,
 			MovingAction,
@@ -19,14 +26,19 @@ namespace Petri
 		}
 
 		public EditorView(Document doc) : base(doc) {
-			_currentAction = EditorAction.None;
+			CurrentAction = EditorAction.None;
+			CurrentTool = EditorTool.Arrow;
 			this.EntityDraw = new EditorEntityDraw(this);
 		}
 
 		public EditorAction CurrentAction {
-			get {
-				return _currentAction;
-			}
+			get;
+			private set;
+		}
+
+		public EditorTool CurrentTool {
+			get;
+			set;
 		}
 
 		public Entity HoveredItem {
@@ -38,7 +50,7 @@ namespace Petri
 		public override void FocusIn() {
 			_shiftDown = false;
 			_ctrlDown = false;
-			_currentAction = EditorAction.None;
+			CurrentAction = EditorAction.None;
 			base.FocusIn();
 			_hoveredItem = null;
 			_document.ReloadHeaders();
@@ -47,19 +59,19 @@ namespace Petri
 		public override void FocusOut() {
 			_shiftDown = false;
 			_ctrlDown = false;
-			_currentAction = EditorAction.None;
+			CurrentAction = EditorAction.None;
 			base.FocusOut();
 		}
 
 		protected override void ManageTwoButtonPress(uint button, double x, double y) {
-			if(button == 1) {
+			if(button == 1 && CurrentTool == EditorTool.Arrow) {
 				// Add new action
 				if(_selectedEntities.Count == 0) {
 					_document.PostAction(new AddStateAction(new Action(this.CurrentPetriNet.Document, CurrentPetriNet, false, new PointD(x, y))));
 					_hoveredItem = SelectedEntity;
 				}
 				else if(_selectedEntities.Count == 1) {
-					_currentAction = EditorAction.None;
+					CurrentAction = EditorAction.None;
 
 					var selected = this.SelectedEntity as State;
 
@@ -123,10 +135,10 @@ namespace Petri
 
 		protected override void ManageOneButtonPress(uint button, double x, double y) {
 			if(button == 1) {
-				if(_currentAction == EditorAction.None) {
-					_deltaClick.X = x;
-					_deltaClick.Y = y;
+				_deltaClick.X = x;
+				_deltaClick.Y = y;
 
+				if(CurrentTool != EditorTool.Arrow || CurrentAction == EditorAction.None) {
 					_hoveredItem = CurrentPetriNet.StateAtPosition(_deltaClick);
 
 					if(_hoveredItem == null) {
@@ -153,52 +165,77 @@ namespace Petri
 						_originalPosition.Y = _motionReference.Position.Y;
 
 						if(_motionReference is State) {
-							_currentAction = EditorAction.MovingAction;
+							CurrentAction = EditorAction.MovingAction;
 						}
 						else if(_motionReference is Transition) {
-							_currentAction = EditorAction.MovingTransition;
+							CurrentAction = EditorAction.MovingTransition;
 						}
 						else if(_motionReference is Comment) {
 							Comment c = _motionReference as Comment;
 							if(Math.Abs(x - _motionReference.Position.X - c.Size.X / 2) < 8 || Math.Abs(x - _motionReference.Position.X + (_motionReference as Comment).Size.X / 2) < 8) {
-								_currentAction = EditorAction.ResizingComment;
+								CurrentAction = EditorAction.ResizingComment;
 								_beforeResize.X = c.Size.X;
 								_beforeResize.Y = c.Size.Y;
 							}
 							else {
-								_currentAction = EditorAction.MovingComment;
+								CurrentAction = EditorAction.MovingComment;
 							}
 						}
 						_deltaClick.X = x - _originalPosition.X;
 						_deltaClick.Y = y - _originalPosition.Y;
 					}
-					else {
-						if(!(_ctrlDown || _shiftDown)) {
-							this.ResetSelection();
+				}
+
+				if(CurrentTool == EditorTool.Arrow) {
+					if(CurrentAction == EditorAction.None) {
+						if(_hoveredItem == null) {
+							if(!(_ctrlDown || _shiftDown)) {
+								this.ResetSelection();
+							}
+							else {
+								_selectedFromRect = new HashSet<Entity>(_selectedEntities);
+							}
+							CurrentAction = EditorAction.SelectionRect;
+							_originalPosition.X = x;
+							_originalPosition.Y = y;
 						}
-						else {
-							_selectedFromRect = new HashSet<Entity>(_selectedEntities);
-						}
-						_currentAction = EditorAction.SelectionRect;
-						_originalPosition.X = x;
-						_originalPosition.Y = y;
+					}
+				}
+				else if(CurrentTool == EditorTool.Action) {
+					if(_hoveredItem == null) {
+						_document.PostAction(new AddStateAction(new Action(this.CurrentPetriNet.Document, CurrentPetriNet, false, new PointD(x, y))));
+					}
+				}
+				else if(CurrentTool == EditorTool.Transition) {
+					if(_hoveredItem is State) {
+						SelectedEntity = _hoveredItem;
+						CurrentAction = EditorAction.CreatingTransition;
+						_deltaClick.X = x;
+						_deltaClick.Y = y;
+					}
+				}
+				else if(CurrentTool == EditorTool.Comment) {
+					if(_hoveredItem == null) {
+						_document.PostAction(new AddCommentAction(new Comment(this.CurrentPetriNet.Document, CurrentPetriNet, new PointD(x, y))));
 					}
 				}
 			}
-			else if(button == 3) {
-				if(_currentAction == EditorAction.None && _hoveredItem != null && _hoveredItem is State) {
+			else if(button == 3 && CurrentTool == EditorTool.Arrow) {
+				if(_hoveredItem is State) {
 					SelectedEntity = _hoveredItem;
-					_currentAction = EditorAction.CreatingTransition;
+					CurrentAction = EditorAction.CreatingTransition;
+					_deltaClick.X = x;
+					_deltaClick.Y = y;
 				}
 				else if(_hoveredItem == null) {
-					_currentAction = EditorAction.None;
+					CurrentAction = EditorAction.None;
 					this.ResetSelection();
 				}
 			}
 		}
 
 		protected override void ManageButtonRelease(uint button, double x, double y) {
-			if(_currentAction == EditorAction.MovingAction || _currentAction == EditorAction.MovingTransition || _currentAction == EditorAction.MovingComment) {
+			if(CurrentAction == EditorAction.MovingAction || CurrentAction == EditorAction.MovingTransition || CurrentAction == EditorAction.MovingComment) {
 				if(_shouldUnselect) {
 					SelectedEntity = _hoveredItem;
 				}
@@ -213,16 +250,16 @@ namespace Petri
 						_document.PostAction(new GuiActionList(actions, actions.Count > 1 ? "Déplacer les entités" : "Déplacer l'entité"));
 					}
 				}
-				_currentAction = EditorAction.None;
+				CurrentAction = EditorAction.None;
 			}
-			else if(_currentAction == EditorAction.CreatingTransition && button == 1) {
-				_currentAction = EditorAction.None;
+			else if(CurrentAction == EditorAction.CreatingTransition && button == 1) {
+				CurrentAction = EditorAction.None;
 				if(_hoveredItem != null && _hoveredItem is State) {
 					_document.PostAction(new AddTransitionAction(new Transition(CurrentPetriNet.Document, CurrentPetriNet, SelectedEntity as State, _hoveredItem as State), (_hoveredItem as State).RequiredTokens == 0));
 				}
 			}
-			else if(_currentAction == EditorAction.SelectionRect) {
-				_currentAction = EditorAction.None;
+			else if(CurrentAction == EditorAction.SelectionRect) {
+				CurrentAction = EditorAction.None;
 
 				this.ResetSelection();
 				foreach(var e in _selectedFromRect)
@@ -231,8 +268,8 @@ namespace Petri
 
 				_selectedFromRect.Clear();
 			}
-			else if(_currentAction == EditorAction.ResizingComment) {
-				_currentAction = EditorAction.None;
+			else if(CurrentAction == EditorAction.ResizingComment) {
+				CurrentAction = EditorAction.None;
 				var newSize = new PointD((_hoveredItem as Comment).Size.X, (_hoveredItem as Comment).Size.Y);
 				(_hoveredItem as Comment).Size = _beforeResize;
 				_document.PostAction(new ResizeCommentAction(_hoveredItem as Comment, newSize));
@@ -244,8 +281,8 @@ namespace Petri
 		protected override void ManageMotion(double x, double y) {
 			_shouldUnselect = false;
 
-			if(_currentAction == EditorAction.MovingAction || _currentAction == EditorAction.MovingTransition || _currentAction == EditorAction.MovingComment) {
-				if(_currentAction == EditorAction.MovingAction || _currentAction == EditorAction.MovingComment) {
+			if(CurrentAction == EditorAction.MovingAction || CurrentAction == EditorAction.MovingTransition || CurrentAction == EditorAction.MovingComment) {
+				if(CurrentAction == EditorAction.MovingAction || CurrentAction == EditorAction.MovingComment) {
 					_selectedEntities.RemoveWhere(item => item is Transition);
 					_document.EditorController.UpdateSelection();
 				}
@@ -258,7 +295,7 @@ namespace Petri
 				}
 				this.Redraw();
 			}
-			else if(_currentAction == EditorAction.SelectionRect) {
+			else if(CurrentAction == EditorAction.SelectionRect) {
 				_deltaClick.X = x;
 				_deltaClick.Y = y;
 
@@ -292,7 +329,7 @@ namespace Petri
 
 				this.Redraw();
 			}
-			else if(_currentAction == EditorAction.ResizingComment) {
+			else if(CurrentAction == EditorAction.ResizingComment) {
 				Comment comment = _hoveredItem as Comment;
 				double w = Math.Abs(x - comment.Position.X) * 2;
 				comment.Size = new PointD(w, 0);
@@ -320,11 +357,11 @@ namespace Petri
 		protected override bool OnKeyPressEvent(Gdk.EventKey ev)
 		{
 			if(ev.Key == Gdk.Key.Escape) {
-				if(_currentAction == EditorAction.CreatingTransition) {
-					_currentAction = EditorAction.None;
+				if(CurrentAction == EditorAction.CreatingTransition) {
+					CurrentAction = EditorAction.None;
 					this.Redraw();
 				}
-				else if(_currentAction == EditorAction.None) {
+				else if(CurrentAction == EditorAction.None) {
 					if(_selectedEntities.Count > 0) {
 						this.ResetSelection();
 					}
@@ -333,12 +370,12 @@ namespace Petri
 					}
 					this.Redraw();
 				}
-				else if(_currentAction == EditorAction.SelectionRect) {
-					_currentAction = EditorAction.None;
+				else if(CurrentAction == EditorAction.SelectionRect) {
+					CurrentAction = EditorAction.None;
 					this.Redraw();
 				}
 			}
-			else if(_selectedEntities.Count > 0 && _currentAction == EditorAction.None && (ev.Key == Gdk.Key.Delete || ev.Key == Gdk.Key.BackSpace)) {
+			else if(_selectedEntities.Count > 0 && CurrentAction == EditorAction.None && (ev.Key == Gdk.Key.Delete || ev.Key == Gdk.Key.BackSpace)) {
 				_document.PostAction(_document.EditorController.RemoveSelection());
 			}
 			else if(ev.Key == Gdk.Key.Shift_L || ev.Key == Gdk.Key.Shift_R) {
@@ -410,7 +447,7 @@ namespace Petri
 		}
 
 		protected override void SpecializedDrawing(Cairo.Context context) {
-			if(_currentAction == EditorAction.CreatingTransition) {
+			if(CurrentAction == EditorAction.CreatingTransition) {
 				Color color = new Color(1, 0, 0, 1);
 				double lineWidth = 2;
 
@@ -437,7 +474,7 @@ namespace Petri
 					EntityDraw.DrawArrow(context, direction, destination, arrowLength);
 				}
 			}
-			else if(_currentAction == EditorAction.SelectionRect) {
+			else if(CurrentAction == EditorAction.SelectionRect) {
 				double xm = Math.Min(_deltaClick.X, _originalPosition.X);
 				double ym = Math.Min(_deltaClick.Y, _originalPosition.Y);
 				double xM = Math.Max(_deltaClick.X, _originalPosition.X);
@@ -504,7 +541,7 @@ namespace Petri
 		}
 
 		public bool EntitySelected(Entity e) {
-			if(_currentAction == EditorAction.SelectionRect) {
+			if(CurrentAction == EditorAction.SelectionRect) {
 				return _selectedFromRect.Contains(e);
 			}
 			return _selectedEntities.Contains(e);
@@ -526,7 +563,6 @@ namespace Petri
 			_selectedEntities.Clear();
 		}
 
-		EditorAction _currentAction;
 		bool _shouldUnselect = false;
 		Entity _motionReference;
 		HashSet<Entity> _selectedEntities = new HashSet<Entity>();

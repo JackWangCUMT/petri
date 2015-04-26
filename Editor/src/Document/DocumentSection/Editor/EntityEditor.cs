@@ -334,7 +334,9 @@ namespace Petri
 					_objectList.RemoveAt(index);
 				}
 
-				_document.PostAction(new ChangeCommentColorAction(comment, _colors[_colorNames.IndexOf(color)]));
+				if(changed) {
+					_document.PostAction(new ChangeCommentColorAction(comment, _colors[_colorNames.IndexOf(color)]));
+				}
 			}
 			_document.Window.EditorGui.View.Redraw();
 			this.FormatAndShow();

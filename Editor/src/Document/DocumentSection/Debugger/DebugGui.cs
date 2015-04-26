@@ -41,12 +41,21 @@ namespace Petri
 			_zoomOut.Clicked += OnClick;
 
 			_toolbar.Insert(_attachDetach, -1);
+			_toolbar.Insert(_exit, -1);
+
+			_toolbar.Insert(new SeparatorToolItem(), -1);
+
 			_toolbar.Insert(_startStopPetri, -1);
 			_toolbar.Insert(_playPause, -1);
 			_toolbar.Insert(_reload, -1);
-			_toolbar.Insert(_exit, -1);
+
+			_toolbar.Insert(new SeparatorToolItem(), -1);
+
 			_toolbar.Insert(_zoomIn, -1);
 			_toolbar.Insert(_zoomOut, -1);
+
+			_toolbar.Insert(new SeparatorToolItem(), -1);
+
 			_toolbar.Insert(_switchToEditor, -1);
 
 			_paned = new HPaned();

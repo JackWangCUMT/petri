@@ -143,5 +143,17 @@
     <EmbeddedResource Include="Resources\fix.png">
       <LogicalName>fix</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\action.png">
+      <LogicalName>action</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\arrow.png">
+      <LogicalName>arrow</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\comment.png">
+      <LogicalName>comment</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\transition.png">
+      <LogicalName>transition</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

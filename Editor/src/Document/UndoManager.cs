@@ -170,6 +170,38 @@ namespace Petri
 		string _description;
 	}
 
+	public class ChangeParentAction : GuiAction {
+		public ChangeParentAction(Entity e, PetriNet parent) {
+			_entity = e;
+			_newParent = parent;
+			_oldParent = _entity.Parent;
+		}
+
+		public override void Apply() {
+			_entity.Parent = _newParent;
+		}
+
+		public override GuiAction Reverse() {
+			return new ChangeParentAction(_entity, _oldParent); 
+		}
+
+		public override object Focus {
+			get {
+				return _entity;
+			}
+		}
+
+		public override string Description {
+			get {
+				return "Modifier le parent";
+			}
+		}
+
+		Entity _entity;
+		PetriNet _newParent;
+		PetriNet _oldParent;
+	}
+
 	public class ChangeNameAction : GuiAction {
 		public ChangeNameAction(Entity e, string newName) {
 			_entity = e;
@@ -454,7 +486,7 @@ namespace Petri
 
 		public override object Focus {
 			get {
-				return _comment.Parent;
+				return _comment;
 			}
 		}
 
@@ -485,7 +517,7 @@ namespace Petri
 
 		public override object Focus {
 			get {
-				return _comment.Parent;
+				return _comment;
 			}
 		}
 

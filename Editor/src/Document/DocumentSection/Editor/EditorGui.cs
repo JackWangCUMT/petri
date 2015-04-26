@@ -20,7 +20,7 @@ namespace Petri
 			IconTheme.AddBuiltinIcon("CppGen", buf.Width, buf);
 			_cpp = new ToolButton("CppGen");
 			_cpp.IconName = "CppGen";
-			_cpp.Label = "Générer C++";
+			_cpp.Label = "Gén. C++";
 
 			buf = Pixbuf.LoadFromResource("build");
 			IconTheme.AddBuiltinIcon("Build", (int)(buf.Width / 0.8), buf);
@@ -28,11 +28,36 @@ namespace Petri
 			_compile.IconName = "Build";
 			_compile.Label = "Compiler";
 
+			buf = Pixbuf.LoadFromResource("arrow");
+			IconTheme.AddBuiltinIcon("Arrow", (int)(buf.Width / 0.8), buf);
+			_arrow = new ToggleToolButton("Arrow");
+			_arrow.Active = true;
+			_arrow.IconName = "Arrow";
+			_arrow.Label = "Sélection";
+
+			buf = Pixbuf.LoadFromResource("action");
+			IconTheme.AddBuiltinIcon("Action", (int)(buf.Width / 0.8), buf);
+			_action = new ToggleToolButton("Action");
+			_action.IconName = "Action";
+			_action.Label = "Action";
+
+			buf = Pixbuf.LoadFromResource("transition");
+			IconTheme.AddBuiltinIcon("Transition", (int)(buf.Width / 0.8), buf);
+			_transition = new ToggleToolButton("Transition");
+			_transition.IconName = "Transition";
+			_transition.Label = "Transition";
+
+			buf = Pixbuf.LoadFromResource("comment");
+			IconTheme.AddBuiltinIcon("Comment", (int)(buf.Width / 0.8), buf);
+			_comment = new ToggleToolButton("Comment");
+			_comment.IconName = "Comment";
+			_comment.Label = "Comment.";
+
 			buf = Pixbuf.LoadFromResource("bug");
 			IconTheme.AddBuiltinIcon("Debug", (int)(buf.Width / 0.8), buf);
 			_switchToDebug = new ToolButton("Debug");
 			_switchToDebug.IconName = "Debug";
-			_switchToDebug.Label = "Mode debug";
+			_switchToDebug.Label = "Debug";
 
 			_zoomIn = new ToolButton(Stock.ZoomIn);
 			_zoomIn.Label = "Agrandir";
@@ -45,12 +70,29 @@ namespace Petri
 			_switchToDebug.Clicked += OnClick;
 			_zoomIn.Clicked += OnClick;
 			_zoomOut.Clicked += OnClick;
+			_arrow.Clicked += OnClick;
+			_action.Clicked += OnClick;
+			_transition.Clicked += OnClick;
+			_comment.Clicked += OnClick;
 
 			_toolbar.Insert(_save, -1);
 			_toolbar.Insert(_cpp, -1);
 			_toolbar.Insert(_compile, -1);
+
+			_toolbar.Insert(new SeparatorToolItem(), -1);
+
+			_toolbar.Insert(_arrow, -1);
+			_toolbar.Insert(_action, -1);
+			_toolbar.Insert(_transition, -1);
+			_toolbar.Insert(_comment, -1);
+
+			_toolbar.Insert(new SeparatorToolItem(), -1);
+
 			_toolbar.Insert(_zoomIn, -1);
 			_toolbar.Insert(_zoomOut, -1);
+
+			_toolbar.Insert(new SeparatorToolItem(), -1);
+
 			_toolbar.Insert(_switchToDebug, -1);
 
 			_paned = new HPaned();
@@ -90,6 +132,10 @@ namespace Petri
 
 		protected void OnClick(object sender, EventArgs e)
 		{
+			if(_toggling)
+				return;
+			_toggling = true;
+
 			if(sender == _save) {
 				_document.Save();
 			}
@@ -116,6 +162,36 @@ namespace Petri
 				}
 				_petriView.Redraw();
 			}
+			else if(sender == _arrow) {
+				_petriView.CurrentTool = EditorView.EditorTool.Arrow;
+				_arrow.Active = true;
+				_action.Active = false;
+				_transition.Active = false;
+				_comment.Active = false;
+			}
+			else if(sender == _action) {
+				_petriView.CurrentTool = EditorView.EditorTool.Action;
+				_arrow.Active = false;
+				_action.Active = true;
+				_transition.Active = false;
+				_comment.Active = false;
+			}
+			else if(sender == _transition) {
+				_petriView.CurrentTool = EditorView.EditorTool.Transition;
+				_arrow.Active = false;
+				_action.Active = false;
+				_transition.Active = true;
+				_comment.Active = false;
+			}
+			else if(sender == _comment) {
+				_petriView.CurrentTool = EditorView.EditorTool.Comment;
+				_arrow.Active = false;
+				_action.Active = false;
+				_transition.Active = false;
+				_comment.Active = true;
+			}
+
+			_toggling = false;
 		}
 
 		public override void UpdateToolbar() {}
@@ -178,6 +254,8 @@ namespace Petri
 
 		Toolbar _toolbar;
 		ToolButton _save, _cpp, _compile, _switchToDebug, _zoomIn, _zoomOut;
+		ToggleToolButton _arrow, _action, _transition, _comment;
+		bool _toggling = false;
 
 		Document _document;
 	}

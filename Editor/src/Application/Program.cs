@@ -188,6 +188,11 @@ namespace Petri
 			}
 		}
 
+		public static int PasteCount {
+			get;
+			set;
+		}
+
 		static List<Document> _documents = new List<Document>();
 		static HashSet<Entity> _clipboard = new HashSet<Entity>();
 	}
