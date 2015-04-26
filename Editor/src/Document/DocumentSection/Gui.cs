@@ -19,6 +19,10 @@ namespace Petri
 
 		public abstract void UpdateToolbar();
 
+		public abstract ScrolledWindow ScrolledWindow {
+			get;
+		}
+
 		public abstract PetriView BaseView {
 			get;
 		}

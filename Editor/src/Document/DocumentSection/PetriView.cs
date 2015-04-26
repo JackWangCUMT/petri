@@ -215,10 +215,14 @@ namespace Petri
 			context.Stroke();
 
 			minX += 50;
-			minY += 50 + 300;
+			minY += 50;
 
 			minX *= Zoom;
 			minY *= Zoom;
+
+			var scrolled = _document.Window.Gui.ScrolledWindow;
+			minX += scrolled.Hadjustment.PageSize / 2;
+			minY += scrolled.Vadjustment.PageSize / 2;
 
 			int prevX, prevY;
 			this.GetSizeRequest(out prevX, out prevY);

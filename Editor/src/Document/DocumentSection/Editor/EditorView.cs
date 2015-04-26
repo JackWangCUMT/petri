@@ -262,6 +262,9 @@ namespace Petri
 				_deltaClick.X = x;
 				_deltaClick.Y = y;
 
+				_deltaUpdated = true;
+				ManageScrolling();
+
 				var oldSet = new HashSet<Entity>(_selectedEntities);
 				_selectedFromRect = new HashSet<Entity>();
 
@@ -358,6 +361,47 @@ namespace Petri
 			}
 
 			return base.OnKeyReleaseEvent(ev);
+		}
+
+		protected void ManageScrolling() {
+			if(!_scrolling) {
+				GLib.Timeout.Add(100, () => {
+					_scrolling = true;
+
+					var scrolled = _document.Window.EditorGui.ScrolledWindow;
+					const double margin = 30, powCoef= 0.6;
+
+					if(_deltaUpdated) {
+						_scrollingDelta.X = _deltaClick.X * Zoom - scrolled.Hadjustment.Value;
+						_scrollingDelta.Y = _deltaClick.Y * Zoom - scrolled.Vadjustment.Value;
+						_deltaUpdated = false;
+					}
+
+					if(_scrollingDelta.X > scrolled.Allocation.Width - margin) {
+						scrolled.Hadjustment.Value += Math.Pow((_scrollingDelta.X - (scrolled.Allocation.Width - margin)), powCoef);
+						scrolled.Hadjustment.Value = Math.Min(scrolled.Hadjustment.Upper - scrolled.Hadjustment.PageSize, scrolled.Hadjustment.Value);				
+					}
+					else if(_scrollingDelta.X < margin) {
+						scrolled.Hadjustment.Value -= Math.Pow(margin - _scrollingDelta.X, powCoef);
+						scrolled.Hadjustment.Value = Math.Max(scrolled.Hadjustment.Lower, scrolled.Hadjustment.Value);				
+					}
+
+					if(_scrollingDelta.Y > scrolled.Allocation.Height - margin) {
+						scrolled.Vadjustment.Value += Math.Pow((_scrollingDelta.Y - (scrolled.Allocation.Height - margin)), powCoef);
+						scrolled.Vadjustment.Value = Math.Min(scrolled.Vadjustment.Upper - scrolled.Vadjustment.PageSize, scrolled.Vadjustment.Value);				
+					}
+					else if(_scrollingDelta.Y < margin) {
+						scrolled.Vadjustment.Value -= Math.Pow(margin - _scrollingDelta.Y, powCoef);
+						scrolled.Vadjustment.Value = Math.Max(scrolled.Vadjustment.Lower, scrolled.Vadjustment.Value);				
+					}
+
+					if(CurrentAction != EditorAction.SelectionRect) {
+						_scrolling = false;
+					}
+
+					return CurrentAction == EditorAction.SelectionRect;
+				});
+			}
 		}
 
 		protected override EntityDraw EntityDraw {
@@ -491,6 +535,9 @@ namespace Petri
 		Entity _hoveredItem;
 		bool _shiftDown;
 		bool _ctrlDown;
+
+		bool _scrolling = false, _deltaUpdated = false;
+		PointD _scrollingDelta = new PointD();
 	}
 }
 

@@ -65,8 +65,8 @@ namespace Petri
 					|Gdk.EventMask.KeyPressMask    
 					|Gdk.EventMask.PointerMotionMask));
 
-			ScrolledWindow scrolledWindow = new ScrolledWindow();
-			scrolledWindow.SetPolicy(PolicyType.Never, PolicyType.Automatic);
+			_scroll = new ScrolledWindow();
+			_scroll.SetPolicy(PolicyType.Never, PolicyType.Automatic);
 
 			Viewport viewport = new Viewport();
 
@@ -76,16 +76,11 @@ namespace Petri
 				viewport.WidthRequest = viewport.Child.Requisition.Width;
 			};
 
-			scrolledWindow.Add(viewport);
+			_scroll.Add(viewport);
 
-			_paned.Pack1(scrolledWindow, true, true);
+			_paned.Pack1(_scroll, true, true);
 			_editor = new Fixed();
 			_paned.Pack2(_editor, false, true);
-		}
-
-		public void ToNormalSize() {
-			// TODO: tbd
-			//_paned.Child2.WidthRequest = 300;
 		}
 
 		public DebugView View {
@@ -173,6 +168,12 @@ namespace Petri
 			}
 		}
 
+		public override ScrolledWindow ScrolledWindow {
+			get {
+				return _scroll;
+			}
+		}
+
 		protected void OnClick(object sender, EventArgs e) {
 			if(sender == _attachDetach) {
 				if(Server.SessionRunning) {
@@ -240,6 +241,7 @@ namespace Petri
 		}
 
 		Fixed _editor;
+		ScrolledWindow _scroll;
 
 		DebugView _view;
 		Document _document;

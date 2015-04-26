@@ -55,10 +55,6 @@ namespace Petri
 		public void SwitchToDebug() {
 			CurrentController = DebugController;
 			Window.Gui = Window.DebugGui;
-			GLib.Timeout.Add(1000, () => {
-				Window.DebugGui.ToNormalSize();
-				return false;
-			});
 		}
 
 		public void SwitchToEditor() {
