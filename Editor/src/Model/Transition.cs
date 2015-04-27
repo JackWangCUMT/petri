@@ -169,7 +169,7 @@ namespace Petri
 						string name = this.CppName + "_Entry_" + newID.ToString();
 
 						source += "auto " + name + " = std::make_shared<Transition<" + Document.Settings.Enum.Name + ">>(*" + aName + ", *" + s.CppName + ");";
-						source += name + "->setCondition(" + "std::make_shared<Condition>(make_callable_ptr([](){ return true; }))" + ");";
+						source += name + "->setCondition(" + "std::make_shared<Condition<" + Document.Settings.Enum.Name + ">>([](" + Document.Settings.Enum.Name + "){ return true; })" + ");";
 
 						source += name + "->setName(\"" + name + "\");";
 						source += name + "->setID(" + newID.ToString() + ");";
