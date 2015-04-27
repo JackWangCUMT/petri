@@ -61,7 +61,7 @@ namespace Petri
 			source += name + "->setRequiredTokens(" + RequiredTokens.ToString() + ");";
 			source += name + "->setID(" + EntryPointID + ");";
 
-			source += "petriNet.addAction(" + name + ", " + "false" + ");";
+			source += "petriNet.addAction(" + name + ", " + (Active ? "true" : "false") + ");";
 
 			base.GenerateCpp(source, lastID);
 

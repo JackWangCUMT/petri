@@ -23,7 +23,7 @@ namespace Petri
 
 			base.Position = new PointD(0, 0);
 
-			this.Condition = new CheckResultCondition(this, doc.Settings.Enum.Name, doc.Settings.Enum.Members[0]);
+			this.Condition = new ExpressionCondition(Cpp.Expression.CreateFromString<Cpp.Expression>("Résultat == " + doc.Settings.Enum.Name + "::" + doc.Settings.Enum.Members[0], this, doc.AllFunctions, doc.CppMacros));
 
 			this.UpdatePosition();
 		}
@@ -45,7 +45,7 @@ namespace Petri
 
 		private void TrySetCondition(string s) {
 			try {
-				this.Condition = ConditionBase.ConditionFromString(s, Document.Settings.Enum, this, Document.AllFunctions, Document.CppMacros);
+				this.Condition = ConditionBase.ConditionFromString(s, this, Document.AllFunctions, Document.CppMacros);
 			}
 			catch(Exception) {
 				Document.Conflicting.Add(this);

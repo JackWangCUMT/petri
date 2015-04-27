@@ -7,64 +7,28 @@ namespace Petri
 
 	public abstract class ConditionBase : Cpp.FunctionInvocation
 	{
-		protected ConditionBase() : base(new Cpp.Function(new Cpp.Type("bool", Cpp.Scope.EmptyScope), Cpp.Scope.EmptyScope, "", false)) {
-
+		protected ConditionBase(Transition t) : base(new Cpp.Function(new Cpp.Type("bool", Cpp.Scope.EmptyScope), Cpp.Scope.EmptyScope, "", false)) {
+			_transition = t;
 		}
 
 		public abstract override bool UsesFunction(Cpp.Function f);
 
-		public static ConditionBase ConditionFromString(string condition, Cpp.Enum resultEnum, Transition transition, IEnumerable<Cpp.Function> funcList, IDictionary<string, string> macros) {
-			foreach(string res in resultEnum.Members) {
-				if(condition == res) {
-					return new CheckResultCondition(transition, resultEnum.Name, res);
-				}
-			}
+		public static ConditionBase ConditionFromString(string condition, Transition t, IEnumerable<Cpp.Function> funcList, IDictionary<string, string> macros) {
 			if(condition.StartsWith("Timeout(")) {
-				return new TimeoutCondition(new Cpp.Duration(condition.Substring("Timeout(".Length, condition.Length - "Timeout(".Length - 1)));
+				return new TimeoutCondition(new Cpp.Duration(condition.Substring("Timeout(".Length, condition.Length - "Timeout(".Length - 1)), t);
 			}
-			return new ExpressionCondition(Cpp.Expression.CreateFromString<Cpp.Expression>(condition, null, funcList, macros));
-		}
-	}
 
-	public class CheckResultCondition : ConditionBase
-	{
-		public CheckResultCondition(Transition t, string enumName, string res) : base() {
-			this.Transition = t;
-			this.ActionResult = res;
-			EnumName = enumName;
+			var exp = Cpp.Expression.CreateFromString<Cpp.Expression>(condition, null, funcList, macros);
+
+			return new ExpressionCondition(exp, t);
 		}
 
-		Transition Transition {
-			get;
-			set;
-		}
-
-		string ActionResult {
-			get;
-			set;
-		}
-
-		string EnumName {
-			get;
-			set;
-		}
-
-		public override string MakeCpp() {
-			return this.Transition.CppName + "->compareResult(" + EnumName + "::" + this.ActionResult + ")";
-		}
-
-		public override string MakeUserReadable() {
-			return this.ActionResult;
-		}
-
-		public override bool UsesFunction(Cpp.Function f) {
-			return false;
-		}
+		protected Transition _transition;
 	}
 
 	public class TimeoutCondition : ConditionBase
 	{
-		public TimeoutCondition(Cpp.Duration d) : base() {
+		public TimeoutCondition(Cpp.Duration d, Transition t) : base(t) {
 			this.Duration = d;
 		}
 
@@ -88,7 +52,7 @@ namespace Petri
 
 	public class ExpressionCondition : ConditionBase
 	{
-		public ExpressionCondition(Cpp.Expression cond) : base() {
+		public ExpressionCondition(Cpp.Expression cond, Transition t) : base(t) {
 			Expression = cond;
 		}
 
@@ -106,7 +70,8 @@ namespace Petri
 		}
 
 		public override string MakeCpp() {
-			return "std::make_shared<Condition>(make_callable_ptr([]() { return " + Expression.MakeCpp() + "->operator()(); }))";
+			string ret = "std::make_shared<Condition>(make_callable_ptr([]() { return " + Expression.MakeCpp() + "->operator()(); }))";
+			return ret.Replace("Résultat", _transition.CppName + "->compareResult(" + EnumName + "::" + this.ActionResult + ")");
 		}
 	}
 }

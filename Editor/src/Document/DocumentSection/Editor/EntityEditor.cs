@@ -366,7 +366,7 @@ namespace Petri
 			var condition = CreateWidget<Entry>(true, 0, userReadable);
 			MainClass.RegisterValidation(condition, false, (obj, p) => {
 				try {
-					var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, doc.Settings.Enum, t, _document.AllFunctions, _document.CppMacros));
+					var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, t, _document.AllFunctions, _document.CppMacros));
 					_document.PostAction(cond);
 				}
 				catch(Exception e) {
