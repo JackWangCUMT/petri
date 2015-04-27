@@ -23,7 +23,7 @@ namespace Petri
 
 			base.Position = new PointD(0, 0);
 
-			this.Condition = new ExpressionCondition(Cpp.Expression.CreateFromString<Cpp.Expression>("Résultat == " + doc.Settings.Enum.Name + "::" + doc.Settings.Enum.Members[0], this, doc.AllFunctions, doc.CppMacros));
+			this.Condition = new ExpressionCondition(Cpp.Expression.CreateFromString<Cpp.Expression>("true", this, doc.AllFunctions, doc.CppMacros), this);
 
 			this.UpdatePosition();
 		}
@@ -49,7 +49,7 @@ namespace Petri
 			}
 			catch(Exception) {
 				Document.Conflicting.Add(this);
-				this.Condition = new ExpressionCondition(new Cpp.LitteralExpression(s));
+				this.Condition = new ExpressionCondition(new Cpp.LitteralExpression(s), this);
 			}
 		}
 

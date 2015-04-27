@@ -1,9 +1,5 @@
-﻿macro active à l'état initial mais en fait non
-Condition qui dépend du résultat de l'action ne parse pas correctement (!REUSSI)
-
-taille debugeditor
+﻿taille debugeditor
 génération invocation compilateur
-état interne des Conditions pas thread-safe (Gestion des timeouts)
 
 Parenthèses A && B && C
 

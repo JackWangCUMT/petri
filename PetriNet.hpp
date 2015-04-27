@@ -72,9 +72,9 @@ inline void PetriNet<_ActionResult>::executeState(Action<_ActionResult> &a) {
 	}
 
 	if(!a.transitions().empty()) {
-		std::list<decltype(a.transitions().begin())> transitionsToTest;
+		std::list<Transition<_ActionResult>> transitionsToTest;
 		for(auto it = a.transitions().begin(); it != a.transitions().end(); ++it) {
-			transitionsToTest.push_back(it);
+			transitionsToTest.emplace_back(**it);
 		}
 
 		auto lastTest = ClockType::time_point();
@@ -86,17 +86,17 @@ inline void PetriNet<_ActionResult>::executeState(Action<_ActionResult> &a) {
 			for(auto it = transitionsToTest.begin(); it != transitionsToTest.end();) {
 				bool isFulfilled = false;
 
-				if((now - lastTest) >= (**it)->delayBetweenEvaluation()) {
+				if((now - lastTest) >= (it)->delayBetweenEvaluation()) {
 					// Testing the transition
-					isFulfilled = (**it)->isFulfilled(res);
-					minDelay = std::min(minDelay, (**it)->delayBetweenEvaluation());
+					isFulfilled = (it)->isFulfilled(res);
+					minDelay = std::min(minDelay, (it)->delayBetweenEvaluation());
 				}
 				else {
-					minDelay = std::min(minDelay, (**it)->delayBetweenEvaluation() - (now - lastTest));
+					minDelay = std::min(minDelay, (it)->delayBetweenEvaluation() - (now - lastTest));
 				}
 
 				if(isFulfilled) {
-					Action<_ActionResult> &a = (**it)->next();
+					Action<_ActionResult> &a = (it)->next();
 					std::lock_guard<std::mutex> tokensLock(a.tokensMutex());
 					if(++a.currentTokens() >= a.requiredTokens()) {
 						a.currentTokens() -= a.requiredTokens();

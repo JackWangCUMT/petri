@@ -93,12 +93,30 @@ namespace Petri
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			source += "auto " + this.CppName + " = std::make_shared<Action<" + Document.Settings.Enum.Name + ">>();";
-			source += this.CppName + "->setAction(" + this.Function.MakeCpp() + ");";
-			source += this.CppName + "->setRequiredTokens(" + this.RequiredTokens.ToString() + ");";
+
+			var old = new Dictionary<Cpp.LitteralExpression, string>();
+			string enumName = Document.Settings.Enum.Name;
+
+			var litterals = Function.GetLitterals();
+			foreach(Cpp.LitteralExpression le in litterals) {
+				foreach(string e in Document.Settings.Enum.Members) {
+					if(le.Expression == e) {
+						old.Add(le, le.Expression);
+						le.Expression = enumName + "::" + le.Expression;
+					}
+				}
+			}
+
+			source += this.CppName + "->setAction(" + Function.MakeCpp() + ");";
+			source += this.CppName + "->setRequiredTokens(" + RequiredTokens.ToString() + ");";
 
 			source += this.CppName + "->setName(\"" + this.Parent.Name + "_" + this.Name + "\");";
 			source += this.CppName + "->setID(" + this.ID.ToString() + ");";
 			source += "petriNet.addAction(" + this.CppName + ", " + ((this.Active && (this.Parent is RootPetriNet)) ? "true" : "false") + ");";
+
+			foreach(var tup in old) {
+				tup.Key.Expression = tup.Value;
+			}
 
 			return "";
 		}

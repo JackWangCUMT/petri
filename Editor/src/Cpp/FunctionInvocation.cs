@@ -68,6 +68,16 @@ namespace Petri
 
 				return Function.QualifiedName + "(" + args + ")";
 			}
+
+			public override List<LitteralExpression> GetLitterals() {
+				var l1 = new List<LitteralExpression>();
+				foreach(var e in Arguments) {
+					var l2 = e.GetLitterals();
+					l1.AddRange(l2);
+				}
+
+				return l1;
+			}
 		}
 
 		public class MethodInvocation : FunctionInvocation {
@@ -95,6 +105,13 @@ namespace Petri
 				}
 
 				return This.MakeUserReadable() + (Indirection ? "->" : ".") + Function.QualifiedName + "(" + args + ")";
+			}
+
+			public override List<LitteralExpression> GetLitterals() {
+				var l1 = base.GetLitterals();
+				l1.AddRange(This.GetLitterals());
+
+				return l1;
 			}
 		}
 

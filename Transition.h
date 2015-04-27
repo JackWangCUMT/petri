@@ -28,6 +28,10 @@ class Action;
 template<typename _ActionResult>
 class Transition : public CallableTimeout<uint64_t> {
 public:
+	Transition(Transition const &t) : CallableTimeout<uint64_t>(this->ID()), _previous(t._previous), _next(t._next), _name(t._name), _delayBetweenEvaluation(t._delayBetweenEvaluation) {
+		this->setCondition(t._test);
+	}
+
 	/**
 	 * Creates an Transition object, containing a nullptr test, allowing the end of execution of Action 'previous' to provoke
 	 * the execution of Action 'next', if the test is fulfilled.
@@ -38,13 +42,11 @@ public:
 
 	/**
 	 * Checks whether the Transition can be crossed
-	 * @param resultatAction The result of the Action 'previous'. This is useful when the Transition's test uses this value.
+	 * @param actionResult The result of the Action 'previous'. This is useful when the Transition's test uses this value.
 	 * @return The result of the test, true meaning that the Transition can be crossed to enable the action 'next'
 	 */
-	bool isFulfilled(_ActionResult resultatAction) const {
-		_result = resultatAction;
-
-		return _test->isFulfilled();
+	bool isFulfilled(_ActionResult actionResult) const {
+		return _test->isFulfilled(actionResult);
 	}
 
 	/**
@@ -65,7 +67,7 @@ public:
 	 * Returns the condition associated to the Transition
 	 * @return The condition associated to the Transition
 	 */
-	ConditionBase const &condition() const {
+	ConditionBase<_ActionResult> const &condition() const {
 		return *_test;
 	}
 
@@ -73,26 +75,16 @@ public:
 	 * Changes the condition associated to the Transition
 	 * @param test The new condition to associate to the Transition
 	 */
-	void setCondition(ConditionBase const &test) {
-		_test = std::static_pointer_cast<ConditionBase>(test.copy_ptr());
+	void setCondition(ConditionBase<_ActionResult> const &test) {
+		_test = std::static_pointer_cast<ConditionBase<_ActionResult>>(test.copy_ptr());
 	}
 
 	/**
 	 * Changes the condition associated to the Transition
 	 * @param test The new condition to associate to the Transition
 	 */
-	void setCondition(std::shared_ptr<ConditionBase> const &test) {
-		_test = std::static_pointer_cast<ConditionBase>(test);
-	}
-
-	/**
-	 * Gets the default Condition of this Transition, i.e. the test returning true when 'previous' execution returned the
-	 * specified parameter, and false otherwise.
-	 * @param result The Action return code to test the execution of 'previous' Action against
-	 * @return The default Condition of the Transition
-	 */
-	std::shared_ptr<ConditionBase> compareResult(_ActionResult result) const {
-		return make_condition_ptr<Condition>(make_callable(&Transition::checkResult, std::cref(_result), result));
+	void setCondition(std::shared_ptr<ConditionBase<_ActionResult>> const &test) {
+		_test = test;
 	}
 
 	/**
@@ -145,15 +137,10 @@ public:
 	}
 
 private:
-	static bool checkResult(std::atomic<_ActionResult> const &r1, _ActionResult r2) {
-		return r1 == r2;
-	}
-
-	std::shared_ptr<ConditionBase> _test;
+	std::shared_ptr<ConditionBase<_ActionResult>> _test;
 	Action<_ActionResult> &_previous;
 	Action<_ActionResult> &_next;
 	std::string _name;
-	mutable std::atomic<_ActionResult> _result;
 
 	// Default delay between evaluation
 	std::chrono::nanoseconds _delayBetweenEvaluation = 10ms;

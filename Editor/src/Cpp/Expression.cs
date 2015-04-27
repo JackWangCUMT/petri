@@ -19,6 +19,8 @@ namespace Petri {
 			public abstract string MakeCpp();
 			public abstract string MakeUserReadable();
 
+			public abstract List<LitteralExpression> GetLitterals();
+
 			public static ExpressionType CreateFromString<ExpressionType>(string s, Entity entity, IEnumerable<Function> funcList, IDictionary<string, string> macros) where ExpressionType : Expression {
 				string unexpanded = s;
 
@@ -401,6 +403,10 @@ namespace Petri {
 			public override string MakeUserReadable() {
 				return "";
 			}
+
+			public override List<LitteralExpression> GetLitterals() {
+				return new List<LitteralExpression>();
+			}
 		}
 
 		public class LitteralExpression : Expression {
@@ -410,7 +416,7 @@ namespace Petri {
 
 			public string Expression {
 				get;
-				private set;
+				set;
 			}
 
 			public override bool UsesFunction(Function f) {
@@ -423,6 +429,12 @@ namespace Petri {
 
 			public override string MakeUserReadable() {
 				return Expression;
+			}
+
+			public override List<LitteralExpression> GetLitterals() {
+				var l = new List<LitteralExpression>();
+				l.Add(this);
+				return l;
 			}
 		}
 
@@ -452,6 +464,10 @@ namespace Petri {
 
 			public override string MakeUserReadable() {
 				return this.ReadableName;
+			}
+
+			public override List<LitteralExpression> GetLitterals() {
+				return new List<LitteralExpression>();
 			}
 		}
 		
@@ -525,6 +541,10 @@ namespace Petri {
 				}
 
 				throw new Exception("Operator not implemented!");
+			}
+
+			public override List<LitteralExpression> GetLitterals() {
+				return Expression.GetLitterals();
 			}
 		}
 
@@ -662,6 +682,14 @@ namespace Petri {
 
 				throw new Exception("Operator not implemented!");
 			}
+
+			public override List<LitteralExpression> GetLitterals() {
+				var l1 = Expression1.GetLitterals();
+				var l2 = Expression2.GetLitterals();
+				l1.AddRange(l2);
+
+				return l1;
+			}
 		}
 
 		// Could have been TernaryExpression, but there is only one ternary operator in C++, so we already specialize it.
@@ -695,6 +723,16 @@ namespace Petri {
 			public override string MakeUserReadable() {
 				// TODO: tbd
 				throw new Exception("Operator not implemented!");
+			}
+
+			public override List<LitteralExpression> GetLitterals() {
+				var l1 = Expression1.GetLitterals();
+				var l2 = Expression2.GetLitterals();
+				var l3 = Expression3.GetLitterals();
+				l1.AddRange(l2);
+				l1.AddRange(l3);
+
+				return l1;
 			}
 		}
 	}

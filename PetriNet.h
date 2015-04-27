@@ -25,6 +25,8 @@ using namespace std::chrono_literals;
 #include "Transition.h"
 #include "Action.h"
 
+#define PETRI_GET_ACTION_RESULT _private_petri_net_action_result_
+
 template<typename _ActionResult>
 class PetriNet {
 	enum {InitialThreadsActions = 1};

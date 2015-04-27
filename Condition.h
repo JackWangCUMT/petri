@@ -11,24 +11,22 @@
 #include <chrono>
 #include "Callable.h"
 
-struct ConditionBase : CallableBool {
-	virtual bool operator()() {
-		return this->isFulfilled();
-	}
-
-	virtual bool isFulfilled() = 0;
+template<typename _ActionResult>
+struct ConditionBase {
+	virtual bool isFulfilled(_ActionResult result) = 0;
 	virtual void willTest() {}
 	virtual void didTest() {}
 };
 
-template<typename ConditionType>
-struct ConditionBaseCopyPtr : ConditionBase {
-	virtual std::shared_ptr<CallableBase<bool>> copy_ptr() const override {
-		return std::make_shared<ConditionType>(static_cast<ConditionType const &>(*this));
+template<template <typename> class ConditionType, typename _ActionResult>
+struct ConditionBaseCopyPtr : ConditionBase<_ActionResult> {
+	virtual std::shared_ptr<ConditionBase<_ActionResult> > copy_ptr() const {
+		return std::make_shared<ConditionType<_ActionResult>>(static_cast<ConditionType<_ActionResult> const &>(*this));
 	}
 };
 
-struct TimeoutCondition : ConditionBaseCopyPtr<TimeoutCondition> {
+template<typename _ActionResult>
+struct TimeoutCondition : ConditionBaseCopyPtr<TimeoutCondition, _ActionResult> {
 	// We want a steady clock (no adjustments, only ticking forward in time), but it would be better if we got an high resolution clock.
 	using ClockType = std::conditional<std::chrono::high_resolution_clock::is_steady, std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
 	
@@ -37,11 +35,13 @@ struct TimeoutCondition : ConditionBaseCopyPtr<TimeoutCondition> {
 
 	}
 
+	TimeoutCondition(TimeoutCondition<_ActionResult> const &) = default;
+
 	virtual void willTest() override {
 		_referencePoint = ClockType::now();
 	}
 
-	virtual bool isFulfilled() override {
+	virtual bool isFulfilled(_ActionResult result) override {
 		return ClockType::now() - _referencePoint >= _timeout;
 	}
 
@@ -50,22 +50,22 @@ private:
 	std::chrono::nanoseconds const _timeout;
 };
 
-struct Condition : public ConditionBaseCopyPtr<Condition> {
-	Condition(CallableBool const &test) : _test(test.copy_ptr()) {}
-	Condition(Condition const &cond) : _test(cond._test->copy_ptr()) {}
-	Condition(std::shared_ptr<CallableBool> const &test) : _test(test) {}
-	virtual bool isFulfilled() override {
-		return _test->operator()();
+template<typename _ActionResult>
+struct Condition : public ConditionBaseCopyPtr<Condition, _ActionResult> {
+	Condition(std::function<bool(_ActionResult)> const &test) : _test(test) {}
+	Condition(Condition const &cond) : _test(cond._test) {}
+	virtual bool isFulfilled(_ActionResult result) override {
+		return _test.operator()(result);
 	}
 
 private:
-	std::shared_ptr<CallableBool> _test;
+	std::function<bool(_ActionResult)> _test;
 };
 
 // Creates a Callable<bool, Cond, Args...> from parameters and encapsulates it in the condition
-template<typename ConditionType, typename Cond, typename... Args>
-std::shared_ptr<ConditionType> make_condition_ptr(Cond &&cond, Args &&...args) {
-	return std::make_shared<ConditionType>(make_callable(std::forward<Cond>(cond), std::forward<Args>(args)...));
+template<typename _ActionResult, template<typename> class ConditionType, typename Cond, typename... Args>
+std::shared_ptr<ConditionType<_ActionResult>> make_condition_ptr(Cond &&cond, Args &&...args) {
+	return std::make_shared<ConditionType<_ActionResult>>(make_callable(std::forward<Cond>(cond), std::forward<Args>(args)...));
 }
 
 #endif
