@@ -4,6 +4,7 @@ génération invocation compilateur
 Parenthèses A && B && C
 
 Variables atomiques accessibles directement dans l'éditeur de RdP
+Playground
 
 Commenter le code :3
 Documentation

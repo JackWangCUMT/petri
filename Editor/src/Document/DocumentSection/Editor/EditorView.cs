@@ -64,7 +64,7 @@ namespace Petri
 		}
 
 		protected override void ManageTwoButtonPress(uint button, double x, double y) {
-			if(button == 1 && CurrentTool == EditorTool.Arrow) {
+			if(button == 1) {
 				// Add new action
 				if(_selectedEntities.Count == 0) {
 					_document.PostAction(new AddStateAction(new Action(this.CurrentPetriNet.Document, CurrentPetriNet, false, new PointD(x, y))));
@@ -138,7 +138,7 @@ namespace Petri
 				_deltaClick.X = x;
 				_deltaClick.Y = y;
 
-				if(CurrentTool != EditorTool.Arrow || CurrentAction == EditorAction.None) {
+				if(CurrentAction == EditorAction.None) {
 					_hoveredItem = CurrentPetriNet.StateAtPosition(_deltaClick);
 
 					if(_hoveredItem == null) {
@@ -220,7 +220,7 @@ namespace Petri
 					}
 				}
 			}
-			else if(button == 3 && CurrentTool == EditorTool.Arrow) {
+			else if(button == 3) {
 				if(_hoveredItem is State) {
 					SelectedEntity = _hoveredItem;
 					CurrentAction = EditorAction.CreatingTransition;
