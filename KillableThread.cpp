@@ -1,6 +1,6 @@
 //
 //  KillableThread.cpp
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 06/07/2014.
 //

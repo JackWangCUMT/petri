@@ -1,12 +1,12 @@
 //
 //  DebugServer.h
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 23/11/2014.
 //
 
-#ifndef IA_Pe_tri_DebugServer_h
-#define IA_Pe_tri_DebugServer_h
+#ifndef Petri_DebugServer_h
+#define Petri_DebugServer_h
 
 #include <string>
 #include "PetriNet.h"

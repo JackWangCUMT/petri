@@ -1,6 +1,6 @@
 //
 //  PetriDynamicLib.h
-//  Club Robot
+//  Pétri
 //
 //  Created by Rémi on 22/11/2014.
 //

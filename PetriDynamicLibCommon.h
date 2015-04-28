@@ -1,12 +1,12 @@
 //
 //  PetriDynamicLibCommon.h
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 22/11/2014.
 //
 
-#ifndef IA_Pe_tri_PetriDynamicLibCommon_h
-#define IA_Pe_tri_PetriDynamicLibCommon_h
+#ifndef Petri_PetriDynamicLibCommon_h
+#define Petri_PetriDynamicLibCommon_h
 
 #include "DynamicLib.h"
 #include <memory>

@@ -1,12 +1,12 @@
 //
 //  KillableThread.h
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 06/07/2014.
 //
 
-#ifndef IA_Pe_tri_KillableThread_h
-#define IA_Pe_tri_KillableThread_h
+#ifndef Petri_KillableThread_h
+#define Petri_KillableThread_h
 
 #include <thread>
 #include <atomic>

@@ -1,6 +1,6 @@
 //
 //  DebugServer.cpp
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 23/11/2014.
 //

@@ -1,12 +1,12 @@
 //
 //  Condition.h
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 27/06/2014.
 //
 
-#ifndef IA_Pe_tri_Condition_h
-#define IA_Pe_tri_Condition_h
+#ifndef Petri_Condition_h
+#define Petri_Condition_h
 
 #include <chrono>
 #include "Callable.h"

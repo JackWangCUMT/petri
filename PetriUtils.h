@@ -1,12 +1,12 @@
 //
 //  StateChartUtils.h
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 12/11/2014.
 //
 
-#ifndef IA_Pe_tri_PetriUtils_h
-#define IA_Pe_tri_PetriUtils_h
+#ifndef Petri_PetriUtils_h
+#define Petri_PetriUtils_h
 
 #include <functional>
 #include <memory>

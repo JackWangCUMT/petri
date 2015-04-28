@@ -1,12 +1,9 @@
 //
 //  CallableImpl.hpp
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 30/11/2014.
 //
-
-#ifndef IA_Pe_tri_CallableImpl_hpp
-#define IA_Pe_tri_CallableImpl_hpp
 
 namespace Callable_detail {
 	template<bool Last, typename CallableType, typename Tuple, typename... Args2>
@@ -158,5 +155,3 @@ auto make_callable_ptr(CallableType &&c, Args ...args) {
 
 	return static_cast<std::shared_ptr<CallableBase<ComputedReturnType>>>(std::make_shared<Callable<ComputedReturnType, CallableType, Args...>>(c, args...));
 }
-
-#endif

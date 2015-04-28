@@ -1,12 +1,12 @@
 //
 //  ThreadMemoryPool.h
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 06/07/2014.
 //
 
-#ifndef IA_Pe_tri_ManagedMemoryHeap_h
-#define IA_Pe_tri_ManagedMemoryHeap_h
+#ifndef Petri_ManagedMemoryHeap_h
+#define Petri_ManagedMemoryHeap_h
 
 #include <thread>
 #include <iostream>

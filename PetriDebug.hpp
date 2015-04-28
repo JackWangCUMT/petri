@@ -1,6 +1,6 @@
 //
 //  PetriDebug.cpp
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 27/11/2014.
 //

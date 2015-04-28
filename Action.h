@@ -1,12 +1,12 @@
 //
 //  Action.h
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 22/11/2014.
 //
 
-#ifndef IA_Pe_tri_Action_h
-#define IA_Pe_tri_Action_h
+#ifndef Petri_Action_h
+#define Petri_Action_h
 
 #include "Callable.h"
 #include "Condition.h"

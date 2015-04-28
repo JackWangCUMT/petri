@@ -1,6 +1,6 @@
 //
 //  Common.h
-//  Club Robot
+//  Pétri
 //
 //  Created by Rémi on 15/04/2015.
 //

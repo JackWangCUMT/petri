@@ -1,12 +1,12 @@
 //
 //  PetriDebug.h
-//  IA Pétri
+//  Pétri
 //
 //  Created by Rémi on 22/11/2014.
 //
 
-#ifndef IA_Pe_tri_PetriDebug_h
-#define IA_Pe_tri_PetriDebug_h
+#ifndef Petri_PetriDebug_h
+#define Petri_PetriDebug_h
 
 #include "PetriNet.h"
 #include "jsoncpp/include/json.h"

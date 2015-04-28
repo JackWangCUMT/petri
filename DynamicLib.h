@@ -1,11 +1,12 @@
 //
 //  DynamicLib.h
+//  Pétri
 //
 //  Created by Rémi on 25/01/2015.
 //
 
-#ifndef Club_Robot_DynamicLib_h
-#define Club_Robot_DynamicLib_h
+#ifndef Petri_DynamicLib_h
+#define Petri_DynamicLib_h
 
 #include <string>
 #include <stdexcept>
