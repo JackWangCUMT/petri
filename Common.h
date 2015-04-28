@@ -12,18 +12,22 @@
 #include <string>
 #include <chrono>
 
-namespace PetriCommon {
-	inline void setThreadName(char const *name) {
+namespace Petri {
+	
+	namespace PetriCommon {
+		inline void setThreadName(char const *name) {
 #if __LINUX__
-		pthread_setname_np(pthread_self(), name);
+			pthread_setname_np(pthread_self(), name);
 #elif __APPLE__
-		pthread_setname_np(name);
+			pthread_setname_np(name);
 #endif
+		}
+
+		inline void setThreadName(std::string const &name) {
+			setThreadName(name.c_str());
+		}
 	}
 
-	inline void setThreadName(std::string const &name) {
-		setThreadName(name.c_str());
-	}
 }
 
 

@@ -20,80 +20,83 @@
 #include <deque>
 #include "Common.h"
 
-using namespace std::chrono_literals;
-
 #include "Transition.h"
 #include "Action.h"
 
-#define PETRI_GET_ACTION_RESULT _private_petri_net_action_result_
+namespace Petri {
 
-template<typename _ActionResult>
-class PetriNet {
-	enum {InitialThreadsActions = 1};
-public:
-	/**
-	 * Creates the PetriNet, assigning it a name which serves debug purposes (see ThreadPool constructor)
-	 */
-	PetriNet(std::string const &name);
+using namespace std::chrono_literals;
 
-	virtual ~PetriNet();
+	template<typename _ActionResult>
+	class PetriNet {
+		enum {InitialThreadsActions = 1};
+	public:
+		/**
+		 * Creates the PetriNet, assigning it a name which serves debug purposes (see ThreadPool constructor)
+		 */
+		PetriNet(std::string const &name);
 
-	/**
-	 * Adds an Action to the PetriNet. The net must not be running yet.
-	 * @param action The action to add
-	 * @param active Controls whether the action is active as soon as the net is started or not
-	 */
-	virtual void addAction(std::shared_ptr<Action<_ActionResult>> &action, bool active = false);
+		virtual ~PetriNet();
 
-	/**
-	 * Checks whether the net is running.
-	 * @return true means that the net has been started, and we can not add any more action to it now.
-	 */
-	bool running() const {
-		return _running;
-	}
+		/**
+		 * Adds an Action to the PetriNet. The net must not be running yet.
+		 * @param action The action to add
+		 * @param active Controls whether the action is active as soon as the net is started or not
+		 */
+		virtual void addAction(std::shared_ptr<Action<_ActionResult>> &action, bool active = false);
 
-	/**
-	 * Starts the Petri net. It must not be already running. If no states are initially active, this is a no-op.
-	 */
-	virtual void run();
+		/**
+		 * Checks whether the net is running.
+		 * @return true means that the net has been started, and we can not add any more action to it now.
+		 */
+		bool running() const {
+			return _running;
+		}
 
-	/**
-	 * Stops the Petri net. It blocks the calling thread until all running states are finished,
-	 * but do not allows new states to be enabled. If the net is not running, this is a no-op.
-	 */
-	virtual void stop();
+		/**
+		 * Starts the Petri net. It must not be already running. If no states are initially active, this is a no-op.
+		 */
+		virtual void run();
 
-	/**
-	 * Blocks the calling thread until the Petri net has completed its whole execution.
-	 */
-	virtual void join();
+		/**
+		 * Stops the Petri net. It blocks the calling thread until all running states are finished,
+		 * but do not allows new states to be enabled. If the net is not running, this is a no-op.
+		 */
+		virtual void stop();
 
-protected:
-	using ClockType = std::conditional<std::chrono::high_resolution_clock::is_steady, std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
+		/**
+		 * Blocks the calling thread until the Petri net has completed its whole execution.
+		 */
+		virtual void join();
 
-	// This method is executed concurrently on the thread pool.
-	virtual void executeState(Action<_ActionResult> &a);
+	protected:
+		using ClockType = std::conditional<std::chrono::high_resolution_clock::is_steady, std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
 
-	virtual void stateEnabled(Action<_ActionResult> &a) {}
-	virtual void stateDisabled(Action<_ActionResult> &a) {}
+		// This method is executed concurrently on the thread pool.
+		virtual void executeState(Action<_ActionResult> &a);
 
-	void enableState(Action<_ActionResult> &a);
-	void disableState(Action<_ActionResult> &a);
-	void swapStates(Action<_ActionResult> &oldAction, Action<_ActionResult> &newAction);
+		virtual void stateEnabled(Action<_ActionResult> &a) {}
+		virtual void stateDisabled(Action<_ActionResult> &a) {}
 
-	std::condition_variable _activationCondition;
-	std::multiset<Action<_ActionResult> *> _activeStates;
-	std::mutex _activationMutex;
+		void enableState(Action<_ActionResult> &a);
+		void disableState(Action<_ActionResult> &a);
+		void swapStates(Action<_ActionResult> &oldAction, Action<_ActionResult> &newAction);
 
-	std::atomic_bool _running = {false};
-	ThreadPool<void> _actionsPool;
+		std::condition_variable _activationCondition;
+		std::multiset<Action<_ActionResult> *> _activeStates;
+		std::mutex _activationMutex;
 
-	std::string const _name;
-	std::list<std::pair<std::shared_ptr<Action<_ActionResult>>, bool>> _states;
-	std::list<Transition<_ActionResult>> _transitions;
-};
+		std::atomic_bool _running = {false};
+		ThreadPool<void> _actionsPool;
+
+		std::string const _name;
+		std::list<std::pair<std::shared_ptr<Action<_ActionResult>>, bool>> _states;
+		std::list<Transition<_ActionResult>> _transitions;
+	};
+
+}
 
 #include "PetriNet.hpp"
+
 
 #endif

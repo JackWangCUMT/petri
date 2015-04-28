@@ -7,4 +7,8 @@
 
 #include "KillableThread.h"
 
-KillableThread::AmIAlive KillableThread::_amIAlive;
+namespace Petri {
+
+	KillableThread::AmIAlive KillableThread::_amIAlive;
+
+}

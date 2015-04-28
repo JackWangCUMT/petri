@@ -14,74 +14,75 @@
 #include <set>
 #include "Socket.h"
 
-using namespace std::string_literals;
-using namespace std::chrono_literals;
-
-namespace DebugServer {
-	extern std::string getVersion();
-	extern std::chrono::system_clock::time_point getAPIdate();
-	extern std::chrono::system_clock::time_point getDateFromTimestamp(char const *timestamp);
-}
-
-template<typename _ActionResult>
-class PetriDynamicLibCommon;
-
-template<typename _ActionResult>
-class PetriDebug;
-
-template<typename _ActionResult>
-class DebugSession {
-public:
-	DebugSession(PetriDynamicLibCommon<_ActionResult> &petri);
+namespace Petri {
 	
-	~DebugSession();
+	using namespace std::string_literals;
+	using namespace std::chrono_literals;
 
-	DebugSession(DebugSession const &) = delete;
-	DebugSession &operator=(DebugSession const &) = delete;
+	namespace DebugServer {
+		extern std::string getVersion();
+		extern std::chrono::system_clock::time_point getAPIdate();
+		extern std::chrono::system_clock::time_point getDateFromTimestamp(char const *timestamp);
+	}
 
-	DebugSession(DebugSession &&) = default;
-	DebugSession &operator=(DebugSession &&) = default;
+	template<typename _ActionResult>
+	class PetriDynamicLibCommon;
 
-	void start();
-	void stop();
-	bool running() const;
+	template<typename _ActionResult>
+	class PetriDebug;
 
-	void addActiveState(Action<_ActionResult> &a);
-	void removeActiveState(Action<_ActionResult> &a);
+	template<typename _ActionResult>
+	class DebugSession {
+	public:
+		DebugSession(PetriDynamicLibCommon<_ActionResult> &petri);
 
-protected:
-	void serverCommunication();
-	void heartBeat();
+		~DebugSession();
 
-	void clearPetri();
+		DebugSession(DebugSession const &) = delete;
+		DebugSession &operator=(DebugSession const &) = delete;
 
-	void setPause(bool pause);
+		void start();
+		void stop();
+		bool running() const;
 
-	void updateBreakpoints(Json::Value const &breakpoints);
+		void addActiveState(Action<_ActionResult> &a);
+		void removeActiveState(Action<_ActionResult> &a);
 
-	Json::Value receiveObject();
-	void sendObject(Json::Value const &o);
+	protected:
+		void serverCommunication();
+		void heartBeat();
 
-	Json::Value json(std::string const &type, Json::Value const &payload);
-	Json::Value error(std::string const &error);
+		void clearPetri();
 
-	std::map<Action<_ActionResult> *, std::size_t> _activeStates;
-	bool _stateChange = false;
-	std::condition_variable _stateChangeCondition;
-	std::mutex _stateChangeMutex;
+		void setPause(bool pause);
 
-	std::thread _receptionThread;
-	std::thread _heartBeat;
-	Petri::Socket _socket;
-	Petri::Socket _client;
-	std::atomic_bool _running = {false};
+		void updateBreakpoints(Json::Value const &breakpoints);
 
-	PetriDynamicLibCommon<_ActionResult> &_petriNetFactory;
-	std::unique_ptr<PetriDebug<_ActionResult>> _petri;
-	std::mutex _sendMutex;
-	std::mutex _breakpointsMutex;
-	std::set<Action<_ActionResult> *> _breakpoints;
-};
+		Json::Value receiveObject();
+		void sendObject(Json::Value const &o);
+
+		Json::Value json(std::string const &type, Json::Value const &payload);
+		Json::Value error(std::string const &error);
+
+		std::map<Action<_ActionResult> *, std::size_t> _activeStates;
+		bool _stateChange = false;
+		std::condition_variable _stateChangeCondition;
+		std::mutex _stateChangeMutex;
+
+		std::thread _receptionThread;
+		std::thread _heartBeat;
+		Petri::Socket _socket;
+		Petri::Socket _client;
+		std::atomic_bool _running = {false};
+
+		PetriDynamicLibCommon<_ActionResult> &_petriNetFactory;
+		std::unique_ptr<PetriDebug<_ActionResult>> _petri;
+		std::mutex _sendMutex;
+		std::mutex _breakpointsMutex;
+		std::set<Action<_ActionResult> *> _breakpoints;
+	};
+
+}
 
 #include "DebugServer.hpp"
 

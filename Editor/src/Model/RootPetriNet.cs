@@ -70,7 +70,7 @@ namespace Petri
 
 			source += "#define EXPORT extern \"C\"";
 
-			source += "";
+			source += "\nusing namespace Petri;\n";
 
 			source += "namespace {";
 			source += "void fill(PetriNet<" + Document.Settings.Enum.Name + "> &petriNet) {";

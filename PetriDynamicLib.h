@@ -11,7 +11,7 @@
 #error "Do not include this file manually, let the C++ code generator use it for you!"
 #endif
 
-class PETRI_CLASS_NAME : public PetriDynamicLibCommon<PETRI_ENUM> {
+class PETRI_CLASS_NAME : public Petri::PetriDynamicLibCommon<PETRI_ENUM> {
 public:
 	/**
 	 * Creates the dynamic library wrapper. You still need to call the load() method to access the wrapped functions.

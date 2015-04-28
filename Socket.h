@@ -17,6 +17,7 @@
 #include <vector>
 
 namespace Petri {
+
 	class Socket {
 	public:
 		Socket();
@@ -84,6 +85,7 @@ namespace Petri {
 		SockState _state = SOCK_FREE;
 		sockaddr_in _addr = {};
 	};
+	
 }
 
 #endif // SOCKET_H

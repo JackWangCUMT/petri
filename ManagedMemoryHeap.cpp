@@ -7,7 +7,13 @@
 
 #include "ManagedMemoryHeap.h"
 
-ManagedMemoryHeap::ManagedHeaps ManagedMemoryHeap::_managedHeaps;
+namespace Petri {
+
+	ManagedMemoryHeap::ManagedHeaps ManagedMemoryHeap::_managedHeaps;
+
+}
+
+using namespace Petri;
 
 void *operator new(size_t bytes) {
 	void *p = nullptr;

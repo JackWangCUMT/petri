@@ -85,13 +85,13 @@ namespace Petri
 
 			string cpp = Expression is Cpp.LitteralExpression ? Expression.MakeCpp() : "(*" + Expression.MakeCpp() + ")()";
 
-			string s =  "std::make_shared<Condition<" + enumName + ">>([](" + enumName + " PETRI_GET_ACTION_RESULT) { return " + cpp + "; })";
+			string s =  "std::make_shared<Condition<" + enumName + ">>([](" + enumName + " _PETRI_PRIVATE_GET_ACTION_RESULT_) { return " + cpp + "; })";
 
 			foreach(var tup in old) {
 				tup.Key.Expression = tup.Value;
 			}
 
-			return s.Replace("$Res", "PETRI_GET_ACTION_RESULT");
+			return s.Replace("$Res", "_PETRI_PRIVATE_GET_ACTION_RESULT_");
 		}
 	}
 }

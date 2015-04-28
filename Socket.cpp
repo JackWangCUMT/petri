@@ -10,6 +10,7 @@
 #include <memory>
 
 namespace Petri {
+
 	Socket::Socket() {
 		_fd = socket(AF_INET, SOCK_STREAM, 0); // AF_INET : internet; SOCK_STREAM : par flux; 0 : protocol (TCP)
 
@@ -179,4 +180,5 @@ namespace Petri {
 			_state = SOCK_FREE;
 		}
 	}
+	
 }
