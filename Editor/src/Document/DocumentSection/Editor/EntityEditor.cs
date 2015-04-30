@@ -102,7 +102,7 @@ namespace Petri
 					if(func.Name != "defaultAction" && func.ReturnType.Equals(_document.Settings.Enum.Type))
 						list.Add(func.Signature);
 				}
-				string activeFunction = a.IsDefault() ? defaultFunction : (!a.Function.NeedsExpansion && list.Contains(a.Function.Function.Signature) ? a.Function.Function.Signature : manual);
+				string activeFunction = a.IsDefault() ? defaultFunction : (!(a.Function is Cpp.WrapperFunctionInvocation) && !a.Function.NeedsExpansion && list.Contains(a.Function.Function.Signature) ? a.Function.Function.Signature : manual);
 
 				ComboBox funcList = ComboHelper(activeFunction, list);
 				this.AddWidget(funcList, true, 0);
@@ -171,11 +171,18 @@ namespace Petri
 				var invocation = CreateWidget<Entry>(true, 0, userReadable);
 				editorFields.Add(invocation);
 				MainClass.RegisterValidation(invocation, false, (obj, p) => {
+					Cpp.Expression cppExpr = null;
 					Cpp.FunctionInvocation funcInvocation = null;
 					try {
-						funcInvocation = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>((obj as Entry).Text, a, _document.AllFunctions, _document.CppMacros);
-						if(!funcInvocation.Function.ReturnType.Equals(_document.Settings.Enum.Type)) {
-							throw new Exception("Type de retour de la fonction incorrect : " + _document.Settings.Enum.Name + "attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
+						cppExpr = Cpp.Expression.CreateFromString<Cpp.Expression>((obj as Entry).Text, a);
+						if(cppExpr is Cpp.FunctionInvocation) {
+							funcInvocation = (Cpp.FunctionInvocation)cppExpr;
+							if(!funcInvocation.Function.ReturnType.Equals(_document.Settings.Enum.Type)) {
+								throw new Exception("Type de retour de la fonction incorrect : " + _document.Settings.Enum.Name + "attendu, " + funcInvocation.Function.ReturnType.ToString() + " trouvé.");
+							}
+						}
+						else {
+							funcInvocation = new Cpp.WrapperFunctionInvocation(_document.Settings.Enum.Type, cppExpr);
 						}
 						_document.PostAction(new InvocationChangeAction(a, funcInvocation));
 					}
@@ -207,10 +214,10 @@ namespace Petri
 										if((w as Entry).Text == "this")
 											args.Add(new Cpp.EntityExpression(a, "this"));
 										else
-											args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, _document.AllFunctions, _document.CppMacros));
+											args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a));
 									}
 								}
-								_document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions, _document.CppMacros), false, args.ToArray())));
+								_document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray())));
 							}
 							catch(Exception ex) {
 								MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("L'expression spécifiée est invalide (" + ex.Message + ")."));
@@ -238,12 +245,12 @@ namespace Petri
 										if((w as Entry).Text == "this")
 											args.Add(new Cpp.EntityExpression(a, "this"));
 										else
-											args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, _document.AllFunctions, _document.CppMacros));
+											args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a));
 									}
 								}
 								Cpp.FunctionInvocation invocation;
 								if(a.Function.Function is Cpp.Method) {
-									invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a, _document.AllFunctions, _document.CppMacros), false, args.ToArray());
+									invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray());
 								}
 								else {
 									invocation = new Cpp.FunctionInvocation(a.Function.Function, args.ToArray());

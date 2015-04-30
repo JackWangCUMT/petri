@@ -23,7 +23,7 @@ namespace Petri
 
 			base.Position = new PointD(0, 0);
 
-			this.Condition = new ExpressionCondition(Cpp.Expression.CreateFromString<Cpp.Expression>("true", this, doc.AllFunctions, doc.CppMacros), this);
+			this.Condition = new ExpressionCondition(Cpp.Expression.CreateFromString<Cpp.Expression>("true", this), this);
 
 			this.UpdatePosition();
 		}
@@ -49,7 +49,7 @@ namespace Petri
 			}
 			catch(Exception) {
 				Document.Conflicting.Add(this);
-				this.Condition = new ExpressionCondition(new Cpp.LitteralExpression(s), this);
+				this.Condition = new ExpressionCondition(Cpp.LitteralExpression.CreateFromString(s, this), this);
 			}
 		}
 
@@ -179,13 +179,19 @@ namespace Petri
 			}
 
 			source += "auto " + this.CppName + " = std::make_shared<Transition<" + Document.Settings.Enum.Name + ">>(*" + bName + ", *" + aName + ");";
-			source += this.CppName + "->setCondition(" + this.Condition.MakeCpp() + ");";
+			source += this.CppName + "->setCondition(" + Condition.MakeCpp() + ");";
 		
 			source += this.CppName + "->setName(\"" + this.Name + "\");";
 			source += this.CppName + "->setID(" + this.ID.ToString() + ");";
 			source += bName + "->addTransition(" + this.CppName + ");";
 
 			return "";
+		}
+
+		public void GetVariables(HashSet<Cpp.VariableExpression> res) {
+			if(Condition is ExpressionCondition) {
+				((ExpressionCondition)Condition).GetVariables(res);
+			}
 		}
 	}
 }

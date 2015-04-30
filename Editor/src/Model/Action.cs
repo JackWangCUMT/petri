@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Linq;
+using System.Linq;
 
 namespace Petri
 {
@@ -22,13 +23,19 @@ namespace Petri
 		}
 
 		private void TrySetFunction(string s) {
-			Cpp.FunctionInvocation exp;
+			Cpp.Expression exp;
 			try {
-				exp = Cpp.Expression.CreateFromString<Cpp.FunctionInvocation>(s, this, Document.AllFunctions, Document.CppMacros);
-				if(!exp.Function.ReturnType.Equals(Document.Settings.Enum.Type)) {
-					Document.Conflicting.Add(this);
+				exp = Cpp.Expression.CreateFromString<Cpp.Expression>(s, this);
+				if(exp is Cpp.FunctionInvocation) {
+					var f = (Cpp.FunctionInvocation)exp;
+					if(!f.Function.ReturnType.Equals(Document.Settings.Enum.Type)) {
+						Document.Conflicting.Add(this);
+					}
+					Function = f;
 				}
-				Function = exp;
+				else {
+					Function = new Cpp.WrapperFunctionInvocation(Document.Settings.Enum.Type, exp);
+				}
 			}
 			catch(Exception) {
 				Document.Conflicting.Add(this);
@@ -97,7 +104,7 @@ namespace Petri
 			var old = new Dictionary<Cpp.LitteralExpression, string>();
 			string enumName = Document.Settings.Enum.Name;
 
-			var litterals = Function.GetLitterals();
+			var litterals = Function.GetLiterals();
 			foreach(Cpp.LitteralExpression le in litterals) {
 				foreach(string e in Document.Settings.Enum.Members) {
 					if(le.Expression == e) {
@@ -107,7 +114,30 @@ namespace Petri
 				}
 			}
 
-			source += this.CppName + "->setAction(" + Function.MakeCpp() + ");";
+			var cppVar = new HashSet<Cpp.VariableExpression>();
+			GetVariables(cppVar);
+
+			if(cppVar.Count == 0) {
+				source += this.CppName + "->setAction(" + Function.MakeCpp() + ");";
+			}
+			else {
+				var cppLockLock = from v in cppVar
+								  select "_petri_lock_" + v.Expression;
+				
+				source += this.CppName + "->setAction(make_callable_ptr([&petriNet]() {";
+				foreach(var v in cppVar) {
+					source += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + v.Expression + ")).getLock();";
+				}
+
+				if(cppVar.Count > 1)
+					source += "std::lock(" + String.Join(", ", cppLockLock) + ");";
+				else {
+					source += String.Join(", ", cppLockLock) + ".lock();";
+				}
+					
+				source += "return (*" + Function.MakeCpp() + ")();";
+				source += "}));";
+			}
 			source += this.CppName + "->setRequiredTokens(" + RequiredTokens.ToString() + ");";
 
 			source += this.CppName + "->setName(\"" + this.Parent.Name + "_" + this.Name + "\");";
@@ -119,6 +149,15 @@ namespace Petri
 			}
 
 			return "";
+		}
+
+		public void GetVariables(HashSet<Cpp.VariableExpression> res) {				
+			var l = Function.GetLiterals();
+			foreach(var ll in l) {
+				if(ll is Cpp.VariableExpression) {
+					res.Add(ll as Cpp.VariableExpression);
+				}
+			}
 		}
 
 		Cpp.FunctionInvocation _function;

@@ -1,9 +1,16 @@
-﻿taille debugeditor
+﻿quand exec pétri se termine, signaler au débuggueur
+
+taille debugeditor
 génération invocation compilateur
+
+suppression timeoutcondition
+
+sleep()
+déplacement transitions
 
 Parenthèses A && B && C
 
-Variables atomiques accessibles directement dans l'éditeur de RdP
+Fonction recherche
 Playground
 
 Commenter le code :3
@@ -12,8 +19,6 @@ Documentation
 Compilation du code : formattage des erreurs de compilation
 
 Actions/Transitions : ajustement des dimensions à la longueur du titre
-
-Fonction recherche
 
 Scénario d'exécution
 

@@ -137,8 +137,8 @@ namespace Petri {
 								_petriNetFactory.load();
 							}
 							catch(std::exception &e) {
-								this->sendObject(this->error("The PetriNet API has been updated after the compilation of the dynamic library, please recompile to allow debugging!"));
-								std::cerr << "The PetriNet API has been updated after the compilation of the dynamic library, please recompile to allow debugging!" << std::endl;
+								this->sendObject(this->error(std::string("An exception occurred upon dynamic lib loading (") + e.what() + ")!"));
+								std::cerr << "An exception occurred upon dynamic lib loading (" << e.what() << ")!" << std::endl;
 							}
 						}
 						if(_petriNetFactory.loaded()) {
@@ -206,8 +206,8 @@ namespace Petri {
 							lib = root["payload"]["lib"].asString();
 							DynamicLib dl(lib);
 							dl.load();
-							auto eval = dl.loadSymbol<char const *()>(_petriNetFactory.prefix() + std::string("_evaluate"));
-							result = eval();
+							auto eval = dl.loadSymbol<char const *(void *)>(_petriNetFactory.prefix() + std::string("_evaluate"));
+							result = eval(static_cast<void *>(_petri.get()));
 						}
 						catch(std::exception &e) {
 							result = std::string("could not evaluate the symbol, reason: ") + e.what();

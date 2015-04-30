@@ -58,7 +58,7 @@ namespace Petri
 				if(index != -1) {
 					/*var t = Parser.SyntacticSplit(s.Substring(index + 1, s.Length - index - 2));
 					foreach(var e in t) {
-						template.Add(Expression.CreateFromString<Expression>(e, null, new List<Function>()));
+						template.Add(Expression.CreateFromString<Expression>(e, notnullplease, new List<Function>()));
 					}*/
 					template = s.Substring(index + 1, s.Length - index - 2);
 				}

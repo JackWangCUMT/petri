@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Regex = System.Text.RegularExpressions.Regex;
+using System.Linq;
 
 namespace Petri
 {
@@ -18,7 +19,7 @@ namespace Petri
 				return new TimeoutCondition(new Cpp.Duration(condition.Substring("Timeout(".Length, condition.Length - "Timeout(".Length - 1)), t);
 			}
 
-			var exp = Cpp.Expression.CreateFromString<Cpp.Expression>(condition, null, funcList, macros);
+			var exp = Cpp.Expression.CreateFromString<Cpp.Expression>(condition, t);
 
 			return new ExpressionCondition(exp, t);
 		}
@@ -69,12 +70,15 @@ namespace Petri
 			private set;
 		}
 
+		public override List<Cpp.LitteralExpression> GetLiterals() {
+			return Expression.GetLiterals();
+		}
+
 		public override string MakeCpp() {
 			var old = new Dictionary<Cpp.LitteralExpression, string>();
 			string enumName = _transition.Document.Settings.Enum.Name;
 
-			var litterals = Expression.GetLitterals();
-			foreach(Cpp.LitteralExpression le in litterals) {
+			foreach(Cpp.LitteralExpression le in GetLiterals()) {
 				foreach(string e in _transition.Document.Settings.Enum.Members) {
 					if(le.Expression == e) {
 						old.Add(le, le.Expression);
@@ -83,15 +87,45 @@ namespace Petri
 				}
 			}
 
-			string cpp = Expression is Cpp.LitteralExpression ? Expression.MakeCpp() : "(*" + Expression.MakeCpp() + ")()";
+			string cpp = "return " + (Expression is Cpp.LitteralExpression ? Expression.MakeCpp() : "(*" + Expression.MakeCpp() + ")()") + ";";
 
-			string s =  "std::make_shared<Condition<" + enumName + ">>([](" + enumName + " _PETRI_PRIVATE_GET_ACTION_RESULT_) { return " + cpp + "; })";
+			var cppVar = new HashSet<Cpp.VariableExpression>();
+			GetVariables(cppVar);
+
+			if(cppVar.Count > 0) {
+				string lockString = "";
+				var cppLockLock = from v in cppVar
+								  select "_petri_lock_" + v.Expression;
+
+				foreach(var v in cppVar) {
+					lockString += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + v.Expression + ")).getLock();\n";
+				}
+
+				if(cppVar.Count > 1)
+					lockString += "std::lock(" + String.Join(", ", cppLockLock) + ");\n";
+				else {
+					lockString += String.Join(", ", cppLockLock) + ".lock();\n";
+				}
+
+				cpp = "\n" + lockString + cpp + "\n";
+			}
+
+			string s =  "std::make_shared<Condition<" + enumName + ">>([&petriNet](" + enumName + " _PETRI_PRIVATE_GET_ACTION_RESULT_) -> bool { " + cpp + " })";
 
 			foreach(var tup in old) {
 				tup.Key.Expression = tup.Value;
 			}
 
 			return s.Replace("$Res", "_PETRI_PRIVATE_GET_ACTION_RESULT_");
+		}
+
+		public void GetVariables(HashSet<Cpp.VariableExpression> res) {
+			var l = GetLiterals();
+			foreach(var ll in l) {
+				if(ll is Cpp.VariableExpression) {
+					res.Add(ll as Cpp.VariableExpression);
+				}
+			}
 		}
 	}
 }

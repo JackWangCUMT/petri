@@ -8,7 +8,7 @@ namespace Petri
 {
 	public class HeadlessDocument {
 		public HeadlessDocument(string path) {
-			this.Headers = new List<string>();
+			Headers = new List<string>();
 			CppActions = new List<Cpp.Function>();
 			AllFunctionsList = new List<Cpp.Function>();
 			CppConditions = new List<Cpp.Function>();
@@ -21,7 +21,7 @@ namespace Petri
 			timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>", Cpp.Scope.EmptyScope), "timeout"));
 			CppConditions.Add(timeout);
 
-			this.Path = path;
+			Path = path;
 		}
 
 		public string Path {
@@ -336,6 +336,17 @@ namespace Petri
 		public virtual void UpdateConflicts() {
 			Conflicting.Clear();
 			PetriNet.UpdateConflicts();
+		}
+
+		public string GenerateVarEnum() {
+			var variables = PetriNet.Variables;
+			var cppVar = from v in variables
+			             select v.Expression;
+			if(variables.Count > 0) {
+				return "enum class Petri_Var_Enum : std::uint_fast32_t {" + String.Join(", ", cppVar) + "};";
+			}
+
+			return "";
 		}
 
 		int _wX, _wY, _wW, _wH;

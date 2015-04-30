@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Petri {
 	namespace Cpp
@@ -19,17 +20,17 @@ namespace Petri {
 			public abstract string MakeCpp();
 			public abstract string MakeUserReadable();
 
-			public abstract List<LitteralExpression> GetLitterals();
+			public abstract List<LitteralExpression> GetLiterals();
 
-			public static ExpressionType CreateFromString<ExpressionType>(string s, Entity entity, IEnumerable<Function> funcList, IDictionary<string, string> macros) where ExpressionType : Expression {
+			public static ExpressionType CreateFromString<ExpressionType>(string s, Entity entity) where ExpressionType : Expression {
 				string unexpanded = s;
 
-				string expanded = Expand(s, macros);
+				string expanded = Expand(s, entity.Document.CppMacros);
 				s = expanded;
 
 				var tup = Expression.Preprocess(s);
 
-				Expression result = Expression.CreateFromPreprocessedString(tup.Item1, entity, funcList, tup.Item2);
+				Expression result = Expression.CreateFromPreprocessedString(tup.Item1, entity, tup.Item2);
 
 				if(!(result is ExpressionType))
 					throw new Exception("Unable to get a valid expression");
@@ -162,7 +163,7 @@ namespace Petri {
 				return Tuple.Create(s, subexprs);
 			}
 
-			private static Expression CreateFromPreprocessedString(string s, Entity entity, IEnumerable<Function> funcList, Dictionary<int, Tuple<ExprType, string>> subexprs) {
+			private static Expression CreateFromPreprocessedString(string s, Entity entity, Dictionary<int, Tuple<ExprType, string>> subexprs) {
 				for(int i = 17; i >= 0; --i) {
 					int bound;
 					int direction;
@@ -242,14 +243,14 @@ namespace Petri {
 								var param = new List<Expression>();
 								if(tup.Item1.Length > 0) {
 									foreach(var a in argsList) {
-										param.Add(Expression.CreateFromPreprocessedString(a, entity, funcList, tup.Item2));
+										param.Add(Expression.CreateFromPreprocessedString(a, entity, tup.Item2));
 									}
 								}
 
 								var func = Expression.GetStringFromPreprocessed(e2.Substring(0, paramIndex), subexprs);
 								tup = Expression.Preprocess(func);
 								var funcScope = Parser.ExtractScope(Expression.GetStringFromPreprocessed(tup.Item1, subexprs));
-								Cpp.Method m = (funcList.FirstOrDefault(delegate(Cpp.Function ff) {
+								Cpp.Method m = (entity.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
 									return (ff is Cpp.Method) && ff.Parameters.Count == param.Count && funcScope.Item2 == ff.Name && funcScope.Item1.Equals(ff.Enclosing);
 								})) as Cpp.Method;
 
@@ -257,16 +258,16 @@ namespace Petri {
 									throw new Exception("Aucune méthode ne correspond à l'expression demandée (" + GetStringFromPreprocessed(s, subexprs) + ")");
 								}
 
-								return new MethodInvocation(m, Expression.CreateFromPreprocessedString(e1, entity, funcList, subexprs), foundOperator == Cpp.Operator.Name.SelectionPtr, param.ToArray());
+								return new MethodInvocation(m, Expression.CreateFromPreprocessedString(e1, entity, subexprs), foundOperator == Cpp.Operator.Name.SelectionPtr, param.ToArray());
 							}
 
 							e1 = Expression.GetStringFromPreprocessed(e1, subexprs);
 							e2 = Expression.GetStringFromPreprocessed(e2, subexprs);
 
-							return new BinaryExpression(foundOperator, Expression.CreateFromString<Expression>(e1, entity, funcList, null), Expression.CreateFromString<Expression>(e2, entity, funcList, null));
+							return new BinaryExpression(foundOperator, Expression.CreateFromString<Expression>(e1, entity), Expression.CreateFromString<Expression>(e2, entity));
 						}
 						else if(prop.type == Petri.Cpp.Operator.Type.PrefixUnary) {
-							return new UnaryExpression(foundOperator, Expression.CreateFromString<Expression>(Expression.GetStringFromPreprocessed(s.Substring(index + prop.cpp.Length), subexprs), entity, funcList, null));
+							return new UnaryExpression(foundOperator, Expression.CreateFromString<Expression>(Expression.GetStringFromPreprocessed(s.Substring(index + prop.cpp.Length), subexprs), entity));
 						}
 						else if(prop.type == Petri.Cpp.Operator.Type.SuffixUnary) {
 							if(foundOperator == Petri.Cpp.Operator.Name.FunCall) {
@@ -277,14 +278,14 @@ namespace Petri {
 								var param = new List<Expression>();
 								if(tup.Item1.Length > 0) {
 									foreach(var a in argsList) {
-										param.Add(Expression.CreateFromPreprocessedString(a, entity, funcList, tup.Item2));
+										param.Add(Expression.CreateFromPreprocessedString(a, entity, tup.Item2));
 									}
 								}
 
 								var func = Expression.GetStringFromPreprocessed(s.Substring(0, paramIndex), subexprs);
 								tup = Expression.Preprocess(func);
 								var funcScope = Parser.ExtractScope(Expression.GetStringFromPreprocessed(tup.Item1, subexprs));
-								Cpp.Function f = funcList.FirstOrDefault(delegate(Cpp.Function ff) {
+								Cpp.Function f = entity.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
 									return ff.Parameters.Count == param.Count && funcScope.Item2 == ff.Name && funcScope.Item1.Equals(ff.Enclosing);
 								});
 							
@@ -294,12 +295,12 @@ namespace Petri {
 							
 								return new FunctionInvocation(f, param.ToArray());
 							}
-							return new UnaryExpression(foundOperator, Expression.CreateFromString<Expression>(Expression.GetStringFromPreprocessed(s.Substring(0, index), subexprs), entity, funcList, null));
+							return new UnaryExpression(foundOperator, Expression.CreateFromString<Expression>(Expression.GetStringFromPreprocessed(s.Substring(0, index), subexprs), entity));
 						}
 					}
 				}
 
-				return new LitteralExpression(GetStringFromPreprocessed(s, subexprs));
+				return LitteralExpression.CreateFromString(GetStringFromPreprocessed(s, subexprs), entity);
 			}
 
 			private static string GetStringFromPreprocessed(string prep, Dictionary<int, Tuple<ExprType, string>> subexprs) {
@@ -328,8 +329,8 @@ namespace Petri {
 				return prep;
 			}
 
-			private static MethodInvocation CreateInvocation(bool indirection, List<string> invocation, IEnumerable<Function> funcList, IDictionary<string, string> macros, Entity entity) {
-				var func = Expand(invocation[1], macros);
+			private static MethodInvocation CreateInvocation(bool indirection, List<string> invocation, Entity entity) {
+				var func = Expand(invocation[1], entity.Document.CppMacros);
 				func = Parser.RemoveParenthesis(func);
 
 				int index = func.IndexOf("(");
@@ -339,9 +340,9 @@ namespace Petri {
 				var argsList = Parser.SyntacticSplit(args, ",");
 				var exprList = new List<Expression>();
 				foreach(var ss in argsList) {
-					exprList.Add(Expression.CreateFromString<Expression>(Parser.RemoveParenthesis(ss), entity, funcList, null));
+					exprList.Add(Expression.CreateFromString<Expression>(Parser.RemoveParenthesis(ss), entity));
 				}
-				Cpp.Method m = (funcList.FirstOrDefault(delegate(Cpp.Function ff) {
+				Cpp.Method m = (entity.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
 					return (ff is Method) && ff.Parameters.Count == argsList.Count && tup.Item2 == ff.Name && tup.Item1.Equals(ff.Enclosing);
 				})) as Method;
 
@@ -349,7 +350,7 @@ namespace Petri {
 					throw new Exception("Aucune méthode ne correspond à l'expression demandée");
 				}
 
-				return new MethodInvocation(m, Expression.CreateFromString<Expression>(invocation[0], entity, funcList, macros), indirection, exprList.ToArray());
+				return new MethodInvocation(m, Expression.CreateFromString<Expression>(invocation[0], entity), indirection, exprList.ToArray());
 			}
 
 			protected static string Parenthesize(Expression parent, Expression child, string representation) {
@@ -404,13 +405,20 @@ namespace Petri {
 				return "";
 			}
 
-			public override List<LitteralExpression> GetLitterals() {
+			public override List<LitteralExpression> GetLiterals() {
 				return new List<LitteralExpression>();
 			}
 		}
 
 		public class LitteralExpression : Expression {
-			public LitteralExpression(string expr) : base(Cpp.Operator.Name.None) {
+			static public LitteralExpression CreateFromString(string s, Entity e) {
+				if(s.Length >= 2 && s.StartsWith("$") && char.IsLower(s[1])) {
+					return new VariableExpression(s.Substring(1), e);
+				}
+				return new LitteralExpression(s);
+			}
+
+			protected LitteralExpression(string expr) : base(Cpp.Operator.Name.None) {
 				Expression = expr.Trim();
 			}
 
@@ -431,10 +439,36 @@ namespace Petri {
 				return Expression;
 			}
 
-			public override List<LitteralExpression> GetLitterals() {
+			public override List<LitteralExpression> GetLiterals() {
 				var l = new List<LitteralExpression>();
 				l.Add(this);
 				return l;
+			}
+		}
+
+		public class VariableExpression : LitteralExpression {
+			public VariableExpression(string expr, Entity e) : base(expr) {
+				Regex name = new Regex(Cpp.Parser.NamePattern);
+				Match nameMatch = name.Match(expr);
+				if(!nameMatch.Success) {
+					throw new Exception("Invalid variable name specified");
+				}
+			}
+
+			public override string MakeCpp() {
+				return "std::ref(petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + Expression + ")).value())";
+			}
+
+			public override string MakeUserReadable() {
+				return "$" + Expression;
+			}
+
+			public override bool Equals(object o) {
+				return o is VariableExpression && ((VariableExpression)o).Expression == Expression;
+			}
+
+			public override int GetHashCode() {
+				return Expression.GetHashCode();
 			}
 		}
 
@@ -466,7 +500,7 @@ namespace Petri {
 				return this.ReadableName;
 			}
 
-			public override List<LitteralExpression> GetLitterals() {
+			public override List<LitteralExpression> GetLiterals() {
 				return new List<LitteralExpression>();
 			}
 		}
@@ -490,25 +524,25 @@ namespace Petri {
 				case Cpp.Operator.Name.FunCall:
 					throw new Exception("Already managed in FunctionInvocation class!");
 				case Cpp.Operator.Name.UnaryPlus:
-					return this.Expression.MakeCpp();
+					return "make_callable_ptr(PetriUtils::identity(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.UnaryMinus:
-					return "make_callable_ptr(std::negate<void>(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(std::negate(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.LogicalNot:
-					return "make_callable_ptr(std::logical_not<void>(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(std::logical_not(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.BitwiseNot:
-					return "make_callable_ptr(std::bit_not<void>(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(std::bit_not(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.Indirection:
-					return "make_callable_ptr(PetriUtils::indirect<void>(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(PetriUtils::indirect(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.AddressOf:
-					return "make_callable_ptr(PetriUtils::addressof<void>(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(PetriUtils::addressof(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.PreIncr:
-					return "make_callable_ptr(PetriUtils::preincr<void>(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(PetriUtils::preincr(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.PreDecr:
-					return "make_callable_ptr(PetriUtils::predecr<void>(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(PetriUtils::predecr(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.PostIncr:
-					return "make_callable_ptr(PetriUtils::postincr<void>(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(PetriUtils::postincr(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.PostDecr:
-					return "make_callable_ptr(PetriUtils::postdecr<void>(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(PetriUtils::postdecr(), " + this.Expression.MakeCpp() + ")";
 				}
 				throw new Exception("Operator not implemented!");
 			}
@@ -543,8 +577,8 @@ namespace Petri {
 				throw new Exception("Operator not implemented!");
 			}
 
-			public override List<LitteralExpression> GetLitterals() {
-				return Expression.GetLitterals();
+			public override List<LitteralExpression> GetLiterals() {
+				return Expression.GetLiterals();
 			}
 		}
 
@@ -683,9 +717,9 @@ namespace Petri {
 				throw new Exception("Operator not implemented!");
 			}
 
-			public override List<LitteralExpression> GetLitterals() {
-				var l1 = Expression1.GetLitterals();
-				var l2 = Expression2.GetLitterals();
+			public override List<LitteralExpression> GetLiterals() {
+				var l1 = Expression1.GetLiterals();
+				var l2 = Expression2.GetLiterals();
 				l1.AddRange(l2);
 
 				return l1;
@@ -725,10 +759,10 @@ namespace Petri {
 				throw new Exception("Operator not implemented!");
 			}
 
-			public override List<LitteralExpression> GetLitterals() {
-				var l1 = Expression1.GetLitterals();
-				var l2 = Expression2.GetLitterals();
-				var l3 = Expression3.GetLitterals();
+			public override List<LitteralExpression> GetLiterals() {
+				var l1 = Expression1.GetLiterals();
+				var l2 = Expression2.GetLiterals();
+				var l3 = Expression3.GetLiterals();
 				l1.AddRange(l2);
 				l1.AddRange(l3);
 

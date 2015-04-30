@@ -14,7 +14,7 @@ namespace Petri
 				foreach(var arg in arguments) {
 					var a = arg;
 					if(a.MakeUserReadable() == "")
-						a = new LitteralExpression("void");
+						a = LitteralExpression.CreateFromString("void", null);
 
 					this.Arguments.Add(a);
 				}
@@ -69,10 +69,10 @@ namespace Petri
 				return Function.QualifiedName + "(" + args + ")";
 			}
 
-			public override List<LitteralExpression> GetLitterals() {
+			public override List<LitteralExpression> GetLiterals() {
 				var l1 = new List<LitteralExpression>();
 				foreach(var e in Arguments) {
-					var l2 = e.GetLitterals();
+					var l2 = e.GetLiterals();
 					l1.AddRange(l2);
 				}
 
@@ -107,9 +107,9 @@ namespace Petri
 				return This.MakeUserReadable() + (Indirection ? "->" : ".") + Function.QualifiedName + "(" + args + ")";
 			}
 
-			public override List<LitteralExpression> GetLitterals() {
-				var l1 = base.GetLitterals();
-				l1.AddRange(This.GetLitterals());
+			public override List<LitteralExpression> GetLiterals() {
+				var l1 = base.GetLiterals();
+				l1.AddRange(This.GetLiterals());
 
 				return l1;
 			}
@@ -139,6 +139,26 @@ namespace Petri
 
 			string _value;
 			static Cpp.Function _dummy;
+		}
+
+		public class WrapperFunctionInvocation : FunctionInvocation {
+			public WrapperFunctionInvocation(Cpp.Type returnType, Expression expr) : base(GetWrapperFunction(returnType), expr) {
+				
+			}
+
+			public static Cpp.Function GetWrapperFunction(Cpp.Type returnType) {
+				var f = new Function(returnType, Scope.MakeFromNamespace("PetriUtils", null), "", false);
+				f.AddParam(new Param(new Type("void", Scope.EmptyScope), "param"));
+				return f;
+			}
+
+			public override string MakeCpp() {
+				return "make_callable_ptr([&petriNet]() -> " + Function.ReturnType.Name + " { (*" + Arguments[0].MakeCpp() + ")(); return {}; })";
+			}
+
+			public override string MakeUserReadable() {
+				return Arguments[0].MakeUserReadable();
+			}
 		}
 	}
 }

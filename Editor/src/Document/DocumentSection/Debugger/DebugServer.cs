@@ -219,7 +219,16 @@ namespace Petri
 				cppExpr = expression.MakeCpp();
 			}
 			else {
-				cppExpr = expression.MakeCpp() + "->operator()()";
+				cppExpr = "(*" + expression.MakeCpp() + ")()";
+			}
+
+			if(!PetriRunning) {
+				var literals = expression.GetLiterals();
+				foreach(var l in literals) {
+					if(l is Cpp.VariableExpression) {
+						throw new Exception("Impossible d'évaluer une variable du réseau de pétri tant que celui-ci n'est pas lancé.");
+					}
+				}
 			}
 
 			Cpp.Generator generator = new Cpp.Generator();
@@ -230,7 +239,12 @@ namespace Petri
 			generator.AddHeader("<string>");
 			generator.AddHeader("<sstream>");
 
-			generator += "extern \"C\" char const *" + _document.CppPrefix + "_evaluate() {";
+			generator += "using namespace Petri;";
+
+			generator += _document.GenerateVarEnum();
+
+			generator += "extern \"C\" char const *" + _document.CppPrefix + "_evaluate(void *petriPtr) {";
+			generator += "auto &petriNet = *static_cast<PetriDebug<" + _document.Settings.Enum.Name + "> *>(petriPtr);";
 			generator += "static std::string result;";
 			generator += "std::ostringstream oss;";
 			generator += "oss << " + cppExpr + ";";

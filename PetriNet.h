@@ -19,6 +19,8 @@
 #include <thread>
 #include <deque>
 #include "Common.h"
+#include "Atomic.h"
+#include <map>
 
 #include "Transition.h"
 #include "Action.h"
@@ -69,6 +71,9 @@ using namespace std::chrono_literals;
 		 */
 		virtual void join();
 
+		void addVariable(std::uint_fast32_t id);
+		Atomic &getVariable(std::uint_fast32_t id);
+
 	protected:
 		using ClockType = std::conditional<std::chrono::high_resolution_clock::is_steady, std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
 
@@ -92,6 +97,8 @@ using namespace std::chrono_literals;
 		std::string const _name;
 		std::list<std::pair<std::shared_ptr<Action<_ActionResult>>, bool>> _states;
 		std::list<Transition<_ActionResult>> _transitions;
+
+		std::map<std::uint_fast32_t, std::unique_ptr<Atomic>> _variables;
 	};
 
 }

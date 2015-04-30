@@ -111,8 +111,8 @@ namespace Petri
 
 				Properties[Name.ScopeResolution] = new Op(Associativity.LeftToRight, Type.Binary, "::", 0, false, false);
 
-				Properties[Name.PostIncr] = new Op(Associativity.LeftToRight, Type.SuffixUnary, "++", 1, false, false);
-				Properties[Name.PostDecr] = new Op(Associativity.LeftToRight, Type.SuffixUnary, "--", 1, false, false);
+				Properties[Name.PostIncr] = new Op(Associativity.LeftToRight, Type.SuffixUnary, "++", 1, true, false);
+				Properties[Name.PostDecr] = new Op(Associativity.LeftToRight, Type.SuffixUnary, "--", 1, true, false);
 				Properties[Name.FunctionalCast] = new Op(Associativity.LeftToRight, Type.PrefixUnary, "", 1, false, false);
 				Properties[Name.FunCall] = new Op(Associativity.LeftToRight, Type.SuffixUnary, "()", 1, true, false);
 				Properties[Name.Subscript] = new Op(Associativity.LeftToRight, Type.SuffixUnary, "", 1, false, false);
@@ -121,8 +121,8 @@ namespace Petri
 				Properties[Name.SelectionRef] = new Op(Associativity.LeftToRight, Type.Binary, ".", 2, true, false);
 				Properties[Name.SelectionPtr] = new Op(Associativity.LeftToRight, Type.Binary, "->", 2, true, false);
 
-				Properties[Name.PreIncr] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "++", 3, false, false);
-				Properties[Name.PreDecr] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "--", 3, false, false);
+				Properties[Name.PreIncr] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "++", 3, true, false);
+				Properties[Name.PreDecr] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "--", 3, true, false);
 				Properties[Name.UnaryPlus] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "+", 3, true, true);
 				Properties[Name.UnaryMinus] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "-", 3, true, true);
 				Properties[Name.LogicalNot] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "!", 3, true, false);

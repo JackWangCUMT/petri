@@ -50,7 +50,7 @@ namespace Petri
 				if(_document.DebugController.Server.SessionRunning && (!_document.DebugController.Server.PetriRunning || _document.DebugController.Server.Pause)) {
 					string str = entry.Text;
 					try {
-						Cpp.Expression expr = Cpp.Expression.CreateFromString<Cpp.Expression>(str, null, _document.AllFunctions, _document.CppMacros);
+						Cpp.Expression expr = Cpp.Expression.CreateFromString<Cpp.Expression>(str, _document.PetriNet);
 						_document.DebugController.Server.Evaluate(expr);
 					}
 					catch(Exception e) {

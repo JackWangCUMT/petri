@@ -2,6 +2,7 @@
 using System.Xml;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using System.Linq;
 
 namespace Petri
 {
@@ -63,6 +64,7 @@ namespace Petri
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
+			source.AddHeader("<cstdint>");
 			source.AddHeader("\"PetriUtils.h\"");
 			foreach(var s in Document.Headers) {
 				source.AddHeader("\"" + s + "\"");
@@ -72,8 +74,19 @@ namespace Petri
 
 			source += "\nusing namespace Petri;\n";
 
+			var variables = Variables;
+			var cppVar = from v in variables
+			             select v.Expression;
+
+			source += Document.GenerateVarEnum();
+
 			source += "namespace {";
 			source += "void fill(PetriNet<" + Document.Settings.Enum.Name + "> &petriNet) {";
+
+			foreach(var e in cppVar) {
+				source += "petriNet.addVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + e + "));";
+			}
+
 			base.GenerateCpp(source, lastID);
 			source += "}"; // fill()
 			source += "}"; // namespace
@@ -131,6 +144,23 @@ namespace Petri
 			foreach(Entity o in entities) {
 				o.ID = Document.LastEntityID;
 				++Document.LastEntityID;
+			}
+		}
+
+		public HashSet<Cpp.VariableExpression> Variables {
+			get {
+				var res = new HashSet<Cpp.VariableExpression>();
+				var list = BuildEntitiesList();
+				foreach(Entity e in list) {
+					if(e is Action) {
+						((Action)e).GetVariables(res);
+					}
+					if(e is Transition) {
+						((Transition)e).GetVariables(res);
+					}
+				}
+
+				return res;
 			}
 		}
 	}

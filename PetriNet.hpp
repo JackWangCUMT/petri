@@ -27,6 +27,17 @@ namespace Petri {
 	}
 
 	template<typename _ActionResult>
+	void PetriNet<_ActionResult>::addVariable(std::uint_fast32_t id) {
+		_variables.emplace(std::make_pair(id, std::make_unique<Atomic>()));
+	}
+
+	template<typename _ActionResult>
+	Atomic &PetriNet<_ActionResult>::getVariable(std::uint_fast32_t id) {
+		auto it = _variables.find(id);
+		return *it->second;
+	}
+
+	template<typename _ActionResult>
 	inline void PetriNet<_ActionResult>::run() {
 		if(this->running()) {
 			throw std::runtime_error("Already running!");
