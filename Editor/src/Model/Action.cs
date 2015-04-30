@@ -101,11 +101,11 @@ namespace Petri
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			source += "auto " + this.CppName + " = std::make_shared<Action<" + Document.Settings.Enum.Name + ">>();";
 
-			var old = new Dictionary<Cpp.LitteralExpression, string>();
+			var old = new Dictionary<Cpp.LiteralExpression, string>();
 			string enumName = Document.Settings.Enum.Name;
 
 			var litterals = Function.GetLiterals();
-			foreach(Cpp.LitteralExpression le in litterals) {
+			foreach(Cpp.LiteralExpression le in litterals) {
 				foreach(string e in Document.Settings.Enum.Members) {
 					if(le.Expression == e) {
 						old.Add(le, le.Expression);

@@ -32,7 +32,7 @@ namespace Petri {
 		virtual void addAction(std::shared_ptr<Action<_ActionResult>> &action, bool active = false) override;
 
 		/**
-		 * Adds an observer to the PetriDebug object. The observer will be notified by some of the Petri net events, such as when a state is activated or disabled.
+		 * Sets the observer of the PetriDebug object. The observer will be notified by some of the Petri net events, such as when a state is activated or disabled.
 		 * @param session The observer which will be notified of the events
 		 */
 		void setObserver(DebugSession<_ActionResult> *session) {
@@ -59,6 +59,8 @@ namespace Petri {
 			else
 				return nullptr;
 		}
+
+		void stop() override;
 
 	protected:
 		virtual void stateEnabled(Action<_ActionResult> &a) override;

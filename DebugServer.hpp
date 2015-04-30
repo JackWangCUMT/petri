@@ -89,6 +89,11 @@ namespace Petri {
 	}
 
 	template<typename _ActionResult>
+	inline void DebugSession<_ActionResult>::notifyStop() {
+		this->sendObject(this->json("ack", "stop"));
+	}
+
+	template<typename _ActionResult>
 	inline void DebugSession<_ActionResult>::serverCommunication() {
 		setThreadName(std::string("DebugSession ") + _petriNetFactory.name());
 

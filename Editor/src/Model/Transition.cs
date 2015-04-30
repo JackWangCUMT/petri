@@ -49,7 +49,7 @@ namespace Petri
 			}
 			catch(Exception) {
 				Document.Conflicting.Add(this);
-				this.Condition = new ExpressionCondition(Cpp.LitteralExpression.CreateFromString(s, this), this);
+				this.Condition = new ExpressionCondition(Cpp.LiteralExpression.CreateFromString(s, this), this);
 			}
 		}
 

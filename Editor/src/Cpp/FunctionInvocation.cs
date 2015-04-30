@@ -14,7 +14,7 @@ namespace Petri
 				foreach(var arg in arguments) {
 					var a = arg;
 					if(a.MakeUserReadable() == "")
-						a = LitteralExpression.CreateFromString("void", null);
+						a = LiteralExpression.CreateFromString("void", null);
 
 					this.Arguments.Add(a);
 				}
@@ -69,8 +69,8 @@ namespace Petri
 				return Function.QualifiedName + "(" + args + ")";
 			}
 
-			public override List<LitteralExpression> GetLiterals() {
-				var l1 = new List<LitteralExpression>();
+			public override List<LiteralExpression> GetLiterals() {
+				var l1 = new List<LiteralExpression>();
 				foreach(var e in Arguments) {
 					var l2 = e.GetLiterals();
 					l1.AddRange(l2);
@@ -107,7 +107,7 @@ namespace Petri
 				return This.MakeUserReadable() + (Indirection ? "->" : ".") + Function.QualifiedName + "(" + args + ")";
 			}
 
-			public override List<LitteralExpression> GetLiterals() {
+			public override List<LiteralExpression> GetLiterals() {
 				var l1 = base.GetLiterals();
 				l1.AddRange(This.GetLiterals());
 

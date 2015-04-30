@@ -215,7 +215,7 @@ namespace Petri
 			string sourceName = System.IO.Path.GetTempFileName();
 
 			string cppExpr;
-			if(expression is Cpp.LitteralExpression) {
+			if(expression is Cpp.LiteralExpression) {
 				cppExpr = expression.MakeCpp();
 			}
 			else {
@@ -255,6 +255,7 @@ namespace Petri
 			generator.Write(sourceName);
 
 			string libName = System.IO.Path.GetTempFileName();
+
 
 			var c = new CppCompiler(_document);
 			var o = c.CompileSource(sourceName, libName);

@@ -29,4 +29,11 @@ namespace Petri {
 		this->PetriNet<_ActionResult>::addAction(action, active);
 	}
 
+	template<typename _ActionResult>
+	inline void PetriDebug<_ActionResult>::stop() {
+		if(_observer) {
+			_observer->notifyStop();
+		}
+	}
+
 }

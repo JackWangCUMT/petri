@@ -70,15 +70,15 @@ namespace Petri
 			private set;
 		}
 
-		public override List<Cpp.LitteralExpression> GetLiterals() {
+		public override List<Cpp.LiteralExpression> GetLiterals() {
 			return Expression.GetLiterals();
 		}
 
 		public override string MakeCpp() {
-			var old = new Dictionary<Cpp.LitteralExpression, string>();
+			var old = new Dictionary<Cpp.LiteralExpression, string>();
 			string enumName = _transition.Document.Settings.Enum.Name;
 
-			foreach(Cpp.LitteralExpression le in GetLiterals()) {
+			foreach(Cpp.LiteralExpression le in GetLiterals()) {
 				foreach(string e in _transition.Document.Settings.Enum.Members) {
 					if(le.Expression == e) {
 						old.Add(le, le.Expression);
@@ -87,7 +87,7 @@ namespace Petri
 				}
 			}
 
-			string cpp = "return " + (Expression is Cpp.LitteralExpression ? Expression.MakeCpp() : "(*" + Expression.MakeCpp() + ")()") + ";";
+			string cpp = "return " + (Expression is Cpp.LiteralExpression ? Expression.MakeCpp() : "(*" + Expression.MakeCpp() + ")()") + ";";
 
 			var cppVar = new HashSet<Cpp.VariableExpression>();
 			GetVariables(cppVar);

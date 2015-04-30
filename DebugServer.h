@@ -47,6 +47,7 @@ namespace Petri {
 
 		void addActiveState(Action<_ActionResult> &a);
 		void removeActiveState(Action<_ActionResult> &a);
+		void notifyStop();
 
 	protected:
 		void serverCommunication();

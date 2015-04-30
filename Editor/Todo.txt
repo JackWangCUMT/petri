@@ -1,6 +1,4 @@
-﻿quand exec pétri se termine, signaler au débuggueur
-
-taille debugeditor
+﻿taille debugeditor
 génération invocation compilateur
 
 suppression timeoutcondition

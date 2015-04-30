@@ -20,7 +20,7 @@ namespace Petri {
 			public abstract string MakeCpp();
 			public abstract string MakeUserReadable();
 
-			public abstract List<LitteralExpression> GetLiterals();
+			public abstract List<LiteralExpression> GetLiterals();
 
 			public static ExpressionType CreateFromString<ExpressionType>(string s, Entity entity) where ExpressionType : Expression {
 				string unexpanded = s;
@@ -300,7 +300,7 @@ namespace Petri {
 					}
 				}
 
-				return LitteralExpression.CreateFromString(GetStringFromPreprocessed(s, subexprs), entity);
+				return LiteralExpression.CreateFromString(GetStringFromPreprocessed(s, subexprs), entity);
 			}
 
 			private static string GetStringFromPreprocessed(string prep, Dictionary<int, Tuple<ExprType, string>> subexprs) {
@@ -405,20 +405,20 @@ namespace Petri {
 				return "";
 			}
 
-			public override List<LitteralExpression> GetLiterals() {
-				return new List<LitteralExpression>();
+			public override List<LiteralExpression> GetLiterals() {
+				return new List<LiteralExpression>();
 			}
 		}
 
-		public class LitteralExpression : Expression {
-			static public LitteralExpression CreateFromString(string s, Entity e) {
+		public class LiteralExpression : Expression {
+			static public LiteralExpression CreateFromString(string s, Entity e) {
 				if(s.Length >= 2 && s.StartsWith("$") && char.IsLower(s[1])) {
 					return new VariableExpression(s.Substring(1), e);
 				}
-				return new LitteralExpression(s);
+				return new LiteralExpression(s);
 			}
 
-			protected LitteralExpression(string expr) : base(Cpp.Operator.Name.None) {
+			protected LiteralExpression(string expr) : base(Cpp.Operator.Name.None) {
 				Expression = expr.Trim();
 			}
 
@@ -439,14 +439,14 @@ namespace Petri {
 				return Expression;
 			}
 
-			public override List<LitteralExpression> GetLiterals() {
-				var l = new List<LitteralExpression>();
+			public override List<LiteralExpression> GetLiterals() {
+				var l = new List<LiteralExpression>();
 				l.Add(this);
 				return l;
 			}
 		}
 
-		public class VariableExpression : LitteralExpression {
+		public class VariableExpression : LiteralExpression {
 			public VariableExpression(string expr, Entity e) : base(expr) {
 				Regex name = new Regex(Cpp.Parser.NamePattern);
 				Match nameMatch = name.Match(expr);
@@ -500,8 +500,8 @@ namespace Petri {
 				return this.ReadableName;
 			}
 
-			public override List<LitteralExpression> GetLiterals() {
-				return new List<LitteralExpression>();
+			public override List<LiteralExpression> GetLiterals() {
+				return new List<LiteralExpression>();
 			}
 		}
 		
@@ -577,7 +577,7 @@ namespace Petri {
 				throw new Exception("Operator not implemented!");
 			}
 
-			public override List<LitteralExpression> GetLiterals() {
+			public override List<LiteralExpression> GetLiterals() {
 				return Expression.GetLiterals();
 			}
 		}
@@ -717,7 +717,7 @@ namespace Petri {
 				throw new Exception("Operator not implemented!");
 			}
 
-			public override List<LitteralExpression> GetLiterals() {
+			public override List<LiteralExpression> GetLiterals() {
 				var l1 = Expression1.GetLiterals();
 				var l2 = Expression2.GetLiterals();
 				l1.AddRange(l2);
@@ -759,7 +759,7 @@ namespace Petri {
 				throw new Exception("Operator not implemented!");
 			}
 
-			public override List<LitteralExpression> GetLiterals() {
+			public override List<LiteralExpression> GetLiterals() {
 				var l1 = Expression1.GetLiterals();
 				var l2 = Expression2.GetLiterals();
 				var l3 = Expression3.GetLiterals();
