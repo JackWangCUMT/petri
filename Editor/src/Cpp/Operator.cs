@@ -164,7 +164,7 @@ namespace Petri
 				Properties[Name.LogicalOr] = new Op(Associativity.LeftToRight, Type.Binary, "||", 14, true, false);
 
 				Properties[Name.TernaryConditional] = new Op(Associativity.RightToLeft, Type.Ternary, "?", 15, false, false);
-				Properties[Name.Assignment] = new Op(Associativity.RightToLeft, Type.Binary, "=", 15, true, false);
+				Properties[Name.Assignment] = new Op(Associativity.RightToLeft, Type.Binary, ":=", 15, true, false);
 				Properties[Name.PlusAssign] = new Op(Associativity.RightToLeft, Type.Binary, "+=", 15, false, false);
 				Properties[Name.MinusAssign] = new Op(Associativity.RightToLeft, Type.Binary, "-=", 15, false, false);
 				Properties[Name.MultAssign] = new Op(Associativity.RightToLeft, Type.Binary, "*=", 15, false, false);

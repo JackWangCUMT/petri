@@ -691,7 +691,7 @@ namespace Petri {
 				case Cpp.Operator.Name.LogicalOr:
 					return p1 + " || " + p2;
 				case Cpp.Operator.Name.Assignment:
-					return p1 + " = " + p2;
+					return p1 + " := " + p2;
 				case Cpp.Operator.Name.PlusAssign:
 					return p1 + " += " + p2;
 				case Cpp.Operator.Name.MinusAssign:
