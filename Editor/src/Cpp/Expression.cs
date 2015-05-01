@@ -184,6 +184,13 @@ namespace Petri {
 							int opIndex = s.IndexOf(prop.cpp);
 							if(opIndex == -1)
 								opIndex = bound;
+							
+							if(op == Petri.Cpp.Operator.Name.SelectionRef && opIndex > 0 && opIndex < s.Length - 1) {
+								// Do not mess up with the decimal separator
+								if(char.IsDigit(s[opIndex - 1]) || char.IsDigit(s[opIndex + 1])) {
+									opIndex = bound;
+								}
+							}
 							// If we have found an operator closer to the end of the string (in relation to the operator associativity)
 							if(opIndex.CompareTo(index) == direction) {
 								// If the operator is ambiguous, we assume the ambiguity is that there exist a binary op with the same representation
