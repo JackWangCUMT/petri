@@ -128,11 +128,11 @@ namespace Petri
 							if(a.Function.Function != f) {
 								var pp = new List<Cpp.Expression>();
 								for(int i = 0; i < f.Parameters.Count; ++i) {
-									pp.Add(new Cpp.EmptyExpression());
+									pp.Add(new Cpp.EmptyExpression(true));
 								}
 								Cpp.FunctionInvocation invocation;
 								if(f is Cpp.Method) {
-									invocation = new Cpp.MethodInvocation(f as Cpp.Method, new Cpp.EmptyExpression(), false, pp.ToArray());
+									invocation = new Cpp.MethodInvocation(f as Cpp.Method, new Cpp.EmptyExpression(true), false, pp.ToArray());
 								}
 								else {
 									invocation = new Cpp.FunctionInvocation(f, pp.ToArray());
@@ -214,7 +214,7 @@ namespace Petri
 										if((w as Entry).Text == "this")
 											args.Add(new Cpp.EntityExpression(a, "this"));
 										else
-											args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a));
+											args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, false));
 									}
 								}
 								_document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray())));

@@ -178,7 +178,7 @@ namespace Petri
 
 				Properties[Name.Throw] = new Op(Associativity.LeftToRight, Type.PrefixUnary, "", 16, false, false);
 
-				Properties[Name.Comma] = new Op(Associativity.LeftToRight, Type.Binary, "", 17, false, false);
+				Properties[Name.Comma] = new Op(Associativity.LeftToRight, Type.Binary, ",", 17, true, false);
 
 				ByPrecedence = new Dictionary<int, List<Name>>();
 				for(int i = 0; i <= 17; ++i) {
