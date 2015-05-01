@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include "Callable.h"
+#include <functional>
 
 namespace Petri {
 

@@ -456,7 +456,7 @@ namespace Petri {
 			}
 
 			public override string MakeCpp() {
-				return "std::ref(petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + Expression + ")).value())";
+				return "PetriUtils::wrap_ref(petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + Expression + ")).value())";
 			}
 
 			public override string MakeUserReadable() {
@@ -526,11 +526,11 @@ namespace Petri {
 				case Cpp.Operator.Name.UnaryPlus:
 					return "make_callable_ptr(PetriUtils::identity(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.UnaryMinus:
-					return "make_callable_ptr(std::negate(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(std::negate<>(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.LogicalNot:
-					return "make_callable_ptr(std::logical_not(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(std::logical_not<>(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.BitwiseNot:
-					return "make_callable_ptr(std::bit_not(), " + this.Expression.MakeCpp() + ")";
+					return "make_callable_ptr(std::bit_not<>(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.Indirection:
 					return "make_callable_ptr(PetriUtils::indirect(), " + this.Expression.MakeCpp() + ")";
 				case Cpp.Operator.Name.AddressOf:
@@ -608,41 +608,43 @@ namespace Petri {
 
 				switch(this.Operator) {
 				case Cpp.Operator.Name.Mult:
-					return "make_callable_ptr(std::multiplies<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::multiplies<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.Div:
-					return "make_callable_ptr(std::divides<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::divides<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.Mod:
-					return "make_callable_ptr(std::modulus<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::modulus<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.Plus:
-					return "make_callable_ptr(std::plus<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::plus<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.Minus:
-					return "make_callable_ptr(std::minus<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::minus<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.ShiftLeft:
-					return "make_callable_ptr(PetriUtils::shift_left<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(PetriUtils::shift_left<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.ShiftRight:
-					return "make_callable_ptr(PetriUtils::shift_right<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(PetriUtils::shift_right<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.Less:
-					return "make_callable_ptr(std::less<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::less<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.LessEqual:
-					return "make_callable_ptr(std::less_equal<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::less_equal<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.Greater:
-					return "make_callable_ptr(std::greater<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::greater<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.GreaterEqual:
-					return "make_callable_ptr(std::greater_equal<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::greater_equal<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.Equal:
-					return "make_callable_ptr(std::equal_to<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::equal_to<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.NotEqual:
-					return "make_callable_ptr(std::not_equal_to<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::not_equal_to<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.BitwiseAnd:
-					return "make_callable_ptr(std::bit_and<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::bit_and<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.BitwiseXor:
-					return "make_callable_ptr(std::bit_xor<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::bit_xor<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.BitwiseOr:
-					return "make_callable_ptr(std::bit_or<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::bit_or<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.LogicalAnd:
-					return "make_callable_ptr(std::logical_and<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::logical_and<>(), " + e1 + ", " + e2 + ")";
 				case Cpp.Operator.Name.LogicalOr:
-					return "make_callable_ptr(std::logical_or<void>(), " + e1 + ", " + e2 + ")";
+					return "make_callable_ptr(std::logical_or<>(), " + e1 + ", " + e2 + ")";
+				case Cpp.Operator.Name.Assignment:
+					return "make_callable_ptr(PetriUtils::assign(), " + e1 + ", " + e2 + ")";
 				}
 
 				throw new Exception("Operator not implemented!");

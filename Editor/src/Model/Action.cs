@@ -63,7 +63,7 @@ namespace Petri
 		}
 
 		public static Cpp.Function DefaultFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "defaultAction", true);
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.EmptyScope, "defaultAction", true);
 			f.AddParam(new Cpp.Param(new Cpp.Type("Action *", Cpp.Scope.EmptyScope), "action"));
 			f.TemplateArguments = doc.Settings.Enum.Name;
 
@@ -71,7 +71,7 @@ namespace Petri
 		}
 
 		public static Cpp.Function DoNothingFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "doNothing", true);
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.EmptyScope, "doNothing", true);
 			f.AddParam(new Cpp.Param(doc.Settings.Enum.Type, "resultat"));
 			f.TemplateArguments = doc.Settings.Enum.Name;
 
@@ -95,7 +95,7 @@ namespace Petri
 
 		public bool IsDefault()
 		{
-			return this.Function.Function.Name == "defaultAction" && this.Function.Function.Enclosing.Equals(Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope));
+			return this.Function.Function.Name == "defaultAction";
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {

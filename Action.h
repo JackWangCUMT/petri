@@ -135,6 +135,16 @@ namespace Petri {
 		std::mutex _tokensMutex;
 	};
 
+	template<typename _ActionResult>
+	inline _ActionResult defaultAction(Action<_ActionResult> *a) {
+		std::cout << "Action " << a->name() << ", ID " << std::to_string(a->ID()) << " exécutée." << std::endl;
+		return _ActionResult{};
+	}
+
+	template<typename _ActionResult>
+	inline _ActionResult doNothing(_ActionResult result) {
+		return result;
+	}
 }
 
 #endif

@@ -10,10 +10,6 @@
 
 #include <functional>
 #include <memory>
-#include "Condition.h"
-#include "PetriNet.h"
-#include "PetriDebug.h"
-#include "Atomic.h"
 
 namespace Petri {
 
@@ -25,13 +21,36 @@ namespace Petri {
 	};
 
 	namespace PetriUtils {
+		template<class _Tp>
+		class ref_wrapper {
+		public:
+			ref_wrapper(_Tp &t) : _ptr(std::addressof(t)) {}
+
+			template<typename T>
+			operator T() const {
+				return static_cast<T>(*_ptr);
+			}
+			operator _Tp &() const {
+				return *_ptr;
+			}
+
+		private:
+			ref_wrapper(_Tp &&) = delete;
+			_Tp *_ptr;
+		};
+
+		template<typename _Tp>
+		inline auto wrap_ref(_Tp &ref) {
+			return ref_wrapper<_Tp>(ref);
+		}
+
 		struct indirect {
 			template<class _Tp>
 			inline constexpr auto operator()(_Tp&& x) const {
 				return *std::forward<_Tp>(x);
 			}
 		};
-		struct adressof {
+		struct addressof {
 			template<class _Tp>
 			inline constexpr auto operator()(_Tp&& x) const {
 				return &std::forward<_Tp>(x);
@@ -79,19 +98,12 @@ namespace Petri {
 				return std::forward<_Tp>(x);
 			}
 		};
-	}
-
-	namespace PetriUtils {
-		template<typename _ActionResult>
-		inline _ActionResult defaultAction(Action<_ActionResult> *a) {
-			std::cout << "Action " << a->name() << ", ID " << std::to_string(a->ID()) << " exécutée." << std::endl;
-			return _ActionResult{};
-		}
-
-		template<typename _ActionResult>
-		inline _ActionResult doNothing(_ActionResult result) {
-			return result;
-		}
+		struct assign {
+			template<class _T1, class _T2>
+			inline constexpr auto operator()(ref_wrapper<_T1> t, _T2&& u) const {
+				return std::forward<_T1 &>(t) = u;
+			}
+		};
 	}
 
 }

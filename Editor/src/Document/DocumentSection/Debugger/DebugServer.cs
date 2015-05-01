@@ -235,7 +235,7 @@ namespace Petri
 			foreach(string header in _document.Headers) {
 				generator.AddHeader("\"" + header + "\"");
 			}
-			generator.AddHeader("\"PetriUtils.h\"");
+			generator.AddHeader("\"Petri.h\"");
 			generator.AddHeader("<string>");
 			generator.AddHeader("<sstream>");
 

@@ -65,7 +65,7 @@ namespace Petri
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			source.AddHeader("<cstdint>");
-			source.AddHeader("\"PetriUtils.h\"");
+			source.AddHeader("\"Petri.h\"");
 			foreach(var s in Document.Headers) {
 				source.AddHeader("\"" + s + "\"");
 			}

@@ -9,7 +9,7 @@
 #define Petri_Atomic_h
 
 #include <mutex>
-#include <type_traits>
+#include "PetriUtils.h"
 
 namespace Petri {
 
@@ -19,7 +19,7 @@ namespace Petri {
 
 		}
 
-		std::int64_t &value() {
+		auto &value() {
 			return _value;
 		}
 
