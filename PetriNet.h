@@ -9,7 +9,6 @@
 #define Petri_StateChart_h
 
 #include "Callable.h"
-#include "Condition.h"
 #include <queue>
 #include <list>
 #include <unordered_map>

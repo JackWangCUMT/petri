@@ -8,7 +8,7 @@ namespace Petri {
 	{
 		public abstract class Expression
 		{
-			protected enum ExprType {Parenthesis, Invocation, Subscript, Template, Quote, DoubleQuote, Brackets};
+			public enum ExprType {Parenthesis, Invocation, Subscript, Template, Quote, DoubleQuote, Brackets};
 
 			protected Expression(Operator.Name op) {
 				this.Operator = op;
@@ -68,15 +68,11 @@ namespace Petri {
 			}
 
 			protected static Tuple<string, Dictionary<int, Tuple<ExprType, string>>> Preprocess(string s) {
-				s = s.Replace("\t", " ");
-				s = s.Replace("  ", " ");
-				s = s.Replace(" (", "(");
 				s = Parser.RemoveParenthesis(s.Trim()).Trim();
 				var subexprs = new Dictionary<int, Tuple<ExprType, string>>();
 
 				var nesting = new Stack<Tuple<ExprType, int>>();
 				for(int i = 0; i < s.Length; ++i) {
-					char cc = s[i];
 					switch(s[i]) {
 					case '(':
 						bool special = false;
@@ -159,6 +155,9 @@ namespace Petri {
 						break;
 					}
 				}
+
+				s = s.Replace("\t", " ");
+				s = s.Replace("  ", " ");
 
 				return Tuple.Create(s, subexprs);
 			}
@@ -551,39 +550,6 @@ namespace Petri {
 			}
 		}
 
-		public class EntityExpression : Expression {
-			public EntityExpression(Entity e, string readableName) : base(Cpp.Operator.Name.None) {
-				this.Entity = e;
-				this.ReadableName = readableName;
-			}
-
-			public Entity Entity {
-				get;
-				private set;
-			}
-
-			public string ReadableName {
-				get;
-				private set;
-			}
-
-			public override bool UsesFunction(Function f) {
-				return false;
-			}
-
-			public override string MakeCpp() {
-				return this.Entity.CppName + ".get()";
-			}
-
-			public override string MakeUserReadable() {
-				return this.ReadableName;
-			}
-
-			public override List<LiteralExpression> GetLiterals() {
-				return new List<LiteralExpression>();
-			}
-		}
-		
 		public class UnaryExpression : Expression {
 			public UnaryExpression(Operator.Name o, Expression expr) : base(o) {
 				this.Expression = expr;

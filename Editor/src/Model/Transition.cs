@@ -3,6 +3,7 @@ using Cairo;
 using System.Xml;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using System.Linq;
 
 namespace Petri
 {
@@ -23,7 +24,7 @@ namespace Petri
 
 			base.Position = new PointD(0, 0);
 
-			this.Condition = new ExpressionCondition(Cpp.Expression.CreateFromString<Cpp.Expression>("true", this), this);
+			this.Condition = Cpp.Expression.CreateFromString<Cpp.Expression>("true", this);
 
 			this.UpdatePosition();
 		}
@@ -45,11 +46,11 @@ namespace Petri
 
 		private void TrySetCondition(string s) {
 			try {
-				this.Condition = ConditionBase.ConditionFromString(s, this, Document.AllFunctions, Document.CppMacros);
+				Condition = Cpp.Expression.CreateFromString<Cpp.Expression>(s, this);
 			}
 			catch(Exception) {
 				Document.Conflicting.Add(this);
-				this.Condition = new ExpressionCondition(Cpp.LiteralExpression.CreateFromString(s, this), this);
+				Condition = Cpp.LiteralExpression.CreateFromString(s, this);
 			}
 		}
 
@@ -138,7 +139,7 @@ namespace Petri
 			set;
 		}
 
-		public ConditionBase Condition {
+		public Cpp.Expression Condition {
 			get;
 			set;
 		}
@@ -150,6 +151,30 @@ namespace Petri
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
+			var old = new Dictionary<Cpp.LiteralExpression, string>();
+			string enumName = Document.Settings.Enum.Name;
+
+			foreach(Cpp.LiteralExpression le in Condition.GetLiterals()) {
+				foreach(string e in Document.Settings.Enum.Members) {
+					if(le.Expression == e) {
+						old.Add(le, le.Expression);
+						le.Expression = enumName + "::" + le.Expression;
+					}
+					else if(le.Expression == "$Res") {
+						old.Add(le, le.Expression);
+						le.Expression = "_PETRI_PRIVATE_GET_ACTION_RESULT_";
+					}
+					else if(le.Expression == "$Name") {
+						old.Add(le, le.Expression);
+						le.Expression = "\"" + Name + "\"";
+					}
+					else if(le.Expression == "$ID") {
+						old.Add(le, le.Expression);
+						le.Expression = ID.ToString();
+					}
+				}
+			}
+
 			string bName = this.Before.CppName;
 			string aName = this.After.CppName;
 
@@ -168,8 +193,8 @@ namespace Petri
 						var newID = lastID.Consume();
 						string name = this.CppName + "_Entry_" + newID.ToString();
 
-						source += "auto " + name + " = std::make_shared<Transition<" + Document.Settings.Enum.Name + ">>(*" + aName + ", *" + s.CppName + ");";
-						source += name + "->setCondition(" + "std::make_shared<Condition<" + Document.Settings.Enum.Name + ">>([](" + Document.Settings.Enum.Name + "){ return true; })" + ");";
+						source += "auto " + name + " = std::make_shared<Transition<" + enumName + ">>(*" + aName + ", *" + s.CppName + ");";
+						source += name + "->setCondition([](" + enumName + "){ return true; });";
 
 						source += name + "->setName(\"" + name + "\");";
 						source += name + "->setID(" + newID.ToString() + ");";
@@ -178,19 +203,52 @@ namespace Petri
 				}
 			}
 
-			source += "auto " + this.CppName + " = std::make_shared<Transition<" + Document.Settings.Enum.Name + ">>(*" + bName + ", *" + aName + ");";
-			source += this.CppName + "->setCondition(" + Condition.MakeCpp() + ");";
-		
+			string cpp = "return " + (Condition is Cpp.LiteralExpression ? Condition.MakeCpp() : "(*" + Condition.MakeCpp() + ")()") + ";";
+
+			var cppVar = new HashSet<Cpp.VariableExpression>();
+			GetVariables(cppVar);
+
+			if(cppVar.Count > 0) {
+				string lockString = "";
+				var cppLockLock = from v in cppVar
+								  select "_petri_lock_" + v.Expression;
+
+				foreach(var v in cppVar) {
+					lockString += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + v.Expression + ")).getLock();\n";
+				}
+
+				if(cppVar.Count > 1)
+					lockString += "std::lock(" + String.Join(", ", cppLockLock) + ");\n";
+				else {
+					lockString += String.Join(", ", cppLockLock) + ".lock();\n";
+				}
+
+				cpp = "\n" + lockString + cpp + "\n";
+			}
+
+
+			cpp = "[&petriNet](" + enumName + " _PETRI_PRIVATE_GET_ACTION_RESULT_) -> bool { " + cpp + " }";
+
+			source += "auto " + this.CppName + " = std::make_shared<Transition<" + enumName + ">>(*" + bName + ", *" + aName + ");";
+			source += this.CppName + "->setCondition(" + cpp + ");";
+
 			source += this.CppName + "->setName(\"" + this.Name + "\");";
 			source += this.CppName + "->setID(" + this.ID.ToString() + ");";
 			source += bName + "->addTransition(" + this.CppName + ");";
 
+			foreach(var tup in old) {
+				tup.Key.Expression = tup.Value;
+			}
+
 			return "";
 		}
 
-		public void GetVariables(HashSet<Cpp.VariableExpression> res) {
-			if(Condition is ExpressionCondition) {
-				((ExpressionCondition)Condition).GetVariables(res);
+		public void GetVariables(HashSet<Cpp.VariableExpression> res) {				
+			var l = Condition.GetLiterals();
+			foreach(var ll in l) {
+				if(ll is Cpp.VariableExpression) {
+					res.Add(ll as Cpp.VariableExpression);
+				}
 			}
 		}
 	}

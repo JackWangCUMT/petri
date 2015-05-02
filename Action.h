@@ -9,7 +9,6 @@
 #define Petri_Action_h
 
 #include "Callable.h"
-#include "Condition.h"
 #include <queue>
 #include <list>
 #include <unordered_map>
@@ -136,8 +135,8 @@ namespace Petri {
 	};
 
 	template<typename _ActionResult>
-	inline _ActionResult defaultAction(Action<_ActionResult> *a) {
-		std::cout << "Action " << a->name() << ", ID " << std::to_string(a->ID()) << " exécutée." << std::endl;
+	inline _ActionResult defaultAction(std::string const &name, std::uint64_t id) {
+		std::cout << "Action " << name << ", ID " << id << " completed." << std::endl;
 		return _ActionResult{};
 	}
 

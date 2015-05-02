@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ExprType = Petri.Cpp.Expression.ExprType;
 
 namespace Petri
 {
@@ -36,8 +37,6 @@ namespace Petri
 
 			public static string Indent(string val)
 			{
-				val = val.Replace("\t", "");
-
 				string newVal = "";
 
 				Dictionary<char, int> dict = new Dictionary<char, int>();
@@ -48,22 +47,84 @@ namespace Petri
 
 				int currentIndent = 0;
 
+				var nesting = new Stack<Cpp.Expression.ExprType>();
+
 				foreach(string line in val.Split('\n')) {
-					int firstIndent = 0;
-					int deltaNext = 0;
+					int existingIndent = 0;
 					for(int i = 0; i < line.Length; ++i) {
-						if(dict.ContainsKey(line[i])) {
-							int delta = dict[line[i]];
-
-							if(i == 0 && delta < 0) {
-								firstIndent = delta;
-							}
-
-							deltaNext += delta;
+						if(line[i] == '\t') {
+							++existingIndent;
+						}
+						else {
+							break;
 						}
 					}
+					int firstIndent = 0;
+					int deltaNext = 0;
 
-					string newLine = GetNTab(currentIndent + firstIndent) + line;
+					for(int i = 0; i < line.Length; ++i) {
+						int delta = 0;
+						switch(line[i]) {
+						case '(':
+							nesting.Push(ExprType.Parenthesis);
+							delta = 2;
+							break;
+						case ')':
+							if(nesting.Count > 0 && nesting.Peek() == ExprType.Parenthesis) {
+								delta = -2;
+								nesting.Pop();
+							}
+							break;
+						case '{':
+							delta = 1;
+							nesting.Push(ExprType.Brackets);
+							break;
+						case '}':
+							if(nesting.Count > 0 && nesting.Peek() == ExprType.Brackets) {
+								delta = -1;
+								nesting.Pop();
+							}
+							break;
+						case '[':
+							delta = 2;
+							nesting.Push(ExprType.Subscript);
+							break;
+						case ']':
+							if(nesting.Count > 0 && nesting.Peek() == ExprType.Subscript) {
+								delta = -2;
+								nesting.Pop();
+							}
+							break;
+						case '"':
+							// First quote
+							if(nesting.Count == 0 || (nesting.Peek() != ExprType.DoubleQuote && nesting.Peek() != ExprType.Quote)) {
+								nesting.Push(ExprType.DoubleQuote);
+							}
+							// Second quote
+							else if(nesting.Count > 0 && nesting.Peek() == ExprType.DoubleQuote && line[i - 1] != '\\') {
+								nesting.Pop();
+							}
+							break;
+						case '\'':
+							// First quote
+							if(nesting.Count == 0 || (nesting.Peek() != ExprType.Quote && nesting.Peek() != ExprType.DoubleQuote)) {
+								nesting.Push(ExprType.Quote);
+							}
+							// Second quote
+							else if(nesting.Count > 0 && nesting.Peek() == ExprType.Quote && line[i - 1] != '\\') {
+								nesting.Pop();
+							}
+							break;
+						}
+
+						if(i == 0 && delta < 0) {
+							firstIndent = delta;
+						}
+
+						deltaNext += delta;
+					}
+
+					string newLine = GetNTab(currentIndent + firstIndent - existingIndent) + line;
 					currentIndent += deltaNext;
 
 					newVal += newLine + "\n";

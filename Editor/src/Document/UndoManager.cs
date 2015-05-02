@@ -344,7 +344,7 @@ namespace Petri
 	}
 
 	public class ConditionChangeAction : GuiAction {
-		public ConditionChangeAction(Transition t, ConditionBase newCondition) {
+		public ConditionChangeAction(Transition t, Cpp.Expression newCondition) {
 			Transition = t;
 			_oldCondition = t.Condition;
 			_newCondition = newCondition;
@@ -375,7 +375,7 @@ namespace Petri
 			private set;
 		}
 
-		ConditionBase _newCondition, _oldCondition;
+		Cpp.Expression _newCondition, _oldCondition;
 	}
 
 	public class InvocationChangeAction : GuiAction {

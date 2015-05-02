@@ -87,7 +87,6 @@
     <Compile Include="src\Cpp\Parser.cs" />
     <Compile Include="src\Cpp\Type.cs" />
     <Compile Include="src\Model\Action.cs" />
-    <Compile Include="src\Model\Condition.cs" />
     <Compile Include="src\Model\Entity.cs" />
     <Compile Include="src\Model\ExitPoint.cs" />
     <Compile Include="src\Model\InnerPetriNet.cs" />

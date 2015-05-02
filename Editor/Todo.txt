@@ -1,8 +1,6 @@
 ﻿taille debugeditor
 génération invocation compilateur
 
-suppression timeoutcondition
-
 sleep()
 déplacement transitions
 
@@ -19,5 +17,3 @@ Compilation du code : formattage des erreurs de compilation
 Actions/Transitions : ajustement des dimensions à la longueur du titre
 
 Scénario d'exécution
-
-std::packaged_task

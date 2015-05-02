@@ -211,10 +211,7 @@ namespace Petri
 								for(int j = 2; j < editorFields.Count; ++j) {
 									Widget w = editorFields[j];
 									if(w.GetType() == typeof(Entry)) {
-										if((w as Entry).Text == "this")
-											args.Add(new Cpp.EntityExpression(a, "this"));
-										else
-											args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, false));
+										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, false));
 									}
 								}
 								_document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray())));
@@ -242,10 +239,7 @@ namespace Petri
 								for(int j = (a.Function.Function is Cpp.Method) ? 2 : 0; j < editorFields.Count; ++j) {
 									Widget w = editorFields[j];
 									if(w.GetType() == typeof(Entry)) {
-										if((w as Entry).Text == "this")
-											args.Add(new Cpp.EntityExpression(a, "this"));
-										else
-											args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a));
+										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a));
 									}
 								}
 								Cpp.FunctionInvocation invocation;
@@ -364,8 +358,8 @@ namespace Petri
 
 			CreateLabel(0, "Condition de la transition :");
 			string userReadable;
-			if(t.Condition is ExpressionCondition && ((ExpressionCondition)t.Condition).Expression.NeedsExpansion) {
-				userReadable = ((ExpressionCondition)t.Condition).Expression.Unexpanded;
+			if(t.Condition.NeedsExpansion) {
+				userReadable = t.Condition.Unexpanded;
 			}
 			else {
 				userReadable = t.Condition.MakeUserReadable();
@@ -373,7 +367,7 @@ namespace Petri
 			var condition = CreateWidget<Entry>(true, 0, userReadable);
 			MainClass.RegisterValidation(condition, false, (obj, p) => {
 				try {
-					var cond = new ConditionChangeAction(t, ConditionBase.ConditionFromString((obj as Entry).Text, t, _document.AllFunctions, _document.CppMacros));
+					var cond = new ConditionChangeAction(t, Cpp.Expression.CreateFromString<Cpp.Expression>((obj as Entry).Text, t));
 					_document.PostAction(cond);
 				}
 				catch(Exception e) {

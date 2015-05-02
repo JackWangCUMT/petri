@@ -59,12 +59,13 @@ namespace Petri
 		}
 
 		public Cpp.FunctionInvocation DefaultAction() {
-			return new Petri.Cpp.FunctionInvocation(DefaultFunction(Document), new Petri.Cpp.EntityExpression(this, "this"));
+			return new Petri.Cpp.FunctionInvocation(DefaultFunction(Document), Cpp.LiteralExpression.CreateFromString("$Name", this), Cpp.LiteralExpression.CreateFromString("$ID", this));
 		}
 
 		public static Cpp.Function DefaultFunction(HeadlessDocument doc) {
 			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.EmptyScope, "defaultAction", true);
-			f.AddParam(new Cpp.Param(new Cpp.Type("Action *", Cpp.Scope.EmptyScope), "action"));
+			f.AddParam(new Cpp.Param(new Cpp.Type("std::string const &", Cpp.Scope.EmptyScope), "name"));
+			f.AddParam(new Cpp.Param(new Cpp.Type("std::uint64_t", Cpp.Scope.EmptyScope), "id"));
 			f.TemplateArguments = doc.Settings.Enum.Name;
 
 			return f;
@@ -111,14 +112,24 @@ namespace Petri
 						old.Add(le, le.Expression);
 						le.Expression = enumName + "::" + le.Expression;
 					}
+					else if(le.Expression == "$Name") {
+						old.Add(le, le.Expression);
+						le.Expression = "\"" + Name + "\"";
+					}
+					else if(le.Expression == "$ID") {
+						old.Add(le, le.Expression);
+						le.Expression = ID.ToString();
+					}
 				}
 			}
+
+			var cpp = Function.MakeCpp();
 
 			var cppVar = new HashSet<Cpp.VariableExpression>();
 			GetVariables(cppVar);
 
 			if(cppVar.Count == 0) {
-				source += this.CppName + "->setAction(" + Function.MakeCpp() + ");";
+				source += this.CppName + "->setAction(" + cpp + ");";
 			}
 			else {
 				var cppLockLock = from v in cppVar
@@ -135,7 +146,7 @@ namespace Petri
 					source += String.Join(", ", cppLockLock) + ".lock();";
 				}
 					
-				source += "return (*" + Function.MakeCpp() + ")();";
+				source += "return (*" + cpp + ")();";
 				source += "}));";
 			}
 			source += this.CppName + "->setRequiredTokens(" + RequiredTokens.ToString() + ");";

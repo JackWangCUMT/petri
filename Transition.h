@@ -9,7 +9,6 @@
 #define Petri_Transition_h
 
 #include "Callable.h"
-#include "Condition.h"
 #include <queue>
 #include <list>
 #include <unordered_map>
@@ -50,44 +49,22 @@ namespace Petri {
 		 * @return The result of the test, true meaning that the Transition can be crossed to enable the action 'next'
 		 */
 		bool isFulfilled(_ActionResult actionResult) const {
-			return _test->isFulfilled(actionResult);
-		}
-
-		/**
-		 * Invoked just before the execution of Action 'previous'.
-		 */
-		void actionStarted() {
-			_test->willTest();
-		}
-
-		/**
-		 * Invoked just after the execution of Action 'previous'.
-		 */
-		void actionEnded() {
-			_test->didTest();
+			return _test(actionResult);
 		}
 
 		/**
 		 * Returns the condition associated to the Transition
 		 * @return The condition associated to the Transition
 		 */
-		ConditionBase<_ActionResult> const &condition() const {
-			return *_test;
+		std::function<bool(_ActionResult)> const &condition() const {
+			return _test;
 		}
 
 		/**
 		 * Changes the condition associated to the Transition
 		 * @param test The new condition to associate to the Transition
 		 */
-		void setCondition(ConditionBase<_ActionResult> const &test) {
-			_test = std::static_pointer_cast<ConditionBase<_ActionResult>>(test.copy_ptr());
-		}
-
-		/**
-		 * Changes the condition associated to the Transition
-		 * @param test The new condition to associate to the Transition
-		 */
-		void setCondition(std::shared_ptr<ConditionBase<_ActionResult>> const &test) {
+		void setCondition(std::function<bool(_ActionResult)> const &test) {
 			_test = test;
 		}
 
@@ -141,7 +118,7 @@ namespace Petri {
 		}
 
 	private:
-		std::shared_ptr<ConditionBase<_ActionResult>> _test;
+		std::function<bool(_ActionResult)> _test;
 		Action<_ActionResult> &_previous;
 		Action<_ActionResult> &_next;
 		std::string _name;

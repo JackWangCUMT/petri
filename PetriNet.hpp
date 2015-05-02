@@ -72,16 +72,8 @@ namespace Petri {
 	inline void PetriNet<_ActionResult>::executeState(Action<_ActionResult> &a) {
 		Action<_ActionResult> *nextState = nullptr;
 
-		for(auto &t : a.transitions()) {
-			t->actionStarted();
-		}
-
 		// Runs the Callable
 		auto res = a.action()();
-
-		for(auto &t : a.transitions()) {
-			t->actionEnded();
-		}
 
 		if(!a.transitions().empty()) {
 			std::list<Transition<_ActionResult>> transitionsToTest;
