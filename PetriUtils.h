@@ -10,6 +10,7 @@
 
 #include <functional>
 #include <memory>
+#include <thread>
 
 namespace Petri {
 
@@ -104,6 +105,23 @@ namespace Petri {
 				return std::forward<_T1 &>(t) = u;
 			}
 		};
+
+		template<typename _ActionResult>
+		_ActionResult pause(std::chrono::nanoseconds const &delay) {
+			std::this_thread::sleep_for(delay);
+			return {};
+		}
+		
+		template<typename _ActionResult>
+		inline _ActionResult printAction(std::string const &name, std::uint64_t id) {
+			std::cout << "Action " << name << ", ID " << id << " completed." << std::endl;
+			return _ActionResult{};
+		}
+
+		template<typename _ActionResult>
+		inline _ActionResult doNothing() {
+			return {};
+		}
 	}
 
 }

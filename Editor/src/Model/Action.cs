@@ -15,7 +15,7 @@ namespace Petri
 
 			this.Active = active;
 
-			this.Function = this.DefaultAction();
+			this.Function = new Cpp.FunctionInvocation(DoNothingFunction(doc));
 		}
 
 		public Action(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
@@ -58,12 +58,12 @@ namespace Petri
 			element.SetAttributeValue("Function", this.Function.MakeUserReadable());
 		}
 
-		public Cpp.FunctionInvocation DefaultAction() {
-			return new Petri.Cpp.FunctionInvocation(DefaultFunction(Document), Cpp.LiteralExpression.CreateFromString("$Name", this), Cpp.LiteralExpression.CreateFromString("$ID", this));
+		public Cpp.FunctionInvocation PrintAction() {
+			return new Petri.Cpp.FunctionInvocation(PrintFunction(Document), Cpp.LiteralExpression.CreateFromString("$Name", this), Cpp.LiteralExpression.CreateFromString("$ID", this));
 		}
 
-		public static Cpp.Function DefaultFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.EmptyScope, "defaultAction", true);
+		public static Cpp.Function PrintFunction(HeadlessDocument doc) {
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "printAction", true);
 			f.AddParam(new Cpp.Param(new Cpp.Type("std::string const &", Cpp.Scope.EmptyScope), "name"));
 			f.AddParam(new Cpp.Param(new Cpp.Type("std::uint64_t", Cpp.Scope.EmptyScope), "id"));
 			f.TemplateArguments = doc.Settings.Enum.Name;
@@ -72,8 +72,15 @@ namespace Petri
 		}
 
 		public static Cpp.Function DoNothingFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.EmptyScope, "doNothing", true);
-			f.AddParam(new Cpp.Param(doc.Settings.Enum.Type, "resultat"));
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "doNothing", true);
+			f.TemplateArguments = doc.Settings.Enum.Name;
+
+			return f;
+		}
+
+		public static Cpp.Function PauseFunction(HeadlessDocument doc) {
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "pause", true);
+			f.AddParam(new Cpp.Param(new Cpp.Type("", Cpp.Scope.EmptyScope), "delai"));
 			f.TemplateArguments = doc.Settings.Enum.Name;
 
 			return f;
@@ -85,18 +92,11 @@ namespace Petri
 			}
 			set {
 				_function = value;
-				if(this.IsDefault())
-					_function = this.DefaultAction();
 			}
 		}
 
 		public override bool UsesFunction(Cpp.Function f) {
 			return Function.UsesFunction(f);
-		}
-
-		public bool IsDefault()
-		{
-			return this.Function.Function.Name == "defaultAction";
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {

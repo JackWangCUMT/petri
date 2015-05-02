@@ -1,12 +1,10 @@
 ﻿taille debugeditor
 génération invocation compilateur
-
-sleep()
 déplacement transitions
+Fonction recherche
 
 Parenthèses A && B && C
 
-Fonction recherche
 Playground
 
 Commenter le code :3

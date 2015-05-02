@@ -133,17 +133,6 @@ namespace Petri {
 		std::size_t _currentTokens;
 		std::mutex _tokensMutex;
 	};
-
-	template<typename _ActionResult>
-	inline _ActionResult defaultAction(std::string const &name, std::uint64_t id) {
-		std::cout << "Action " << name << ", ID " << id << " completed." << std::endl;
-		return _ActionResult{};
-	}
-
-	template<typename _ActionResult>
-	inline _ActionResult doNothing(_ActionResult result) {
-		return result;
-	}
 }
 
 #endif

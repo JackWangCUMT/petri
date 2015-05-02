@@ -77,11 +77,12 @@ namespace Petri
 
 		public IEnumerable<Cpp.Function> AllFunctions {
 			get {
-				Cpp.Function[] ff = new Cpp.Function[AllFunctionsList.Count + 2];
-				ff[0] = Action.DefaultFunction(this);
-				ff[1] = Action.DoNothingFunction(this);
+				Cpp.Function[] ff = new Cpp.Function[AllFunctionsList.Count + 3];
+				ff[0] = Action.DoNothingFunction(this);
+				ff[1] = Action.PrintFunction(this);
+				ff[2] = Action.PauseFunction(this);
 				for(int i = 0; i < AllFunctionsList.Count; ++i) {
-					ff[i + 2] = AllFunctionsList[i];
+					ff[i + 3] = AllFunctionsList[i];
 				}
 
 				return ff;

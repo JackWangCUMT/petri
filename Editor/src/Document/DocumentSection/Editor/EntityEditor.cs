@@ -52,6 +52,8 @@ namespace Petri
 	}
 
 	public class ActionEditor : EntityEditor {
+		private enum ActionType { Nothing, Print, Pause, Manual, Invocation };
+
 		public ActionEditor(Action a, Document doc) : base(a, doc) {
 			CreateLabel(0, "Nom de l'action :");
 			var name = CreateWidget<Entry>(true, 0, a.Name);
@@ -94,16 +96,34 @@ namespace Petri
 				var editorFields = new List<Widget>();
 
 				var list = new List<string>();
-				string defaultFunction = "Afficher ID + Nom action";
+				string nothingFunction = "Ne rien faire";
+				string printFunction = "Afficher ID + Nom action";
+				string pauseFunction = "Pause";
 				string manual = "Manuel…";
-				list.Add(defaultFunction);
+				list.Add(nothingFunction);
+				list.Add(printFunction);
+				list.Add(pauseFunction);
 				list.Add(manual);
 				foreach(var func in _document.CppActions) {
-					if(func.Name != "defaultAction" && func.ReturnType.Equals(_document.Settings.Enum.Type))
+					if(func.Signature != Action.DoNothingFunction(a.Document).Signature && func.Signature != Action.PrintFunction(a.Document).Signature && func.Signature != Action.PauseFunction(a.Document).Signature && func.ReturnType.Equals(_document.Settings.Enum.Type))
 						list.Add(func.Signature);
 				}
-				string activeFunction = a.IsDefault() ? defaultFunction : (!(a.Function is Cpp.WrapperFunctionInvocation) && !a.Function.NeedsExpansion && list.Contains(a.Function.Function.Signature) ? a.Function.Function.Signature : manual);
 
+				ActionType actionType = a.Function.Function.Signature == Action.DoNothingFunction(a.Document).Signature ? ActionType.Nothing : a.Function.Function.Signature == Action.PauseFunction(a.Document).Signature ? ActionType.Pause : a.Function.Function.Signature == Action.PrintFunction(a.Document).Signature ? ActionType.Print : !(a.Function is Cpp.WrapperFunctionInvocation) && !a.Function.NeedsExpansion && list.Contains(a.Function.Function.Signature) ? ActionType.Invocation : ActionType.Manual;
+				string activeFunction = manual;
+				if(actionType == ActionType.Nothing) {
+					activeFunction = nothingFunction;
+				}
+				else if(actionType == ActionType.Print) {
+					activeFunction = printFunction;
+				}
+				else if(actionType == ActionType.Pause) {
+					activeFunction = pauseFunction;
+				}
+				else if(actionType == ActionType.Invocation) {
+					activeFunction = a.Function.Function.Signature;
+				}
+					
 				ComboBox funcList = ComboHelper(activeFunction, list);
 				this.AddWidget(funcList, true, 0);
 				funcList.Changed += (object sender, EventArgs e) => {
@@ -113,14 +133,24 @@ namespace Petri
 
 					if(combo.GetActiveIter(out iter)) {
 						var val = combo.Model.GetValue(iter, 0) as string;
-						if(val == defaultFunction) {
-							a.Function = a.DefaultAction();
-							EditInvocation(a, false, editorFields);
+						if(val == nothingFunction) {
+							a.Function = new Cpp.FunctionInvocation(Action.DoNothingFunction(a.Document));
+							actionType = ActionType.Nothing;
+						}
+						else if(val == printFunction) {
+							a.Function = a.PrintAction();
+							actionType = ActionType.Print;
+						}
+						else if(val == pauseFunction) {
+							a.Function = new Cpp.FunctionInvocation(Action.PauseFunction(a.Document), Cpp.LiteralExpression.CreateFromString("1s", a));
+							actionType = ActionType.Pause;
 						}
 						else if(val == manual) {
-							EditInvocation(a, true, editorFields);
+							actionType = ActionType.Manual;
 						}
 						else {
+							actionType = ActionType.Invocation;
+
 							var f = _document.CppActions.FirstOrDefault(delegate(Cpp.Function ff) {
 								return ff.Signature == val;
 							});
@@ -138,26 +168,23 @@ namespace Petri
 									invocation = new Cpp.FunctionInvocation(f, pp.ToArray());
 								}
 								_document.PostAction(new InvocationChangeAction(a, invocation));
-								EditInvocation(a, false, editorFields);
-							}
-							else {
-								EditInvocation(a, false, editorFields);
 							}
 						}
+						EditInvocation(a, actionType, editorFields);
 					}
 				};
 
-				EditInvocation(a, activeFunction == manual, editorFields);
+				EditInvocation(a, actionType, editorFields);
 			}
 		}
 
-		protected void EditInvocation(Action a, bool manual, List<Widget> editorFields) {
+		private void EditInvocation(Action a, ActionType type, List<Widget> editorFields) {
 			foreach(var e in editorFields) {
 				_objectList.RemoveAll(((Tuple<Widget, int, bool> obj) => obj.Item1 == e));
 			}
 			editorFields.Clear();
 
-			if(manual) {
+			if(type == ActionType.Manual) {
 				var label = CreateLabel(0, "Invocation de l'action :");
 				editorFields.Add(label);
 				string userReadable;
@@ -196,74 +223,79 @@ namespace Petri
 					}
 				});
 			}
-			else {
-				if(!a.IsDefault()) {
-					if(a.Function.Function is Cpp.Method) {
-						var method = a.Function as Cpp.MethodInvocation;
-						var editorHeader = CreateLabel(20, "Objet *this de type " + method.Function.Enclosing.ToString() + " :");
-						editorFields.Add(editorHeader);
+			else if(type == ActionType.Invocation) {
+				if(a.Function.Function is Cpp.Method) {
+					var method = a.Function as Cpp.MethodInvocation;
+					var editorHeader = CreateLabel(20, "Objet *this de type " + method.Function.Enclosing.ToString() + " :");
+					editorFields.Add(editorHeader);
 
-						var valueEditor = CreateWidget<Entry>(true, 20, method.This.MakeUserReadable());
-						editorFields.Add(valueEditor);
-						MainClass.RegisterValidation(valueEditor, false, (obj, p) => {
-							try {
-								var args = new List<Cpp.Expression>();
-								for(int j = 2; j < editorFields.Count; ++j) {
-									Widget w = editorFields[j];
-									if(w.GetType() == typeof(Entry)) {
-										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, false));
-									}
+					var valueEditor = CreateWidget<Entry>(true, 20, method.This.MakeUserReadable());
+					editorFields.Add(valueEditor);
+					MainClass.RegisterValidation(valueEditor, false, (obj, p) => {
+						try {
+							var args = new List<Cpp.Expression>();
+							for(int j = 2; j < editorFields.Count; ++j) {
+								Widget w = editorFields[j];
+								if(w.GetType() == typeof(Entry)) {
+									args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, false));
 								}
-								_document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray())));
 							}
-							catch(Exception ex) {
-								MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("L'expression spécifiée est invalide (" + ex.Message + ")."));
-								d.AddButton("Annuler", ResponseType.Cancel);
-								d.Run();
-								d.Destroy();
+							_document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray())));
+						}
+						catch(Exception ex) {
+							MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("L'expression spécifiée est invalide (" + ex.Message + ")."));
+							d.AddButton("Annuler", ResponseType.Cancel);
+							d.Run();
+							d.Destroy();
 
-								(obj as Entry).Text = method.This.MakeUserReadable();
-							}
-						});
-					}
-					for(int i = 0; i < a.Function.Function.Parameters.Count; ++i) {
-						var p = a.Function.Function.Parameters[i];
-						var editorHeader = CreateLabel(20, "Paramètre " + p.Type + " " + p.Name + " :");
-						editorFields.Add(editorHeader);
-
-						var valueEditor = CreateWidget<Entry>(true, 20, a.Function.Arguments[i].MakeUserReadable());
-						editorFields.Add(valueEditor);
-						MainClass.RegisterValidation(valueEditor, false, (obj, ii) => {
-							try {
-								var args = new List<Cpp.Expression>();
-								for(int j = (a.Function.Function is Cpp.Method) ? 2 : 0; j < editorFields.Count; ++j) {
-									Widget w = editorFields[j];
-									if(w.GetType() == typeof(Entry)) {
-										args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a));
-									}
-								}
-								Cpp.FunctionInvocation invocation;
-								if(a.Function.Function is Cpp.Method) {
-									invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray());
-								}
-								else {
-									invocation = new Cpp.FunctionInvocation(a.Function.Function, args.ToArray());
-								}
-								_document.PostAction(new InvocationChangeAction(a, invocation));
-							}
-							catch(Exception ex) {
-								MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("L'expression spécifiée est invalide (" + ex.Message + ")."));
-								d.AddButton("Annuler", ResponseType.Cancel);
-								d.Run();
-								d.Destroy();
-								(obj as Entry).Text = a.Function.Arguments[(int)(ii[0])].MakeUserReadable();
-							}
-						}, new object[]{i});
-					}
+							(obj as Entry).Text = method.This.MakeUserReadable();
+						}
+					});
 				}
+				for(int i = 0; i < a.Function.Function.Parameters.Count; ++i) {
+					EditParameter(a, i, editorFields);
+				}
+			}
+			else if(type == ActionType.Pause) {
+				EditParameter(a, 0, editorFields);
 			}
 
 			this.FormatAndShow();
+		}
+
+		private void EditParameter(Action a, int i, List<Widget> editorFields) {
+			var p = a.Function.Function.Parameters[i];
+			var editorHeader = CreateLabel(20, "Paramètre " + p.Type + " " + p.Name + " :");
+			editorFields.Add(editorHeader);
+
+			var valueEditor = CreateWidget<Entry>(true, 20, a.Function.Arguments[i].MakeUserReadable());
+			editorFields.Add(valueEditor);
+			MainClass.RegisterValidation(valueEditor, false, (obj, ii) => {
+				try {
+					var args = new List<Cpp.Expression>();
+					for(int j = (a.Function.Function is Cpp.Method) ? 2 : 0; j < editorFields.Count; ++j) {
+						Widget w = editorFields[j];
+						if(w.GetType() == typeof(Entry)) {
+							args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a));
+						}
+					}
+					Cpp.FunctionInvocation invocation;
+					if(a.Function.Function is Cpp.Method) {
+						invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray());
+					}
+					else {
+						invocation = new Cpp.FunctionInvocation(a.Function.Function, args.ToArray());
+					}
+					_document.PostAction(new InvocationChangeAction(a, invocation));
+				}
+				catch(Exception ex) {
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("L'expression spécifiée est invalide (" + ex.Message + ")."));
+					d.AddButton("Annuler", ResponseType.Cancel);
+					d.Run();
+					d.Destroy();
+					(obj as Entry).Text = a.Function.Arguments[(int)(ii[0])].MakeUserReadable();
+				}
+			}, new object[]{i});
 		}
 	}
 
