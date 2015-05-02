@@ -186,21 +186,6 @@ namespace Petri
 			var a = this.After as InnerPetriNet;
 			if(a != null) {
 				aName = a.EntryPointName;
-
-				// Adding a transition from the entry point to all of the initially active states
-				foreach(State s in a.States) {
-					if(s.Active) {
-						var newID = lastID.Consume();
-						string name = this.CppName + "_Entry_" + newID.ToString();
-
-						source += "auto " + name + " = std::make_shared<Transition<" + enumName + ">>(*" + aName + ", *" + s.CppName + ");";
-						source += name + "->setCondition([](" + enumName + "){ return true; });";
-
-						source += name + "->setName(\"" + name + "\");";
-						source += name + "->setID(" + newID.ToString() + ");";
-						source += aName + "->addTransition(" + name + ");";
-					}
-				}
 			}
 
 			string cpp = "return " + (Condition is Cpp.LiteralExpression ? Condition.MakeCpp() : "(*" + Condition.MakeCpp() + ")()") + ";";

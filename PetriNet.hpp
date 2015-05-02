@@ -183,7 +183,7 @@ namespace Petri {
 		_activeStates.erase(it);
 		
 		this->stateDisabled(a);
-		if(_activeStates.size() == 0) {
+		if(_activeStates.size() == 0 && _running) {
 			this->stop();
 		}
 	}

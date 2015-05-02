@@ -133,8 +133,6 @@ namespace Petri
 		{
 			var entities = this.BuildEntitiesList();
 			entities.Add(this);
-			entities.AddRange(this.Transitions);
-			entities.AddRange(this.Comments);
 
 			entities.Sort(delegate(Entity o1, Entity o2) {
 				return o1.ID.CompareTo(o2.ID);
@@ -142,8 +140,10 @@ namespace Petri
 
 			Document.LastEntityID = 0;
 			foreach(Entity o in entities) {
-				o.ID = Document.LastEntityID;
-				++Document.LastEntityID;
+				o.ID = Document.LastEntityID++;
+				if(o is InnerPetriNet) {
+					((InnerPetriNet)o).EntryPointID = Document.LastEntityID++;
+				}
 			}
 		}
 

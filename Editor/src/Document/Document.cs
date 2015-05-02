@@ -173,13 +173,14 @@ namespace Petri
 
 		public override void Save() {
 			if(Path == "") {
-				this.SaveAs();
+				if(SaveAs()) {
+					Modified = false;
+				}
 			}
 			else {
 				base.Save();
+				Modified = false;
 			}
-
-			Modified = false;
 		}
 
 		public bool Modified {
@@ -229,6 +230,9 @@ namespace Petri
 				if(result == ResponseType.Yes) {
 					Save();
 					d.Destroy();
+					if(Modified) {
+						return false;
+					}
 				}
 				else if(result == ResponseType.No) {
 					d.Destroy();
@@ -279,7 +283,7 @@ namespace Petri
 			}
 		}
 
-		public void SaveAs() {
+		public bool SaveAs() {
 			string filename = null;
 
 			var fc = new Gtk.FileChooserDialog("Enregistrer le graphe sous…", Window,
@@ -305,13 +309,15 @@ namespace Petri
 			}
 			else {
 				fc.Destroy();
-				return;
+				return false;
 			}
 
 			Window.Title = filename;
 			Settings.Name = filename;
 
 			this.Save();
+
+			return true;
 		}
 
 		public void Restore()

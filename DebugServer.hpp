@@ -157,8 +157,9 @@ namespace Petri {
 									_petri = _petriNetFactory.createDebug();
 									_petri->setObserver(this);
 								}
-								else if(_petri->running())
+								else if(_petri->running()) {
 									throw std::runtime_error("Petri net is already running!");
+								}
 
 								this->sendObject(this->json("ack", "start"));
 
