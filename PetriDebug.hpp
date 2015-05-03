@@ -34,6 +34,7 @@ namespace Petri {
 		if(_observer) {
 			_observer->notifyStop();
 		}
+		this->PetriNet<_ActionResult>::stop();
 	}
 
 }

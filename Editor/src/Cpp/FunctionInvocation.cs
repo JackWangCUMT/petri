@@ -45,9 +45,11 @@ namespace Petri
 
 			public override string MakeCpp() {
 				string args = "";
-				foreach(var arg in Arguments) {
-					args += ", ";
-					args += arg.MakeCpp();
+				for(int i = 0; i < Function.Parameters.Count; ++i) {
+					if(i > 0) {
+						args += ", ";
+					}
+					args += Arguments[i].MakeCpp();
 				}
 
 				string template = "";
@@ -55,7 +57,7 @@ namespace Petri
 					template = "<" + Function.TemplateArguments + ">";
 				}
 
-				return "make_callable_ptr(&" + Function.QualifiedName + template + args + ")";
+				return Function.QualifiedName + template + "(" + args + ")";
 			}
 
 			public override string MakeUserReadable() {
@@ -153,7 +155,7 @@ namespace Petri
 			}
 
 			public override string MakeCpp() {
-				return "make_callable_ptr([&petriNet]() -> " + Function.ReturnType.Name + " { (*" + Arguments[0].MakeCpp() + ")(); return {}; })";
+				return "([&petriNet]() -> " + Function.ReturnType.Name + " { " + Arguments[0].MakeCpp() + "; return {}; })()";
 			}
 
 			public override string MakeUserReadable() {

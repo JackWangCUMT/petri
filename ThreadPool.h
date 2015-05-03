@@ -177,7 +177,7 @@ namespace Petri {
 			_taskAvailable.notify_all();
 
 			for(auto &t : _workerThreads) {
-				if(t.joinable())
+				if(t.joinable() && t.get_id() != std::this_thread::get_id())
 					t.join();
 			}
 

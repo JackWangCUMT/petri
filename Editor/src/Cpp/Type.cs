@@ -75,7 +75,7 @@ namespace Petri
 			}
 
 			public override string ToString() {
-				string val = Name;
+				string val = Enclosing.ToString() + Name;
 				if(Template.Length > 0) {
 					/*string v = "";
 					foreach(var e in Template) {

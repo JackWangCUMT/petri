@@ -70,7 +70,9 @@ namespace Petri {
 		 */
 		void unload() {
 			if(this->loaded()) {
-				dlclose(_libHandle);
+				if(dlclose(_libHandle) != 0) {
+					std::cerr <<"Unable to unload the dynamic library!\n" << "Reason: " << dlerror() << std::endl;
+				}
 			}
 
 			_libHandle = nullptr;

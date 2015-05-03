@@ -129,13 +129,13 @@ namespace Petri
 			GetVariables(cppVar);
 
 			if(cppVar.Count == 0) {
-				source += this.CppName + "->setAction(" + cpp + ");";
+				source += this.CppName + "->setAction(make_callable([&petriNet]() { return " + cpp + "; }));";
 			}
 			else {
 				var cppLockLock = from v in cppVar
 								  select "_petri_lock_" + v.Expression;
 				
-				source += this.CppName + "->setAction(make_callable_ptr([&petriNet]() {";
+				source += this.CppName + "->setAction(make_callable([&petriNet]() {";
 				foreach(var v in cppVar) {
 					source += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + v.Expression + ")).getLock();";
 				}
@@ -146,7 +146,7 @@ namespace Petri
 					source += String.Join(", ", cppLockLock) + ".lock();";
 				}
 					
-				source += "return (*" + cpp + ")();";
+				source += "return " + cpp + ";";
 				source += "}));";
 			}
 			source += this.CppName + "->setRequiredTokens(" + RequiredTokens.ToString() + ");";

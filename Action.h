@@ -65,14 +65,6 @@ namespace Petri {
 		}
 
 		/**
-		 * Changes the Callable associated to the Action
-		 * @param action The Callable which will be put in the Action
-		 */
-		void setAction(std::shared_ptr<CallableBase<_ActionResult>> const &action) {
-			_action = action;
-		}
-
-		/**
 		 * Returns the required tokens of the Action to be activated, i.e. the count of Actions which must lead to *this and terminate for *this to activate.
 		 * @return The required tokens of the Action
 		 */

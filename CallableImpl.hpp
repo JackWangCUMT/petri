@@ -15,26 +15,17 @@ namespace Callable_detail {
 	template<bool Pointer, typename CallableType, typename... Args2>
 	struct callFinalMember {};
 
-	template<typename Tuple, bool callable, int N>
-	struct getArg {};
+	template<typename Tuple, int N>
+	struct getArg {
+		typedef typename std::add_const<decltype(std::get<N>(std::declval<Tuple &>()))>::type type;
+
+		static type call(Tuple &tuple) {
+			return std::get<N>(tuple);
+		}
+	};
 
 	template<typename Tuple, bool pointer, int N>
 	struct dereference {};
-
-	template<typename T>
-	struct isCallable : std::integral_constant<bool, false> {};
-
-	template<typename ReturnType, typename CallableType, typename... Args>
-	struct isCallable<Callable<ReturnType, CallableType, Args...> &> : std::integral_constant<bool, true> {};
-
-	template<typename ReturnType>
-	struct isCallable<std::shared_ptr<CallableBase<ReturnType>> &> : std::integral_constant<bool, true> {};
-
-	template<typename T>
-	struct isPointer : std::integral_constant<bool, false> {};
-
-	template<typename ReturnType>
-	struct isPointer<std::shared_ptr<CallableBase<ReturnType>> &> : std::integral_constant<bool, true> {};
 
 	// Not a member function pointer, regular call
 	template<typename CallableType, typename... Args2>
@@ -69,9 +60,7 @@ namespace Callable_detail {
 	// Intermediate calls to unroll the argument list, and call each item of this list if they are Callable
 	template<typename Tuple, typename CallableType, typename... Args2>
 	struct callImpl<false, CallableType, Tuple, Args2...> {
-		static constexpr bool isCallableValue = isCallable<decltype(std::get<sizeof...(Args2)>(std::declval<Tuple &>()))>::value;
-
-		typedef getArg<Tuple, isCallableValue, sizeof...(Args2)> getArgType;
+		typedef getArg<Tuple, sizeof...(Args2)> getArgType;
 		typedef callImpl<sizeof...(Args2) + 1 == std::tuple_size<Tuple>(), CallableType, Tuple, Args2..., typename getArgType::type> NextImplType;
 
 		static auto call(CallableType &callable, Tuple &tuple, Args2 ...args) -> decltype(NextImplType::call(callable, tuple, args..., getArgType::call(tuple))) {
@@ -84,53 +73,6 @@ namespace Callable_detail {
 	struct callImpl<true, CallableType, Tuple, Args2...> {
 		static auto call(CallableType &callable, Tuple &tuple, Args2 ...args) -> decltype(callFinal<std::is_member_function_pointer<CallableType>::value, CallableType, Args2...>::call(callable, args...)) {
 			return callFinal<std::is_member_function_pointer<CallableType>::value, CallableType, Args2...>::call(callable, args...);
-		}
-	};
-
-	// Argument is a Callable
-	template<typename Tuple, int N>
-	struct getArg<Tuple, true, N> {
-		typedef decltype(std::get<N>(std::declval<Tuple &>())) elementType;
-
-		static constexpr bool isPointerValue = isPointer<elementType>::value;
-		typedef dereference<Tuple, isPointerValue, N> dereferenceType;
-
-		typedef typename std::add_const<decltype(dereferenceType::call(std::declval<Tuple &>()))>::type type;
-
-		static type call(Tuple &tuple) {
-			return dereferenceType::call(tuple);
-		}
-	};
-
-	// Argument is not a Callable
-	template<typename Tuple, int N>
-	struct getArg<Tuple, false, N> {
-		typedef typename std::add_const<decltype(std::get<N>(std::declval<Tuple &>()))>::type type;
-
-		static type call(Tuple &tuple) {
-			return std::get<N>(tuple);
-		}
-	};
-
-	// Pointer
-	template<typename Tuple, int N>
-	struct dereference<Tuple, true, N> {
-		typedef decltype(std::get<N>(std::declval<Tuple &>())) elementType;
-		typedef typename std::add_const<decltype(std::declval<elementType>()->operator()())>::type type;
-
-		static type call(Tuple &tuple) {
-			return std::get<N>(tuple)->operator()();
-		}
-	};
-
-	// Not pointer
-	template<typename Tuple, int N>
-	struct dereference<Tuple, false, N> {
-		typedef decltype(std::get<N>(std::declval<Tuple &>())) elementType;
-		typedef typename std::add_const<decltype(std::declval<elementType>()())>::type type;
-
-		static type call(Tuple &tuple) {
-			return std::get<N>(tuple)();
 		}
 	};
 }

@@ -188,7 +188,7 @@ namespace Petri
 				aName = a.EntryPointName;
 			}
 
-			string cpp = "return " + (Condition is Cpp.LiteralExpression ? Condition.MakeCpp() : "(*" + Condition.MakeCpp() + ")()") + ";";
+			string cpp = "return " + Condition.MakeCpp() + ";";
 
 			var cppVar = new HashSet<Cpp.VariableExpression>();
 			GetVariables(cppVar);

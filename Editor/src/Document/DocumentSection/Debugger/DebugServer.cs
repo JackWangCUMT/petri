@@ -214,13 +214,7 @@ namespace Petri
 		public void Evaluate(Cpp.Expression expression) {
 			string sourceName = System.IO.Path.GetTempFileName();
 
-			string cppExpr;
-			if(expression is Cpp.LiteralExpression) {
-				cppExpr = expression.MakeCpp();
-			}
-			else {
-				cppExpr = "(*" + expression.MakeCpp() + ")()";
-			}
+			string cppExpr = expression.MakeCpp();
 
 			if(!PetriRunning) {
 				var literals = expression.GetLiterals();

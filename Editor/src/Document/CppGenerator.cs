@@ -10,8 +10,14 @@ namespace Petri
 		{
 			public Generator()
 			{
-				this.Headers = "";
-				this.Body = "";
+				Headers = "";
+				Body = "";
+				Indentation = true;
+			}
+
+			public bool Indentation {
+				get;
+				set;
 			}
 
 			public void AddHeader(string header)
@@ -21,12 +27,12 @@ namespace Petri
 
 			public void AddLine(string line)
 			{
-				this.Body += line + "\n";
+				Body += line + "\n";
 			}
 
 			public void Add(string line)
 			{
-				this.Body += line;
+				Body += line;
 			}
 
 			public static Generator operator +(Generator gen, string s)
@@ -140,8 +146,10 @@ namespace Petri
 
 			public string Value {
 				get {
-					Body = Indent(Body);
-					return this.Headers + "\n" + this.Body + "\n";
+					if(Indentation) {
+						Body = Indent(Body);
+					}
+					return Headers + "\n" + Body + "\n";
 				}
 			}
 
