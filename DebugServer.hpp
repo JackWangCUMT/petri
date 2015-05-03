@@ -28,25 +28,21 @@ namespace Petri {
 		return std::chrono::system_clock::from_time_t(std::mktime(&tm));
 	}
 
-	template<typename _ActionResult>
-	inline DebugSession<_ActionResult>::DebugSession(PetriDynamicLibCommon<_ActionResult> &petri) : _socket(), _client(), _petriNetFactory(petri) {}
+	inline DebugSession::DebugSession(PetriDynamicLibCommon &petri) : _socket(), _client(), _petriNetFactory(petri) {}
 
-	template<typename _ActionResult>
-	inline DebugSession<_ActionResult>::~DebugSession() {
+	inline DebugSession::~DebugSession() {
 		if(_receptionThread.joinable())
 			_receptionThread.join();
 		if(_heartBeat.joinable())
 			_heartBeat.join();
 	}
 
-	template<typename _ActionResult>
-	inline void DebugSession<_ActionResult>::start() {
+	inline void DebugSession::start() {
 		_running = true;
-		_receptionThread = std::thread(&DebugSession<_ActionResult>::serverCommunication, this);
+		_receptionThread = std::thread(&DebugSession::serverCommunication, this);
 	}
 
-	template<typename _ActionResult>
-	inline void DebugSession<_ActionResult>::stop() {
+	inline void DebugSession::stop() {
 		_running = false;
 
 		if(_receptionThread.joinable())
@@ -55,13 +51,11 @@ namespace Petri {
 			_heartBeat.join();
 	}
 
-	template<typename _ActionResult>
-	inline bool DebugSession<_ActionResult>::running() const {
+	inline bool DebugSession::running() const {
 		return _running;
 	}
 
-	template<typename _ActionResult>
-	inline void DebugSession<_ActionResult>::addActiveState(Action<_ActionResult> &a) {
+	inline void DebugSession::addActiveState(Action &a) {
 		{
 			std::lock_guard<std::mutex> lk(_breakpointsMutex);
 			if(_breakpoints.count(&a) > 0) {
@@ -76,8 +70,7 @@ namespace Petri {
 		_stateChangeCondition.notify_all();
 	}
 
-	template<typename _ActionResult>
-	inline void DebugSession<_ActionResult>::removeActiveState(Action<_ActionResult> &a) {
+	inline void DebugSession::removeActiveState(Action &a) {
 		std::lock_guard<std::mutex> lk(_stateChangeMutex);
 		auto it = _activeStates.find(&a);
 		if(it == _activeStates.end() || it->second == 0)
@@ -88,13 +81,11 @@ namespace Petri {
 		_stateChangeCondition.notify_all();
 	}
 
-	template<typename _ActionResult>
-	inline void DebugSession<_ActionResult>::notifyStop() {
+	inline void DebugSession::notifyStop() {
 		this->sendObject(this->json("ack", "stop"));
 	}
 
-	template<typename _ActionResult>
-	inline void DebugSession<_ActionResult>::serverCommunication() {
+	inline void DebugSession::serverCommunication() {
 		setThreadName(std::string("DebugSession ") + _petriNetFactory.name());
 
 		int attempts = 0;
@@ -133,7 +124,7 @@ namespace Petri {
 							ehlo["type"] = "ehlo";
 							ehlo["version"] = DebugServer::getVersion();
 							this->sendObject(ehlo);
-							_heartBeat = std::thread(&DebugSession<_ActionResult>::heartBeat, this);
+							_heartBeat = std::thread(&DebugSession::heartBeat, this);
 						}
 					}
 					else if(type == "start") {
@@ -147,7 +138,8 @@ namespace Petri {
 							}
 						}
 						if(_petriNetFactory.loaded()) {
-							if(root["payload"]["hash"] != _petriNetFactory.hash()) {
+							if(root["payload"]["hash"].asString() != _petriNetFactory.hash()) {
+								std::cout << root["payload"]["hash"].asString() << " " << _petriNetFactory.hash() << std::endl;
 								this->sendObject(this->error("You are trying to run a Petri net that is different from the one which is compiled!"));
 								std::cerr << "You are trying to run a Petri net that is different from the one which is compiled!" << std::endl;
 								_petriNetFactory.unload();
@@ -201,6 +193,8 @@ namespace Petri {
 						_petriNetFactory.hash();
 						_petri = _petriNetFactory.createDebug();
 						_petri->setObserver(this);
+						std::cout << "Reloaded Petri Net." << std::endl;
+						std::cout << "Got hash: " << _petriNetFactory.hash() << std::endl;
 						this->sendObject(this->json("ack", "reload"));
 					}
 					else if(type == "breakpoints") {
@@ -248,8 +242,7 @@ namespace Petri {
 			_petri->stop();
 	}
 
-	template<typename _ActionResult>
-	inline void DebugSession<_ActionResult>::updateBreakpoints(Json::Value const &breakpoints) {
+	inline void DebugSession::updateBreakpoints(Json::Value const &breakpoints) {
 		if(breakpoints.type() != Json::arrayValue) {
 			throw std::runtime_error("Invalid breakpoint specifying format!");
 		}
@@ -262,8 +255,7 @@ namespace Petri {
 		}
 	}
 
-	template<typename _ActionResult>
-	inline void DebugSession<_ActionResult>::heartBeat() {
+	inline void DebugSession::heartBeat() {
 		setThreadName(std::string("DebugSession ") + _petriNetFactory.name() + std::string(" heart beat"));
 		auto lastSendDate = std::chrono::system_clock::now();
 		auto const minDelayBetweenSend = 100ms;
@@ -298,16 +290,14 @@ namespace Petri {
 		}
 	}
 
-	template<typename _ActionResult>
-	inline void DebugSession<_ActionResult>::clearPetri() {
+	inline void DebugSession::clearPetri() {
 		if(_petri != nullptr) {
 			_petri = nullptr;
 		}
 		_activeStates.clear();
 	}
 
-	template<typename _ActionResult>
-	inline void DebugSession<_ActionResult>::setPause(bool pause) {
+	inline void DebugSession::setPause(bool pause) {
 		if(!_petri || !_petri->running())
 			throw std::runtime_error("Petri net is not running!");
 
@@ -319,8 +309,7 @@ namespace Petri {
 		}
 	}
 
-	template<typename _ActionResult>
-	inline Json::Value DebugSession<_ActionResult>::receiveObject() {
+	inline Json::Value DebugSession::receiveObject() {
 		std::vector<uint8_t> vect = _socket.receiveNewMsg(_client);
 
 		std::string msg(vect.begin(), vect.end());
@@ -335,8 +324,7 @@ namespace Petri {
 		return root;
 	}
 
-	template<typename _ActionResult>
-	inline void DebugSession<_ActionResult>::sendObject(Json::Value const &o) {
+	inline void DebugSession::sendObject(Json::Value const &o) {
 		std::lock_guard<std::mutex> lk(_sendMutex);
 
 		Json::FastWriter writer;
@@ -347,8 +335,7 @@ namespace Petri {
 		_socket.sendMsg(_client, s.c_str(), s.size());
 	}
 	
-	template<typename _ActionResult>
-	inline Json::Value DebugSession<_ActionResult>::json(std::string const &type, Json::Value const &payload) {
+	inline Json::Value DebugSession::json(std::string const &type, Json::Value const &payload) {
 		Json::Value err;
 		err["type"] = type;
 		err["payload"] = payload;
@@ -356,8 +343,7 @@ namespace Petri {
 		return err;
 	}
 	
-	template<typename _ActionResult>
-	inline Json::Value DebugSession<_ActionResult>::error(std::string const &error) {
+	inline Json::Value DebugSession::error(std::string const &error) {
 		return this->json("error", error);
 	}
 	

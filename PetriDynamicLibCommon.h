@@ -16,7 +16,6 @@
 
 namespace Petri {
 
-	template<typename _ActionResult>
 	class PetriDynamicLibCommon : public DynamicLib {
 	public:
 		/**
@@ -34,26 +33,26 @@ namespace Petri {
 		 * Creates the PetriNet object according to the code contained in the dynamic library.
 		 * @return The PetriNet object wrapped in a std::unique_ptr
 		 */
-		std::unique_ptr<PetriNet<_ActionResult>> create() {
+		std::unique_ptr<PetriNet> create() {
 			if(!this->loaded()) {
 				throw std::runtime_error("Dynamic library not loaded!");
 			}
 
 			void *ptr = _createPtr();
-			return std::unique_ptr<PetriNet<_ActionResult>>(static_cast<PetriNet<_ActionResult> *>(ptr));
+			return std::unique_ptr<PetriNet>(static_cast<PetriNet *>(ptr));
 		}
 
 		/**
 		 * Creates the PetriDebug object according to the code contained in the dynamic library.
 		 * @return The PetriDebug object wrapped in a std::unique_ptr
 		 */
-		std::unique_ptr<PetriDebug<_ActionResult>> createDebug() {
+		std::unique_ptr<PetriDebug> createDebug() {
 			if(!this->loaded()) {
 				throw std::runtime_error("Dynamic library not loaded!");
 			}
 
 			void *ptr = _createDebugPtr();
-			return std::unique_ptr<PetriDebug<_ActionResult>>(static_cast<PetriDebug<_ActionResult> *>(ptr));
+			return std::unique_ptr<PetriDebug>(static_cast<PetriDebug *>(ptr));
 		}
 
 		/**

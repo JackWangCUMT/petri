@@ -63,25 +63,22 @@ namespace Petri
 		}
 
 		public static Cpp.Function PrintFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "printAction", true);
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "printAction", false);
 			f.AddParam(new Cpp.Param(new Cpp.Type("std::string const &", Cpp.Scope.EmptyScope), "name"));
 			f.AddParam(new Cpp.Param(new Cpp.Type("std::uint64_t", Cpp.Scope.EmptyScope), "id"));
-			f.TemplateArguments = doc.Settings.Enum.Name;
 
 			return f;
 		}
 
 		public static Cpp.Function DoNothingFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "doNothing", true);
-			f.TemplateArguments = doc.Settings.Enum.Name;
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "doNothing", false);
 
 			return f;
 		}
 
 		public static Cpp.Function PauseFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "pause", true);
+			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "pause", false);
 			f.AddParam(new Cpp.Param(new Cpp.Type("", Cpp.Scope.EmptyScope), "delai"));
-			f.TemplateArguments = doc.Settings.Enum.Name;
 
 			return f;
 		}
@@ -100,7 +97,7 @@ namespace Petri
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
-			source += "auto " + this.CppName + " = std::make_shared<Action<" + Document.Settings.Enum.Name + ">>();";
+			source += "auto " + this.CppName + " = std::make_shared<Action>();";
 
 			var old = new Dictionary<Cpp.LiteralExpression, string>();
 			string enumName = Document.Settings.Enum.Name;
@@ -110,7 +107,7 @@ namespace Petri
 				foreach(string e in Document.Settings.Enum.Members) {
 					if(le.Expression == e) {
 						old.Add(le, le.Expression);
-						le.Expression = enumName + "::" + le.Expression;
+						le.Expression = "static_cast<actionResult_t>(" + enumName + "::" + le.Expression + ")";
 					}
 					else if(le.Expression == "$Name") {
 						old.Add(le, le.Expression);
@@ -123,7 +120,7 @@ namespace Petri
 				}
 			}
 
-			var cpp = Function.MakeCpp();
+			var cpp = "static_cast<actionResult_t>(" + Function.MakeCpp() + ")";
 
 			var cppVar = new HashSet<Cpp.VariableExpression>();
 			GetVariables(cppVar);

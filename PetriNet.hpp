@@ -6,19 +6,18 @@
 //
 
 #include <cassert>
+#include "Atomic.h"
+#include "Action.h"
 
 namespace Petri {
 
-	template<typename _ActionResult>
-	inline PetriNet<_ActionResult>::PetriNet(std::string const &name) : _actionsPool(InitialThreadsActions, name), _name(name) {}
+	inline PetriNet::PetriNet(std::string const &name) : _actionsPool(InitialThreadsActions, name), _name(name) {}
 
-	template<typename _ActionResult>
-	inline PetriNet<_ActionResult>::~PetriNet() {
+	inline PetriNet::~PetriNet() {
 		this->stop();
 	}
 
-	template<typename _ActionResult>
-	inline void PetriNet<_ActionResult>::addAction(std::shared_ptr<Action<_ActionResult>> &action, bool active) {
+	inline void PetriNet::addAction(std::shared_ptr<Action> &action, bool active) {
 		if(this->running()) {
 			throw std::runtime_error("Cannot modify running state chart!");
 		}
@@ -26,19 +25,16 @@ namespace Petri {
 		_states.emplace_back(action, active);
 	}
 
-	template<typename _ActionResult>
-	void PetriNet<_ActionResult>::addVariable(std::uint_fast32_t id) {
+	void PetriNet::addVariable(std::uint_fast32_t id) {
 		_variables.emplace(std::make_pair(id, std::make_unique<Atomic>()));
 	}
 
-	template<typename _ActionResult>
-	Atomic &PetriNet<_ActionResult>::getVariable(std::uint_fast32_t id) {
+	Atomic &PetriNet::getVariable(std::uint_fast32_t id) {
 		auto it = _variables.find(id);
 		return *it->second;
 	}
 
-	template<typename _ActionResult>
-	inline void PetriNet<_ActionResult>::run() {
+	inline void PetriNet::run() {
 		if(this->running()) {
 			throw std::runtime_error("Already running!");
 		}
@@ -51,8 +47,7 @@ namespace Petri {
 		}
 	}
 
-	template<typename _ActionResult>
-	inline void PetriNet<_ActionResult>::stop() {
+	inline void PetriNet::stop() {
 		if(this->running()) {
 			_running = false;
 			_activationCondition.notify_all();
@@ -60,23 +55,21 @@ namespace Petri {
 		_actionsPool.cancel();
 	}
 
-	template<typename _ActionResult>
-	inline void PetriNet<_ActionResult>::join() {
+	inline void PetriNet::join() {
 		// Quick and dirty…
 		while(this->running()) {
 			std::this_thread::sleep_for(std::chrono::nanoseconds(1'000'000));
 		}
 	}
 
-	template<typename _ActionResult>
-	inline void PetriNet<_ActionResult>::executeState(Action<_ActionResult> &a) {
-		Action<_ActionResult> *nextState = nullptr;
+	inline void PetriNet::executeState(Action &a) {
+		Action *nextState = nullptr;
 
 		// Runs the Callable
 		auto res = a.action()();
 
 		if(!a.transitions().empty()) {
-			std::list<Transition<_ActionResult>> transitionsToTest;
+			std::list<Transition> transitionsToTest;
 			for(auto it = a.transitions().begin(); it != a.transitions().end(); ++it) {
 				transitionsToTest.emplace_back(**it);
 			}
@@ -100,7 +93,7 @@ namespace Petri {
 					}
 
 					if(isFulfilled) {
-						Action<_ActionResult> &a = (it)->next();
+						Action &a = (it)->next();
 						std::lock_guard<std::mutex> tokensLock(a.tokensMutex());
 						if(++a.currentTokens() >= a.requiredTokens()) {
 							a.currentTokens() -= a.requiredTokens();
@@ -141,8 +134,7 @@ namespace Petri {
 		}
 	}
 
-	template<typename _ActionResult>
-	inline void PetriNet<_ActionResult>::swapStates(Action<_ActionResult> &oldAction, Action<_ActionResult> &newAction) {
+	inline void PetriNet::swapStates(Action &oldAction, Action &newAction) {
 		{
 			std::lock_guard<std::mutex> lk(_activationMutex);
 			_activeStates.insert(&newAction);
@@ -158,8 +150,7 @@ namespace Petri {
 		_actionsPool.addTask(make_callable_ptr(std::bind(&PetriNet::executeState, std::ref(*this), std::placeholders::_1), std::ref(newAction)));
 	}
 
-	template<typename _ActionResult>
-	inline void PetriNet<_ActionResult>::enableState(Action<_ActionResult> &a) {
+	inline void PetriNet::enableState(Action &a) {
 		{
 			std::lock_guard<std::mutex> lk(_activationMutex);
 			_activeStates.insert(&a);
@@ -173,8 +164,7 @@ namespace Petri {
 		_actionsPool.addTask(make_callable_ptr(std::bind(&PetriNet::executeState, std::ref(*this), std::placeholders::_1), std::ref(a)));
 	}
 
-	template<typename _ActionResult>
-	inline void PetriNet<_ActionResult>::disableState(Action<_ActionResult> &a) {
+	inline void PetriNet::disableState(Action &a) {
 		std::lock_guard<std::mutex> lk(_activationMutex);
 		
 		auto it = _activeStates.find(&a);

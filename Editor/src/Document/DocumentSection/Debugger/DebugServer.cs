@@ -238,7 +238,7 @@ namespace Petri
 			generator += _document.GenerateVarEnum();
 
 			generator += "extern \"C\" char const *" + _document.CppPrefix + "_evaluate(void *petriPtr) {";
-			generator += "auto &petriNet = *static_cast<PetriDebug<" + _document.Settings.Enum.Name + "> *>(petriPtr);";
+			generator += "auto &petriNet = *static_cast<PetriDebug *>(petriPtr);";
 			generator += "static std::string result;";
 			generator += "std::ostringstream oss;";
 			generator += "oss << " + cppExpr + ";";

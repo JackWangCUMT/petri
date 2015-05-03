@@ -227,7 +227,7 @@ namespace Petri {
 
 	private:
 		void work(std::string const &name) {
-			PetriCommon::setThreadName(name);
+			setThreadName(name);
 
 			while(_alive) {
 				std::unique_lock<std::mutex> lk(_availabilityMutex);

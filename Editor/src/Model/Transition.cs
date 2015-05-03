@@ -158,7 +158,7 @@ namespace Petri
 				foreach(string e in Document.Settings.Enum.Members) {
 					if(le.Expression == e) {
 						old.Add(le, le.Expression);
-						le.Expression = enumName + "::" + le.Expression;
+						le.Expression = "static_cast<actionResult_t>(" + enumName + "::" + le.Expression + ")";
 					}
 					else if(le.Expression == "$Res") {
 						old.Add(le, le.Expression);
@@ -188,7 +188,7 @@ namespace Petri
 				aName = a.EntryPointName;
 			}
 
-			string cpp = "return " + Condition.MakeCpp() + ";";
+			string cpp = "return static_cast<actionResult_t>(" + Condition.MakeCpp() + ");";
 
 			var cppVar = new HashSet<Cpp.VariableExpression>();
 			GetVariables(cppVar);
@@ -212,9 +212,9 @@ namespace Petri
 			}
 
 
-			cpp = "[&petriNet](" + enumName + " _PETRI_PRIVATE_GET_ACTION_RESULT_) -> bool { " + cpp + " }";
+			cpp = "[&petriNet](actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) -> bool { " + cpp + " }";
 
-			source += "auto " + this.CppName + " = std::make_shared<Transition<" + enumName + ">>(*" + bName + ", *" + aName + ");";
+			source += "auto " + this.CppName + " = std::make_shared<Transition>(*" + bName + ", *" + aName + ");";
 			source += this.CppName + "->setCondition(" + cpp + ");";
 
 			source += this.CppName + "->setName(\"" + this.Name + "\");";

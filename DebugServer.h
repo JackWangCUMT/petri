@@ -25,16 +25,13 @@ namespace Petri {
 		extern std::chrono::system_clock::time_point getDateFromTimestamp(char const *timestamp);
 	}
 
-	template<typename _ActionResult>
 	class PetriDynamicLibCommon;
 
-	template<typename _ActionResult>
 	class PetriDebug;
 
-	template<typename _ActionResult>
 	class DebugSession {
 	public:
-		DebugSession(PetriDynamicLibCommon<_ActionResult> &petri);
+		DebugSession(PetriDynamicLibCommon &petri);
 
 		~DebugSession();
 
@@ -45,8 +42,8 @@ namespace Petri {
 		void stop();
 		bool running() const;
 
-		void addActiveState(Action<_ActionResult> &a);
-		void removeActiveState(Action<_ActionResult> &a);
+		void addActiveState(Action &a);
+		void removeActiveState(Action &a);
 		void notifyStop();
 
 	protected:
@@ -65,7 +62,7 @@ namespace Petri {
 		Json::Value json(std::string const &type, Json::Value const &payload);
 		Json::Value error(std::string const &error);
 
-		std::map<Action<_ActionResult> *, std::size_t> _activeStates;
+		std::map<Action *, std::size_t> _activeStates;
 		bool _stateChange = false;
 		std::condition_variable _stateChangeCondition;
 		std::mutex _stateChangeMutex;
@@ -76,11 +73,11 @@ namespace Petri {
 		Petri::Socket _client;
 		std::atomic_bool _running = {false};
 
-		PetriDynamicLibCommon<_ActionResult> &_petriNetFactory;
-		std::unique_ptr<PetriDebug<_ActionResult>> _petri;
+		PetriDynamicLibCommon &_petriNetFactory;
+		std::unique_ptr<PetriDebug> _petri;
 		std::mutex _sendMutex;
 		std::mutex _breakpointsMutex;
-		std::set<Action<_ActionResult> *> _breakpoints;
+		std::set<Action *> _breakpoints;
 	};
 
 }

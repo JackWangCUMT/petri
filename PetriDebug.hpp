@@ -9,32 +9,29 @@
 
 namespace Petri {
 
-	template<typename _ActionResult>
-	inline void PetriDebug<_ActionResult>::stateEnabled(Action<_ActionResult> &a) {
+	inline void PetriDebug::stateEnabled(Action &a) {
 		if(_observer) {
 			_observer->addActiveState(a);
 		}
 	}
 
-	template<typename _ActionResult>
-	inline void PetriDebug<_ActionResult>::stateDisabled(Action<_ActionResult> &a) {
+	inline void PetriDebug::stateDisabled(Action &a) {
 		if(_observer) {
 			_observer->removeActiveState(a);
 		}
 	}
 
-	template<typename _ActionResult>
-	inline void PetriDebug<_ActionResult>::addAction(std::shared_ptr<Action<_ActionResult>> &action, bool active) {
+	inline void PetriDebug::addAction(std::shared_ptr<Action> &action, bool active) {
 		_statesMap[action->ID()] = action.get();
-		this->PetriNet<_ActionResult>::addAction(action, active);
+		this->PetriNet::addAction(action, active);
 	}
 
-	template<typename _ActionResult>
-	inline void PetriDebug<_ActionResult>::stop() {
+	inline void PetriDebug::stop() {
 		if(_observer) {
 			_observer->notifyStop();
+			std::cout << "notifyStop" << std::endl;
 		}
-		this->PetriNet<_ActionResult>::stop();
+		this->PetriNet::stop();
 	}
 
 }

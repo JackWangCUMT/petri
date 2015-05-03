@@ -49,7 +49,7 @@ namespace Petri
 					if(i > 0) {
 						args += ", ";
 					}
-					args += Arguments[i].MakeCpp();
+					args += "static_cast<" + Function.Parameters[i].Type.ToString() + ">(" + Arguments[i].MakeCpp() + ")";
 				}
 
 				string template = "";

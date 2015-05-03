@@ -255,7 +255,6 @@ namespace Petri
 			cppGen.Item1.Write(System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.SourceOutputPath), Settings.Name) + ".cpp");
 
 			var generator = new Cpp.Generator();
-			generator.AddHeader("\"Petri.h\"");
 
 			generator += "#ifndef PETRI_" + cppGen.Item2 + "_H";
 			generator += "#define PETRI_" + cppGen.Item2 + "_H\n";

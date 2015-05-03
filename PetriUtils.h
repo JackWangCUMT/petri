@@ -106,20 +106,17 @@ namespace Petri {
 			}
 		};
 
-		template<typename _ActionResult>
-		_ActionResult pause(std::chrono::nanoseconds const &delay) {
+		inline actionResult_t pause(std::chrono::nanoseconds const &delay) {
 			std::this_thread::sleep_for(delay);
 			return {};
 		}
 		
-		template<typename _ActionResult>
-		inline _ActionResult printAction(std::string const &name, std::uint64_t id) {
+		inline actionResult_t printAction(std::string const &name, std::uint64_t id) {
 			std::cout << "Action " << name << ", ID " << id << " completed." << std::endl;
-			return _ActionResult{};
+			return {};
 		}
 
-		template<typename _ActionResult>
-		inline _ActionResult doNothing() {
+		inline actionResult_t doNothing() {
 			return {};
 		}
 	}

@@ -11,22 +11,23 @@
 #include <thread>
 #include <string>
 #include <chrono>
+#include <cstdint>
 
 namespace Petri {
 	
-	namespace PetriCommon {
-		inline void setThreadName(char const *name) {
+	inline void setThreadName(char const *name) {
 #if __LINUX__
-			pthread_setname_np(pthread_self(), name);
+		pthread_setname_np(pthread_self(), name);
 #elif __APPLE__
-			pthread_setname_np(name);
+		pthread_setname_np(name);
 #endif
-		}
-
-		inline void setThreadName(std::string const &name) {
-			setThreadName(name.c_str());
-		}
 	}
+
+	inline void setThreadName(std::string const &name) {
+		setThreadName(name.c_str());
+	}
+
+	using actionResult_t = std::int32_t;
 
 }
 

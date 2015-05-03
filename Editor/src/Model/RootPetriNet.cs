@@ -65,7 +65,8 @@ namespace Petri
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			source.AddHeader("<cstdint>");
-			source.AddHeader("\"Petri.h\"");
+			source.AddHeader("\"PetriDebug.h\"");
+			source.AddHeader("\"PetriUtils.h\"");
 			foreach(var s in Document.Headers) {
 				source.AddHeader("\"" + s + "\"");
 			}
@@ -81,7 +82,7 @@ namespace Petri
 			source += Document.GenerateVarEnum();
 
 			source += "namespace {";
-			source += "void fill(PetriNet<" + Document.Settings.Enum.Name + "> &petriNet) {";
+			source += "void fill(PetriNet &petriNet) {";
 
 			foreach(var e in cppVar) {
 				source += "petriNet.addVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + e + "));";
@@ -100,7 +101,7 @@ namespace Petri
 			source += "";
 
 			source += "EXPORT void *" + Document.Settings.Name + "_create() {";
-			source += "auto petriNet = std::make_unique<PetriNet<" + Document.Settings.Enum.Name + ">>(PREFIX);";
+			source += "auto petriNet = std::make_unique<PetriNet>(PREFIX);";
 			source += "fill(*petriNet);";
 			source += "return petriNet.release();";
 			source += "}"; // create()
@@ -108,7 +109,7 @@ namespace Petri
 			source += "";
 
 			source += "EXPORT void *" + Document.Settings.Name + "_createDebug() {";
-			source += "auto petriNet = std::make_unique<PetriDebug<" + Document.Settings.Enum.Name + ">>(PREFIX);";
+			source += "auto petriNet = std::make_unique<PetriDebug>(PREFIX);";
 			source += "fill(*petriNet);";
 			source += "return petriNet.release();";
 			source += "}"; // create()

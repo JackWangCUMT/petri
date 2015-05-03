@@ -17,18 +17,17 @@
 #include <mutex>
 #include <thread>
 #include <deque>
+#include "Common.h"
 
 namespace Petri {
 
 	using namespace std::chrono_literals;
 
-	template<typename _ActionResult>
 	class Action;
 
 	/**
 	 * A transition linking 2 Action, composing a PetriNet.
 	 */
-	template<typename _ActionResult>
 	class Transition : public CallableTimeout<uint64_t> {
 	public:
 		Transition(Transition const &t) : CallableTimeout<uint64_t>(this->ID()), _previous(t._previous), _next(t._next), _name(t._name), _delayBetweenEvaluation(t._delayBetweenEvaluation) {
@@ -41,14 +40,14 @@ namespace Petri {
 		 * @param previous The starting point of the Transition
 		 * @param next The arrival point of the Transition
 		 */
-		Transition(Action<_ActionResult> &previous, Action<_ActionResult> &next) : CallableTimeout(0), _previous(previous), _next(next) {}
+		Transition(Action &previous, Action &next) : CallableTimeout(0), _previous(previous), _next(next) {}
 
 		/**
 		 * Checks whether the Transition can be crossed
 		 * @param actionResult The result of the Action 'previous'. This is useful when the Transition's test uses this value.
 		 * @return The result of the test, true meaning that the Transition can be crossed to enable the action 'next'
 		 */
-		bool isFulfilled(_ActionResult actionResult) const {
+		bool isFulfilled(actionResult_t actionResult) const {
 			return _test(actionResult);
 		}
 
@@ -56,7 +55,7 @@ namespace Petri {
 		 * Returns the condition associated to the Transition
 		 * @return The condition associated to the Transition
 		 */
-		std::function<bool(_ActionResult)> const &condition() const {
+		std::function<bool(actionResult_t)> const &condition() const {
 			return _test;
 		}
 
@@ -64,7 +63,7 @@ namespace Petri {
 		 * Changes the condition associated to the Transition
 		 * @param test The new condition to associate to the Transition
 		 */
-		void setCondition(std::function<bool(_ActionResult)> const &test) {
+		void setCondition(std::function<bool(actionResult_t)> const &test) {
 			_test = test;
 		}
 
@@ -72,7 +71,7 @@ namespace Petri {
 		 * Gets the Action 'previous', the starting point of the Transition.
 		 * @return The Action 'previous', the starting point of the Transition.
 		 */
-		Action<_ActionResult> &previous() {
+		Action &previous() {
 			return _previous;
 		}
 
@@ -80,7 +79,7 @@ namespace Petri {
 		 * Gets the Action 'next', the arrival point of the Transition.
 		 * @return The Action 'next', the arrival point of the Transition.
 		 */
-		Action<_ActionResult> &next() {
+		Action &next() {
 			return _next;
 		}
 
@@ -118,9 +117,9 @@ namespace Petri {
 		}
 
 	private:
-		std::function<bool(_ActionResult)> _test;
-		Action<_ActionResult> &_previous;
-		Action<_ActionResult> &_next;
+		std::function<bool(actionResult_t)> _test;
+		Action &_previous;
+		Action &_next;
 		std::string _name;
 		
 		// Default delay between evaluation
