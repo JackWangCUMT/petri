@@ -67,6 +67,8 @@ namespace Petri
 			source.AddHeader("<cstdint>");
 			source.AddHeader("\"PetriDebug.h\"");
 			source.AddHeader("\"PetriUtils.h\"");
+			source.AddHeader("\"Action.h\"");
+			source.AddHeader("\"Atomic.h\"");
 			foreach(var s in Document.Headers) {
 				source.AddHeader("\"" + s + "\"");
 			}
