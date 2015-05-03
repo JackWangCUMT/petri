@@ -30,6 +30,9 @@ namespace Petri {
 
 				var tup = Expression.Preprocess(s);
 
+				/*var exprList = tup.Item1.Split(new char[]{ ';' });
+				var parsedList = from e in exprList
+				                 select Expression.CreateFromPreprocessedString(e, entity, tup.Item2);*/
 				Expression result = Expression.CreateFromPreprocessedString(tup.Item1, entity, tup.Item2, allowComma);
 
 				if(!(result is ExpressionType))

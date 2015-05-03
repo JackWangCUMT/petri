@@ -11,7 +11,6 @@
 #include "DynamicLib.h"
 #include <memory>
 #include "PetriUtils.h"
-#include "DebugServer.h"
 #include "PetriDebug.h"
 
 namespace Petri {

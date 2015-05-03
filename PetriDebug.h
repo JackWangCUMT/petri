@@ -49,13 +49,7 @@ namespace Petri {
 		 * @param The ID to match with a state.
 		 * @return The state matching ID
 		 */
-		Action *stateWithID(uint64_t id) const {
-			auto it = _statesMap.find(id);
-			if(it != _statesMap.end())
-				return it->second;
-			else
-				return nullptr;
-		}
+		Action *stateWithID(uint64_t id) const;
 
 		void stop() override;
 
@@ -68,7 +62,5 @@ namespace Petri {
 	};
 
 }
-
-#include "PetriDebug.hpp"
 
 #endif

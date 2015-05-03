@@ -8,11 +8,9 @@
 #ifndef Petri_Transition_h
 #define Petri_Transition_h
 
-#include "Callable.h"
 #include <queue>
 #include <list>
 #include <unordered_map>
-#include "ThreadPool.h"
 #include <atomic>
 #include <mutex>
 #include <thread>

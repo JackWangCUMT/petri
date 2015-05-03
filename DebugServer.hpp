@@ -8,6 +8,7 @@
 #include <cstring>
 #include <string>
 #include "PetriDynamicLibCommon.h"
+#include "Action.h"
 
 namespace Petri {
 

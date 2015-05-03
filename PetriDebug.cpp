@@ -9,29 +9,37 @@
 
 namespace Petri {
 
-	inline void PetriDebug::stateEnabled(Action &a) {
+	void PetriDebug::stateEnabled(Action &a) {
 		if(_observer) {
 			_observer->addActiveState(a);
 		}
 	}
 
-	inline void PetriDebug::stateDisabled(Action &a) {
+	void PetriDebug::stateDisabled(Action &a) {
 		if(_observer) {
 			_observer->removeActiveState(a);
 		}
 	}
 
-	inline void PetriDebug::addAction(std::shared_ptr<Action> &action, bool active) {
+	void PetriDebug::addAction(std::shared_ptr<Action> &action, bool active) {
 		_statesMap[action->ID()] = action.get();
 		this->PetriNet::addAction(action, active);
 	}
 
-	inline void PetriDebug::stop() {
+	void PetriDebug::stop() {
 		if(_observer) {
 			_observer->notifyStop();
 			std::cout << "notifyStop" << std::endl;
 		}
 		this->PetriNet::stop();
+	}
+
+	Action *PetriDebug::stateWithID(uint64_t id) const {
+		auto it = _statesMap.find(id);
+		if(it != _statesMap.end())
+			return it->second;
+		else
+			return nullptr;
 	}
 
 }

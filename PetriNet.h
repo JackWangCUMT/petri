@@ -21,7 +21,6 @@
 #include <map>
 
 #include "Transition.h"
-#include "Action.h"
 
 namespace Petri {
 
@@ -100,8 +99,5 @@ namespace Petri {
 	};
 
 }
-
-#include "PetriNet.hpp"
-
 
 #endif
