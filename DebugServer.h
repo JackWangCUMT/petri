@@ -17,6 +17,7 @@
 #include <condition_variable>
 #include <thread>
 #include "Socket.h"
+#include <atomic>
 
 namespace Petri {
 	
