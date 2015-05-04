@@ -30,10 +30,20 @@ namespace Petri {
 
 				var tup = Expression.Preprocess(s);
 
-				/*var exprList = tup.Item1.Split(new char[]{ ';' });
+				Expression result;
+
+				var exprList = tup.Item1.Split(new char[]{ ';' });
 				var parsedList = from e in exprList
-				                 select Expression.CreateFromPreprocessedString(e, entity, tup.Item2);*/
-				Expression result = Expression.CreateFromPreprocessedString(tup.Item1, entity, tup.Item2, allowComma);
+				                 select Expression.CreateFromPreprocessedString(e, entity, tup.Item2, true);
+				
+				if(parsedList.Count() > 1) {
+					result = new ExpressionList(parsedList);
+				}
+				else {
+					var it = parsedList.GetEnumerator();
+					it.MoveNext();
+					result = it.Current;
+				}
 
 				if(!(result is ExpressionType))
 					throw new Exception("Unable to get a valid expression");
@@ -165,7 +175,7 @@ namespace Petri {
 				return Tuple.Create(s, subexprs);
 			}
 
-			private static Expression CreateFromPreprocessedString(string s, Entity entity, Dictionary<int, Tuple<ExprType, string>> subexprs, bool allowComma) {
+			protected static Expression CreateFromPreprocessedString(string s, Entity entity, Dictionary<int, Tuple<ExprType, string>> subexprs, bool allowComma) {
 				for(int i = allowComma ? 17 : 16; i >= 0; --i) {
 					int bound;
 					int direction;
@@ -820,6 +830,41 @@ namespace Petri {
 				l1.AddRange(l3);
 
 				return l1;
+			}
+		}
+
+		public class ExpressionList : Expression {
+			public ExpressionList(IEnumerable<Expression> expressions) : base(Cpp.Operator.Name.None) {
+				Expressions = new List<Expression>(expressions);
+			}
+
+			public List<Expression> Expressions {
+				get;
+				private set;
+			}
+
+			public override bool UsesFunction(Function f) {
+				foreach(var e in Expressions) {
+					if(e.UsesFunction(f))
+						return true;
+				}
+				return false;
+			}
+
+			public override string MakeCpp() {
+				return String.Join(";\n", from e in Expressions select e.MakeCpp());
+			}
+
+			public override string MakeUserReadable() {
+				return String.Join(";\n", from e in Expressions select e.MakeUserReadable());
+			}
+
+			public override List<LiteralExpression> GetLiterals() {
+				var l = new List<LiteralExpression>();
+				foreach(var e in Expressions) {
+					l.AddRange(e.GetLiterals());
+				}
+				return l;
 			}
 		}
 	}
