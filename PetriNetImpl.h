@@ -32,6 +32,9 @@ namespace Petri {
 	struct PetriNet::Internals {
 
 		Internals(PetriNet &pn, std::string const &name) : _actionsPool(InitialThreadsActions, name), _name(name), _this(pn) {}
+		virtual ~Internals() {
+			
+		}
 
 		// This method is executed concurrently on the thread pool.
 		virtual void executeState(Action &a);

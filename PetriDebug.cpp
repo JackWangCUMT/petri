@@ -16,6 +16,11 @@ namespace Petri {
 		Internals(PetriDebug &pn, std::string const &name) : PetriNet::Internals(pn, name) {
 			
 		}
+
+		~Internals() {
+
+		}
+
 		void stateEnabled(Action &a) override;
 		void stateDisabled(Action &a) override;
 
