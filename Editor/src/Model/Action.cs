@@ -97,7 +97,7 @@ namespace Petri
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
-			source += "auto " + this.CppName + " = std::make_shared<Action>();";
+			source += "Action " + this.CppName + ";";
 
 			var old = new Dictionary<Cpp.LiteralExpression, string>();
 			string enumName = Document.Settings.Enum.Name;
@@ -126,13 +126,13 @@ namespace Petri
 			GetVariables(cppVar);
 
 			if(cppVar.Count == 0) {
-				source += this.CppName + "->setAction(make_callable([&petriNet]() { return " + cpp + "; }));";
+				source += this.CppName + ".setAction(make_callable([&petriNet]() { return " + cpp + "; }));";
 			}
 			else {
 				var cppLockLock = from v in cppVar
 								  select "_petri_lock_" + v.Expression;
 				
-				source += this.CppName + "->setAction(make_callable([&petriNet]() {";
+				source += this.CppName + ".setAction(make_callable([&petriNet]() {";
 				foreach(var v in cppVar) {
 					source += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + v.Expression + ")).getLock();";
 				}
@@ -146,11 +146,11 @@ namespace Petri
 				source += "return " + cpp + ";";
 				source += "}));";
 			}
-			source += this.CppName + "->setRequiredTokens(" + RequiredTokens.ToString() + ");";
+			source += this.CppName + ".setRequiredTokens(" + RequiredTokens.ToString() + ");";
 
-			source += this.CppName + "->setName(\"" + this.Parent.Name + "_" + this.Name + "\");";
-			source += this.CppName + "->setID(" + this.ID.ToString() + ");";
-			source += "petriNet.addAction(" + this.CppName + ", " + ((this.Active && (this.Parent is RootPetriNet)) ? "true" : "false") + ");";
+			source += this.CppName + ".setName(\"" + this.Parent.Name + "_" + this.Name + "\");";
+			source += this.CppName + ".setID(" + this.ID.ToString() + ");";
+			source += "auto &" + CppName + "_emplaced = " + "petriNet.addAction(std::move(" + this.CppName + "), " + ((this.Active && (this.Parent is RootPetriNet)) ? "true" : "false") + ");";
 
 			foreach(var tup in old) {
 				tup.Key.Expression = tup.Value;

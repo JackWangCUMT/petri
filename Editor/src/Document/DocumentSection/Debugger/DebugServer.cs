@@ -230,6 +230,7 @@ namespace Petri
 				generator.AddHeader("\"" + header + "\"");
 			}
 			generator.AddHeader("\"Petri.h\"");
+			generator.AddHeader("\"Atomic.h\"");
 			generator.AddHeader("<string>");
 			generator.AddHeader("<sstream>");
 

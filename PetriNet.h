@@ -30,7 +30,7 @@ namespace Petri {
 		 * @param action The action to add
 		 * @param active Controls whether the action is active as soon as the net is started or not
 		 */
-		virtual void addAction(std::shared_ptr<Action> &action, bool active = false);
+		virtual Action &addAction(Action action, bool active = false);
 
 		/**
 		 * Checks whether the net is running.

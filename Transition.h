@@ -11,7 +11,6 @@
 #include "Common.h"
 #include "Callable.h"
 #include <chrono>
-#include <functional>
 
 namespace Petri {
 
@@ -19,13 +18,37 @@ namespace Petri {
 
 	class Action;
 
+	struct TransitionCallableBase {
+	public:
+		virtual bool operator()(actionResult_t res) = 0;
+		virtual std::unique_ptr<TransitionCallableBase> copy_ptr() const = 0;
+	};
+
+	template<typename CallableType>
+	struct TransitionCallable : public TransitionCallableBase {
+		TransitionCallable(CallableType const &c) : _c(c) {}
+		TransitionCallable(TransitionCallable const &c) : _c(c._c) {}
+
+		virtual bool operator()(actionResult_t res) override { return _c(res); }
+
+		virtual std::unique_ptr<TransitionCallableBase> copy_ptr() const override { return std::make_unique<TransitionCallable<CallableType>>(*this); }
+
+	private:
+		CallableType _c;
+	};
+
+	template<typename CallableType>
+	auto make_transition_callable(CallableType &&c) {
+		return TransitionCallable<CallableType>(c);
+	}
+
 	/**
 	 * A transition linking 2 Action, composing a PetriNet.
 	 */
 	class Transition : public CallableTimeout<uint64_t> {
 	public:
 		Transition(Transition const &t) : CallableTimeout<uint64_t>(this->ID()), _previous(t._previous), _next(t._next), _name(t._name), _delayBetweenEvaluation(t._delayBetweenEvaluation) {
-			this->setCondition(t._test);
+			this->setCondition(t.condition());
 		}
 
 		/**
@@ -42,23 +65,23 @@ namespace Petri {
 		 * @return The result of the test, true meaning that the Transition can be crossed to enable the action 'next'
 		 */
 		bool isFulfilled(actionResult_t actionResult) const {
-			return _test(actionResult);
+			return (*_test)(actionResult);
 		}
 
 		/**
 		 * Returns the condition associated to the Transition
 		 * @return The condition associated to the Transition
 		 */
-		std::function<bool(actionResult_t)> const &condition() const {
-			return _test;
+		TransitionCallableBase const &condition() const {
+			return *_test;
 		}
 
 		/**
 		 * Changes the condition associated to the Transition
 		 * @param test The new condition to associate to the Transition
 		 */
-		void setCondition(std::function<bool(actionResult_t)> const &test) {
-			_test = test;
+		void setCondition(TransitionCallableBase const &test) {
+			_test = test.copy_ptr();
 		}
 
 		/**
@@ -111,7 +134,7 @@ namespace Petri {
 		}
 
 	private:
-		std::function<bool(actionResult_t)> _test;
+		std::unique_ptr<TransitionCallableBase> _test;
 		Action &_previous;
 		Action &_next;
 		std::string _name;

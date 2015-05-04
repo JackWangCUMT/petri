@@ -53,13 +53,13 @@ namespace Petri
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
-			source += "auto " + this.CppName + " = std::make_shared<Action>();";
-			source += this.CppName + "->setAction(make_callable([](){ return actionResult_t(); }));";
-			source += this.CppName + "->setRequiredTokens(" + this.RequiredTokens.ToString() + ");";
+			source += "Action " + this.CppName + ";";
+			source += this.CppName + ".setAction(make_callable([](){ return actionResult_t(); }));";
+			source += this.CppName + ".setRequiredTokens(" + this.RequiredTokens.ToString() + ");";
 
-			source += this.CppName + "->setName(\"" + this.Parent.Name + "_" + this.Name + "\");";
-			source += this.CppName + "->setID(" + this.ID.ToString() + ");";
-			source += "petriNet.addAction(" + this.CppName + ", " + "false" + ");";
+			source += this.CppName + ".setName(\"" + this.Parent.Name + "_" + this.Name + "\");";
+			source += this.CppName + ".setID(" + this.ID.ToString() + ");";
+			source += "auto &" + CppName + "_emplaced = " + "petriNet.addAction(std::move(" + this.CppName + "), " + "false" + ");";
 
 			return "";
 		}

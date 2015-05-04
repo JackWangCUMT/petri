@@ -27,7 +27,7 @@ namespace Petri {
 		 * @param action The action to add
 		 * @param active Controls whether the action is active as soon as the net is started or not
 		 */
-		virtual void addAction(std::shared_ptr<Action> &action, bool active = false) override;
+		virtual Action &addAction(Action action, bool active = false) override;
 
 		/**
 		 * Sets the observer of the PetriDebug object. The observer will be notified by some of the Petri net events, such as when a state is activated or disabled.

@@ -12,8 +12,8 @@
 namespace Petri {
 
 	struct Action::Internals {
-		std::list<std::shared_ptr<Transition>> _transitions;
-		std::shared_ptr<CallableBase<actionResult_t>> _action;
+		std::list<Transition> _transitions;
+		std::unique_ptr<CallableBase<actionResult_t>> _action;
 		std::string _name;
 		std::size_t _requiredTokens = 1;
 
@@ -31,16 +31,15 @@ namespace Petri {
 		this->setAction(action);
 	}
 
-	Action::~Action() {
-		
-	}
+	Action::Action(Action &&) = default;
+	Action::~Action() = default;
 
 	/**
 	 * Adds a Transition to the Action.
 	 * @param transition the transition to be added
 	 */
-	void Action::addTransition(std::shared_ptr<Transition> &transition) {
-		_internals->_transitions.push_back(transition);
+	void Action::addTransition(Transition transition) {
+		_internals->_transitions.push_back(std::move(transition));
 	}
 
 	/**
@@ -107,7 +106,7 @@ namespace Petri {
 	 * Returns the transitions exiting the Action.
 	 * @param name The exiting transitions of the Action
 	 */
-	std::list<std::shared_ptr<Transition>> const &Action::transitions() const {
+	std::list<Transition> const &Action::transitions() const {
 		return _internals->_transitions;
 	}
 

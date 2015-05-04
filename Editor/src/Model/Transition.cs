@@ -214,12 +214,12 @@ namespace Petri
 
 			cpp = "[&petriNet](actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) -> bool { " + cpp + " }";
 
-			source += "auto " + this.CppName + " = std::make_shared<Transition>(*" + bName + ", *" + aName + ");";
-			source += this.CppName + "->setCondition(" + cpp + ");";
+			source += "Transition " + this.CppName + "(" + bName + "_emplaced, " + aName + "_emplaced);";
+			source += this.CppName + ".setCondition(make_transition_callable(" + cpp + "));";
 
-			source += this.CppName + "->setName(\"" + this.Name + "\");";
-			source += this.CppName + "->setID(" + this.ID.ToString() + ");";
-			source += bName + "->addTransition(" + this.CppName + ");";
+			source += this.CppName + ".setName(\"" + this.Name + "\");";
+			source += this.CppName + ".setID(" + this.ID.ToString() + ");";
+			source += bName + "_emplaced.addTransition(std::move(" + this.CppName + "));";
 
 			foreach(var tup in old) {
 				tup.Key.Expression = tup.Value;

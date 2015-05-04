@@ -15,24 +15,23 @@ namespace Petri {
 
 	/**
 	 * An abstract class which encapsulates a function, method, lambda or functor call with all of his parameters,
-	 * for calling when requested. The parameters can optionally be lazy-evaluated upon the call.
+	 * for calling when requested.
 	 * This abstact class serves the simple purpose of hiding the parameters types, in order to allow simple copying,
 	 * when passing the Callable object as a function argument or when inserting in a container among others.
 	 */
 	template<typename ReturnType>
 	struct CallableBase {
 		/**
-		 * Calls the function method, lambda or functor with its encapsulated parameters. Lazy-evaluated parameters are resolved during this call.
+		 * Calls the function method, lambda or functor with its encapsulated parameters.
 		 * @return The result of the call, same as if the callable object was called as a regulat function-type call.
 		 */
 		virtual ReturnType operator()() = 0;
 
 		/**
 		 * Creates a deep copy of the Callable object, including the callable object and all of its parameters.
-		 * It is a shared_ptr, but the pointed-to object is a brand new Callable object.
 		 * @return A pointer to a new, deep-copied Callable object
 		 */
-		virtual std::shared_ptr<CallableBase<ReturnType>> copy_ptr() const = 0;
+		virtual std::unique_ptr<CallableBase<ReturnType>> copy_ptr() const = 0;
 	};
 
 	/**
@@ -62,19 +61,18 @@ namespace Petri {
 		Callable(Callable &&c) : _c(std::move(c._c)), _args(std::move(c._args)) {}
 
 		/**
-		 * Calls the function method, lambda or functor with its encapsulated parameters. Lazy-evaluated parameters are resolved during this call.
+		 * Calls the function method, lambda or functor with its encapsulated parameters.
 		 * @return The result of the call, same as if the callable object was called as a regulat function-type call.
 		 */
 		virtual ReturnType operator()() override;
 
 		/**
 		 * Creates a deep copy of the Callable object, including the callable object and all of its parameters.
-		 * It is a shared_ptr, but the pointed-to object is a brand new Callable object.
 		 * @return A pointer to a new, deep-copied Callable object
 		 */
 
-		virtual std::shared_ptr<CallableBase<ReturnType>> copy_ptr() const override {
-			return std::make_shared<Callable<ReturnType, CallableType, Args...>>(*this);
+		virtual std::unique_ptr<CallableBase<ReturnType>> copy_ptr() const override {
+			return std::make_unique<Callable<ReturnType, CallableType, Args...>>(*this);
 		}
 
 	private:
@@ -94,7 +92,7 @@ namespace Petri {
 	auto make_callable(CallableType &&c, Args ...args);
 
 	/**
-	 * Creates a Callable object pointer managed by a std::shared_ptr, using the provided callable object and parameters.
+	 * Creates a Callable object pointer managed by a std::unique_ptr, using the provided callable object and parameters.
 	 * All the type template paramaters of Callable class are resolved automatically.
 	 * c(args...) must be a valid function call.
 	 * @param c The callable object
@@ -104,9 +102,7 @@ namespace Petri {
 	template<typename CallableType, typename... Args>
 	auto make_callable_ptr(CallableType &&c, Args ...args);
 
-#include "CallableImpl.hpp"
-
-	using CallableBool = CallableBase<bool>;
+#include "Callable.hpp"
 
 	template<typename T>
 	struct CallableTimeout {

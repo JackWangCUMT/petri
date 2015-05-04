@@ -17,12 +17,14 @@ namespace Petri {
 		this->stop();
 	}
 
-	void PetriNet::addAction(std::shared_ptr<Action> &action, bool active) {
+	Action &PetriNet::addAction(Action action, bool active) {
 		if(this->running()) {
 			throw std::runtime_error("Cannot modify running state chart!");
 		}
 
-		_internals->_states.emplace_back(action, active);
+		_internals->_states.emplace_back(std::move(action), active);
+
+		return _internals->_states.back().first;
 	}
 
 	bool PetriNet::running() const {
@@ -46,7 +48,7 @@ namespace Petri {
 		for(auto &p : _internals->_states) {
 			if(p.second) {
 				_internals->_running = true;
-				_internals->enableState(*p.first);
+				_internals->enableState(p.first);
 			}
 		}
 	}
@@ -75,7 +77,7 @@ namespace Petri {
 		if(!a.transitions().empty()) {
 			std::list<Transition> transitionsToTest;
 			for(auto it = a.transitions().begin(); it != a.transitions().end(); ++it) {
-				transitionsToTest.emplace_back(**it);
+				transitionsToTest.emplace_back(*it);
 			}
 
 			auto lastTest = ClockType::time_point();

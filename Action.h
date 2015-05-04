@@ -32,6 +32,7 @@ namespace Petri {
 		 * @param action The Callable which will be copied
 		 */
 		Action(CallableBase<actionResult_t> const &action);
+		Action(Action &&);
 
 		~Action();
 
@@ -39,7 +40,7 @@ namespace Petri {
 		 * Adds a Transition to the Action.
 		 * @param transition the transition to be added
 		 */
-		void addTransition(std::shared_ptr<Transition> &transition);
+		void addTransition(Transition transition);
 
 		/**
 		 * Returns the Callable asociated to the action. An Action with a null Callable must not invoke this method!
@@ -89,7 +90,7 @@ namespace Petri {
 		 * Returns the transitions exiting the Action.
 		 * @param name The exiting transitions of the Action
 		 */
-		std::list<std::shared_ptr<Transition>, std::allocator<std::shared_ptr<Transition>>> const &transitions() const;
+		std::list<Transition> const &transitions() const;
 
 	private:
 		struct Internals;

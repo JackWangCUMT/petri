@@ -54,7 +54,7 @@ namespace Petri {
 		ThreadPool<void> _actionsPool;
 
 		std::string const _name;
-		std::list<std::pair<std::shared_ptr<Action>, bool>> _states;
+		std::list<std::pair<Action, bool>> _states;
 		std::list<Transition> _transitions;
 
 		std::map<std::uint_fast32_t, std::unique_ptr<Atomic>> _variables;

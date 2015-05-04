@@ -32,7 +32,7 @@ namespace Petri {
 			// Defined to char if ReturnType is void, so that we can nevertheless create a member variable of this type
 			using VoidProofReturnType = typename std::conditional<std::is_same<ReturnType, void>::value, char, ReturnType>::type;
 
-			TaskManager(std::shared_ptr<CallableBase<ReturnType>> &&task) : _task(std::move(task)) {}//, std::chrono::nanoseconds timeout, VoidProofReturnType returnWhenTimeout = VoidProofReturnType()) : _task(std::move(task)), _timeout(timeout), _res(returnWhenTimeout) {}
+			TaskManager(std::unique_ptr<CallableBase<ReturnType>> task) : _task(std::move(task)) {}//, std::chrono::nanoseconds timeout, VoidProofReturnType returnWhenTimeout = VoidProofReturnType()) : _task(std::move(task)), _timeout(timeout), _res(returnWhenTimeout) {}
 
 			ReturnType returnValue() {
 				this->waitForCompletion();
@@ -74,7 +74,7 @@ namespace Petri {
 			 std::chrono::time_point<ClockType> _timeoutDate;*/
 
 			VoidProofReturnType _res;
-			std::shared_ptr<CallableBase<ReturnType>> _task;
+			std::unique_ptr<CallableBase<ReturnType>> _task;
 		};
 	public:
 		class TaskResult {
@@ -212,7 +212,7 @@ namespace Petri {
 		 * @param task The task to be addes.
 		 * @return A proxy object allowing the user to wait for the task completion, query the task completion status and get the task return value
 		 */
-		TaskResult addTask(std::shared_ptr<CallableBase<ReturnType>> task) {//, std::chrono::nanoseconds timeout) {
+		TaskResult addTask(std::unique_ptr<CallableBase<ReturnType>> task) {//, std::chrono::nanoseconds timeout) {
 			TaskResult result;
 			// task must be kept alive until execution finishes
 			result._proxy = std::make_shared<TaskManager>(std::move(task));

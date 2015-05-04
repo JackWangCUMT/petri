@@ -44,17 +44,17 @@ namespace Petri {
 
 	}
 
-	PetriDebug::~PetriDebug() {
-		
-	};
+	PetriDebug::~PetriDebug() = default;
 
 
 	void PetriDebug::setObserver(DebugSession *session) {
 		static_cast<Internals &>(*_internals)._observer = session;
 	}
-	void PetriDebug::addAction(std::shared_ptr<Action> &action, bool active) {
-		static_cast<Internals &>(*_internals)._statesMap[action->ID()] = action.get();
-		this->PetriNet::addAction(action, active);
+	Action &PetriDebug::addAction(Action action, bool active) {
+		auto &a = this->PetriNet::addAction(std::move(action), active);
+		static_cast<Internals &>(*_internals)._statesMap[a.ID()] = &a;
+
+		return a;
 	}
 
 	void PetriDebug::stop() {

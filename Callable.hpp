@@ -95,5 +95,5 @@ auto make_callable_ptr(CallableType &&c, Args ...args) {
 	typedef std::tuple<Args...> Tuple;
 	typedef decltype(Callable_detail::callImpl<sizeof...(Args) == 0, CallableType, Tuple>::call(c, std::declval<Tuple &>())) ComputedReturnType;
 
-	return static_cast<std::shared_ptr<CallableBase<ComputedReturnType>>>(std::make_shared<Callable<ComputedReturnType, CallableType, Args...>>(c, args...));
+	return static_cast<std::unique_ptr<CallableBase<ComputedReturnType>>>(std::make_unique<Callable<ComputedReturnType, CallableType, Args...>>(c, args...));
 }
