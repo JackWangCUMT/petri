@@ -243,7 +243,17 @@ namespace Petri
 			}
 
 			public static Scope MakeFromScopes(Scope enclosing, Scope inner) {
-				inner.Enclosing = enclosing;
+				Scope i = inner;
+				while(true) {
+					if(i.Enclosing != null) {
+						i = i.Enclosing;
+					}
+					else {
+						i.Enclosing = enclosing;
+						break;
+					}
+				}
+
 				return inner;
 			}
 
