@@ -9,17 +9,18 @@
 #define Petri_PetriDebug_h
 
 #include "PetriNet.h"
-#include <unordered_map>
 
 namespace Petri {
 
 	class DebugSession;
+	template<typename _ReturnType>
+	class ThreadPool;
 
 	class PetriDebug : public PetriNet {
 	public:
-		PetriDebug(std::string const &name) : PetriNet(name) {}
+		PetriDebug(std::string const &name);
 
-		virtual ~PetriDebug() = default;
+		virtual ~PetriDebug();
 
 		/**
 		 * Adds an Action to the PetriNet. The net must not be running yet.
@@ -32,17 +33,13 @@ namespace Petri {
 		 * Sets the observer of the PetriDebug object. The observer will be notified by some of the Petri net events, such as when a state is activated or disabled.
 		 * @param session The observer which will be notified of the events
 		 */
-		void setObserver(DebugSession *session) {
-			_observer = session;
-		}
+		void setObserver(DebugSession *session);
 
 		/**
 		 * Retrieves the underlying ThreadPool object.
 		 * @return The underlying ThreadPool
 		 */
-		ThreadPool<void> &actionsPool() {
-			return this->PetriNet::_actionsPool;
-		}
+		ThreadPool<void> &actionsPool();
 
 		/**
 		 * Finds the state associated to the specified ID, or nullptr if not found.
@@ -54,11 +51,7 @@ namespace Petri {
 		void stop() override;
 
 	protected:
-		virtual void stateEnabled(Action &a) override;
-		virtual void stateDisabled(Action &a) override;
-
-		DebugSession *_observer = nullptr;
-		std::unordered_map<uint64_t, Action *> _statesMap;
+		struct Internals;
 	};
 
 }

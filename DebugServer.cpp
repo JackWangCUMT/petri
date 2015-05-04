@@ -5,22 +5,24 @@
 //  Created by Rémi on 23/11/2014.
 //
 
+#include "DebugServer.h"
 #include <cstring>
 #include <string>
 #include "PetriDynamicLibCommon.h"
 #include "Action.h"
+#include "ThreadPool.h"
 
 namespace Petri {
 
-	inline std::string DebugServer::getVersion() {
+	std::string DebugServer::getVersion() {
 		return "0.2";
 	}
 
-	inline std::chrono::system_clock::time_point DebugServer::getAPIdate() {
+	std::chrono::system_clock::time_point DebugServer::getAPIdate() {
 		return DebugServer::getDateFromTimestamp(__TIMESTAMP__);
 	}
 
-	inline std::chrono::system_clock::time_point DebugServer::getDateFromTimestamp(char const *timestamp) {
+	std::chrono::system_clock::time_point DebugServer::getDateFromTimestamp(char const *timestamp) {
 		char const *format = "%a %b %d %H:%M:%S %Y";
 		std::tm tm;
 		std::memset(&tm, 0, sizeof(tm));
@@ -29,21 +31,21 @@ namespace Petri {
 		return std::chrono::system_clock::from_time_t(std::mktime(&tm));
 	}
 
-	inline DebugSession::DebugSession(PetriDynamicLibCommon &petri) : _socket(), _client(), _petriNetFactory(petri) {}
+	DebugSession::DebugSession(PetriDynamicLibCommon &petri) : _socket(), _client(), _petriNetFactory(petri) {}
 
-	inline DebugSession::~DebugSession() {
+	DebugSession::~DebugSession() {
 		if(_receptionThread.joinable())
 			_receptionThread.join();
 		if(_heartBeat.joinable())
 			_heartBeat.join();
 	}
 
-	inline void DebugSession::start() {
+	void DebugSession::start() {
 		_running = true;
 		_receptionThread = std::thread(&DebugSession::serverCommunication, this);
 	}
 
-	inline void DebugSession::stop() {
+	void DebugSession::stop() {
 		_running = false;
 
 		if(_receptionThread.joinable())
@@ -52,11 +54,11 @@ namespace Petri {
 			_heartBeat.join();
 	}
 
-	inline bool DebugSession::running() const {
+	bool DebugSession::running() const {
 		return _running;
 	}
 
-	inline void DebugSession::addActiveState(Action &a) {
+	void DebugSession::addActiveState(Action &a) {
 		{
 			std::lock_guard<std::mutex> lk(_breakpointsMutex);
 			if(_breakpoints.count(&a) > 0) {
@@ -71,7 +73,7 @@ namespace Petri {
 		_stateChangeCondition.notify_all();
 	}
 
-	inline void DebugSession::removeActiveState(Action &a) {
+	void DebugSession::removeActiveState(Action &a) {
 		std::lock_guard<std::mutex> lk(_stateChangeMutex);
 		auto it = _activeStates.find(&a);
 		if(it == _activeStates.end() || it->second == 0)
@@ -82,11 +84,11 @@ namespace Petri {
 		_stateChangeCondition.notify_all();
 	}
 
-	inline void DebugSession::notifyStop() {
+	void DebugSession::notifyStop() {
 		this->sendObject(this->json("ack", "stop"));
 	}
 
-	inline void DebugSession::serverCommunication() {
+	void DebugSession::serverCommunication() {
 		setThreadName(std::string("DebugSession ") + _petriNetFactory.name());
 
 		int attempts = 0;
@@ -243,7 +245,7 @@ namespace Petri {
 			_petri->stop();
 	}
 
-	inline void DebugSession::updateBreakpoints(Json::Value const &breakpoints) {
+	void DebugSession::updateBreakpoints(Json::Value const &breakpoints) {
 		if(breakpoints.type() != Json::arrayValue) {
 			throw std::runtime_error("Invalid breakpoint specifying format!");
 		}
@@ -256,7 +258,7 @@ namespace Petri {
 		}
 	}
 
-	inline void DebugSession::heartBeat() {
+	void DebugSession::heartBeat() {
 		setThreadName(std::string("DebugSession ") + _petriNetFactory.name() + std::string(" heart beat"));
 		auto lastSendDate = std::chrono::system_clock::now();
 		auto const minDelayBetweenSend = 100ms;
@@ -291,14 +293,14 @@ namespace Petri {
 		}
 	}
 
-	inline void DebugSession::clearPetri() {
+	void DebugSession::clearPetri() {
 		if(_petri != nullptr) {
 			_petri = nullptr;
 		}
 		_activeStates.clear();
 	}
 
-	inline void DebugSession::setPause(bool pause) {
+	void DebugSession::setPause(bool pause) {
 		if(!_petri || !_petri->running())
 			throw std::runtime_error("Petri net is not running!");
 
@@ -310,7 +312,7 @@ namespace Petri {
 		}
 	}
 
-	inline Json::Value DebugSession::receiveObject() {
+	Json::Value DebugSession::receiveObject() {
 		std::vector<uint8_t> vect = _socket.receiveNewMsg(_client);
 
 		std::string msg(vect.begin(), vect.end());
@@ -325,7 +327,7 @@ namespace Petri {
 		return root;
 	}
 
-	inline void DebugSession::sendObject(Json::Value const &o) {
+	void DebugSession::sendObject(Json::Value const &o) {
 		std::lock_guard<std::mutex> lk(_sendMutex);
 
 		Json::FastWriter writer;
@@ -336,7 +338,7 @@ namespace Petri {
 		_socket.sendMsg(_client, s.c_str(), s.size());
 	}
 	
-	inline Json::Value DebugSession::json(std::string const &type, Json::Value const &payload) {
+	Json::Value DebugSession::json(std::string const &type, Json::Value const &payload) {
 		Json::Value err;
 		err["type"] = type;
 		err["payload"] = payload;
@@ -344,7 +346,7 @@ namespace Petri {
 		return err;
 	}
 	
-	inline Json::Value DebugSession::error(std::string const &error) {
+	Json::Value DebugSession::error(std::string const &error) {
 		return this->json("error", error);
 	}
 	

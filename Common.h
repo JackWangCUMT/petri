@@ -8,24 +8,13 @@
 #ifndef Petri_Common_h
 #define Petri_Common_h
 
-#include <thread>
 #include <string>
-#include <chrono>
 #include <cstdint>
 
 namespace Petri {
 	
-	inline void setThreadName(char const *name) {
-#if __LINUX__
-		pthread_setname_np(pthread_self(), name);
-#elif __APPLE__
-		pthread_setname_np(name);
-#endif
-	}
-
-	inline void setThreadName(std::string const &name) {
-		setThreadName(name.c_str());
-	}
+	void setThreadName(char const *name);
+	void setThreadName(std::string const &name);
 
 	using actionResult_t = std::int32_t;
 

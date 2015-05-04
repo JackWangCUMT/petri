@@ -8,14 +8,10 @@
 #ifndef Petri_Transition_h
 #define Petri_Transition_h
 
-#include <queue>
-#include <list>
-#include <unordered_map>
-#include <atomic>
-#include <mutex>
-#include <thread>
-#include <deque>
 #include "Common.h"
+#include "Callable.h"
+#include <chrono>
+#include <functional>
 
 namespace Petri {
 

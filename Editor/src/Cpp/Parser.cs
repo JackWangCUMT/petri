@@ -122,7 +122,7 @@ namespace Petri
 					}
 
 					var match = Regex.Match(l, ClassDeclaration);
-					if(match.Success) {
+					if(!l.EndsWith(";") && match.Success) {
 						Visibility vis = Visibility.Public;
 						if(l.StartsWith("class"))
 							vis = Visibility.Private;

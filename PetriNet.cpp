@@ -6,13 +6,12 @@
 //
 
 #include "PetriNet.h"
-#include <cassert>
-#include "Atomic.h"
-#include "Action.h"
+#include "PetriNetImpl.h"
 
 namespace Petri {
 
-	PetriNet::PetriNet(std::string const &name) : _actionsPool(InitialThreadsActions, name), _name(name) {}
+	PetriNet::PetriNet(std::string const &name) : PetriNet(std::make_unique<Internals>(*this, name)) {}
+	PetriNet::PetriNet(std::unique_ptr<Internals> internals) : _internals(std::move(internals)) {}
 
 	PetriNet::~PetriNet() {
 		this->stop();
@@ -23,15 +22,19 @@ namespace Petri {
 			throw std::runtime_error("Cannot modify running state chart!");
 		}
 
-		_states.emplace_back(action, active);
+		_internals->_states.emplace_back(action, active);
+	}
+
+	bool PetriNet::running() const {
+		return _internals->_running;
 	}
 
 	void PetriNet::addVariable(std::uint_fast32_t id) {
-		_variables.emplace(std::make_pair(id, std::make_unique<Atomic>()));
+		_internals->_variables.emplace(std::make_pair(id, std::make_unique<Atomic>()));
 	}
 
 	Atomic &PetriNet::getVariable(std::uint_fast32_t id) {
-		auto it = _variables.find(id);
+		auto it = _internals->_variables.find(id);
 		return *it->second;
 	}
 
@@ -40,20 +43,20 @@ namespace Petri {
 			throw std::runtime_error("Already running!");
 		}
 
-		for(auto &p : _states) {
+		for(auto &p : _internals->_states) {
 			if(p.second) {
-				_running = true;
-				this->enableState(*p.first);
+				_internals->_running = true;
+				_internals->enableState(*p.first);
 			}
 		}
 	}
 
 	void PetriNet::stop() {
 		if(this->running()) {
-			_running = false;
-			_activationCondition.notify_all();
+			_internals->_running = false;
+			_internals->_activationCondition.notify_all();
 		}
-		_actionsPool.cancel();
+		_internals->_actionsPool.cancel();
 	}
 
 	void PetriNet::join() {
@@ -63,7 +66,7 @@ namespace Petri {
 		}
 	}
 
-	void PetriNet::executeState(Action &a) {
+	void PetriNet::Internals::executeState(Action &a) {
 		Action *nextState = nullptr;
 
 		// Runs the Callable
@@ -135,7 +138,7 @@ namespace Petri {
 		}
 	}
 
-	void PetriNet::swapStates(Action &oldAction, Action &newAction) {
+	void PetriNet::Internals::swapStates(Action &oldAction, Action &newAction) {
 		{
 			std::lock_guard<std::mutex> lk(_activationMutex);
 			_activeStates.insert(&newAction);
@@ -148,10 +151,10 @@ namespace Petri {
 		this->stateDisabled(oldAction);
 		this->stateEnabled(newAction);
 
-		_actionsPool.addTask(make_callable_ptr(std::bind(&PetriNet::executeState, std::ref(*this), std::placeholders::_1), std::ref(newAction)));
+		_actionsPool.addTask(make_callable_ptr(std::bind(&Internals::executeState, std::ref(*this), std::placeholders::_1), std::ref(newAction)));
 	}
 
-	void PetriNet::enableState(Action &a) {
+	void PetriNet::Internals::enableState(Action &a) {
 		{
 			std::lock_guard<std::mutex> lk(_activationMutex);
 			_activeStates.insert(&a);
@@ -162,10 +165,10 @@ namespace Petri {
 		}
 
 		this->stateEnabled(a);
-		_actionsPool.addTask(make_callable_ptr(std::bind(&PetriNet::executeState, std::ref(*this), std::placeholders::_1), std::ref(a)));
+		_actionsPool.addTask(make_callable_ptr(std::bind(&Internals::executeState, std::ref(*this), std::placeholders::_1), std::ref(a)));
 	}
 
-	void PetriNet::disableState(Action &a) {
+	void PetriNet::Internals::disableState(Action &a) {
 		std::lock_guard<std::mutex> lk(_activationMutex);
 		
 		auto it = _activeStates.find(&a);
@@ -175,7 +178,7 @@ namespace Petri {
 		
 		this->stateDisabled(a);
 		if(_activeStates.size() == 0 && _running) {
-			this->stop();
+			_this.stop();
 		}
 	}
 	

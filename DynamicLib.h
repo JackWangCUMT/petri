@@ -10,7 +10,6 @@
 
 #include <string>
 #include <stdexcept>
-#include <dlfcn.h>
 
 namespace Petri {
 
@@ -49,34 +48,12 @@ namespace Petri {
 		 * Loads the dynamic library associated to this wrapper.
 		 * @throws std::runtime_error when an error occurred (see subclasses doc for the possible errors).
 		 */
-		virtual void load() {
-			if(this->loaded()) {
-				return;
-			}
-
-			std::string path = this->path();
-
-			_libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
-
-			if(_libHandle == nullptr) {
-				std::cerr <<"Unable to load the dynamic library at path \"" << path << "\"!\n" << "Reason: " << dlerror() << std::endl;
-
-				throw std::runtime_error("Unable to load the dynamic library at path \"" + path + "\"!");
-			}
-		}
+		virtual void load();
 
 		/**
 		 * Removes the dynamic library associated to this wrapper from memory.
 		 */
-		void unload() {
-			if(this->loaded()) {
-				if(dlclose(_libHandle) != 0) {
-					std::cerr <<"Unable to unload the dynamic library!\n" << "Reason: " << dlerror() << std::endl;
-				}
-			}
-
-			_libHandle = nullptr;
-		}
+		void unload();
 
 		/**
 		 * Unloads the code of the dynamic library previously loaded, and loads the code contained in a possibly updated dylib.
@@ -95,7 +72,7 @@ namespace Petri {
 				throw std::runtime_error("Dynamic library not loaded!");
 			}
 
-			void *sym = dlsym(_libHandle, name.c_str());
+			void *sym = _loadSymbol(name);
 
 			if(sym == nullptr) {
 				throw std::runtime_error("Could not find symbol " + name + " in the library!");
@@ -105,6 +82,7 @@ namespace Petri {
 		}
 		
 	protected:
+		void *_loadSymbol(std::string const &name);
 		void *_libHandle = nullptr;
 		std::string const _path;
 	};

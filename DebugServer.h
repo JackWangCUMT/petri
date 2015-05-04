@@ -12,6 +12,10 @@
 #include "PetriNet.h"
 #include "jsoncpp/include/json.h"
 #include <set>
+#include <chrono>
+#include <mutex>
+#include <condition_variable>
+#include <thread>
 #include "Socket.h"
 
 namespace Petri {
@@ -26,7 +30,6 @@ namespace Petri {
 	}
 
 	class PetriDynamicLibCommon;
-
 	class PetriDebug;
 
 	class DebugSession {
@@ -81,7 +84,5 @@ namespace Petri {
 	};
 
 }
-
-#include "DebugServer.hpp"
 
 #endif

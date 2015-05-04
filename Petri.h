@@ -11,5 +11,6 @@
 #include "PetriNet.h"
 #include "PetriDebug.h"
 #include "PetriUtils.h"
+#include "Action.h"
 
 #endif

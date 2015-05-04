@@ -8,19 +8,8 @@
 #ifndef Petri_StateChart_h
 #define Petri_StateChart_h
 
-#include "Callable.h"
-#include <queue>
-#include <list>
-#include <unordered_map>
-#include "ThreadPool.h"
-#include <atomic>
-#include <mutex>
-#include <thread>
-#include <deque>
-#include "Common.h"
-#include <map>
-
-#include "Transition.h"
+#include <memory>
+#include <string>
 
 namespace Petri {
 
@@ -28,7 +17,6 @@ namespace Petri {
 	class Action;
 
 	class PetriNet {
-		enum {InitialThreadsActions = 1};
 	public:
 		/**
 		 * Creates the PetriNet, assigning it a name which serves debug purposes (see ThreadPool constructor)
@@ -48,9 +36,7 @@ namespace Petri {
 		 * Checks whether the net is running.
 		 * @return true means that the net has been started, and we can not add any more action to it now.
 		 */
-		bool running() const {
-			return _running;
-		}
+		bool running() const;
 
 		/**
 		 * Starts the Petri net. It must not be already running. If no states are initially active, this is a no-op.
@@ -72,30 +58,9 @@ namespace Petri {
 		Atomic &getVariable(std::uint_fast32_t id);
 
 	protected:
-		using ClockType = std::conditional<std::chrono::high_resolution_clock::is_steady, std::chrono::high_resolution_clock, std::chrono::steady_clock>::type;
-
-		// This method is executed concurrently on the thread pool.
-		virtual void executeState(Action &a);
-
-		virtual void stateEnabled(Action &a) {}
-		virtual void stateDisabled(Action &a) {}
-
-		void enableState(Action &a);
-		void disableState(Action &a);
-		void swapStates(Action &oldAction, Action &newAction);
-
-		std::condition_variable _activationCondition;
-		std::multiset<Action *> _activeStates;
-		std::mutex _activationMutex;
-
-		std::atomic_bool _running = {false};
-		ThreadPool<void> _actionsPool;
-
-		std::string const _name;
-		std::list<std::pair<std::shared_ptr<Action>, bool>> _states;
-		std::list<Transition> _transitions;
-
-		std::map<std::uint_fast32_t, std::unique_ptr<Atomic>> _variables;
+		struct Internals;
+		PetriNet(std::unique_ptr<Internals> internals);
+		std::unique_ptr<Internals> _internals;
 	};
 
 }
