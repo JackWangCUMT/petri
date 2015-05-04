@@ -78,7 +78,7 @@ namespace Petri
 
 		public static Cpp.Function PauseFunction(HeadlessDocument doc) {
 			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "pause", false);
-			f.AddParam(new Cpp.Param(new Cpp.Type("", Cpp.Scope.EmptyScope), "delai"));
+			f.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::nanoseconds", Cpp.Scope.EmptyScope), "delai"));
 
 			return f;
 		}
