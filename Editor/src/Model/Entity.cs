@@ -111,7 +111,8 @@ namespace Petri
 				return _position;
 			}
 			set {
-				_position = value;
+				int gridSize = 10;
+				_position = new Cairo.PointD(Math.Truncate(value.X / gridSize) * gridSize, Math.Truncate(value.Y / gridSize) * gridSize);
 			}
 		}
 
