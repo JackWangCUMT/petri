@@ -46,7 +46,7 @@ namespace Petri
 		public Tuple<Cpp.Generator, string> GenerateCpp() {
 			var source = new Cpp.Generator();
 
-			source += "#define PREFIX \"" + Document.Settings.Name + "\"\n";
+			source += "#define PETRI_PREFIX \"" + Document.Settings.Name + "\"\n";
 
 			string h = this.GenerateCpp(source, new IDManager(Document.LastEntityID));
 
@@ -56,7 +56,7 @@ namespace Petri
 		public string GetHash() {
 			var source = new Cpp.Generator();
 
-			source += "#define PREFIX \"" + Document.Settings.Name + "\"\n";
+			source += "#define PETRI_PREFIX \"" + Document.Settings.Name + "\"\n";
 
 			var hash = this.GenerateCpp(source, new IDManager(Document.LastEntityID));
 
@@ -103,7 +103,7 @@ namespace Petri
 			source += "";
 
 			source += "EXPORT void *" + Document.Settings.Name + "_create() {";
-			source += "auto petriNet = std::make_unique<PetriNet>(PREFIX);";
+			source += "auto petriNet = std::make_unique<PetriNet>(PETRI_PREFIX);";
 			source += "fill(*petriNet);";
 			source += "return petriNet.release();";
 			source += "}"; // create()
@@ -111,7 +111,7 @@ namespace Petri
 			source += "";
 
 			source += "EXPORT void *" + Document.Settings.Name + "_createDebug() {";
-			source += "auto petriNet = std::make_unique<PetriDebug>(PREFIX);";
+			source += "auto petriNet = std::make_unique<PetriDebug>(PETRI_PREFIX);";
 			source += "fill(*petriNet);";
 			source += "return petriNet.release();";
 			source += "}"; // create()

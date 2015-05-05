@@ -256,8 +256,8 @@ namespace Petri
 
 			var generator = new Cpp.Generator();
 
-			generator += "#ifndef PETRI_" + cppGen.Item2 + "_H";
-			generator += "#define PETRI_" + cppGen.Item2 + "_H\n";
+			generator += "#ifndef PETRI_" + Settings.Name + "_H";
+			generator += "#define PETRI_" + Settings.Name + "_H\n";
 
 			generator += "#define PETRI_CLASS_NAME " + Settings.Name;
 			generator += "#define PETRI_PREFIX \"" + CppPrefix + "\"";
@@ -277,7 +277,19 @@ namespace Petri
 
 			generator += "#endif"; // ifndef header guard
 
-			System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.SourceOutputPath), Settings.Name) + ".h", generator.Value);
+			string path = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.SourceOutputPath), Settings.Name) + ".h";
+			bool generate = true;
+			string headerCode = generator.Value;
+			if(System.IO.File.Exists(path)) {
+				string existing = System.IO.File.ReadAllText(path);
+				if(existing.Length > 1 && existing.Substring(0, existing.Length - 1) == headerCode) {
+					generate = false;
+				}
+			}
+
+			if(generate) {
+				System.IO.File.WriteAllText(path, generator.Value);
+			}
 		}
 
 		public virtual bool Compile(bool wait) {
