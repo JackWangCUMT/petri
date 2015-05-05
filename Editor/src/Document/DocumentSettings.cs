@@ -257,6 +257,13 @@ namespace Petri
 				val += "-l'" + l + "' ";
 			}
 
+			if(Configuration.Arch == 64) {
+				val += "-m64 ";
+			}
+			else {
+				val += "-m32 ";
+			}
+
 			val += "-o '" + lib + "' ";
 
 			val += "-x c++ '" + source + "'";

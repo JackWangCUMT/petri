@@ -154,6 +154,18 @@ namespace Petri
 			}
 		}
 
+		[ConfigurationProperty("arch",
+			DefaultValue = 64,
+			IsRequired = true)]
+		public static int Arch {
+			get {
+				return (int)Get()["arch"];
+			}
+			set {
+				Get()["arch"] = value;
+			}
+		}
+
 		public static string GetRelativePath(string file, string folder) {
 			Uri pathUri = new Uri(file);
 			if (!folder.EndsWith(Path.DirectorySeparatorChar.ToString())) {

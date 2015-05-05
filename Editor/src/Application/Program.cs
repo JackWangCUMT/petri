@@ -50,7 +50,7 @@ namespace Petri
 		}
 
 		private static int PrintUsage() {
-			Console.WriteLine("Usage: mono Petri.exe [--generate] [--compile \"document.petri\"]");
+			Console.WriteLine("Usage: mono Petri.exe [--generate] [--compile \"document.petri\" --arch (32|64)]");
 			return 1;
 		}
 
@@ -58,6 +58,28 @@ namespace Petri
 			if(args.Length > 1) {
 				bool generate = args[0] == "--generate";
 				bool compile = generate ? args.Length == 3 && args[1] == "--compile" : args[0] == "--compile";
+				int arch = 64;
+				for(int i = 1; i < args.Length; ++i) {
+					if(args[i] == "--arch") {
+						if(i < args.Length - 1) {
+							if(int.TryParse(args[i + 1], out arch)) {
+								if(arch == 32 || arch == 64) {
+									Configuration.Arch = arch;
+									Configuration.Save();
+								}
+								else {
+									return PrintUsage();
+								}
+							}
+							else {
+								return PrintUsage();
+							}
+						}
+						else {
+							return PrintUsage();
+						}
+					}
+				}
 				string path = generate && compile ? args[2] : args[1];
 
 				if(!compile && !generate) {
