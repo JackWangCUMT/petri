@@ -70,7 +70,7 @@ namespace Petri
 			source.AddHeader("\"Action.h\"");
 			source.AddHeader("\"Atomic.h\"");
 			foreach(var s in Document.Headers) {
-				source.AddHeader("\"" + s + "\"");
+				source.AddHeader("\"" + Configuration.GetRelativePath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, s), System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath)) + "\"");
 			}
 
 			source += "#define EXPORT extern \"C\"";
