@@ -228,6 +228,12 @@ namespace Petri
 			return "";
 		}
 
+		public override bool Grid {
+			get {
+				return false;
+			}
+		}
+
 		public void GetVariables(HashSet<Cpp.VariableExpression> res) {				
 			var l = Condition.GetLiterals();
 			foreach(var ll in l) {

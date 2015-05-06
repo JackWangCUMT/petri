@@ -106,13 +106,24 @@ namespace Petri
 			}
 		}
 
+		public virtual bool Grid {
+			get {
+				return true;
+			}
+		}
+
 		public virtual Cairo.PointD Position {
 			get {
 				return _position;
 			}
 			set {
-				int gridSize = 10;
-				_position = new Cairo.PointD(Math.Truncate(value.X / gridSize) * gridSize, Math.Truncate(value.Y / gridSize) * gridSize);
+				if(Grid) {
+					int gridSize = 10;
+					_position = new Cairo.PointD(Math.Truncate(value.X / gridSize) * gridSize, Math.Truncate(value.Y / gridSize) * gridSize);
+				}
+				else {
+					_position = new Cairo.PointD(value.X, value.Y);
+				}
 			}
 		}
 
