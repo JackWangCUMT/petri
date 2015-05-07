@@ -155,7 +155,7 @@ namespace Petri
 		}
 
 		[ConfigurationProperty("arch",
-			DefaultValue = 64,
+			DefaultValue = 0,
 			IsRequired = true)]
 		public static int Arch {
 			get {

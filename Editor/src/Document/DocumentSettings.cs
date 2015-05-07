@@ -260,7 +260,7 @@ namespace Petri
 			if(Configuration.Arch == 64) {
 				val += "-m64 ";
 			}
-			else {
+			else if(Configuration.Arch == 32) {
 				val += "-m32 ";
 			}
 

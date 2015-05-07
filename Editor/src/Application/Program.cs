@@ -58,7 +58,7 @@ namespace Petri
 			if(args.Length > 1) {
 				bool generate = args[0] == "--generate";
 				bool compile = generate ? args.Length == 3 && args[1] == "--compile" : args[0] == "--compile";
-				int arch = 64;
+				int arch = 0;
 				for(int i = 1; i < args.Length; ++i) {
 					if(args[i] == "--arch") {
 						if(i < args.Length - 1) {
@@ -91,7 +91,7 @@ namespace Petri
 					document.Load();
 					Console.WriteLine("Processing Petri net " + document.Settings.Name + "…");
 
-					string cppPath = System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, document.Settings.Name) + ".cpp";
+					string cppPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, document.Settings.SourceOutputPath), document.Settings.Name) + ".cpp";
 
 					bool forceGeneration = false;
 					if(!generate && compile) {

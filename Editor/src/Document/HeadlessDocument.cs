@@ -186,6 +186,7 @@ namespace Petri
 			tempFileName = System.IO.Path.GetTempFileName();
 			XmlWriterSettings xsettings = new XmlWriterSettings();
 			xsettings.Indent = true;
+			xsettings.Encoding = new System.Text.UTF8Encoding(false);
 			XmlWriter writer = XmlWriter.Create(tempFileName, xsettings);
 
 			doc.Save(writer);
