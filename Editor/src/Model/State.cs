@@ -79,7 +79,7 @@ namespace Petri
 				base.Position = value;
 
 				// Prevent execution during State construction
-				if(this.TransitionsBefore != null) {
+				if(TransitionsBefore != null) {
 					foreach(Transition t in TransitionsBefore) {
 						t.UpdatePosition();
 					}

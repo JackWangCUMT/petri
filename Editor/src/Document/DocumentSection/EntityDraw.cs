@@ -159,17 +159,17 @@ namespace Petri
 		protected virtual void DrawLine(Transition t, Context context) {
 			double arrowScale = this.GetArrowScale(t);
 
-			PointD direction = new PointD(t.After.Position.X - t.Position.X, t.After.Position.Y - t.Position.Y);
+			PointD direction = TransitionDirection(t);
 
 			double radB = t.Before.Radius;
 			double radA = t.After.Radius;
 
 			if(PetriView.Norm(direction) > radB) {
 				direction = PetriView.Normalized(direction);
-				PointD destination = new PointD(t.After.Position.X - direction.X * radA, t.After.Position.Y - direction.Y * radA);
+				PointD destination = TransitionDestination(t, direction);
 
 				direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
-				PointD origin = new PointD(t.Before.Position.X + direction.X * radB, t.Before.Position.Y + direction.Y * radB);
+				PointD origin = TransitionOrigin(t);
 
 				context.MoveTo(origin);
 
@@ -186,6 +186,17 @@ namespace Petri
 				direction = PetriView.Normalized(destination.X - t.Position.X, destination.Y - t.Position.Y);
 				EntityDraw.DrawArrow(context, direction, destination, arrowScale);
 			}
+		}
+
+		protected PointD TransitionDirection(Transition t) {
+			return new PointD(t.After.Position.X - t.Position.X, t.After.Position.Y - t.Position.Y);
+		}
+		protected PointD TransitionOrigin(Transition t) {
+			var direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
+			return new PointD(t.Before.Position.X + direction.X * t.Before.Radius, t.Before.Position.Y + direction.Y * t.Before.Radius);
+		}
+		protected PointD TransitionDestination(Transition t, PointD direction) {
+			return new PointD(t.After.Position.X - direction.X * t.After.Radius, t.After.Position.Y - direction.Y * t.After.Radius);
 		}
 
 		protected virtual void InitContextForBorder(Transition t, Context context) {

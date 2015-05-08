@@ -106,9 +106,15 @@ namespace Petri
 			}
 		}
 
-		public virtual bool Grid {
+		public virtual bool StickToGrid {
 			get {
 				return true;
+			}
+		}
+
+		static public int GridSize {
+			get {
+				return 10;
 			}
 		}
 
@@ -117,13 +123,7 @@ namespace Petri
 				return _position;
 			}
 			set {
-				if(Grid) {
-					int gridSize = 10;
-					_position = new Cairo.PointD(Math.Truncate(value.X / gridSize) * gridSize, Math.Truncate(value.Y / gridSize) * gridSize);
-				}
-				else {
-					_position = new Cairo.PointD(value.X, value.Y);
-				}
+				_position = new Cairo.PointD(value.X, value.Y);
 			}
 		}
 

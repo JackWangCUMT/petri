@@ -50,6 +50,7 @@ namespace Petri
 		public override void FocusIn() {
 			_shiftDown = false;
 			_ctrlDown = false;
+			_altDown = false;
 			CurrentAction = EditorAction.None;
 			base.FocusIn();
 			_hoveredItem = null;
@@ -59,6 +60,7 @@ namespace Petri
 		public override void FocusOut() {
 			_shiftDown = false;
 			_ctrlDown = false;
+			_altDown = false;
 			CurrentAction = EditorAction.None;
 			base.FocusOut();
 		}
@@ -245,7 +247,7 @@ namespace Petri
 						var actions = new List<GuiAction>();
 						foreach(var e in _selectedEntities) {
 							e.Position = new PointD(e.Position.X + backToPrevious.X, e.Position.Y + backToPrevious.Y);
-							actions.Add(new MoveAction(e, new PointD(-backToPrevious.X, -backToPrevious.Y)));
+							actions.Add(new MoveAction(e, new PointD(-backToPrevious.X, -backToPrevious.Y), !_altDown));
 						}
 						_document.PostAction(new GuiActionList(actions, actions.Count > 1 ? "Déplacer les entités" : "Déplacer l'entité"));
 					}
@@ -291,7 +293,13 @@ namespace Petri
 				}
 				var delta = new PointD(x - _deltaClick.X - _motionReference.Position.X, y - _deltaClick.Y - _motionReference.Position.Y);
 				foreach(var e in _selectedEntities) {
-					e.Position = new PointD(e.Position.X + delta.X, e.Position.Y + delta.Y);
+					var pos = new PointD(e.Position.X + delta.X, e.Position.Y + delta.Y);
+					if((!_altDown && e.StickToGrid) || (_altDown && !e.StickToGrid)) {
+						pos.X = Math.Round(pos.X / Entity.GridSize) * Entity.GridSize;
+						pos.Y = Math.Round(pos.Y / Entity.GridSize) * Entity.GridSize;
+					}
+
+					e.Position = pos;
 				}
 				this.Redraw();
 			}
@@ -381,6 +389,9 @@ namespace Petri
 			else if(ev.Key == Gdk.Key.Shift_L || ev.Key == Gdk.Key.Shift_R) {
 				_shiftDown = true;
 			}
+			else if(ev.Key == Gdk.Key.Alt_L || ev.Key == Gdk.Key.Alt_R) {
+				_altDown = true;
+			}
 			else if(((Configuration.RunningPlatform == Platform.Mac) && (ev.Key == Gdk.Key.Meta_L || ev.Key == Gdk.Key.Meta_R)) || ((Configuration.RunningPlatform != Platform.Mac) && (ev.Key == Gdk.Key.Control_L || ev.Key == Gdk.Key.Control_L))) {
 				_ctrlDown = true;
 			}
@@ -392,6 +403,9 @@ namespace Petri
 		protected override bool OnKeyReleaseEvent(Gdk.EventKey ev) {
 			if(ev.Key == Gdk.Key.Shift_L || ev.Key == Gdk.Key.Shift_R) {
 				_shiftDown = false;
+			}
+			else if(ev.Key == Gdk.Key.Alt_L || ev.Key == Gdk.Key.Alt_R) {
+				_altDown = false;
 			}
 			else if(((Configuration.RunningPlatform == Platform.Mac) && (ev.Key == Gdk.Key.Meta_L || ev.Key == Gdk.Key.Meta_R)) || ((Configuration.RunningPlatform != Platform.Mac) && (ev.Key == Gdk.Key.Control_L || ev.Key == Gdk.Key.Control_L))) {
 				_ctrlDown = false;
@@ -570,6 +584,7 @@ namespace Petri
 		PointD _beforeResize = new PointD();
 		Entity _hoveredItem;
 		bool _shiftDown;
+		bool _altDown;
 		bool _ctrlDown;
 
 		bool _scrolling = false, _deltaUpdated = false;

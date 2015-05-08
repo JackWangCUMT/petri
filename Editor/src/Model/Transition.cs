@@ -19,14 +19,19 @@ namespace Petri
 			this.Width = 50;
 			this.Height = 30;
 
-			this.Shift = new PointD(0, 0);
-			this.ShiftAmplitude = PetriView.Norm(this.Direction());
+			if(Before == After) {
+				this.Shift = new PointD(40, 40);
+			}
+			else {
+				this.Shift = new PointD(0, 0);
+			}
 
 			base.Position = new PointD(0, 0);
+			this.ShiftAmplitude = PetriView.Norm(Direction);
 
 			this.Condition = Cpp.Expression.CreateFromString<Cpp.Expression>("true", this);
 
-			this.UpdatePosition();
+			UpdatePrivate();
 		}
 
 		public Transition(HeadlessDocument doc, PetriNet parent, XElement descriptor, IDictionary<UInt64, State> statesTable) : base(doc, parent, descriptor) {
@@ -83,14 +88,29 @@ namespace Petri
 			return Condition.UsesFunction(f);
 		}
 
-		public PointD Direction() {
-			return new PointD(After.Position.X - Before.Position.X, After.Position.Y - Before.Position.Y);
+		public PointD Direction {
+			get {
+				if(Before == After) {
+					var dir = new PointD(Before.Position.X - Position.X, Before.Position.Y - Position.Y);
+					return dir;
+				}
+
+				return new PointD(After.Position.X - Before.Position.X, After.Position.Y - Before.Position.Y);
+			}
 		}
 
 		public void UpdatePosition() {
-			double norm = PetriView.Norm(this.Direction());
+			if(Before != After) {
+				UpdatePrivate();
+			}
+		}
+
+		private void UpdatePrivate() {
+			double norm = PetriView.Norm(Direction);
 			PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
-			this.Position = new PointD(center.X + Shift.X * norm / ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1), center.Y + Shift.Y * norm / ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1));
+			double amplitude = ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1);
+			var pos = new PointD(center.X + Shift.X * norm / amplitude, center.Y + Shift.Y * norm / amplitude);
+			Position = pos;
 		}
 
 		public State Before {
@@ -111,8 +131,8 @@ namespace Petri
 				base.Position = value;
 
 				// Prevents access during construction
-				if(this.After != null) {
-					ShiftAmplitude = PetriView.Norm(this.Direction());
+				if(After != null) {
+					ShiftAmplitude = PetriView.Norm(Direction);
 					PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
 					Shift = new PointD(value.X - center.X, value.Y - center.Y);
 				}
@@ -228,7 +248,7 @@ namespace Petri
 			return "";
 		}
 
-		public override bool Grid {
+		public override bool StickToGrid {
 			get {
 				return false;
 			}

@@ -114,7 +114,7 @@ namespace Petri
 					}
 
 					if(!(e is Transition)) {
-						actions.Add(new MoveAction(e, new Cairo.PointD(-pos.X + 50, -pos.Y + 50)));
+						actions.Add(new MoveAction(e, new Cairo.PointD(-pos.X + 50, -pos.Y + 50), true));
 					}
 				}
 

@@ -272,9 +272,23 @@ namespace Petri
 	}
 
 	public class MoveAction : GuiAction {
-		public MoveAction(Entity e, Cairo.PointD delta) {
+		public MoveAction(Entity e, Cairo.PointD delta, bool grid) : this(e, delta, grid, false) {
+			
+		}
+
+		private MoveAction(Entity e, Cairo.PointD delta, bool grid, bool oldGrid) {
+			_oldGrid = oldGrid;
+			_grid = grid;
 			_entity = e;
 			_delta = new Cairo.PointD(delta.X, delta.Y);
+
+			if(_grid) {
+				var pos = new Cairo.PointD(_entity.Position.X + _delta.X, _entity.Position.Y + _delta.Y);
+				pos.X = Math.Round(pos.X / Entity.GridSize) * Entity.GridSize;
+				pos.Y = Math.Round(pos.Y / Entity.GridSize) * Entity.GridSize;
+				_delta.X = pos.X - _entity.Position.X;
+				_delta.Y = pos.Y - _entity.Position.Y;
+			}
 		}
 
 		public override void Apply() {
@@ -282,7 +296,7 @@ namespace Petri
 		}
 
 		public override GuiAction Reverse() {
-			return new MoveAction(_entity, new Cairo.PointD(-_delta.X, -_delta.Y)); 
+			return new MoveAction(_entity, new Cairo.PointD(-_delta.X, -_delta.Y), _oldGrid, _grid); 
 		}
 
 		public override object Focus {
@@ -311,6 +325,7 @@ namespace Petri
 			}
 		}
 
+		bool _grid, _oldGrid;
 		Entity _entity;
 		Cairo.PointD _delta;
 	}
