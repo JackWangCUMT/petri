@@ -247,7 +247,7 @@ namespace Petri
 						var actions = new List<GuiAction>();
 						foreach(var e in _selectedEntities) {
 							e.Position = new PointD(e.Position.X + backToPrevious.X, e.Position.Y + backToPrevious.Y);
-							actions.Add(new MoveAction(e, new PointD(-backToPrevious.X, -backToPrevious.Y), !_altDown));
+							actions.Add(new MoveAction(e, new PointD(-backToPrevious.X, -backToPrevious.Y), (!_altDown && e.StickToGrid) || (_altDown && !e.StickToGrid)));
 						}
 						_document.PostAction(new GuiActionList(actions, actions.Count > 1 ? "Déplacer les entités" : "Déplacer l'entité"));
 					}

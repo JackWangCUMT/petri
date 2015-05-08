@@ -120,6 +120,22 @@ namespace Petri
 			context.SetSourceRGBA(color.R, color.G, color.B, color.A);
 		}
 
+		protected override void DrawLine(Transition t, Context context) {
+			base.DrawLine(t, context);
+			double arrowScale = this.GetArrowScale(t);
+
+			PointD direction = TransitionDirection(t);
+
+			double radB = t.Before.Radius;
+			double radA = t.After.Radius;
+
+			if(PetriView.Norm(direction) > radB) {
+				direction = PetriView.Normalized(direction);
+				PointD destination = TransitionDestination(t, direction);
+
+				PointD origin = TransitionOrigin(t);
+			}
+		}
 		private EditorView _editor;
 	}
 }
