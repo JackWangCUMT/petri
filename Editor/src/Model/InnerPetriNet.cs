@@ -53,14 +53,8 @@ namespace Petri
 			string name = this.EntryPointName;
 
 			// Adding an entry point
-			source += "Action " + name + ";";
-			source += name + ".setAction(make_callable([](){ return actionResult_t(); }));";
-			source += name + ".setRequiredTokens(" + this.RequiredTokens.ToString() + ");";
-
-			source += name + ".setName(\"" + this.Name + "_Entry" + "\");";
-			source += name + ".setID(" + EntryPointID + ");";
-
-			source += "auto &" + name + "_emplaced = " + "petriNet.addAction(std::move(" + name + "), " + (Active ? "true" : "false") + ");";
+			source += "auto &" + name + " = petriNet.addAction("
+				+ "Action(" + EntryPointID + ", \"" + this.Name + "_Entry\", make_action_callable([](){ return actionResult_t(); }), " + this.RequiredTokens.ToString() + "), " + (Active ? "true" : "false") + ");";
 
 			base.GenerateCpp(source, lastID);
 
@@ -70,12 +64,7 @@ namespace Petri
 					var newID = lastID.Consume();
 					string tName = name + "_" + newID.ToString();
 
-					source += "Transition " + tName + "(" + name + "_emplaced, " + s.CppName + "_emplaced);";
-					source += tName + ".setCondition(make_transition_callable([](actionResult_t){ return true; }));";
-
-					source += tName + ".setName(\"" + tName + "\");";
-					source += tName + ".setID(" + newID.ToString() + ");";
-					source += name + "_emplaced.addTransition(std::move(" + tName + "));";
+					source += name + ".addTransition(" + newID.ToString() + ", \"" + tName + "\", " + s.CppName + ", make_transition_callable([](actionResult_t){ return true; }));";
 				}
 			}
 

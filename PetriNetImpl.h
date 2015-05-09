@@ -11,7 +11,6 @@
 #include <cassert>
 #include "Atomic.h"
 #include "Action.h"
-#include "Callable.h"
 #include <queue>
 #include <list>
 #include <unordered_map>

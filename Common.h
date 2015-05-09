@@ -18,6 +18,23 @@ namespace Petri {
 
 	using actionResult_t = std::int32_t;
 
+	template<typename T>
+	struct HasID {
+	public:
+		HasID(T id) : _id(id) { }
+
+		T ID() const {
+			return _id;
+		}
+
+		void setID(T id) {
+			_id = id;
+		}
+
+	private:
+		T _id;
+	};
+
 }
 
 

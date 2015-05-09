@@ -12,8 +12,10 @@
 namespace Petri {
 
 	struct Action::Internals {
+		Internals() = default;
+		Internals(std::string const &name, size_t requiredTokens) : _name(name), _requiredTokens(requiredTokens) {}
 		std::list<Transition> _transitions;
-		std::unique_ptr<CallableBase<actionResult_t>> _action;
+		std::unique_ptr<ActionCallableBase> _action;
 		std::string _name;
 		std::size_t _requiredTokens = 1;
 
@@ -21,13 +23,13 @@ namespace Petri {
 		std::mutex _tokensMutex;
 	};
 
-	Action::Action() : CallableTimeout(0), _internals(std::make_unique<Internals>()) {}
+	Action::Action() : HasID(0), _internals(std::make_unique<Internals>()) {}
 
 	/**
 	 * Creates an empty action, associated to a copy ofthe specified Callable.
 	 * @param action The Callable which will be copied
 	 */
-	Action::Action(CallableBase<actionResult_t> const &action) : CallableTimeout(0), _internals(std::make_unique<Internals>()) {
+	Action::Action(uint64_t id, std::string const &name, ActionCallableBase const &action, size_t requiredTokens) : HasID(id), _internals(std::make_unique<Internals>(name, requiredTokens)) {
 		this->setAction(action);
 	}
 
@@ -42,11 +44,14 @@ namespace Petri {
 		_internals->_transitions.push_back(std::move(transition));
 	}
 
+	void Action::addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond) {
+		_internals->_transitions.emplace_back(id, name, *this, next, cond);
+	}
 	/**
 	 * Returns the Callable asociated to the action. An Action with a null Callable must not invoke this method!
 	 * @return The Callable of the Action
 	 */
-	CallableBase<actionResult_t> &Action::action() {
+	ActionCallableBase &Action::action() {
 		return *_internals->_action;
 	}
 
@@ -54,7 +59,7 @@ namespace Petri {
 	 * Changes the Callable associated to the Action
 	 * @param action The Callable which will be copied and put in the Action
 	 */
-	void Action::setAction(CallableBase<actionResult_t> const &action) {
+	void Action::setAction(ActionCallableBase const &action) {
 		_internals->_action = action.copy_ptr();
 	}
 

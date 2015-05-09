@@ -153,7 +153,7 @@ namespace Petri {
 		this->stateDisabled(oldAction);
 		this->stateEnabled(newAction);
 
-		_actionsPool.addTask(make_callable_ptr(std::bind(&Internals::executeState, std::ref(*this), std::placeholders::_1), std::ref(newAction)));
+		_actionsPool.addTask(make_callable([this, &newAction]() { this->executeState(newAction); }));
 	}
 
 	void PetriNet::Internals::enableState(Action &a) {
@@ -167,7 +167,7 @@ namespace Petri {
 		}
 
 		this->stateEnabled(a);
-		_actionsPool.addTask(make_callable_ptr(std::bind(&Internals::executeState, std::ref(*this), std::placeholders::_1), std::ref(a)));
+		_actionsPool.addTask(make_callable([this, &a]() { this->executeState(a); }));
 	}
 
 	void PetriNet::Internals::disableState(Action &a) {

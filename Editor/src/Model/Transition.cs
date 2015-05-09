@@ -208,7 +208,7 @@ namespace Petri
 				aName = a.EntryPointName;
 			}
 
-			string cpp = "return static_cast<actionResult_t>(" + Condition.MakeCpp() + ");";
+			string cpp = "return " + Condition.MakeCpp() + ";";
 
 			var cppVar = new HashSet<Cpp.VariableExpression>();
 			GetVariables(cppVar);
@@ -234,12 +234,7 @@ namespace Petri
 
 			cpp = "[&petriNet](actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) -> bool { " + cpp + " }";
 
-			source += "Transition " + this.CppName + "(" + bName + "_emplaced, " + aName + "_emplaced);";
-			source += this.CppName + ".setCondition(make_transition_callable(" + cpp + "));";
-
-			source += this.CppName + ".setName(\"" + this.Name + "\");";
-			source += this.CppName + ".setID(" + this.ID.ToString() + ");";
-			source += bName + "_emplaced.addTransition(std::move(" + this.CppName + "));";
+			source += bName + ".addTransition(" + this.ID.ToString() + ", \"" + this.Name + "\", " + aName + ", make_transition_callable(" + cpp + "));";
 
 			foreach(var tup in old) {
 				tup.Key.Expression = tup.Value;

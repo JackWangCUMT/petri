@@ -97,8 +97,6 @@ namespace Petri
 		}
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
-			source += "Action " + this.CppName + ";";
-
 			var old = new Dictionary<Cpp.LiteralExpression, string>();
 			string enumName = Document.Settings.Enum.Name;
 
@@ -125,32 +123,32 @@ namespace Petri
 			var cppVar = new HashSet<Cpp.VariableExpression>();
 			GetVariables(cppVar);
 
+			string action;
+
 			if(cppVar.Count == 0) {
-				source += this.CppName + ".setAction(make_callable([&petriNet]() { return " + cpp + "; }));";
+				action = "make_action_callable([&petriNet]() { return " + cpp + "; })";
 			}
 			else {
 				var cppLockLock = from v in cppVar
 								  select "_petri_lock_" + v.Expression;
 				
-				source += this.CppName + ".setAction(make_callable([&petriNet]() {";
+				action = "make_action_callable([&petriNet]() {\n";
 				foreach(var v in cppVar) {
-					source += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + v.Expression + ")).getLock();";
+					action += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + v.Expression + ")).getLock();\n";
 				}
 
 				if(cppVar.Count > 1)
-					source += "std::lock(" + String.Join(", ", cppLockLock) + ");";
+					action += "std::lock(" + String.Join(", ", cppLockLock) + ");\n";
 				else {
-					source += String.Join(", ", cppLockLock) + ".lock();";
+					action += String.Join(", ", cppLockLock) + ".lock();\n";
 				}
 					
-				source += "return " + cpp + ";";
-				source += "}));";
+				action += "return " + cpp + ";\n";
+				action += "})";
 			}
-			source += this.CppName + ".setRequiredTokens(" + RequiredTokens.ToString() + ");";
 
-			source += this.CppName + ".setName(\"" + this.Parent.Name + "_" + this.Name + "\");";
-			source += this.CppName + ".setID(" + this.ID.ToString() + ");";
-			source += "auto &" + CppName + "_emplaced = " + "petriNet.addAction(std::move(" + this.CppName + "), " + ((this.Active && (this.Parent is RootPetriNet)) ? "true" : "false") + ");";
+			source += "auto &" + CppName + " = " + "petriNet.addAction("
+				+ "Action(" + this.ID.ToString() + ", \"" + this.Parent.Name + "_" + this.Name + "\", " + action + ", " + this.RequiredTokens.ToString() + "), " + ((this.Active && (this.Parent is RootPetriNet)) ? "true" : "false") + ");";
 
 			foreach(var tup in old) {
 				tup.Key.Expression = tup.Value;

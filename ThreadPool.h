@@ -21,6 +21,11 @@
 
 namespace Petri {
 
+	template<typename CallableType>
+	auto make_callable(CallableType &&c) {
+		return Callable<CallableType, std::result_of_t<CallableType()>>(c);
+	}
+
 	template<typename _ReturnType>
 	class ThreadPool {
 		using ReturnType = _ReturnType;
@@ -212,10 +217,10 @@ namespace Petri {
 		 * @param task The task to be addes.
 		 * @return A proxy object allowing the user to wait for the task completion, query the task completion status and get the task return value
 		 */
-		TaskResult addTask(std::unique_ptr<CallableBase<ReturnType>> task) {//, std::chrono::nanoseconds timeout) {
+		TaskResult addTask(CallableBase<ReturnType> const &task) {//, std::chrono::nanoseconds timeout) {
 			TaskResult result;
 			// task must be kept alive until execution finishes
-			result._proxy = std::make_shared<TaskManager>(std::move(task));
+			result._proxy = std::make_shared<TaskManager>(task.copy_ptr());
 
 			std::lock_guard<std::mutex> lk(_availabilityMutex);
 			++_pendingTasks;

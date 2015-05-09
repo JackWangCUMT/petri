@@ -8,19 +8,26 @@
 #ifndef Petri_Action_h
 #define Petri_Action_h
 
-#include "Callable.h"
 #include "Transition.h"
 #include <mutex>
 #include <list>
+#include "Callable.h"
 
 namespace Petri {
 
 	using namespace std::chrono_literals;
 
+	using ActionCallableBase = CallableBase<actionResult_t>;
+
+	template<typename CallableType>
+	auto make_action_callable(CallableType &&c) {
+		return Callable<CallableType, actionResult_t>(c);
+	}
+
 	/**
 	 * A state composing a PetriNet.
 	 */
-	class Action : public CallableTimeout<uint64_t> {
+	class Action : public HasID<uint64_t> {
 	public:
 		/**
 		 * Creates an empty action, associated to a null CallablePtr.
@@ -31,7 +38,7 @@ namespace Petri {
 		 * Creates an empty action, associated to a copy ofthe specified Callable.
 		 * @param action The Callable which will be copied
 		 */
-		Action(CallableBase<actionResult_t> const &action);
+		Action(uint64_t id, std::string const &name, ActionCallableBase const &action, size_t requiredTokens);
 		Action(Action &&);
 
 		~Action();
@@ -41,18 +48,19 @@ namespace Petri {
 		 * @param transition the transition to be added
 		 */
 		void addTransition(Transition transition);
+		void addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond);
 
 		/**
 		 * Returns the Callable asociated to the action. An Action with a null Callable must not invoke this method!
 		 * @return The Callable of the Action
 		 */
-		CallableBase<actionResult_t> &action();
+		ActionCallableBase &action();
 
 		/**
 		 * Changes the Callable associated to the Action
 		 * @param action The Callable which will be copied and put in the Action
 		 */
-		void setAction(CallableBase<actionResult_t> const &action);
+		void setAction(ActionCallableBase const &action);
 
 		/**
 		 * Returns the required tokens of the Action to be activated, i.e. the count of Actions which must lead to *this and terminate for *this to activate.
