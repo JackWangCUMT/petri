@@ -566,7 +566,7 @@ namespace Petri
 				if(value != null && CurrentPetriNet != value.Parent) {
 					if(value is RootPetriNet)
 						this.ResetSelection();
-					else {
+					else if(!(value is PetriNet && value == CurrentPetriNet)) {
 						CurrentPetriNet = value.Parent;
 						SelectedEntity = value;
 					}

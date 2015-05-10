@@ -1,5 +1,4 @@
-﻿Focus undomanager
-Entité selectionnée pendant l'édition
+﻿Entité selectionnée pendant l'édition
 
 taille debugeditor
 génération invocation compilateur

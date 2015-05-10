@@ -582,10 +582,16 @@ namespace Petri
 	}
 
 	public class ChangeTransitionEndAction : GuiAction {
-		public ChangeTransitionEndAction(Transition t, State newEnd, bool destination) {
+		public ChangeTransitionEndAction(Transition t, State newEnd, bool destination) : this(t, newEnd, destination, destination && t.After.RequiredTokens == t.After.TransitionsBefore.Count, destination && newEnd.TransitionsBefore.Count == 0) {
+		
+		}
+
+		private ChangeTransitionEndAction(Transition t, State newEnd, bool destination, bool decrementOld, bool incrementNew) {
 			_transition = t;
 			_newEnd = newEnd;
 			_destination = destination;
+			_decrementOld = decrementOld;
+			_incrementNew = incrementNew;
 			if(destination) {
 				_oldEnd = _transition.After;
 			}
@@ -597,18 +603,28 @@ namespace Petri
 		public override void Apply() {
 			if(_destination) {
 				_transition.After.RemoveTransitionBefore(_transition);
+				if(_decrementOld) {
+					--_transition.After.RequiredTokens;
+				}
 				_transition.After = _newEnd;
 				_newEnd.AddTransitionBefore(_transition);
 			}
 			else {
 				_transition.Before.RemoveTransitionAfter(_transition);
+				if(_decrementOld) {
+					--_transition.Before.RequiredTokens;
+				}
 				_transition.Before = _newEnd;
 				_newEnd.AddTransitionAfter(_transition);
+			}
+
+			if(_incrementNew) {
+				++_newEnd.RequiredTokens;
 			}
 		}
 
 		public override GuiAction Reverse() {
-			return new ChangeTransitionEndAction(_transition, _oldEnd, _destination); 
+			return new ChangeTransitionEndAction(_transition, _oldEnd, _destination, _incrementNew, _decrementOld); 
 		}
 
 		public override object Focus {
@@ -625,7 +641,7 @@ namespace Petri
 
 		Transition _transition;
 		State _newEnd, _oldEnd;
-		bool _destination;
+		bool _destination, _decrementOld, _incrementNew;
 	}
 
 	public class RemoveTransitionAction : GuiAction {
