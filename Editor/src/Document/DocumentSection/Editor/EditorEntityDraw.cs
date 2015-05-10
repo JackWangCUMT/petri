@@ -100,9 +100,16 @@ namespace Petri
 			double lineWidth = 2;
 
 			if(_editor.EntitySelected(t)) {
-				c.R = 0.3;
-				c.G = 0.8;
-				lineWidth += 2;
+				if(_editor.CurrentAction == EditorView.EditorAction.ChangingTransitionDestination || _editor.CurrentAction == EditorView.EditorAction.ChangingTransitionOrigin) {
+					c.R = 0.6;
+					c.G = 0.6;
+					c.B = 0.6;
+				}
+				else {
+					c.R = 0.3;
+					c.G = 0.8;
+					lineWidth += 2;
+				}
 			}
 			context.SetSourceRGBA(c.R, c.G, c.B, c.A);
 			context.LineWidth = lineWidth;
@@ -122,20 +129,79 @@ namespace Petri
 
 		protected override void DrawLine(Transition t, Context context) {
 			base.DrawLine(t, context);
-			double arrowScale = this.GetArrowScale(t);
 
-			PointD direction = TransitionDirection(t);
+			if(_editor.EntitySelected(t) && !_editor.MultipleSelection) {
+				PointD direction = TransitionDirection(t);
 
-			double radB = t.Before.Radius;
-			double radA = t.After.Radius;
+				double radB = t.Before.Radius;
+				double radA = t.After.Radius;
 
-			if(PetriView.Norm(direction) > radB) {
-				direction = PetriView.Normalized(direction);
-				PointD destination = TransitionDestination(t, direction);
+				if(PetriView.Norm(direction) > radB) {
+					direction = PetriView.Normalized(direction);
+					PointD destination = TransitionDestination(t, direction);
 
-				PointD origin = TransitionOrigin(t);
+					PointD origin = TransitionOrigin(t);
+					direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
+
+					context.Arc(origin.X + 5 * direction.X, origin.Y + 5 * direction.Y, 5, 0, 2 * Math.PI);
+
+					PointD direction2 = new PointD(destination.X - t.Position.X, destination.Y - t.Position.Y);
+					direction2 = PetriView.Normalized(direction2);
+					context.Arc(destination.X - 5 * direction2.X, destination.Y - 5 * direction2.Y, 5, 0, 2 * Math.PI);
+
+					context.Fill();
+				}
 			}
 		}
+
+		static public PointD GetOriginHandle(Transition t) {
+			PointD origin = TransitionOrigin(t);
+			PointD direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
+
+			return new PointD(origin.X + 5 * direction.X, origin.Y + 5 * direction.Y);
+		}
+
+		static public PointD GetDestinationHandle(Transition t) {
+			PointD direction = PetriView.Normalized(TransitionDirection(t));
+			PointD destination = TransitionDestination(t, direction);
+
+			PointD direction2 = new PointD(destination.X - t.Position.X, destination.Y - t.Position.Y);
+			direction2 = PetriView.Normalized(direction2);
+
+			return new PointD(destination.X - 5 * direction2.X, destination.Y - 5 * direction2.Y);
+		}
+
+		static public bool IsOnOriginHandle(double x, double y, Entity e) {
+			if(!(e is Transition))
+				return false;
+
+			var pos = GetOriginHandle((Transition)e);
+			if(Math.Abs(x - pos.X) < 5.0 / 2 && Math.Abs(y - pos.Y) < 5.0 / 2) {
+				return true;
+			}
+
+			return false;
+		}
+
+		static public bool IsOnDestinationHandle(double x, double y, Entity e) {
+			if(!(e is Transition))
+				return false;
+
+			var pos = GetDestinationHandle((Transition)e);
+			if(Math.Abs(x - pos.X) < 5.0 / 2 && Math.Abs(y - pos.Y) < 5.0 / 2) {
+				return true;
+			}
+
+			return false;
+		}
+
+		protected override void InitContextForText(Transition t, Context context) {
+			base.InitContextForText(t, context);
+			if(_editor.EntitySelected(t) && (_editor.CurrentAction == EditorView.EditorAction.ChangingTransitionDestination || _editor.CurrentAction == EditorView.EditorAction.ChangingTransitionOrigin)) {
+				context.SetSourceRGBA(0.6, 0.6, 0.6, 1);
+			}
+		}
+
 		private EditorView _editor;
 	}
 }

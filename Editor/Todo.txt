@@ -1,6 +1,8 @@
-﻿taille debugeditor
+﻿Focus undomanager
+Entité selectionnée pendant l'édition
+
+taille debugeditor
 génération invocation compilateur
-déplacement transitions
 Fonction recherche
 
 Parenthèses A && B && C

@@ -581,6 +581,53 @@ namespace Petri
 		bool _incrementTokenCount;
 	}
 
+	public class ChangeTransitionEndAction : GuiAction {
+		public ChangeTransitionEndAction(Transition t, State newEnd, bool destination) {
+			_transition = t;
+			_newEnd = newEnd;
+			_destination = destination;
+			if(destination) {
+				_oldEnd = _transition.After;
+			}
+			else {
+				_oldEnd = _transition.Before;
+			}
+		}
+
+		public override void Apply() {
+			if(_destination) {
+				_transition.After.RemoveTransitionBefore(_transition);
+				_transition.After = _newEnd;
+				_newEnd.AddTransitionBefore(_transition);
+			}
+			else {
+				_transition.Before.RemoveTransitionAfter(_transition);
+				_transition.Before = _newEnd;
+				_newEnd.AddTransitionAfter(_transition);
+			}
+		}
+
+		public override GuiAction Reverse() {
+			return new ChangeTransitionEndAction(_transition, _oldEnd, _destination); 
+		}
+
+		public override object Focus {
+			get {
+				return _transition;
+			}
+		}
+
+		public override string Description {
+			get {
+				return "Changer l'extrémité de la transition";
+			}
+		}
+
+		Transition _transition;
+		State _newEnd, _oldEnd;
+		bool _destination;
+	}
+
 	public class RemoveTransitionAction : GuiAction {
 		public RemoveTransitionAction(Transition t, bool decrementTokenCount) {
 			_transition = t;

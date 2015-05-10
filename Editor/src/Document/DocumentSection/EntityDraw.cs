@@ -188,14 +188,14 @@ namespace Petri
 			}
 		}
 
-		protected PointD TransitionDirection(Transition t) {
+		static protected PointD TransitionDirection(Transition t) {
 			return new PointD(t.After.Position.X - t.Position.X, t.After.Position.Y - t.Position.Y);
 		}
-		protected PointD TransitionOrigin(Transition t) {
+		static protected PointD TransitionOrigin(Transition t) {
 			var direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
 			return new PointD(t.Before.Position.X + direction.X * t.Before.Radius, t.Before.Position.Y + direction.Y * t.Before.Radius);
 		}
-		protected PointD TransitionDestination(Transition t, PointD direction) {
+		static protected PointD TransitionDestination(Transition t, PointD direction) {
 			return new PointD(t.After.Position.X - direction.X * t.After.Radius, t.After.Position.Y - direction.Y * t.After.Radius);
 		}
 
