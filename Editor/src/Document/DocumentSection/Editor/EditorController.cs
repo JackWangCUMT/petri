@@ -233,7 +233,7 @@ namespace Petri
 			foreach(State s in states) {
 				// Change entity's owner
 				s.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
-				s.Name = s.Name + " 2";
+				s.Name = s.Name;
 				s.Position = new Cairo.PointD(s.Position.X + 20 * MainClass.PasteCount, s.Position.Y + 20 * MainClass.PasteCount);
 				actionList.Add(new AddStateAction(s));
 			}
@@ -247,7 +247,7 @@ namespace Petri
 			foreach(Transition t in transitions) {
 				// Change entity's owner
 				t.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
-				t.Name = t.Name + " 2";
+				t.Name = t.Name;
 				actionList.Add(new AddTransitionAction(t, false));
 			}
 
