@@ -1,8 +1,8 @@
-﻿taille debugeditor
-génération invocation compilateur
-Fonction recherche
+﻿Fonction recherche
 
+Fenêtre au 1er plan quand enregistrement
 Parenthèses A && B && C
+génération invocation compilateur
 
 Playground
 

@@ -62,7 +62,16 @@ namespace Petri
 			this.PackStart(_paned, true, true, 0);
 
 			_paned.SizeRequested += (object o, SizeRequestedArgs args) => {
-				_document.DebugController.DebugEditor.Resize((o as HPaned).Child2.Allocation.Width);
+				HPaned p = (HPaned)o;
+				if(p.Child2.Allocation.Width != 1) {
+					_document.DebugController.DebugEditor.Resize(p.Child2.Allocation.Width);
+				}
+				else {
+					int x, y;
+					p.RootWindow.GetSize(out x, out y);
+					p.Position = x - 250;
+					_document.DebugController.DebugEditor.Resize(200);
+				}
 			};
 
 			_view = new DebugView(doc);
