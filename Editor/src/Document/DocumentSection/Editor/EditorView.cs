@@ -573,9 +573,14 @@ namespace Petri
 				}
 				else {
 					_selectedEntities.Clear();
-					if(value != null)
+					if(value != null) {
 						_selectedEntities.Add(value);
+					}
 					_document.EditorController.UpdateSelection();
+					if(value != null) {
+						_selectedEntities.Clear();
+						_selectedEntities.Add(value);
+					}
 				}
 			}
 		}

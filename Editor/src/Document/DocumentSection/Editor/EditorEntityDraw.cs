@@ -176,7 +176,7 @@ namespace Petri
 				return false;
 
 			var pos = GetOriginHandle((Transition)e);
-			if(Math.Abs(x - pos.X) < 5.0 / 2 && Math.Abs(y - pos.Y) < 5.0 / 2) {
+			if(Math.Abs(x - pos.X) < 10.0 / 2 && Math.Abs(y - pos.Y) < 10.0 / 2) {
 				return true;
 			}
 
@@ -188,7 +188,7 @@ namespace Petri
 				return false;
 
 			var pos = GetDestinationHandle((Transition)e);
-			if(Math.Abs(x - pos.X) < 5.0 / 2 && Math.Abs(y - pos.Y) < 5.0 / 2) {
+			if(Math.Abs(x - pos.X) < 10.0 / 2 && Math.Abs(y - pos.Y) < 10.0 / 2) {
 				return true;
 			}
 

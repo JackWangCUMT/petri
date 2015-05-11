@@ -1,6 +1,4 @@
-﻿Entité selectionnée pendant l'édition
-
-taille debugeditor
+﻿taille debugeditor
 génération invocation compilateur
 Fonction recherche
 
