@@ -10,10 +10,6 @@
 
 namespace Petri {
 
-	Transition::Transition(Transition const &t) : HasID<uint64_t>(this->ID()), _previous(t._previous), _next(t._next), _name(t._name), _delayBetweenEvaluation(t._delayBetweenEvaluation) {
-		this->setCondition(t.condition());
-	}
-
 	Transition::Transition(Action &previous, Action &next) : HasID(0), _previous(previous), _next(next) {}
 
 	Transition::Transition(uint64_t id, std::string const &name, Action &previous, Action &next, TransitionCallableBase const &cond) : HasID(id), _name(name), _previous(previous), _next(next), _test(cond.copy_ptr()) {}

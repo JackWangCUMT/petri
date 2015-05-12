@@ -30,7 +30,6 @@ namespace Petri {
 	 */
 	class Transition : public HasID<uint64_t> {
 	public:
-		Transition(Transition const &t);
 		/**
 		 * Creates an Transition object, containing a nullptr test, allowing the end of execution of Action 'previous' to provoke
 		 * the execution of Action 'next', if the test is fulfilled.

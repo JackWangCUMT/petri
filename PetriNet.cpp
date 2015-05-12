@@ -75,9 +75,9 @@ namespace Petri {
 		auto res = a.action()();
 
 		if(!a.transitions().empty()) {
-			std::list<Transition> transitionsToTest;
-			for(auto it = a.transitions().begin(); it != a.transitions().end(); ++it) {
-				transitionsToTest.emplace_back(*it);
+			std::list<Transition *> transitionsToTest;
+			for(auto &t : a.transitions()) {
+				transitionsToTest.push_back(const_cast<Transition *>(&t));
 			}
 
 			auto lastTest = ClockType::time_point();
@@ -89,17 +89,17 @@ namespace Petri {
 				for(auto it = transitionsToTest.begin(); it != transitionsToTest.end();) {
 					bool isFulfilled = false;
 
-					if((now - lastTest) >= (it)->delayBetweenEvaluation()) {
+					if((now - lastTest) >= (*it)->delayBetweenEvaluation()) {
 						// Testing the transition
-						isFulfilled = (it)->isFulfilled(res);
-						minDelay = std::min(minDelay, (it)->delayBetweenEvaluation());
+						isFulfilled = (*it)->isFulfilled(res);
+						minDelay = std::min(minDelay, (*it)->delayBetweenEvaluation());
 					}
 					else {
-						minDelay = std::min(minDelay, (it)->delayBetweenEvaluation() - (now - lastTest));
+						minDelay = std::min(minDelay, (*it)->delayBetweenEvaluation() - (now - lastTest));
 					}
 
 					if(isFulfilled) {
-						Action &a = (it)->next();
+						Action &a = (*it)->next();
 						std::lock_guard<std::mutex> tokensLock(a.tokensMutex());
 						if(++a.currentTokens() >= a.requiredTokens()) {
 							a.currentTokens() -= a.requiredTokens();
