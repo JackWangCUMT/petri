@@ -12,5 +12,6 @@
 #include "PetriDebug.h"
 #include "PetriUtils.h"
 #include "Action.h"
+#include "DebugServer.h"
 
 #endif
