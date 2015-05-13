@@ -142,6 +142,8 @@ namespace Petri {
 						}
 						if(_petriNetFactory.loaded()) {
 							if(root["payload"]["hash"].asString() != _petriNetFactory.hash()) {
+								std::cerr << "Requested hash: " <<  root["payload"]["hash"].asString() << std::endl;
+								std::cerr << "Got hash: " << _petriNetFactory.hash() << std::endl;
 								std::cout << root["payload"]["hash"].asString() << " " << _petriNetFactory.hash() << std::endl;
 								this->sendObject(this->error("You are trying to run a Petri net that is different from the one which is compiled!"));
 								std::cerr << "You are trying to run a Petri net that is different from the one which is compiled!" << std::endl;

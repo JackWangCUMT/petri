@@ -13,6 +13,8 @@
 #include "PetriUtils.h"
 #include "PetriDebug.h"
 
+#include <iostream>
+
 namespace Petri {
 
 	class PetriDynamicLibCommon : public DynamicLib {
@@ -95,6 +97,8 @@ namespace Petri {
 			_createPtr = this->loadSymbol<void *()>((prefix + "_create").c_str());
 			_createDebugPtr = this->loadSymbol<void *()>((prefix + "_createDebug").c_str());
 			_hashPtr = this->loadSymbol<char const *()>((prefix + "_getHash").c_str());
+
+			std::cerr << "Loaded " << this->name()  << ", got hash " << this->hash() << std::endl;
 
 			// Checks that the dylib is more recent than the last change to the debug server
 			/*auto APIDatePtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, (prefix + "_getAPIDate").c_str()));

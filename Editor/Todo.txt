@@ -1,11 +1,7 @@
-﻿Fenêtre au 1er plan quand enregistrement
-Parenthèses A && B && C
+﻿Parenthèses A && B && C
 génération invocation compilateur
 
 Playground
-
-Commenter le code :3
-Documentation
 
 Compilation du code : formattage des erreurs de compilation
 

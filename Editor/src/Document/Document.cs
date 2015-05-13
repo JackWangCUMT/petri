@@ -220,6 +220,7 @@ namespace Petri
 			}
 
 			if(Modified) {
+				Window.Present();
 				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "Souhaitez-vous enregistrer les modifications apportées au graphe ? Vos modifications seront perdues si vous ne les enregistrez pas.");
 				d.AddButton("Ne pas enregistrer", ResponseType.No);
 				d.AddButton("Annuler", ResponseType.Cancel);
