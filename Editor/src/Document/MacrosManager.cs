@@ -97,7 +97,7 @@ namespace Petri
 			TreeIter iter;
 			TreePath[] treePath = _table.Selection.GetSelectedRows();
 
-			for (int i  = treePath.Length; i > 0; i--) {
+			for(int i = treePath.Length; i > 0; i--) {
 				_dataStore.GetIter(out iter, treePath[(i - 1)]);
 				MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Supprimer une macro utilisé dans le document rendra celui-ci inconsistant. À manier avec précaution !");
 				d.AddButton("Supprimer", ResponseType.Accept);

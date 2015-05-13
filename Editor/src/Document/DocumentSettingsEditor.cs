@@ -124,23 +124,6 @@ namespace Petri
 				vbox.PackStart(radioVBox, false, false, 0);
 				vbox.PackStart(_customEnumEditor, false, false, 0);
 
-					/*	GtkWidget *window, *radio1, *radio2, *box, *entry;
-				// Create a radio button with a GtkEntry widget
-				radio1 = gtk_radio_button_new (NULL);
-				entry = gtk_entry_new ();
-				gtk_container_add (GTK_CONTAINER (radio1), entry);
-
-
-				// Create a radio button with a label
-				radio2 = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON (radio1),
-					"I’m the second radio button.");
-
-				// Pack them into a box, then show all the widgets
-				gtk_box_pack_start (GTK_BOX (box), radio1, TRUE, TRUE, 2);
-				gtk_box_pack_start (GTK_BOX (box), radio2, TRUE, TRUE, 2);
-				gtk_container_add (GTK_CONTAINER (window), box);
-				gtk_widget_show_all (window);*/
-
 				label = new Label("Chemin vers le compilateur C++ :");
 				entry = new Entry(_document.Settings.Compiler);
 				MainClass.RegisterValidation(entry, false, (obj, p) => {

@@ -127,6 +127,7 @@
     <Compile Include="src\Document\HeadlessDocument.cs" />
     <Compile Include="src\Document\DocumentSettingsEditor.cs" />
     <Compile Include="src\Cpp\Enum.cs" />
+    <Compile Include="src\Document\DocumentSection\Editor\Find.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

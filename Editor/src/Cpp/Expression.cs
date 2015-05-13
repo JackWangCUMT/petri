@@ -856,7 +856,7 @@ namespace Petri {
 			}
 
 			public override string MakeUserReadable() {
-				return String.Join(";\n", from e in Expressions select e.MakeUserReadable());
+				return String.Join("; ", from e in Expressions select e.MakeUserReadable());
 			}
 
 			public override List<LiteralExpression> GetLiterals() {

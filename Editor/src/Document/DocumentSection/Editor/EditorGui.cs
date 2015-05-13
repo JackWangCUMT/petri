@@ -1,6 +1,7 @@
 ﻿using System;
 using Gtk;
 using Gdk;
+using System.Collections.Generic;
 
 namespace Petri
 {
@@ -8,6 +9,8 @@ namespace Petri
 	{
 		public EditorGui(Document doc) {
 			_document = doc;
+
+			_find = new Find(doc);
 
 			_toolbar = new Toolbar();
 			_toolbar.ToolbarStyle = ToolbarStyle.Both;
@@ -64,6 +67,9 @@ namespace Petri
 			_zoomOut = new ToolButton(Stock.ZoomOut);
 			_zoomOut.Label = "Réduire";
 
+			_findTool = new ToolButton(Stock.Find);
+			_findTool.Label = "Rechercher";
+
 			_save.Clicked += OnClick;
 			_cpp.Clicked += OnClick;
 			_compile.Clicked += OnClick;
@@ -74,6 +80,7 @@ namespace Petri
 			_action.Clicked += OnClick;
 			_transition.Clicked += OnClick;
 			_comment.Clicked += OnClick;
+			_findTool.Clicked += OnClick;
 
 			_toolbar.Insert(_save, -1);
 			_toolbar.Insert(_cpp, -1);
@@ -93,9 +100,72 @@ namespace Petri
 
 			_toolbar.Insert(new SeparatorToolItem(), -1);
 
+			_toolbar.Insert(_findTool, -1);
+
+			_toolbar.Insert(new SeparatorToolItem(), -1);
+
 			_toolbar.Insert(_switchToDebug, -1);
 
 			_paned = new HPaned();
+			_vpaned = new VPaned();
+
+			_findView = new TreeView();
+			_findView.RowActivated += (o, args) => {
+				_petriView.SelectedEntity = _findResults[int.Parse(args.Path.ToString())];
+			};
+
+			TreeViewColumn c0 = new TreeViewColumn();
+			c0.Title = "ID";
+			var idCell = new Gtk.CellRendererText();
+			c0.PackStart(idCell, true);
+			c0.AddAttribute(idCell, "text", 0);
+
+			TreeViewColumn c1 = new TreeViewColumn();
+			c1.Title = "Type";
+			var typeCell = new Gtk.CellRendererText();
+			c1.PackStart(typeCell, true);
+			c1.AddAttribute(typeCell, "text", 1);
+
+			TreeViewColumn c2 = new TreeViewColumn();
+			c2.Title = "Nom";
+			var nameCell = new Gtk.CellRendererText();
+			c2.PackStart(nameCell, true);
+			c2.AddAttribute(nameCell, "text", 2);
+
+			TreeViewColumn c3 = new TreeViewColumn();
+			c2.Title = "Valeur";
+			var valueCell = new Gtk.CellRendererText();
+			c2.PackStart(valueCell, true);
+			c2.AddAttribute(valueCell, "text", 3);
+
+			_findView.AppendColumn(c0);
+			_findView.AppendColumn(c1);
+			_findView.AppendColumn(c2);
+			_findView.AppendColumn(c3);
+			_findStore = new Gtk.ListStore(typeof(string), typeof(string), typeof(string), typeof(string));
+			_findView.Model = _findStore;
+
+			var scroll = new ScrolledWindow();
+			scroll.SetPolicy(PolicyType.Automatic, PolicyType.Automatic);
+
+			Viewport viewport1 = new Viewport();
+
+			viewport1.Add(_findView);
+
+			_findView.SizeRequested += (o, args) => {
+				viewport1.WidthRequest = viewport1.Child.Requisition.Width;
+				viewport1.HeightRequest = viewport1.Child.Requisition.Height;
+			};
+
+			scroll.Add(viewport1);
+
+			_vpaned.Pack2(scroll, true, true);
+			_vpaned.Position = _vpaned.MaxPosition;
+
+			_vpaned.Realized += (object sender, EventArgs e) => {
+				_vpaned.Position = _vpaned.MaxPosition;
+			};
+
 			this.PackStart(_paned, true, true, 0);
 
 			_paned.SizeRequested += (object o, SizeRequestedArgs args) => {
@@ -114,18 +184,19 @@ namespace Petri
 			_scroll = new ScrolledWindow();
 			_scroll.SetPolicy(PolicyType.Automatic, PolicyType.Automatic);
 
-			Viewport viewport = new Viewport();
+			Viewport viewport2 = new Viewport();
 
-			viewport.Add(_petriView);
+			viewport2.Add(_petriView);
 
 			_petriView.SizeRequested += (o, args) => {
-				viewport.WidthRequest = viewport.Child.Requisition.Width;
-				viewport.HeightRequest = viewport.Child.Requisition.Height;
+				viewport2.WidthRequest = viewport2.Child.Requisition.Width;
+				viewport2.HeightRequest = viewport2.Child.Requisition.Height;
 			};
 
-			_scroll.Add(viewport);
+			_scroll.Add(viewport2);
+			_vpaned.Pack1(_scroll, true, true);
 
-			_paned.Pack1(_scroll, true, true);
+			_paned.Pack1(_vpaned, true, true);
 			_editor = new Fixed();
 			_paned.Pack2(_editor, false, true);
 		}
@@ -190,8 +261,50 @@ namespace Petri
 				_transition.Active = false;
 				_comment.Active = true;
 			}
+			else if(sender == _findTool) {
+				Find();
+			}
 
 			_toggling = false;
+		}
+
+		public void Find() {
+			_find.Show();
+		}
+
+		public void PerformFind(string what, Find.FindType type) {
+			_document.SwitchToEditor();
+			_findResults.Clear();
+			_findStore.Clear();
+
+			var list = _document.PetriNet.BuildEntitiesList();
+			foreach(var ee in list) {
+				if(ee is Action && (type == Petri.Find.FindType.All || type == Petri.Find.FindType.Action)) {
+					var e = (Action)ee;
+					if(e.Function.MakeUserReadable().Contains(what)) {
+						_findResults.Add(e);
+						_findStore.AppendValues(e.ID.ToString(), "Action", e.Name, e.Function.MakeUserReadable());
+					}
+				}
+				else if(ee is Transition && (type == Petri.Find.FindType.All || type == Petri.Find.FindType.Transition)) {
+					var e = (Transition)ee;
+					if(e.Condition.MakeUserReadable().Contains(what)) {
+						_findResults.Add(e);
+						_findStore.AppendValues(e.ID.ToString(), "Transition", e.Name, e.Condition.MakeUserReadable());
+					}
+				}
+				else if(ee is Comment && (type == Petri.Find.FindType.All || type == Petri.Find.FindType.Comment)) {
+					var e = (Comment)ee;
+					if(e.Name.Contains(what)) {
+						_findResults.Add(e);
+						_findStore.AppendValues(e.ID.ToString(), "Commentaire", "-", e.Name);
+					}
+				}
+			}
+
+			if(_vpaned.Position == _vpaned.MaxPosition) {
+				_vpaned.Position = Math.Max((_vpaned.MaxPosition - _vpaned.MinPosition) / 2, (_vpaned.HeightRequest - _scroll.HeightRequest));
+			}
 		}
 
 		public override void UpdateToolbar() {}
@@ -246,15 +359,22 @@ namespace Petri
 				});
 			}
 		}
+		
+		Find _find;
+		List<Entity> _findResults = new List<Entity>();
 
 		EditorView _petriView;
 		Fixed _editor;
+		VPaned _vpaned;
+		TreeView _findView;
+		ListStore _findStore;
 
 		ScrolledWindow _scroll;
 
 		Toolbar _toolbar;
-		ToolButton _save, _cpp, _compile, _switchToDebug, _zoomIn, _zoomOut;
+		ToolButton _save, _cpp, _compile, _switchToDebug, _zoomIn, _zoomOut, _findTool;
 		ToggleToolButton _arrow, _action, _transition, _comment;
+
 		bool _toggling = false;
 
 		Document _document;

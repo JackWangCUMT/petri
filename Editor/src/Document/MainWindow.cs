@@ -137,6 +137,11 @@ namespace Petri
 				return _pasteItem;
 			}
 		}
+		public MenuItem FindItem {
+			get {
+				return _findItem;
+			}
+		}
 		public MenuItem EmbedItem {
 			get {
 				return _embedInMacro;
@@ -276,6 +281,9 @@ namespace Petri
 				}
 				_document.Window.Gui.BaseView.Redraw();
 			}
+			else if(sender == _findItem) {
+				_document.Window.EditorGui.Find();
+			}
 		}
 
 		protected void BuildMenus() {
@@ -365,6 +373,10 @@ namespace Petri
 			_pasteItem.Activated += OnClickMenu;
 			_pasteItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.v, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
+			_findItem = new MenuItem("Rechercher…");
+			_findItem.Activated += OnClickMenu;
+			_findItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.f, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+
 			_embedInMacro = new MenuItem("Regrouper dans une macro");
 			_embedInMacro.Activated += OnClickMenu;
 			_embedInMacro.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
@@ -381,6 +393,8 @@ namespace Petri
 			editMenu.Append(_pasteItem);
 			editMenu.Append(new SeparatorMenuItem());
 			editMenu.Append(_selectAllItem);
+			editMenu.Append(new SeparatorMenuItem());
+			editMenu.Append(_findItem);
 			editMenu.Append(new SeparatorMenuItem());
 			editMenu.Append(_embedInMacro);
 
@@ -474,6 +488,7 @@ namespace Petri
 		MenuItem _copyItem;
 		MenuItem _pasteItem;
 		MenuItem _selectAllItem;
+		MenuItem _findItem;
 		MenuItem _embedInMacro;
 
 		MenuItem _showEditorItem;

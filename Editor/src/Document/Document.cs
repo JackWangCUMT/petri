@@ -557,6 +557,7 @@ namespace Petri
 			CurrentController.UpdateMenuItems();
 			Window.UndoItem.Sensitive = UndoManager.NextUndo != null;
 			Window.RedoItem.Sensitive = UndoManager.NextRedo != null;
+			Window.FindItem.Sensitive = Window.Gui == Window.EditorGui;
 		}
 
 		public override void UpdateConflicts() {
