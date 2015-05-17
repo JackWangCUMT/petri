@@ -17,6 +17,7 @@ namespace Petri
 			_window.ShowAll();
 			_window.Present();
 			_document.AssociatedWindows.Add(_window);
+			_what.GrabFocus();
 		}
 
 		public void Hide() {
@@ -86,6 +87,7 @@ namespace Petri
 			vbox.PackStart(hbox, false, false, 0);
 
 			_what = new Entry();
+			_what.Activated += OnFind;
 
 			vbox.PackStart(_what, true, true, 0);
 
@@ -96,6 +98,7 @@ namespace Petri
 				Hide();
 			};
 			find.Clicked += OnFind;
+
 			hbox.PackStart(cancel, false, false, 0);
 			hbox.PackStart(find, false, false, 0);
 			vbox.PackStart(hbox, false, false, 0);
