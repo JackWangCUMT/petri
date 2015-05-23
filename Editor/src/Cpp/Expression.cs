@@ -1,4 +1,26 @@
-﻿using System;
+﻿/*
+ * Copyright (c) 2015 Rémi Saurel
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -52,7 +74,6 @@ namespace Petri {
 				result.NeedsExpansion = !unexpanded.Equals(expanded);
 
 				return (ExpressionType)result;
-
 			}
 
 			public Operator.Name Operator {
@@ -175,6 +196,58 @@ namespace Petri {
 				return Tuple.Create(s, subexprs);
 			}
 
+			protected static bool BetterMatch(int opIndex, string s, Cpp.Operator.Op prop) {
+				Cpp.Operator.Name[] ambiguities = prop.ambiguities;
+				var subB = s.Substring(0, opIndex);
+				var subA = s.Substring(opIndex + prop.cpp.Length);
+				foreach(var ambig in ambiguities) {
+					var ambigProp = Cpp.Operator.Properties[ambig];
+					if(opIndex == 0 && (ambigProp.type == Petri.Cpp.Operator.Type.Binary || ambigProp.type == Cpp.Operator.Type.SuffixUnary)) {
+						continue;
+					}
+					else if(opIndex == s.Length - ambigProp.cpp.Length && ambigProp.type == Cpp.Operator.Type.PrefixUnary) {
+						continue;
+					}
+					if(BetterMatch(opIndex, s, ambigProp)) {
+						return true;
+					}
+					foreach(var op2 in System.Enum.GetValues(typeof(Cpp.Operator.Name)).Cast<Cpp.Operator.Name>()) {
+						if(op2 != Cpp.Operator.Name.None && Cpp.Operator.Properties[op2].implemented) {
+							if(Cpp.Operator.Properties[op2].type == Cpp.Operator.Type.Binary) {
+								int opIndex2 = subB.IndexOf(Cpp.Operator.Properties[op2].cpp);
+								int opIndex3 = subA.IndexOf(Cpp.Operator.Properties[op2].cpp);
+								if(opIndex2 == -1 && opIndex3 == -1) {
+									continue;
+								}
+								else if(Cpp.Operator.Properties[op2].precedence <= prop.precedence) {
+									return true;
+								}
+							}
+							else if(Cpp.Operator.Properties[op2].type == Cpp.Operator.Type.PrefixUnary) {
+								int opIndex2 = subA.IndexOf(Cpp.Operator.Properties[op2].cpp);
+								if(opIndex2 == -1) {
+									continue;
+								}
+								else if(Cpp.Operator.Properties[op2].precedence <= prop.precedence) {
+									return true;
+								}
+							}
+							else if(Cpp.Operator.Properties[op2].type == Cpp.Operator.Type.SuffixUnary) {
+								int opIndex2 = subB.IndexOf(Cpp.Operator.Properties[op2].cpp);
+								if(opIndex2 == -1) {
+									continue;
+								}
+								else if(Cpp.Operator.Properties[op2].precedence <= prop.precedence) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+
+				return false;
+			}
+
 			protected static Expression CreateFromPreprocessedString(string s, Entity entity, Dictionary<int, Tuple<ExprType, string>> subexprs, bool allowComma) {
 				for(int i = allowComma ? 17 : 16; i >= 0; --i) {
 					int bound;
@@ -205,33 +278,9 @@ namespace Petri {
 							}
 							// If we have found an operator closer to the end of the string (in relation to the operator associativity)
 							if(opIndex.CompareTo(index) == direction) {
-								// If the operator is ambiguous, we assume the ambiguity is that there exist a binary op with the same representation
-								// So we have to check if we have found a unary version
-								if(prop.ambiguous) {
-									if(prop.type == Petri.Cpp.Operator.Type.Binary) {
-										// 2 cases where the operator is actually unary: we can find a binary operator before, or nothing at all.
-										if(opIndex == 0)
-											continue;
-										var sub = s.Substring(0, opIndex);
-										bool found = false;
-										foreach(var op2 in System.Enum.GetValues(typeof(Cpp.Operator.Name)).Cast<Cpp.Operator.Name>()) {
-											if(op2 != Cpp.Operator.Name.None && Cpp.Operator.Properties[op2].implemented && Cpp.Operator.Properties[op2].type == Petri.Cpp.Operator.Type.Binary) {
-												int opIndex2 = sub.IndexOf(Cpp.Operator.Properties[op2].cpp);
-												if(opIndex2 == -1) {
-													continue;
-												}
-												else {
-													if(Cpp.Operator.Properties[op2].precedence <= Cpp.Operator.Properties[op].precedence) {
-														found = true;
-														break;
-													}
-												}
-											}
-										}
-										if(found) {
-											continue;
-										}
-									}
+								bool found = BetterMatch(opIndex, s, prop);
+								if(found) {
+									continue;
 								}
 								index = opIndex;
 								foundOperator = op;
@@ -244,13 +293,6 @@ namespace Petri {
 
 						if(prop.type == Petri.Cpp.Operator.Type.Binary) {
 							string e1 = s.Substring(0, index);
-
-							/*// Unary minus unfortunately has the same representation as binary minus, so we try to detect it
-							if(foundOperator == Petri.Cpp.Operator.Name.Minus && e1 == "" || e1.EndsWith(",") || e1.EndsWith("=")) {
-								foundOperator = Petri.Cpp.Operator.Name.None;
-								continue;
-							}*/
-
 							string e2 = s.Substring(index + prop.cpp.Length);
 
 							// Method call
