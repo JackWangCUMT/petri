@@ -203,12 +203,15 @@ namespace Petri {
 				foreach(var ambig in ambiguities) {
 					var ambigProp = Cpp.Operator.Properties[ambig];
 					if(opIndex == 0 && (ambigProp.type == Petri.Cpp.Operator.Type.Binary || ambigProp.type == Cpp.Operator.Type.SuffixUnary)) {
+						//Console.WriteLine(1);
 						continue;
 					}
 					else if(opIndex == s.Length - ambigProp.cpp.Length && ambigProp.type == Cpp.Operator.Type.PrefixUnary) {
+						//Console.WriteLine(2);
 						continue;
 					}
 					if(BetterMatch(opIndex, s, ambigProp)) {
+						//Console.WriteLine(3);
 						return true;
 					}
 					foreach(var op2 in System.Enum.GetValues(typeof(Cpp.Operator.Name)).Cast<Cpp.Operator.Name>()) {
@@ -216,10 +219,13 @@ namespace Petri {
 							if(Cpp.Operator.Properties[op2].type == Cpp.Operator.Type.Binary) {
 								int opIndex2 = subB.IndexOf(Cpp.Operator.Properties[op2].cpp);
 								int opIndex3 = subA.IndexOf(Cpp.Operator.Properties[op2].cpp);
+								//Console.WriteLine(op2);
 								if(opIndex2 == -1 && opIndex3 == -1) {
 									continue;
 								}
 								else if(Cpp.Operator.Properties[op2].precedence <= prop.precedence) {
+									//Console.WriteLine(4);
+									//Console.WriteLine(2 + " " + op2);
 									return true;
 								}
 							}
@@ -264,7 +270,7 @@ namespace Petri {
 					int index = bound;
 					var foundOperator = Petri.Cpp.Operator.Name.None;
 					foreach(var op in Cpp.Operator.ByPrecedence[i]) {
-						var prop = Cpp.Operator.Properties[op];
+							var prop = Cpp.Operator.Properties[op];
 						if(prop.implemented) {
 							int opIndex = s.IndexOf(prop.cpp);
 							if(opIndex == -1)
@@ -654,25 +660,25 @@ namespace Petri {
 				case Cpp.Operator.Name.FunCall:
 					throw new Exception("Already managed in FunctionInvocation class!");
 				case Cpp.Operator.Name.UnaryPlus:
-					return "+" + parenthesized;
+					return "#+" + parenthesized;
 				case Cpp.Operator.Name.UnaryMinus:
-					return "-" + parenthesized;
+					return "#-" + parenthesized;
 				case Cpp.Operator.Name.LogicalNot:
-					return "!" + parenthesized;
+					return "#!" + parenthesized;
 				case Cpp.Operator.Name.BitwiseNot:
-					return "~" + parenthesized;
+					return "#~" + parenthesized;
 				case Cpp.Operator.Name.Indirection:
-					return "*" + parenthesized;
+					return "#*" + parenthesized;
 				case Cpp.Operator.Name.AddressOf:
-					return "&" + parenthesized;
+					return "#&" + parenthesized;
 				case Cpp.Operator.Name.PreIncr:
-					return "++" + parenthesized;
+					return "#1++" + parenthesized;
 				case Cpp.Operator.Name.PreDecr:
-					return "--" + parenthesized;
+					return "#--" + parenthesized;
 				case Cpp.Operator.Name.PostIncr:
-					return parenthesized + "++";
+					return parenthesized + "#2++";
 				case Cpp.Operator.Name.PostDecr:
-					return parenthesized + "--";
+					return parenthesized + "#--";
 				}
 
 				throw new Exception("Operator not implemented!");
@@ -758,65 +764,65 @@ namespace Petri {
 				string p2 = Expression.Parenthesize(this, this.Expression2, this.Expression2.MakeUserReadable());
 				switch(this.Operator) {
 				case Cpp.Operator.Name.Mult:
-					return p1 + " * " + p2;
+					return p1 + " @* " + p2;
 				case Cpp.Operator.Name.Div:
-					return p1 + " / " + p2;
+					return p1 + " @/ " + p2;
 				case Cpp.Operator.Name.Mod:
-					return p1 + " % " + p2;
+					return p1 + " @% " + p2;
 				case Cpp.Operator.Name.Plus:
-					return p1 + " + " + p2;
+					return p1 + " @+ " + p2;
 				case Cpp.Operator.Name.Minus:
-					return p1 + " - " + p2;
+					return p1 + " @- " + p2;
 				case Cpp.Operator.Name.ShiftLeft:
-					return p1 + " << " + p2;
+					return p1 + " @<< " + p2;
 				case Cpp.Operator.Name.ShiftRight:
-					return p1 + " >> " + p2;
+					return p1 + " @>> " + p2;
 				case Cpp.Operator.Name.Less:
-					return p1 + " < " + p2;
+					return p1 + " @< " + p2;
 				case Cpp.Operator.Name.LessEqual:
-					return p1 + " <= " + p2;
+					return p1 + " @<= " + p2;
 				case Cpp.Operator.Name.Greater:
-					return p1 + " > " + p2;
+					return p1 + " @> " + p2;
 				case Cpp.Operator.Name.GreaterEqual:
-					return p1 + " >= " + p2;
+					return p1 + " @>= " + p2;
 				case Cpp.Operator.Name.Equal:
-					return p1 + " == " + p2;
+					return p1 + " @== " + p2;
 				case Cpp.Operator.Name.NotEqual:
-					return p1 + " != " + p2;
+					return p1 + " @!= " + p2;
 				case Cpp.Operator.Name.BitwiseAnd:
-					return p1 + " & " + p2;
+					return p1 + " @& " + p2;
 				case Cpp.Operator.Name.BitwiseXor:
-					return p1 + " ^ " + p2;
+					return p1 + " @^ " + p2;
 				case Cpp.Operator.Name.BitwiseOr:
-					return p1 + " | " + p2;
+					return p1 + " @| " + p2;
 				case Cpp.Operator.Name.LogicalAnd:
-					return p1 + " && " + p2;
+					return p1 + " @&& " + p2;
 				case Cpp.Operator.Name.LogicalOr:
-					return p1 + " || " + p2;
+					return p1 + " @|| " + p2;
 				case Cpp.Operator.Name.Assignment:
-					return p1 + " := " + p2;
+					return p1 + " @:= " + p2;
 				case Cpp.Operator.Name.PlusAssign:
-					return p1 + " += " + p2;
+					return p1 + " @+= " + p2;
 				case Cpp.Operator.Name.MinusAssign:
-					return p1 + " -= " + p2;
+					return p1 + " @-= " + p2;
 				case Cpp.Operator.Name.MultAssign:
-					return p1 + " *= " + p2;
+					return p1 + " @*= " + p2;
 				case Cpp.Operator.Name.DivAssign:
-					return p1 + " /= " + p2;
+					return p1 + " @/= " + p2;
 				case Cpp.Operator.Name.ModAssign:
-					return p1 + " %= " + p2;
+					return p1 + " @%= " + p2;
 				case Cpp.Operator.Name.ShiftLeftAssign:
-					return p1 + " <<= " + p2;
+					return p1 + " @<<= " + p2;
 				case Cpp.Operator.Name.ShiftRightAssign:
-					return p1 + " >>= " + p2;
+					return p1 + " @>>= " + p2;
 				case Cpp.Operator.Name.BitwiseAndAssig:
-					return p1 + " &= " + p2;
+					return p1 + " @&= " + p2;
 				case Cpp.Operator.Name.BitwiseXorAssign:
-					return p1 + " ^= " + p2;
+					return p1 + " @^= " + p2;
 				case Cpp.Operator.Name.BitwiseOrAssign:
-					return p1 + " |= " + p2;
+					return p1 + " @|= " + p2;
 				case Cpp.Operator.Name.Comma:
-					return p1 + ", " + p2;
+					return p1 + "@, " + p2;
 				}
 
 				throw new Exception("Operator not implemented!");
