@@ -46,7 +46,7 @@ namespace Petri
 			}
 
 			if(_exitPoint == null)
-				throw new Exception("No Exit node found in the saved Petri net!");
+				throw new Exception(Configuration.GetLocalized("No Exit node found in the saved Petri net!"));
 		}
 
 		public override void Serialize(XElement elem) {

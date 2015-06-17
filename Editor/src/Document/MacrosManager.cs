@@ -30,7 +30,7 @@ namespace Petri
 		public MacrosManager(Document doc) {
 			_document = doc;
 			_window = new Window(WindowType.Toplevel);
-			_window.Title = "Macros associés à " + doc.Window.Title;
+			_window.Title = Configuration.GetLocalized("Macros associés à ") + doc.Window.Title;
 
 			_window.DefaultWidth = 400;
 			_window.DefaultHeight = 300;
@@ -49,7 +49,7 @@ namespace Petri
 
 			{
 				TreeViewColumn c = new TreeViewColumn();
-				c.Title = "Nom";
+				c.Title = Configuration.GetLocalized("Nom");
 				var nameCell = new Gtk.CellRendererText();
 				c.PackStart(nameCell, true);
 				c.AddAttribute(nameCell, "text", 0);
@@ -58,7 +58,7 @@ namespace Petri
 
 			{
 				TreeViewColumn c = new TreeViewColumn();
-				c.Title = "Valeur";
+				c.Title = Configuration.GetLocalized("Valeur");
 				var valueCell = new Gtk.CellRendererText();
 				valueCell.Editable = true;
 				valueCell.Edited += (object o, EditedArgs args) => {
@@ -121,9 +121,9 @@ namespace Petri
 
 			for(int i = treePath.Length; i > 0; i--) {
 				_dataStore.GetIter(out iter, treePath[(i - 1)]);
-				MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Supprimer une macro utilisé dans le document rendra celui-ci inconsistant. À manier avec précaution !");
-				d.AddButton("Supprimer", ResponseType.Accept);
-				d.AddButton("Annuler", ResponseType.Cancel);
+				MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, Configuration.GetLocalized("Supprimer une macro utilisé dans le document rendra celui-ci inconsistant. À manier avec précaution !"));
+				d.AddButton(Configuration.GetLocalized("Supprimer"), ResponseType.Accept);
+				d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
 				if(d.Run() == (int)ResponseType.Accept) {
 					var key = _dataStore.GetValue(iter, 0) as string;
 					_document.CppMacros.Remove(key);
@@ -143,14 +143,14 @@ namespace Petri
 		}
 
 		private void OnAdd(object sender, EventArgs e) {
-			MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, "Veuillez entrer le nom de la macro (ne pourra être modifié ensuite) :");
-			d.AddButton("Ajouter la macro", ResponseType.Accept);
-			d.AddButton("Annuler", ResponseType.Cancel);
-			Entry entry = new Entry("Nom");
+			MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, Configuration.GetLocalized("Veuillez entrer le nom de la macro (ne pourra être modifié ensuite) :"));
+			d.AddButton(Configuration.GetLocalized("Ajouter la macro"), ResponseType.Accept);
+			d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
+			Entry entry = new Entry(Configuration.GetLocalized("Nom"));
 			d.VBox.PackEnd(entry, true, true, 0);
 			d.ShowAll();
 			if(d.Run() == (int)ResponseType.Accept) {
-				_document.CppMacros.Add(entry.Text, "Valeur");
+				_document.CppMacros.Add(entry.Text, Configuration.GetLocalized("Valeur"));
 
 				this.BuildList();
 			}

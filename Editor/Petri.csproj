@@ -154,5 +154,8 @@
     <EmbeddedResource Include="Resources\transition.png">
       <LogicalName>transition</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\fr.lang">
+      <LogicalName>fr.lang</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

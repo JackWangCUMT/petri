@@ -167,7 +167,7 @@ namespace Petri
 		public virtual void Save() {
 			string tempFileName = "";
 			if(Path == "") {
-				throw new Exception("Empty path!");
+				throw new Exception(Configuration.GetLocalized("Empty path!"));
 			}
 
 			var doc = new XDocument();
@@ -267,10 +267,10 @@ namespace Petri
 
 		public void SaveCppDontAsk() {
 			if(this.Settings.SourceOutputPath.Length == 0) {
-				throw new Exception("No source output path defined. Please open the Petri net with the graphical editor and generate the C++ code once.");
+				throw new Exception(Configuration.GetLocalized("No source output path defined. Please open the Petri net with the graphical editor and generate the C++ code once."));
 			}
 			else if(Conflicts(PetriNet)) {
-				throw new Exception("The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts.");
+				throw new Exception(Configuration.GetLocalized("The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts."));
 			}
 
 			var cppGen = PetriNet.GenerateCpp();
@@ -319,7 +319,7 @@ namespace Petri
 			var c = new CppCompiler(this);
 			var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
 			if(o != "") {
-				Console.WriteLine("Compilation failed with error:\n" + "Invocation du compilateur :\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath, Settings.LibPath) + "\n\nErreurs :\n" + o);
+				Console.WriteLine(Configuration.GetLocalized("Compilation failed.") + "\n" + Configuration.GetLocalized("Invocation du compilateur :") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath, Settings.LibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o);
 				return false;
 			}
 

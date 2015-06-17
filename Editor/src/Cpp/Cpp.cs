@@ -42,7 +42,7 @@ namespace Petri
 					Regex regex = new Regex(@"^[0-9]*(\.[0-9]+)?(ns|us|ms|s)");
 					var match = regex.Match(value);
 					if(!match.Success) {
-						throw new ArgumentException("Invalid timeout duration.");
+						throw new ArgumentException(Configuration.GetLocalized("Invalid timeout duration."));
 					}
 					else {
 						this._value = value;

@@ -72,7 +72,7 @@ namespace Petri {
 				}
 
 				if(!(result is ExpressionType))
-					throw new Exception("Unable to get a valid expression");
+					throw new Exception(Configuration.GetLocalized("Unable to get a valid expression"));
 
 				result.Unexpanded = unexpanded;
 				result.NeedsExpansion = !unexpanded.Equals(expanded);
@@ -157,7 +157,7 @@ namespace Petri {
 							nesting.Pop();
 						}
 						else
-							throw new Exception("Unexpected closing parenthesis found!");
+							throw new Exception(Configuration.GetLocalized("Unexpected closing parenthesis found!"));
 						break;
 					case '{':
 						nesting.Push(Tuple.Create(ExprType.Brackets, i));
@@ -171,7 +171,7 @@ namespace Petri {
 							nesting.Pop();
 						}
 						else
-							throw new Exception("Unexpected closing bracket found!");
+							throw new Exception(Configuration.GetLocalized("Unexpected closing bracket found!"));
 						break;
 					case '[':
 						nesting.Push(Tuple.Create(ExprType.Subscript, i));
@@ -185,7 +185,7 @@ namespace Petri {
 							nesting.Pop();
 						}
 						else
-							throw new Exception("Unexpected closing bracket found!");
+							throw new Exception(Configuration.GetLocalized("Unexpected closing bracket found!"));
 						break;
 					case '"':
 						// First quote
@@ -201,7 +201,7 @@ namespace Petri {
 							nesting.Pop();
 						}
 						else
-							throw new Exception(nesting.Peek().Item1 + " expected, but \" found!");
+							throw new Exception(Configuration.GetLocalized("{0} expected, but \" found!", nesting.Peek().Item1));
 						break;
 					case '\'':
 						// First quote
@@ -217,7 +217,7 @@ namespace Petri {
 							nesting.Pop();
 						}
 						else
-							throw new Exception(nesting.Peek().Item1 + " expected, but \' found!");
+							throw new Exception(Configuration.GetLocalized(" expected, but \' found!", nesting.Peek().Item1));
 						break;
 					}
 
@@ -359,7 +359,7 @@ namespace Petri {
 								})) as Cpp.Method;
 
 								if(m == null) {
-									throw new Exception("Aucune méthode ne correspond à l'expression demandée (" + GetStringFromPreprocessed(s, subexprs) + ")");
+									throw new Exception(Configuration.GetLocalized("Aucune méthode ne correspond à l'expression demandée ({0})", GetStringFromPreprocessed(s, subexprs)));
 								}
 
 								return new MethodInvocation(m, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), foundOperator == Cpp.Operator.Name.SelectionPtr, param.ToArray());
@@ -391,7 +391,7 @@ namespace Petri {
 								});
 							
 								if(f == null) {
-									throw new Exception("Aucune fonction ne correspond à l'expression demandée (" + GetStringFromPreprocessed(s, subexprs) + ")");
+									throw new Exception(Configuration.GetLocalized("Aucune fonction ne correspond à l'expression demandée ({0})", GetStringFromPreprocessed(s, subexprs)));
 								}
 							
 								return new FunctionInvocation(f, param.ToArray());
@@ -470,7 +470,7 @@ namespace Petri {
 				})) as Method;
 
 				if(m == null) {
-					throw new Exception("Aucune méthode ne correspond à l'expression demandée");
+					throw new Exception(Configuration.GetLocalized("Aucune méthode ne correspond à l'expression demandée"));
 				}
 
 				return new MethodInvocation(m, Expression.CreateFromString<Expression>(invocation[0], entity), indirection, exprList.ToArray());
@@ -522,7 +522,7 @@ namespace Petri {
 
 			public override string MakeCpp() {
 				if(DoWeCare)
-					throw new Exception("Expression vide !");
+					throw new Exception(Configuration.GetLocalized("Expression vide !"));
 				else
 					return "";
 			}
@@ -646,7 +646,7 @@ namespace Petri {
 				Regex name = new Regex(Cpp.Parser.NamePattern);
 				Match nameMatch = name.Match(expr);
 				if(!nameMatch.Success) {
-					throw new Exception("Invalid variable name specified");
+					throw new Exception(Configuration.GetLocalized("Invalid variable name specified"));
 				}
 			}
 
@@ -685,7 +685,7 @@ namespace Petri {
 				string parenthesized = Expression.Parenthesize(this, this.Expression, this.Expression.MakeCpp());
 				switch(this.Operator) {
 				case Cpp.Operator.Name.FunCall:
-					throw new Exception("Already managed in FunctionInvocation class!");
+					throw new Exception(Configuration.GetLocalized("Already managed in FunctionInvocation class!"));
 				case Cpp.Operator.Name.UnaryPlus:
 					return "+" + parenthesized;
 				case Cpp.Operator.Name.UnaryMinus:
@@ -707,14 +707,14 @@ namespace Petri {
 				case Cpp.Operator.Name.PostDecr:
 					return parenthesized + "--";
 				}
-				throw new Exception("Operator not implemented!");
+				throw new Exception(Configuration.GetLocalized("Operator not implemented!"));
 			}
 
 			public override string MakeUserReadable() {
 				string parenthesized = Expression.Parenthesize(this, this.Expression, this.Expression.MakeUserReadable());
 				switch(this.Operator) {
 				case Cpp.Operator.Name.FunCall:
-					throw new Exception("Already managed in FunctionInvocation class!");
+					throw new Exception(Configuration.GetLocalized("Already managed in FunctionInvocation class!"));
 				case Cpp.Operator.Name.UnaryPlus:
 					return "+" + parenthesized;
 				case Cpp.Operator.Name.UnaryMinus:
@@ -737,7 +737,7 @@ namespace Petri {
 					return parenthesized + "--";
 				}
 
-				throw new Exception("Operator not implemented!");
+				throw new Exception(Configuration.GetLocalized("Operator not implemented!"));
 			}
 
 			public override List<LiteralExpression> GetLiterals() {
@@ -812,7 +812,7 @@ namespace Petri {
 					return e1 + ", " + e2;
 				}
 
-				throw new Exception("Operator not implemented!");
+				throw new Exception(Configuration.GetLocalized("Operator not implemented!"));
 			}
 
 			public override string MakeUserReadable() {
@@ -881,7 +881,7 @@ namespace Petri {
 					return p1 + ", " + p2;
 				}
 
-				throw new Exception("Operator not implemented!");
+				throw new Exception(Configuration.GetLocalized("Operator not implemented!"));
 			}
 
 			public override List<LiteralExpression> GetLiterals() {
@@ -918,12 +918,12 @@ namespace Petri {
 
 			public override string MakeCpp() {
 				// TODO: tbd
-				throw new Exception("Operator not implemented!");
+				throw new Exception(Configuration.GetLocalized("Operator not implemented!"));
 			}
 
 			public override string MakeUserReadable() {
 				// TODO: tbd
-				throw new Exception("Operator not implemented!");
+				throw new Exception(Configuration.GetLocalized("Operator not implemented!"));
 			}
 
 			public override List<LiteralExpression> GetLiterals() {

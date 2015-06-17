@@ -77,6 +77,24 @@ namespace Petri
 		}
 
 		public static int Main(string[] args) {
+			/*Application.Init();
+			var tdoc = new Document("");
+			var f = new Cpp.Function(new Cpp.Type("int", Cpp.Scope.EmptyScope), Cpp.Scope.MakeFromNamespace("Bla", Cpp.Scope.EmptyScope), "a", false);
+			f.AddParam(new Cpp.Param(new Cpp.Type("int", Cpp.Scope.EmptyScope), "param"));
+			f.AddParam(new Cpp.Param(new Cpp.Type("int", Cpp.Scope.EmptyScope), "param2"));
+			tdoc.AllFunctionsList.Add(f);
+			tdoc.Restore();
+
+			string cpp = "++a+++(b*3{4*2})-4";;
+			var expr = Cpp.Expression.CreateFromString(cpp, tdoc.PetriNet);
+
+
+			Console.WriteLine(expr.MakeUserReadable());
+			Console.WriteLine(expr);
+			Console.WriteLine(expr);
+
+			return 0;*/
+
 			if(args.Length > 1) {
 				bool generate = false;
 				bool compile = false;
@@ -217,10 +235,10 @@ namespace Petri
 		}
 
 		public static void OpenDocument() {
-			var fc = new Gtk.FileChooserDialog("Ouvrir le graphe…", null,
+			var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Open Petri Net…"), null,
 				FileChooserAction.Open,
-				new object[] {"Annuler", ResponseType.Cancel,
-					"Ouvrir", ResponseType.Accept
+				new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+					Configuration.GetLocalized("Open"), ResponseType.Accept
 				});
 
 			var filter = new FileFilter();

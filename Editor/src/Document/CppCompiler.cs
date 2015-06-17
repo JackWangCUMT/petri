@@ -35,7 +35,7 @@ namespace Petri
 			string cd = System.IO.Directory.GetCurrentDirectory();
 			System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(_document.Path).FullName);
 			if(!System.IO.File.Exists(source)) {
-				return "Erreur : le fichier \"" + source + "\" n'existe pas. Veuillez générer le code avant de compiler.";
+				return Configuration.GetLocalized("Erreur : le fichier \"{0}\" n'existe pas. Veuillez générer le code avant de compiler.", source);
 			}
 
 			System.IO.File.SetLastWriteTime(source, DateTime.Now);
@@ -51,7 +51,7 @@ namespace Petri
 				p.StartInfo.Arguments = s;
 			}
 			else {
-				return "Erreur : l'invocation du compilateur est trop longue (" + s.Length.ToString() + " caractères. Essayez de supprimer des chemins d'inclusion récursifs.";
+				return Configuration.GetLocalized("Erreur : l'invocation du compilateur est trop longue ({0}) caractères. Essayez de supprimer des chemins d'inclusion récursifs.", s.Length);
 			}
 			p.Start();
 
@@ -72,7 +72,7 @@ namespace Petri
 			_document = doc;
 
 			_window = new Window(WindowType.Toplevel);
-			_window.Title = "Sortie de la compilation de " + doc.Window.Title;
+			_window.Title = Configuration.GetLocalized("Sortie de la compilation de {0}", doc.Window.Title);
 
 			_window.DefaultWidth = 600;
 			_window.DefaultHeight = 400;

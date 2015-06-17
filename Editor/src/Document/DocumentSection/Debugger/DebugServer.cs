@@ -40,7 +40,7 @@ namespace Petri
 
 		~DebugServer() {
 			if(_petriRunning || _sessionRunning) {
-				throw new Exception("Debugger still running!");
+				throw new Exception(Configuration.GetLocalized("Debugger still running!"));
 			}
 		}
 
@@ -72,8 +72,8 @@ namespace Petri
 					}
 					catch(Exception e) {
 						GLib.Timeout.Add(0, () => {
-							MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
-							d.AddButton("Annuler", ResponseType.Cancel);
+							MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Une erreur est survenue dans le débuggueur : ") + e.Message));
+							d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
 							d.Run();
 							d.Destroy();
 
@@ -153,8 +153,8 @@ namespace Petri
 			}
 			catch(Exception e) {
 				GLib.Timeout.Add(0, () => {
-					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
-					d.AddButton("Annuler", ResponseType.Cancel);
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Une erreur est survenue dans le débuggueur : ") + e.Message));
+					d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
 					d.Run();
 					d.Destroy();
 
@@ -173,8 +173,8 @@ namespace Petri
 			}
 			catch(Exception e) {
 				GLib.Timeout.Add(0, () => {
-					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
-					d.AddButton("Annuler", ResponseType.Cancel);
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Une erreur est survenue dans le débuggueur : ") + e.Message));
+					d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
 					d.Run();
 					d.Destroy();
 
@@ -187,15 +187,15 @@ namespace Petri
 
 		public void ReloadPetri() {
 			GLib.Timeout.Add(0, () => {
-				_document.Window.DebugGui.Status = "Rechargement du réseau de pétri…";
+				_document.Window.DebugGui.Status = Configuration.GetLocalized("Rechargement du réseau de pétri…");
 				return false;
 			});
 			GLib.Timeout.Add(1, () => {
 				this.StopPetri();
 				if(!_document.Compile(true)) {
 					GLib.Timeout.Add(0, () => {
-						MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("La compilation a échoué."));
-						d.AddButton("Annuler", ResponseType.Cancel);
+						MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("La compilation a échoué.")));
+						d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
 						d.Run();
 						d.Destroy();
 
@@ -208,8 +208,8 @@ namespace Petri
 					}
 					catch(Exception e) {
 						GLib.Timeout.Add(0, () => {
-							MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
-							d.AddButton("Annuler", ResponseType.Cancel);
+							MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Une erreur est survenue dans le débuggueur : ") + e.Message));
+							d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
 							d.Run();
 							d.Destroy();
 
@@ -242,7 +242,7 @@ namespace Petri
 				var literals = expression.GetLiterals();
 				foreach(var l in literals) {
 					if(l is Cpp.VariableExpression) {
-						throw new Exception("Impossible d'évaluer une variable du réseau de pétri tant que celui-ci n'est pas lancé.");
+						throw new Exception(Configuration.GetLocalized("Impossible d'évaluer une variable du réseau de pétri tant que celui-ci n'est pas lancé."));
 					}
 				}
 			}
@@ -281,7 +281,7 @@ namespace Petri
 			var c = new CppCompiler(_document);
 			var o = c.CompileSource(sourceName, libName);
 			if(o != "") {
-				throw new Exception("Erreur de compilation : " + o);
+				throw new Exception(Configuration.GetLocalized("Erreur de compilation : ") + o);
 			}
 			else {
 				try {
@@ -303,21 +303,21 @@ namespace Petri
 				var ehlo = this.ReceiveObject();
 				if(ehlo != null && ehlo["type"].ToString() == "ehlo") {
 					GLib.Timeout.Add(0, () => {
-						_document.Window.DebugGui.Status = "Connecté avec succès.";
+						_document.Window.DebugGui.Status = Configuration.GetLocalized("Connecté avec succès.");
 						return false;
 					});
 					_document.Window.DebugGui.UpdateToolbar();
 					return;
 				}
 				else if(ehlo != null && ehlo["type"].ToString() == "error") {
-					throw new Exception("An error was returned by the debugger: " + ehlo["payload"]);
+					throw new Exception(Configuration.GetLocalized("An error was returned by the debugger: ") + ehlo["payload"]);
 				}
-				throw new Exception("Invalid message received from debugger (expected ehlo)");
+				throw new Exception(Configuration.GetLocalized("Invalid message received from debugger (expected ehlo)"));
 			}
 			catch(Exception e) {
 				GLib.Timeout.Add(0, () => {
-					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
-					d.AddButton("Annuler", ResponseType.Cancel);
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Une erreur est survenue dans le débuggueur : ") + e.Message));
+					d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
 					d.Run();
 					d.Destroy();
 
@@ -336,8 +336,8 @@ namespace Petri
 				this.Detach();
 
 				GLib.Timeout.Add(0, () => {
-					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Impossible de se connecter au serveur : " + e.Message));
-					d.AddButton("Annuler", ResponseType.Cancel);
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Impossible de se connecter au serveur : ") + e.Message));
+					d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
 					d.Run();
 					d.Destroy();
 
@@ -360,7 +360,7 @@ namespace Petri
 							_document.Window.DebugGui.UpdateToolbar();
 							this.UpdateBreakpoints();
 							GLib.Timeout.Add(0, () => {
-								_document.Window.DebugGui.Status = "Exécution en cours.";
+								_document.Window.DebugGui.Status = Configuration.GetLocalized("Exécution en cours.");
 								return false;
 							});
 						}
@@ -372,14 +372,14 @@ namespace Petri
 							}
 							_document.Window.DebugGui.View.Redraw();
 							GLib.Timeout.Add(0, () => {
-								_document.Window.DebugGui.Status = "Exécution terminée.";
+								_document.Window.DebugGui.Status = Configuration.GetLocalized("Exécution terminée.");
 								return false;
 							});
 						}
 						else if(msg["payload"].ToString() == "reload") {
 							_document.Window.DebugGui.UpdateToolbar();
 							GLib.Timeout.Add(0, () => {
-								_document.Window.DebugGui.Status = "Le réseau de Pétri a été rechargé avec succès.";
+								_document.Window.DebugGui.Status = Configuration.GetLocalized("Le réseau de Pétri a été rechargé avec succès.");
 								return false;
 							});
 						}
@@ -387,7 +387,7 @@ namespace Petri
 							_pause = true;
 							_document.Window.DebugGui.UpdateToolbar();
 							GLib.Timeout.Add(0, () => {
-								_document.Window.DebugGui.Status = "En pause.";
+								_document.Window.DebugGui.Status = Configuration.GetLocalized("En pause.");
 								return false;
 							});
 						}
@@ -395,15 +395,15 @@ namespace Petri
 							_pause = false;
 							_document.Window.DebugGui.UpdateToolbar();
 							GLib.Timeout.Add(0, () => {
-								_document.Window.DebugGui.Status = "Exécution cours.";
+								_document.Window.DebugGui.Status = Configuration.GetLocalized("Exécution cours.");
 								return false;
 							});
 						}
 					}
 					else if(msg["type"].ToString() == "error") {
 						GLib.Timeout.Add(0, () => {
-							MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + msg["payload"].ToString()));
-							d.AddButton("Annuler", ResponseType.Cancel);
+							MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Une erreur est survenue dans le débuggueur : ") + msg["payload"].ToString()));
+							d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
 							d.Run();
 							d.Destroy();
 
@@ -420,7 +420,7 @@ namespace Petri
 							_petriRunning = false;
 							_document.Window.DebugGui.UpdateToolbar();
 							GLib.Timeout.Add(0, () => {
-								_document.Window.DebugGui.Status = "Déconnecté.";
+								_document.Window.DebugGui.Status = Configuration.GetLocalized("Déconnecté.");
 								return false;
 							});
 						}
@@ -428,7 +428,7 @@ namespace Petri
 							_sessionRunning = false;
 							_petriRunning = false;
 
-							throw new Exception("Remote debugger requested a session termination for reason: " + msg["payload"].ToString());
+							throw new Exception(Configuration.GetLocalized("Remote debugger requested a session termination for reason: ") + msg["payload"].ToString());
 						}
 					}
 					else if(msg["type"].ToString() == "states") {
@@ -440,7 +440,7 @@ namespace Petri
 								var id = UInt64.Parse(s["id"].ToString());
 								var e = _document.EntityFromID(id);
 								if(e == null || !(e is State)) {
-									throw new Exception("Entity sent from runtime doesn't exist on our side! (id: " + id + ")");
+									throw new Exception(Configuration.GetLocalized("Entity sent from runtime doesn't exist on our side! (id: {0})", id));
 								}
 								_document.DebugController.ActiveStates[e as State] = int.Parse(s["count"].ToString());
 							}
@@ -460,13 +460,13 @@ namespace Petri
 					}
 				}
 				if(_sessionRunning) {
-					throw new Exception("Socket unexpectedly disconnected");
+					throw new Exception(Configuration.GetLocalized("Socket unexpectedly disconnected"));
 				}
 			}
 			catch(Exception e) {
 				GLib.Timeout.Add(0, () => {
-					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString("Une erreur est survenue dans le débuggueur : " + e.Message));
-					d.AddButton("Annuler", ResponseType.Cancel);
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Une erreur est survenue dans le débuggueur : ") + e.Message));
+					d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
 					d.Run();
 					d.Destroy();
 
@@ -491,7 +491,7 @@ namespace Petri
 					return JObject.Parse(val);
 
 				if(++count > 5) {
-					throw new Exception("Remote debugger isn't available anymore!");
+					throw new Exception(Configuration.GetLocalized("Remote debugger isn't available anymore!"));
 				}
 				Thread.Sleep(1);
 			}

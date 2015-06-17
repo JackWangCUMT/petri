@@ -29,7 +29,7 @@ namespace Petri
 		public class FunctionInvocation : Expression {
 			public FunctionInvocation(Function function, params Expression[] arguments) : base(Cpp.Operator.Name.FunCall) {
 				if(arguments.Length != function.Parameters.Count) {
-					throw new Exception("Invalid arguments count");
+					throw new Exception(Configuration.GetLocalized("Invalid arguments count"));
 				}
 
 				this.Arguments = new List<Expression>();
@@ -145,7 +145,7 @@ namespace Petri
 			}
 
 			public override string MakeCpp() {
-				throw new InvalidOperationException("La fonction est en conflit");
+				throw new InvalidOperationException(Configuration.GetLocalized("La fonction est en conflit"));
 			}
 
 			public override string MakeUserReadable() {

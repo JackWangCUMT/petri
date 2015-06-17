@@ -24,6 +24,9 @@ using System;
 using System.Configuration;
 using System.Text;
 using System.IO;
+using System.Collections.Generic;
+using System.Xml.Linq;
+using System.Reflection;
 
 namespace Petri
 {
@@ -46,7 +49,7 @@ namespace Petri
 			if(Configuration._instance == null) {
 				try {
 					switch(Environment.OSVersion.Platform) {
-						case PlatformID.Unix:
+					case PlatformID.Unix:
 							if (Directory.Exists("/Applications")
 								& Directory.Exists("/System")
 								& Directory.Exists("/Users")
@@ -55,7 +58,7 @@ namespace Petri
 							else
 								Configuration._platform = Platform.Linux;
 							break;
-						case PlatformID.MacOSX:
+					case PlatformID.MacOSX:
 							Configuration._platform = Platform.Mac;
 							break;
 						default:
@@ -99,6 +102,30 @@ namespace Petri
 			if(Configuration._instance != null) {
 				Configuration._config.Save(ConfigurationSaveMode.Full, true);
 			}
+		}
+
+		public static string Language {
+			get {
+				return System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+			}
+		}
+
+		public static string GetLocalized(string value) {
+			if(Configuration._localizedStrings.Count == 0) {
+				Configuration.Get().LoadLanguage();
+			}
+			if(!Configuration._localizedStrings.ContainsKey(value)) {
+				Console.WriteLine("No localization found for locale " + Language + " and key \"" + value + "\"");
+				return value;
+				//return GetLocalized("__noloc__");
+			}
+			else {
+				return Configuration._localizedStrings[value];
+			}
+		}
+
+		public static string GetLocalized(string value, params object[] args) {
+			return string.Format(GetLocalized(value), args);
 		}
 
 		[ConfigurationProperty("savePath",
@@ -197,11 +224,46 @@ namespace Petri
 			return Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
 		}
 
-					
+		private void LoadLanguage() {
+			string resource;
+			string noloc;
+			if(Language == "fr") {
+				resource = "fr.lang";
+				noloc = "<Traduction non disponible>";
+			}
+			else if(Language == "en") {
+				resource = "en.lang";
+				noloc = "<Localization unavailable>";
+			}
+			else {
+				Console.WriteLine("Language \"" + Language + "\" not supported, defaulting to English locale.");
+				resource = "en.lang";
+				noloc = "<Localization unavailable>";
+			}
+
+			_localizedStrings.Add("__noloc__", noloc);
+
+			Assembly assembly = Assembly.GetExecutingAssembly();
+			Stream objStream = assembly.GetManifestResourceStream(resource);
+			var document = XDocument.Load(new StreamReader(objStream));
+			var root = document.FirstNode as XElement;
+			string key = null;
+			foreach(var element in root.Descendants()) {
+				if(key == null) {
+					key = element.Value;
+				}
+				else {
+					_localizedStrings.Add(key, element.Value);
+					key = null;
+				}
+			}
+		}
+
 		public Configuration() {}
 		private static System.Configuration.Configuration _config = null;
 		private static Configuration _instance = null;
 		private static Platform _platform;
+		private static Dictionary<string, string> _localizedStrings = new Dictionary<string, string>();
 	}
 }
 

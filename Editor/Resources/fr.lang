@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Language>
+<Key>Open Petri Net…</Key>
+<Value>Ouvrir le réseau de Pétri…</Value>
+<Key>Cancel</Key>
+<Value>Annuler</Value>
+<Key>Open</Key>
+<Value>Ouvrir</Value>
+<Key>Invalid timeout duration.</Key>
+<Value>Durée de timeout invalide.</Value>
+</Language>

@@ -30,7 +30,7 @@ namespace Petri
 		public HeadersManager(Document doc) {
 			_document = doc;
 			_window = new Window(WindowType.Toplevel);
-			_window.Title = "Headers associés à " + doc.Window.Title;
+			_window.Title = Configuration.GetLocalized("Headers associés à ") + doc.Window.Title;
 
 			_window.DefaultWidth = 300;
 			_window.DefaultHeight = 300;
@@ -47,7 +47,7 @@ namespace Petri
 
 			_table = new TreeView();
 			TreeViewColumn c = new TreeViewColumn();
-			c.Title = "Fichier";
+			c.Title = Configuration.GetLocalized("Fichier");
 			var fileCell = new Gtk.CellRendererText();
 			c.PackStart(fileCell, true);
 			c.AddAttribute(fileCell, "text", 0);
@@ -67,7 +67,7 @@ namespace Petri
 			hbox.PackStart(minus, false, false, 0);
 			vbox.PackStart(hbox, false, false, 0);
 
-			var OK = new Button(new Label("OK"));
+			var OK = new Button(new Label(Configuration.GetLocalized("OK")));
 			hbox.PackEnd(OK, false, false, 0);
 			OK.Clicked += (sender, e) => _window.Hide();
 
@@ -115,12 +115,12 @@ namespace Petri
 		}
 
 		private void OnAdd(object sender, EventArgs e) {
-			var fc = new Gtk.FileChooserDialog("Choisissez le fichier contenant les déclarations C++…", _window,
+			var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Choisissez le fichier contenant les déclarations C++…"), _window,
 				FileChooserAction.Open,
-				new object[]{"Annuler",ResponseType.Cancel,
-					"Ouvrir",ResponseType.Accept});
+				new object[]{Configuration.GetLocalized("Annuler"), ResponseType.Cancel,
+					Configuration.GetLocalized("Ouvrir"), ResponseType.Accept});
 
-			CheckButton b = new CheckButton("Chemin relatif");
+			CheckButton b = new CheckButton(Configuration.GetLocalized("Chemin relatif"));
 			b.Active = true;
 			fc.ActionArea.PackEnd(b);
 			b.Show();

@@ -1,5 +1,4 @@
-﻿Parenthèses A && B && C
-génération invocation compilateur
+﻿génération invocation compilateur
 
 Playground
 
@@ -8,3 +7,8 @@ Compilation du code : formattage des erreurs de compilation
 Actions/Transitions : ajustement des dimensions à la longueur du titre
 
 Scénario d'exécution
+
+Languages binding (Java, C, C#)
+GUI translations
+Status bar when switching back to the application and there is still 0 conflicts
+Navigation bar should always stay visible in petri nets

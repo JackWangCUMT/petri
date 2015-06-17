@@ -41,7 +41,7 @@ namespace Petri
 				Entry ee = CreateWidget<Entry>(true, 0, ((Action)selected).Function.MakeUserReadable());
 				ee.IsEditable = false;
 
-				var active = CreateWidget<CheckButton>(false, 0, "Point d'arrêt sur l'état");
+				var active = CreateWidget<CheckButton>(false, 0, Configuration.GetLocalized("Point d'arrêt sur l'état"));
 				active.Active = _document.DebugController.Breakpoints.Contains((Action)selected);
 				active.Toggled += (sender, e) => {
 					if(_document.DebugController.Breakpoints.Contains((Action)selected)) {
@@ -55,12 +55,12 @@ namespace Petri
 				};
 			}
 
-			CreateLabel(0, "Évaluer l'expression :");
-			Entry entry = CreateWidget<Entry>(true, 0, "Expression");
-			Evaluate = CreateWidget<Button>(false, 0, "Évaluer");
+			CreateLabel(0, Configuration.GetLocalized("Évaluer l'expression :"));
+			Entry entry = CreateWidget<Entry>(true, 0, Configuration.GetLocalized("Expression"));
+			Evaluate = CreateWidget<Button>(false, 0, Configuration.GetLocalized("Évaluer"));
 			Evaluate.Sensitive = _document.DebugController != null &&_document.DebugController.Server.SessionRunning && (!_document.DebugController.Server.PetriRunning || _document.DebugController.Server.Pause);
 
-			CreateLabel(0, "Résultat :");
+			CreateLabel(0, Configuration.GetLocalized("Résultat :"));
 
 			_buf = new TextBuffer(new TextTagTable());
 			_buf.Text = "";

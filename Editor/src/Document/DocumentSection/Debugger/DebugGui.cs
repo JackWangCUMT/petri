@@ -43,15 +43,15 @@ namespace Petri
 			IconTheme.AddBuiltinIcon("Fix", buf.Width, buf);
 			_reload = new ToolButton("Fix");
 			_reload.IconName = "Fix";
-			_reload.Label = "Fix";
+			_reload.Label = Configuration.GetLocalized("Fix");
 			_exit = new ToolButton(Stock.Quit);
-			_exit.Label = "Terminer la session";
+			_exit.Label = Configuration.GetLocalized("Terminer la session");
 			_switchToEditor = new ToolButton(Stock.Edit);
-			_switchToEditor.Label = "Éditeur";
+			_switchToEditor.Label = Configuration.GetLocalized("Éditeur");
 			_zoomIn = new ToolButton(Stock.ZoomIn);
-			_zoomIn.Label = "Agrandir";
+			_zoomIn.Label = Configuration.GetLocalized("Agrandir");
 			_zoomOut = new ToolButton(Stock.ZoomOut);
-			_zoomOut.Label = "Réduire";
+			_zoomOut.Label = Configuration.GetLocalized("Réduire");
 
 			_attachDetach.Clicked += this.OnClick;
 			_startStopPetri.Clicked += this.OnClick;
@@ -155,43 +155,43 @@ namespace Petri
 					_reload.Sensitive = true;
 					_exit.Sensitive = true;
 
-					_attachDetach.Label = "Déconnexion";
+					_attachDetach.Label = Configuration.GetLocalized("Déconnexion");
 
 					if(_document.DebugController.Server.PetriRunning) {
-						_startStopPetri.Label = "Stopper";
+						_startStopPetri.Label = Configuration.GetLocalized("Stopper");
 						_startStopPetri.StockId = Stock.Stop;
 						_playPause.Sensitive = true;
 						_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
 						if(_document.DebugController.Server.Pause) {
-							_playPause.Label = "Continuer";
+							_playPause.Label = Configuration.GetLocalized("Continuer");
 							_playPause.StockId = Stock.MediaPlay;
 							_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
 						}
 						else {
-							_playPause.Label = "Pause";
+							_playPause.Label = Configuration.GetLocalized("Pause");
 							_playPause.StockId = Stock.MediaPause;
 							_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
 						}
 					}
 					else {
-						_startStopPetri.Label = "Exécuter";
+						_startStopPetri.Label = Configuration.GetLocalized("Exécuter");
 						_startStopPetri.StockId = Stock.MediaPlay;
 						_playPause.Sensitive = false;
 						_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
-						_playPause.Label = "Pause";
+						_playPause.Label = Configuration.GetLocalized("Pause");
 						_playPause.StockId = Stock.MediaPause;
 					}
 				}
 				else {
-					_attachDetach.Label = "Connexion";
-					_startStopPetri.Label = "Exécuter";
+					_attachDetach.Label = Configuration.GetLocalized("Connexion");
+					_startStopPetri.Label = Configuration.GetLocalized("Exécuter");
 					_startStopPetri.StockId = Stock.MediaPlay;
 					_startStopPetri.Sensitive = false;
 					_reload.Sensitive = false;
 					_playPause.Sensitive = false;
 					_exit.Sensitive = false;
 					_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
-					_playPause.Label = "Pause";
+					_playPause.Label = Configuration.GetLocalized("Pause");
 					_playPause.StockId = Stock.MediaPause;
 				}
 
