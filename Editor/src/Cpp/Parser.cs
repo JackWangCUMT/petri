@@ -197,6 +197,12 @@ namespace Petri
 				}
 			}
 
+			public static string NumberPattern {
+				get {
+					return @"(?<number>([0-9]+\.?)|(\.[0-9]+)|([0-9]+\.[0-9]+))";
+				}
+			}
+
 			public static string TemplatePattern {
 				get {
 					// Matches C++ template specialization of a type (which may contain (), <>, :, letters, numbers, white spaces…

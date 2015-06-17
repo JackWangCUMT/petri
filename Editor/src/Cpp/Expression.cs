@@ -30,7 +30,7 @@ namespace Petri {
 	{
 		public abstract class Expression
 		{
-			public enum ExprType {Parenthesis, Invocation, Subscript, Template, Quote, DoubleQuote, Brackets};
+			public enum ExprType {Parenthesis, Invocation, Subscript, Template, Quote, DoubleQuote, Brackets, Number, ID};
 
 			protected Expression(Operator.Name op) {
 				this.Operator = op;
@@ -43,6 +43,10 @@ namespace Petri {
 			public abstract string MakeUserReadable();
 
 			public abstract List<LiteralExpression> GetLiterals();
+
+			public static Expression CreateFromString(string s, Entity entity, bool allowComma = true) {
+				return CreateFromString<Expression>(s, entity, allowComma);
+			}
 
 			public static ExpressionType CreateFromString<ExpressionType>(string s, Entity entity, bool allowComma = true) where ExpressionType : Expression {
 				string unexpanded = s;
@@ -101,26 +105,49 @@ namespace Petri {
 				return expression;
 			}
 
-			protected static Tuple<string, Dictionary<int, Tuple<ExprType, string>>> Preprocess(string s) {
+			protected static Tuple<string, List<Tuple<ExprType, string>>> Preprocess(string s) {
 				s = Parser.RemoveParenthesis(s.Trim()).Trim();
-				var subexprs = new Dictionary<int, Tuple<ExprType, string>>();
+				var subexprs = new List<Tuple<ExprType, string>>();
+
+				var findName = new Regex("(" + Parser.NamePattern + ")?.*");
+				var findNumber = new Regex("(" + Parser.NumberPattern + ")?.*");
 
 				var nesting = new Stack<Tuple<ExprType, int>>();
 				for(int i = 0; i < s.Length; ++i) {
+					var m1 = findName.Match(s.Substring(i));
+					if(m1.Success) {
+						var id = m1.Groups["name"].Value;
+						if(id.Length > 0) {
+							subexprs.Add(Tuple.Create(ExprType.ID, id));
+							int oldSize = s.Length;
+							s = s.Remove(i, id.Length).Insert(i, "@" + (subexprs.Count - 1).ToString() + "@");
+							i += s.Length - oldSize;
+						}
+					}
+					var m2 = findNumber.Match(s.Substring(i));
+					if(m2.Success) {
+						var num = m2.Groups["number"].Value;
+						if(num.Length > 0) {
+							subexprs.Add(Tuple.Create(ExprType.Number, num));
+							int oldSize = s.Length;
+							s = s.Remove(i, num.Length).Insert(i, "@" + (subexprs.Count - 1).ToString() + "@");
+							i += s.Length - oldSize;
+						}
+					}
 					switch(s[i]) {
 					case '(':
 						bool special = false;
-						if(i > 0 && (char.IsLetterOrDigit(s[i - 1]) || s[i - 1] == '_')) {
-							// It is a function call
+						if(i > 0 && s[i - 1] == '@') {
+							// It is a call operator invocation
 							special = true;
 						}
 						nesting.Push(Tuple.Create(special ? ExprType.Invocation : ExprType.Parenthesis, i));
 						break;
 					case ')':
 						if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Invocation || nesting.Peek().Item1 == ExprType.Parenthesis) {
-							subexprs.Add(subexprs.Count, Tuple.Create(nesting.Peek().Item1, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
+							subexprs.Add(Tuple.Create(nesting.Peek().Item1, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
 							int oldSize = s.Length;
-							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + subexprs.Count.ToString() + "@" + (nesting.Peek().Item1 == ExprType.Invocation ? "()" : ""));
+							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + (subexprs.Count - 1).ToString() + "@" + (nesting.Peek().Item1 == ExprType.Invocation ? "()" : ""));
 							i += s.Length - oldSize;
 							nesting.Pop();
 						}
@@ -132,9 +159,9 @@ namespace Petri {
 						break;
 					case '}':
 						if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Brackets) {
-							subexprs.Add(subexprs.Count, Tuple.Create(ExprType.Brackets, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
+							subexprs.Add(Tuple.Create(ExprType.Brackets, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
 							int oldSize = s.Length;
-							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + subexprs.Count.ToString() + "@");
+							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + (subexprs.Count - 1).ToString() + "@");
 							i += s.Length - oldSize;
 							nesting.Pop();
 						}
@@ -146,9 +173,9 @@ namespace Petri {
 						break;
 					case ']':
 						if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Subscript) {
-							subexprs.Add(subexprs.Count, Tuple.Create(nesting.Peek().Item1, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
+							subexprs.Add(Tuple.Create(nesting.Peek().Item1, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
 							int oldSize = s.Length;
-							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + subexprs.Count.ToString() + "@");
+							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + (subexprs.Count - 1).ToString() + "@");
 							i += s.Length - oldSize;
 							nesting.Pop();
 						}
@@ -162,9 +189,9 @@ namespace Petri {
 						}
 						// Second quote
 						else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.DoubleQuote && s[i - 1] != '\\') {
-							subexprs.Add(subexprs.Count, Tuple.Create(ExprType.DoubleQuote, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
+							subexprs.Add(Tuple.Create(ExprType.DoubleQuote, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
 							int oldSize = s.Length;
-							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + subexprs.Count.ToString() + "@");
+							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + (subexprs.Count - 1).ToString() + "@");
 							i += s.Length - oldSize;
 							nesting.Pop();
 						}
@@ -178,9 +205,9 @@ namespace Petri {
 						}
 						// Second quote
 						else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] != '\\') {
-							subexprs.Add(subexprs.Count, Tuple.Create(ExprType.Quote, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
+							subexprs.Add(Tuple.Create(ExprType.Quote, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
 							int oldSize = s.Length;
-							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + subexprs.Count.ToString() + "@");
+							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + (subexprs.Count - 1).ToString() + "@");
 							i += s.Length - oldSize;
 							nesting.Pop();
 						}
@@ -190,71 +217,75 @@ namespace Petri {
 					}
 				}
 
-				s = s.Replace("\t", " ");
-				s = s.Replace("  ", " ");
+				var newExprs = new List<Tuple<ExprType, string>>();
+				foreach(var name in Cpp.Operator.Lex) {
+					s = s.Replace(Cpp.Operator.Properties[name].cpp, Cpp.Operator.Properties[name].lexed);
+				}
+
+				foreach(var expr in subexprs) {
+					string val = expr.Item2;
+
+					switch(expr.Item1) {
+					case ExprType.Brackets:
+					case ExprType.Parenthesis:
+					case ExprType.Subscript:
+					case ExprType.Invocation:
+					case ExprType.Template:
+						foreach(var name in Cpp.Operator.Lex) {
+							val = val.Replace(Cpp.Operator.Properties[name].cpp, Cpp.Operator.Properties[name].lexed);
+						}
+						break;
+					}
+
+					newExprs.Add(Tuple.Create(expr.Item1, val));
+				}
+				subexprs.Clear();
+
+				foreach(var expr in newExprs) {
+					subexprs.Add(Tuple.Create(expr.Item1, expr.Item2.Replace("\t", "").Replace(" ", "")));
+				}
+
+				s = s.Replace("\t", "");
+				s = s.Replace(" ", "");
 
 				return Tuple.Create(s, subexprs);
 			}
 
-			protected static bool BetterMatch(int opIndex, string s, Cpp.Operator.Op prop) {
-				Cpp.Operator.Name[] ambiguities = prop.ambiguities;
-				var subB = s.Substring(0, opIndex);
-				var subA = s.Substring(opIndex + prop.cpp.Length);
-				foreach(var ambig in ambiguities) {
-					var ambigProp = Cpp.Operator.Properties[ambig];
-					if(opIndex == 0 && (ambigProp.type == Petri.Cpp.Operator.Type.Binary || ambigProp.type == Cpp.Operator.Type.SuffixUnary)) {
-						//Console.WriteLine(1);
-						continue;
+			protected static bool Match(int opIndex, string s, Cpp.Operator.Op prop) {
+				if(prop.type == Cpp.Operator.Type.Binary) {
+					if(opIndex == 0 || (s[opIndex - 1] != '@' && s[opIndex - 1] != '#') || opIndex + prop.lexed.Length == s.Length || (s[opIndex + prop.lexed.Length] != '@' && s[opIndex + prop.lexed.Length] != '#')) {
+						return false;
 					}
-					else if(opIndex == s.Length - ambigProp.cpp.Length && ambigProp.type == Cpp.Operator.Type.PrefixUnary) {
-						//Console.WriteLine(2);
-						continue;
+				}
+				else if(prop.type == Cpp.Operator.Type.PrefixUnary) {
+					if((opIndex != 0 && s[opIndex - 1] == '@') || opIndex + prop.lexed.Length == s.Length || (s[opIndex + prop.lexed.Length] != '@' && s[opIndex + prop.lexed.Length] != '#')) {
+						return false;
 					}
-					if(BetterMatch(opIndex, s, ambigProp)) {
-						//Console.WriteLine(3);
-						return true;
-					}
-					foreach(var op2 in System.Enum.GetValues(typeof(Cpp.Operator.Name)).Cast<Cpp.Operator.Name>()) {
-						if(op2 != Cpp.Operator.Name.None && Cpp.Operator.Properties[op2].implemented) {
-							if(Cpp.Operator.Properties[op2].type == Cpp.Operator.Type.Binary) {
-								int opIndex2 = subB.IndexOf(Cpp.Operator.Properties[op2].cpp);
-								int opIndex3 = subA.IndexOf(Cpp.Operator.Properties[op2].cpp);
-								//Console.WriteLine(op2);
-								if(opIndex2 == -1 && opIndex3 == -1) {
-									continue;
-								}
-								else if(Cpp.Operator.Properties[op2].precedence <= prop.precedence) {
-									//Console.WriteLine(4);
-									//Console.WriteLine(2 + " " + op2);
-									return true;
-								}
-							}
-							else if(Cpp.Operator.Properties[op2].type == Cpp.Operator.Type.PrefixUnary) {
-								int opIndex2 = subA.IndexOf(Cpp.Operator.Properties[op2].cpp);
-								if(opIndex2 == -1) {
-									continue;
-								}
-								else if(Cpp.Operator.Properties[op2].precedence <= prop.precedence) {
-									return true;
-								}
-							}
-							else if(Cpp.Operator.Properties[op2].type == Cpp.Operator.Type.SuffixUnary) {
-								int opIndex2 = subB.IndexOf(Cpp.Operator.Properties[op2].cpp);
-								if(opIndex2 == -1) {
-									continue;
-								}
-								else if(Cpp.Operator.Properties[op2].precedence <= prop.precedence) {
-									return true;
-								}
-							}
-						}
+				}
+				else if(prop.type == Cpp.Operator.Type.SuffixUnary) {
+					if(opIndex == 0 || (s[opIndex - 1] != '@' && s[opIndex - 1] != '#') || (opIndex + prop.lexed.Length != s.Length && s[opIndex + prop.lexed.Length] == '@')) {
+						return false;
 					}
 				}
 
-				return false;
+				return true;
 			}
 
-			protected static Expression CreateFromPreprocessedString(string s, Entity entity, Dictionary<int, Tuple<ExprType, string>> subexprs, bool allowComma) {
+			protected static Expression CreateFromPreprocessedString(string s, Entity entity, List<Tuple<ExprType, string>> subexprs, bool allowComma) {
+				if(Regex.Match(s, "^@[0-9]+@$").Success) {
+					int nb = int.Parse(s.Substring(1, s.Length - 2));
+					switch(subexprs[nb].Item1) {
+					case ExprType.Parenthesis:
+					case ExprType.Invocation:
+					case ExprType.Template:
+					case ExprType.Subscript:
+						s = Expression.GetStringFromPreprocessed(s, subexprs);
+						var tup = Expression.Preprocess(s);
+						s = tup.Item1;
+						subexprs = tup.Item2;
+						break;
+					}
+				}
 				for(int i = allowComma ? 17 : 16; i >= 0; --i) {
 					int bound;
 					int direction;
@@ -270,26 +301,26 @@ namespace Petri {
 					int index = bound;
 					var foundOperator = Petri.Cpp.Operator.Name.None;
 					foreach(var op in Cpp.Operator.ByPrecedence[i]) {
-							var prop = Cpp.Operator.Properties[op];
+						var prop = Cpp.Operator.Properties[op];
 						if(prop.implemented) {
-							int opIndex = s.IndexOf(prop.cpp);
-							if(opIndex == -1)
-								opIndex = bound;
-							
-							if(op == Petri.Cpp.Operator.Name.SelectionRef && opIndex > 0 && opIndex < s.Length - 1) {
-								// Do not mess up with the decimal separator
-								if(char.IsDigit(s[opIndex - 1]) || char.IsDigit(s[opIndex + 1])) {
-									opIndex = bound;
+							int currentIndex = 0;
+							while(true) {
+								int opIndex = s.Substring(currentIndex).IndexOf(prop.lexed);
+								if(opIndex == -1)
+									break;
+								opIndex += currentIndex;
+								
+								// If we have found an operator closer to the end of the string (in relation to the operator associativity)
+								if(opIndex.CompareTo(index) == direction) {
+									if(!Match(opIndex, s, prop)) {
+										++currentIndex;
+										continue;
+									}
+									index = opIndex;
+									foundOperator = op;
+									break;
 								}
-							}
-							// If we have found an operator closer to the end of the string (in relation to the operator associativity)
-							if(opIndex.CompareTo(index) == direction) {
-								bool found = BetterMatch(opIndex, s, prop);
-								if(found) {
-									continue;
-								}
-								index = opIndex;
-								foundOperator = op;
+								++currentIndex;
 							}
 						}
 					}
@@ -299,7 +330,7 @@ namespace Petri {
 
 						if(prop.type == Petri.Cpp.Operator.Type.Binary) {
 							string e1 = s.Substring(0, index);
-							string e2 = s.Substring(index + prop.cpp.Length);
+							string e2 = s.Substring(index + prop.lexed.Length);
 
 							// Method call
 							if(foundOperator == Petri.Cpp.Operator.Name.SelectionRef || foundOperator == Petri.Cpp.Operator.Name.SelectionPtr) {
@@ -328,13 +359,10 @@ namespace Petri {
 								return new MethodInvocation(m, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), foundOperator == Cpp.Operator.Name.SelectionPtr, param.ToArray());
 							}
 
-							e1 = Expression.GetStringFromPreprocessed(e1, subexprs);
-							e2 = Expression.GetStringFromPreprocessed(e2, subexprs);
-
-							return new BinaryExpression(foundOperator, Expression.CreateFromString<Expression>(e1, entity), Expression.CreateFromString<Expression>(e2, entity));
+							return new BinaryExpression(foundOperator, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), Expression.CreateFromPreprocessedString(e2, entity, subexprs, true));
 						}
 						else if(prop.type == Petri.Cpp.Operator.Type.PrefixUnary) {
-							return new UnaryExpression(foundOperator, Expression.CreateFromString<Expression>(Expression.GetStringFromPreprocessed(s.Substring(index + prop.cpp.Length), subexprs), entity));
+							return new UnaryExpression(foundOperator, Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length), entity, subexprs, true));
 						}
 						else if(prop.type == Petri.Cpp.Operator.Type.SuffixUnary) {
 							if(foundOperator == Petri.Cpp.Operator.Name.FunCall) {
@@ -362,7 +390,7 @@ namespace Petri {
 							
 								return new FunctionInvocation(f, param.ToArray());
 							}
-							return new UnaryExpression(foundOperator, Expression.CreateFromString<Expression>(Expression.GetStringFromPreprocessed(s.Substring(0, index), subexprs), entity));
+							return new UnaryExpression(foundOperator, Expression.CreateFromPreprocessedString(s.Substring(0, index), entity, subexprs, true));
 						}
 					}
 				}
@@ -370,7 +398,27 @@ namespace Petri {
 				return LiteralExpression.CreateFromString(GetStringFromPreprocessed(s, subexprs), entity);
 			}
 
-			protected static string GetStringFromPreprocessed(string prep, Dictionary<int, Tuple<ExprType, string>> subexprs) {
+			protected static string GetStringFromPreprocessed(string prep, List<Tuple<ExprType, string>> subexprs) {
+				foreach(var name in Cpp.Operator.Lex) {
+					prep = prep.Replace(Cpp.Operator.Properties[name].lexed, " " + Cpp.Operator.Properties[name].cpp + " ");
+					var newExprs = new List<Tuple<ExprType, string>>();
+					foreach(var expr in subexprs) {
+						switch(expr.Item1) {
+						case ExprType.Brackets:
+						case ExprType.Parenthesis:
+						case ExprType.Subscript:
+						case ExprType.Invocation:
+						case ExprType.Template:
+							newExprs.Add(Tuple.Create(expr.Item1, expr.Item2.Replace(Cpp.Operator.Properties[name].lexed, " " + Cpp.Operator.Properties[name].cpp + " ")));
+							break;
+						default:
+							newExprs.Add(expr);
+							break;
+						}
+					}
+					subexprs = newExprs;
+				}
+
 				int index;
 				while(true) {
 					index = prep.IndexOf("@");
@@ -378,20 +426,22 @@ namespace Petri {
 						break;
 
 					int lastIndex = prep.Substring(index + 1).IndexOf("@") + index + 1;
-					int expr = int.Parse(prep.Substring(index + 1, lastIndex - (index + 1))) - 1;
+					int expr = int.Parse(prep.Substring(index + 1, lastIndex - (index + 1)));
 					switch(subexprs[expr].Item1) {
 					case ExprType.DoubleQuote:
 					case ExprType.Quote:
 					case ExprType.Parenthesis:
 					case ExprType.Brackets:
 					case ExprType.Subscript:
+					case ExprType.ID:
+					case ExprType.Number:
 						prep = prep.Remove(index, lastIndex - index + 1).Insert(index, subexprs[expr].Item2);
 						break;
 					case ExprType.Invocation:
 						prep = prep.Remove(index, lastIndex - index + 3).Insert(index, subexprs[expr].Item2);
 						break;
 					}
-				} 
+				}
 
 				return prep;
 			}
@@ -433,10 +483,10 @@ namespace Petri {
 						// No need to manage unary operators
 						// We assume the ternary conditional operator does not need to be parenthesized either
 						if(parentProperties.type == Petri.Cpp.Operator.Type.Binary) {
-							var castedParent = parent as BinaryExpression;
+							var castedParent = (BinaryExpression)parent;
 							// We can assume the associativity is the same for both operators as they have the same precedence
 
-							// If the operator is left-associative, but the expression was parenthesize from right to left
+							// If the operator is left-associative, but the expression was parenthesized from right to left
 							// eg. a + (b + c) (do not forget that IEEE floating point values are not communtative with regards to addition, among others).
 							// So we need to preserve the associativity the user gave at first.
 							if(parentProperties.associativity == Petri.Cpp.Operator.Associativity.LeftToRight && castedParent.Expression2 == child) {
@@ -537,16 +587,16 @@ namespace Petri {
 					var tup = Cpp.Expression.Preprocess(s);
 					int currentIndex = 0;
 					while(currentIndex < tup.Item1.Length) {
-						int index = tup.Item1.Substring(currentIndex).IndexOf("@");
+						int index = tup.Item1.Substring(currentIndex).IndexOf("@") + currentIndex;
 						if(index == -1)
 							break;
 
 						int lastIndex = tup.Item1.Substring(index + 1).IndexOf("@") + index + 1;
-						int expr = int.Parse(tup.Item1.Substring(index + 1, lastIndex - (index + 1))) - 1;
+						int expr = int.Parse(tup.Item1.Substring(index + 1, lastIndex - (index + 1)));
 						if(tup.Item2[expr].Item1 == ExprType.Brackets) {
-							return new BracketedExpression(Cpp.Expression.CreateFromString<Expression>(Cpp.Expression.GetStringFromPreprocessed(tup.Item1.Substring(0, index), tup.Item2), e),
-								Cpp.Expression.CreateFromString<Expression>(Cpp.Expression.GetStringFromPreprocessed(tup.Item2[expr].Item2.Substring(1, tup.Item2[expr].Item2.Length - 2), tup.Item2), e),
-								Cpp.Expression.CreateFromString<Expression>(Cpp.Expression.GetStringFromPreprocessed(tup.Item1.Substring(lastIndex + 1), tup.Item2), e));
+							return new BracketedExpression(Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(0, index), e, tup.Item2, true),
+								Cpp.Expression.CreateFromPreprocessedString(tup.Item2[expr].Item2.Substring(1, tup.Item2[expr].Item2.Length - 2), e, tup.Item2, true),
+								Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(lastIndex + 1), e, tup.Item2, true));
 						}
 						else {
 							currentIndex = lastIndex + 1;
@@ -660,25 +710,25 @@ namespace Petri {
 				case Cpp.Operator.Name.FunCall:
 					throw new Exception("Already managed in FunctionInvocation class!");
 				case Cpp.Operator.Name.UnaryPlus:
-					return "#+" + parenthesized;
+					return "+" + parenthesized;
 				case Cpp.Operator.Name.UnaryMinus:
-					return "#-" + parenthesized;
+					return "-" + parenthesized;
 				case Cpp.Operator.Name.LogicalNot:
-					return "#!" + parenthesized;
+					return "!" + parenthesized;
 				case Cpp.Operator.Name.BitwiseNot:
-					return "#~" + parenthesized;
+					return "~" + parenthesized;
 				case Cpp.Operator.Name.Indirection:
-					return "#*" + parenthesized;
+					return "*" + parenthesized;
 				case Cpp.Operator.Name.AddressOf:
-					return "#&" + parenthesized;
+					return "&" + parenthesized;
 				case Cpp.Operator.Name.PreIncr:
-					return "#1++" + parenthesized;
+					return "++" + parenthesized;
 				case Cpp.Operator.Name.PreDecr:
-					return "#--" + parenthesized;
+					return "--" + parenthesized;
 				case Cpp.Operator.Name.PostIncr:
-					return parenthesized + "#2++";
+					return parenthesized + "++";
 				case Cpp.Operator.Name.PostDecr:
-					return parenthesized + "#--";
+					return parenthesized + "--";
 				}
 
 				throw new Exception("Operator not implemented!");
@@ -764,65 +814,65 @@ namespace Petri {
 				string p2 = Expression.Parenthesize(this, this.Expression2, this.Expression2.MakeUserReadable());
 				switch(this.Operator) {
 				case Cpp.Operator.Name.Mult:
-					return p1 + " @* " + p2;
+					return p1 + " * " + p2;
 				case Cpp.Operator.Name.Div:
-					return p1 + " @/ " + p2;
+					return p1 + " / " + p2;
 				case Cpp.Operator.Name.Mod:
-					return p1 + " @% " + p2;
+					return p1 + " % " + p2;
 				case Cpp.Operator.Name.Plus:
-					return p1 + " @+ " + p2;
+					return p1 + " + " + p2;
 				case Cpp.Operator.Name.Minus:
-					return p1 + " @- " + p2;
+					return p1 + " - " + p2;
 				case Cpp.Operator.Name.ShiftLeft:
-					return p1 + " @<< " + p2;
+					return p1 + " << " + p2;
 				case Cpp.Operator.Name.ShiftRight:
-					return p1 + " @>> " + p2;
+					return p1 + " >> " + p2;
 				case Cpp.Operator.Name.Less:
-					return p1 + " @< " + p2;
+					return p1 + " < " + p2;
 				case Cpp.Operator.Name.LessEqual:
-					return p1 + " @<= " + p2;
+					return p1 + " <= " + p2;
 				case Cpp.Operator.Name.Greater:
-					return p1 + " @> " + p2;
+					return p1 + " > " + p2;
 				case Cpp.Operator.Name.GreaterEqual:
-					return p1 + " @>= " + p2;
+					return p1 + " >= " + p2;
 				case Cpp.Operator.Name.Equal:
-					return p1 + " @== " + p2;
+					return p1 + " == " + p2;
 				case Cpp.Operator.Name.NotEqual:
-					return p1 + " @!= " + p2;
+					return p1 + " != " + p2;
 				case Cpp.Operator.Name.BitwiseAnd:
-					return p1 + " @& " + p2;
+					return p1 + " & " + p2;
 				case Cpp.Operator.Name.BitwiseXor:
-					return p1 + " @^ " + p2;
+					return p1 + " ^ " + p2;
 				case Cpp.Operator.Name.BitwiseOr:
-					return p1 + " @| " + p2;
+					return p1 + " | " + p2;
 				case Cpp.Operator.Name.LogicalAnd:
-					return p1 + " @&& " + p2;
+					return p1 + " && " + p2;
 				case Cpp.Operator.Name.LogicalOr:
-					return p1 + " @|| " + p2;
+					return p1 + " || " + p2;
 				case Cpp.Operator.Name.Assignment:
-					return p1 + " @:= " + p2;
+					return p1 + " = " + p2;
 				case Cpp.Operator.Name.PlusAssign:
-					return p1 + " @+= " + p2;
+					return p1 + " += " + p2;
 				case Cpp.Operator.Name.MinusAssign:
-					return p1 + " @-= " + p2;
+					return p1 + " -= " + p2;
 				case Cpp.Operator.Name.MultAssign:
-					return p1 + " @*= " + p2;
+					return p1 + " *= " + p2;
 				case Cpp.Operator.Name.DivAssign:
-					return p1 + " @/= " + p2;
+					return p1 + " /= " + p2;
 				case Cpp.Operator.Name.ModAssign:
-					return p1 + " @%= " + p2;
+					return p1 + " %= " + p2;
 				case Cpp.Operator.Name.ShiftLeftAssign:
-					return p1 + " @<<= " + p2;
+					return p1 + " <<= " + p2;
 				case Cpp.Operator.Name.ShiftRightAssign:
-					return p1 + " @>>= " + p2;
+					return p1 + " >>= " + p2;
 				case Cpp.Operator.Name.BitwiseAndAssig:
-					return p1 + " @&= " + p2;
+					return p1 + " &= " + p2;
 				case Cpp.Operator.Name.BitwiseXorAssign:
-					return p1 + " @^= " + p2;
+					return p1 + " ^= " + p2;
 				case Cpp.Operator.Name.BitwiseOrAssign:
-					return p1 + " @|= " + p2;
+					return p1 + " |= " + p2;
 				case Cpp.Operator.Name.Comma:
-					return p1 + "@, " + p2;
+					return p1 + ", " + p2;
 				}
 
 				throw new Exception("Operator not implemented!");
