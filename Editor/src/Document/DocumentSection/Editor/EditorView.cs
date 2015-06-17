@@ -184,13 +184,18 @@ namespace Petri
 
 						if(_hoveredItem != null) {
 							if(_shiftDown || _ctrlDown) {
-								if(EntitySelected(_hoveredItem))
+								if(EntitySelected(_hoveredItem)) {
 									RemoveFromSelection(_hoveredItem);
-								else
+								}
+								else {
 									AddToSelection(_hoveredItem);
+								}
 							}
 							else if(!EntitySelected(_hoveredItem)) {
 								this.SelectedEntity = _hoveredItem;
+								if(_hoveredItem == null) {
+									return;
+								}
 							}
 
 							_motionReference = _hoveredItem;

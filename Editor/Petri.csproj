@@ -68,7 +68,6 @@
     <Folder Include="Resources\" />
     <Folder Include="src\" />
     <Folder Include="src\Document\" />
-    <Folder Include="src\Document\DocumentSection\ConflictSolver\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Todo.txt" />

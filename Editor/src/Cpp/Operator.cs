@@ -101,18 +101,19 @@ namespace Petri
 			}
 
 			public struct Op {
-				public Op(int i, Associativity a, Type t, string c, int p, bool impl, Name[] ambig) {
+				public Op(Associativity a, Type t, string c, int p, bool impl) {
 					associativity = a;
 					type = t;
 					precedence = p;
 					implemented = impl;
 					cpp = c;
-					ambiguities = ambig;
-					id = i;
-					lexed = "#" + cpp.GetHashCode() + "#";
+					id = _id++;
+					if(!_lexed.ContainsKey(cpp)) {
+						_lexed[cpp] = id;
+					}
+					lexed = "#" + _lexed[cpp].ToString() + "#";
 				}
 
-				public Name[] ambiguities;
 				public string cpp;
 				public bool implemented;
 				public Associativity associativity;
@@ -120,6 +121,9 @@ namespace Petri
 				public int precedence;
 				public int id;
 				public string lexed;
+
+				private static int _id = 0;
+				private static Dictionary<string, int> _lexed = new Dictionary<string, int>();
 			}
 
 			public static Dictionary<Name, Op> Properties {
@@ -145,78 +149,76 @@ namespace Petri
 			static Operator() {
 				Properties = new Dictionary<Name, Op>();
 
-				int ii = 0;
+				Properties[Name.ScopeResolution] = new Op(Associativity.LeftToRight, Type.Binary, "::", 0, false);
 
-				Properties[Name.ScopeResolution] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "::", 0, false, new Name[]{});
-
-				Properties[Name.PostIncr] = new Op(ii++, Associativity.LeftToRight, Type.SuffixUnary, "++", 1, true, new Name[]{});
-				Properties[Name.PostDecr] = new Op(ii++, Associativity.LeftToRight, Type.SuffixUnary, "--", 1, true, new Name[]{});
-				Properties[Name.FunctionalCast] = new Op(ii++, Associativity.LeftToRight, Type.PrefixUnary, "", 1, false, new Name[]{});
-				Properties[Name.FunCall] = new Op(ii++, Associativity.LeftToRight, Type.SuffixUnary, "()", 1, true, new Name[]{});
-				Properties[Name.Subscript] = new Op(ii++, Associativity.LeftToRight, Type.SuffixUnary, "", 1, false, new Name[]{});
+				Properties[Name.PostIncr] = new Op(Associativity.LeftToRight, Type.SuffixUnary, "++", 1, true);
+				Properties[Name.PostDecr] = new Op(Associativity.LeftToRight, Type.SuffixUnary, "--", 1, true);
+				Properties[Name.FunctionalCast] = new Op(Associativity.LeftToRight, Type.PrefixUnary, "", 1, false);
+				Properties[Name.FunCall] = new Op(Associativity.LeftToRight, Type.SuffixUnary, "()", 1, true);
+				Properties[Name.Subscript] = new Op(Associativity.LeftToRight, Type.SuffixUnary, "", 1, false);
 
 				// Actual precedence is the same as function call for . and ->, but we cheat for f().X being parsed
-				Properties[Name.SelectionRef] = new Op(ii++, Associativity.LeftToRight, Type.Binary, ".", 2, true, new Name[]{});
-				Properties[Name.SelectionPtr] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "->", 2, true, new Name[]{});
+				Properties[Name.SelectionRef] = new Op(Associativity.LeftToRight, Type.Binary, ".", 2, true);
+				Properties[Name.SelectionPtr] = new Op(Associativity.LeftToRight, Type.Binary, "->", 2, true);
 
-				Properties[Name.PreIncr] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "++", 3, true, new Name[]{Name.PostIncr});
-				Properties[Name.PreDecr] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "--", 3, true, new Name[]{Name.PostDecr});
-				Properties[Name.UnaryPlus] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "+", 3, true, new Name[]{Name.PreIncr, Name.PostIncr});
-				Properties[Name.UnaryMinus] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "-", 3, true, new Name[]{Name.PreDecr, Name.PostDecr});
-				Properties[Name.LogicalNot] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "!", 3, true, new Name[]{});
-				Properties[Name.BitwiseNot] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "~", 3, true, new Name[]{});
-				Properties[Name.CCast] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "", 3, false, new Name[]{});
-				Properties[Name.Indirection] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "*", 3, false, new Name[]{});
-				Properties[Name.AddressOf] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "&", 3, true, new Name[]{});
-				Properties[Name.Sizeof] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "", 3, false, new Name[]{});
-				Properties[Name.New] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "", 3, false, new Name[]{});
-				Properties[Name.NewTab] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "", 3, false, new Name[]{});
-				Properties[Name.Delete] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "", 3, false, new Name[]{});
-				Properties[Name.DeleteTab] = new Op(ii++, Associativity.RightToLeft, Type.PrefixUnary, "", 3, false, new Name[]{});
+				Properties[Name.PreIncr] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "++", 3, true);
+				Properties[Name.PreDecr] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "--", 3, true);
+				Properties[Name.UnaryPlus] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "+", 3, true);
+				Properties[Name.UnaryMinus] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "-", 3, true);
+				Properties[Name.LogicalNot] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "!", 3, true);
+				Properties[Name.BitwiseNot] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "~", 3, true);
+				Properties[Name.CCast] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "", 3, false);
+				Properties[Name.Indirection] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "*", 3, false);
+				Properties[Name.AddressOf] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "&", 3, true);
+				Properties[Name.Sizeof] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "", 3, false);
+				Properties[Name.New] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "", 3, false);
+				Properties[Name.NewTab] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "", 3, false);
+				Properties[Name.Delete] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "", 3, false);
+				Properties[Name.DeleteTab] = new Op(Associativity.RightToLeft, Type.PrefixUnary, "", 3, false);
 
-				Properties[Name.PtrToMemRef] = new Op(ii++, Associativity.LeftToRight, Type.Binary, ".*", 4, false, new Name[]{});
-				Properties[Name.PtrToMemPtr] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "->*", 4, false, new Name[]{});
+				Properties[Name.PtrToMemRef] = new Op(Associativity.LeftToRight, Type.Binary, ".*", 4, false);
+				Properties[Name.PtrToMemPtr] = new Op(Associativity.LeftToRight, Type.Binary, "->*", 4, false);
 
-				Properties[Name.Mult] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "*", 5, true, new Name[]{});
-				Properties[Name.Div] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "/", 5, true, new Name[]{});
-				Properties[Name.Mod] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "%", 5, true, new Name[]{});
+				Properties[Name.Mult] = new Op(Associativity.LeftToRight, Type.Binary, "*", 5, true);
+				Properties[Name.Div] = new Op(Associativity.LeftToRight, Type.Binary, "/", 5, true);
+				Properties[Name.Mod] = new Op(Associativity.LeftToRight, Type.Binary, "%", 5, true);
 
-				Properties[Name.Plus] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "+", 6, true, new Name[]{Name.UnaryPlus, Name.PreIncr, Name.PostIncr});
-				Properties[Name.Minus] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "-", 6, true, new Name[]{Name.UnaryMinus, Name.PreDecr, Name.PostDecr});
+				Properties[Name.Plus] = new Op(Associativity.LeftToRight, Type.Binary, "+", 6, true);
+				Properties[Name.Minus] = new Op(Associativity.LeftToRight, Type.Binary, "-", 6, true);
 
-				Properties[Name.ShiftLeft] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "<<", 7, true, new Name[]{});
-				Properties[Name.ShiftRight] = new Op(ii++, Associativity.LeftToRight, Type.Binary, ">>", 7, true, new Name[]{});
+				Properties[Name.ShiftLeft] = new Op(Associativity.LeftToRight, Type.Binary, "<<", 7, true);
+				Properties[Name.ShiftRight] = new Op(Associativity.LeftToRight, Type.Binary, ">>", 7, true);
 
-				Properties[Name.LessEqual] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "<=", 8, true, new Name[]{});
-				Properties[Name.Less] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "<", 8, true, new Name[]{});
-				Properties[Name.GreaterEqual] = new Op(ii++, Associativity.LeftToRight, Type.Binary, ">=", 8, true, new Name[]{});
-				Properties[Name.Greater] = new Op(ii++, Associativity.LeftToRight, Type.Binary, ">", 8, true, new Name[]{});
+				Properties[Name.LessEqual] = new Op(Associativity.LeftToRight, Type.Binary, "<=", 8, true);
+				Properties[Name.Less] = new Op(Associativity.LeftToRight, Type.Binary, "<", 8, true);
+				Properties[Name.GreaterEqual] = new Op(Associativity.LeftToRight, Type.Binary, ">=", 8, true);
+				Properties[Name.Greater] = new Op(Associativity.LeftToRight, Type.Binary, ">", 8, true);
 
-				Properties[Name.Equal] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "==", 9, true, new Name[]{});
-				Properties[Name.NotEqual] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "!=", 9, true, new Name[]{});
+				Properties[Name.Equal] = new Op(Associativity.LeftToRight, Type.Binary, "==", 9, true);
+				Properties[Name.NotEqual] = new Op(Associativity.LeftToRight, Type.Binary, "!=", 9, true);
 
-				Properties[Name.BitwiseAnd] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "&", 10, false, new Name[]{});
-				Properties[Name.BitwiseXor] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "^", 11, false, new Name[]{});
-				Properties[Name.BitwiseOr] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "|", 12, false, new Name[]{});
-				Properties[Name.LogicalAnd] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "&&", 13, true, new Name[]{});
-				Properties[Name.LogicalOr] = new Op(ii++, Associativity.LeftToRight, Type.Binary, "||", 14, true, new Name[]{});
+				Properties[Name.BitwiseAnd] = new Op(Associativity.LeftToRight, Type.Binary, "&", 10, false);
+				Properties[Name.BitwiseXor] = new Op(Associativity.LeftToRight, Type.Binary, "^", 11, false);
+				Properties[Name.BitwiseOr] = new Op(Associativity.LeftToRight, Type.Binary, "|", 12, false);
+				Properties[Name.LogicalAnd] = new Op(Associativity.LeftToRight, Type.Binary, "&&", 13, true);
+				Properties[Name.LogicalOr] = new Op(Associativity.LeftToRight, Type.Binary, "||", 14, true);
 
-				Properties[Name.TernaryConditional] = new Op(ii++, Associativity.RightToLeft, Type.Ternary, "?", 15, false, new Name[]{});
-				Properties[Name.Assignment] = new Op(ii++, Associativity.RightToLeft, Type.Binary, "=", 15, true, new Name[]{});
-				Properties[Name.PlusAssign] = new Op(ii++, Associativity.RightToLeft, Type.Binary, "+=", 15, false, new Name[]{});
-				Properties[Name.MinusAssign] = new Op(ii++, Associativity.RightToLeft, Type.Binary, "-=", 15, false, new Name[]{});
-				Properties[Name.MultAssign] = new Op(ii++, Associativity.RightToLeft, Type.Binary, "*=", 15, false, new Name[]{});
-				Properties[Name.DivAssign] = new Op(ii++, Associativity.RightToLeft, Type.Binary, "/=", 15, false, new Name[]{});
-				Properties[Name.ModAssign] = new Op(ii++, Associativity.RightToLeft, Type.Binary, "%=", 15, false, new Name[]{});
-				Properties[Name.ShiftLeftAssign] = new Op(ii++, Associativity.RightToLeft, Type.Binary, "<<=", 15, false, new Name[]{});
-				Properties[Name.ShiftRightAssign] = new Op(ii++, Associativity.RightToLeft, Type.Binary, ">>=", 15, false, new Name[]{});
-				Properties[Name.BitwiseAndAssig] = new Op(ii++, Associativity.RightToLeft, Type.Binary, "&=", 15, false, new Name[]{});
-				Properties[Name.BitwiseXorAssign] = new Op(ii++, Associativity.RightToLeft, Type.Binary, "^=", 15, false, new Name[]{});
-				Properties[Name.BitwiseOrAssign] = new Op(ii++, Associativity.RightToLeft, Type.Binary, "|=", 15, false, new Name[]{});
+				Properties[Name.TernaryConditional] = new Op(Associativity.RightToLeft, Type.Ternary, "?", 15, false);
+				Properties[Name.Assignment] = new Op(Associativity.RightToLeft, Type.Binary, "=", 15, true);
+				Properties[Name.PlusAssign] = new Op(Associativity.RightToLeft, Type.Binary, "+=", 15, false);
+				Properties[Name.MinusAssign] = new Op(Associativity.RightToLeft, Type.Binary, "-=", 15, false);
+				Properties[Name.MultAssign] = new Op(Associativity.RightToLeft, Type.Binary, "*=", 15, false);
+				Properties[Name.DivAssign] = new Op(Associativity.RightToLeft, Type.Binary, "/=", 15, false);
+				Properties[Name.ModAssign] = new Op(Associativity.RightToLeft, Type.Binary, "%=", 15, false);
+				Properties[Name.ShiftLeftAssign] = new Op(Associativity.RightToLeft, Type.Binary, "<<=", 15, false);
+				Properties[Name.ShiftRightAssign] = new Op(Associativity.RightToLeft, Type.Binary, ">>=", 15, false);
+				Properties[Name.BitwiseAndAssig] = new Op(Associativity.RightToLeft, Type.Binary, "&=", 15, false);
+				Properties[Name.BitwiseXorAssign] = new Op(Associativity.RightToLeft, Type.Binary, "^=", 15, false);
+				Properties[Name.BitwiseOrAssign] = new Op(Associativity.RightToLeft, Type.Binary, "|=", 15, false);
 
-				Properties[Name.Throw] = new Op(ii++, Associativity.LeftToRight, Type.PrefixUnary, "", 16, false, new Name[]{});
+				Properties[Name.Throw] = new Op(Associativity.LeftToRight, Type.PrefixUnary, "", 16, false);
 
-				Properties[Name.Comma] = new Op(ii++, Associativity.LeftToRight, Type.Binary, ",", 17, true, new Name[]{});
+				Properties[Name.Comma] = new Op(Associativity.LeftToRight, Type.Binary, ",", 17, true);
 
 				ByID = Properties.ToDictionary(x => x.Value.id, x => x.Key);
 				ByPrecedence = new Dictionary<int, List<Name>>();

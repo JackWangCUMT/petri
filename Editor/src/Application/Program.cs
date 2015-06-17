@@ -80,6 +80,7 @@ namespace Petri
 			if(args.Length > 1) {
 				bool generate = args[0] == "--generate";
 				bool compile = generate ? args.Length == 3 && args[1] == "--compile" : args[0] == "--compile";
+				bool verbose = false;
 				int arch = 0;
 				for(int i = 1; i < args.Length; ++i) {
 					if(args[i] == "--arch") {
@@ -101,6 +102,9 @@ namespace Petri
 							return PrintUsage();
 						}
 					}
+					else if(args[i] == "-v" || args[i] == "--verbose") {
+						verbose = true;
+					}
 				}
 				string path = generate && compile ? args[2] : args[1];
 
@@ -111,7 +115,9 @@ namespace Petri
 				try {
 					HeadlessDocument document = new HeadlessDocument(path);
 					document.Load();
-					Console.WriteLine("Processing Petri net " + document.Settings.Name + "…");
+					if(verbose) {
+						Console.WriteLine("Processing Petri net " + document.Settings.Name + "…");
+					}
 
 					string cppPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, document.Settings.SourceOutputPath), document.Settings.Name) + ".cpp";
 
@@ -122,33 +128,37 @@ namespace Petri
 							generate = true;
 							forceGeneration = true;
 						}
-						else {
+						else if(verbose) {
 							Console.WriteLine("Previously generated C++ code is up to date, no need for code generation");
 						}
 					}
 
 					if(generate) {
-						if(forceGeneration) {
+						if(forceGeneration && verbose) {
 							Console.WriteLine("Previously generated C++ code is outdated or nonexistent, generating new code…");
 						}
 						document.SaveCppDontAsk();
 						document.Save();
-						Console.WriteLine("Successfully generated C++ code");
+						if(verbose) {
+							Console.WriteLine("Successfully generated C++ code");
+						}
 					}
 					if(compile) {
 						string dylibPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, System.IO.Path.Combine(document.Settings.LibOutputPath, document.Settings.Name  + ".so")));
 						if(!System.IO.File.Exists(dylibPath) || System.IO.File.GetLastWriteTime(dylibPath) < System.IO.File.GetLastWriteTime(cppPath)) {
-							Console.WriteLine("Compiling the C++ code…");
+							if(verbose) {
+								Console.WriteLine("Compiling the C++ code…");
+							}
 							bool res = document.Compile(false);
 							if(!res) {
 								Console.WriteLine("Compilation failed, aborting!");
 								return 3;
 							}
-							else {
+							else if(verbose) {
 								Console.WriteLine("Compilation successful!");
 							}
 						}
-						else {
+						else if(verbose) {
 							Console.WriteLine("Previously compiled dylib is up to date, no need for recompilation");
 						}
 					}

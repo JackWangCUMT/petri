@@ -113,25 +113,30 @@ namespace Petri {
 				var findNumber = new Regex("(" + Parser.NumberPattern + ")?.*");
 
 				var nesting = new Stack<Tuple<ExprType, int>>();
-				for(int i = 0; i < s.Length; ++i) {
-					var m1 = findName.Match(s.Substring(i));
-					if(m1.Success) {
-						var id = m1.Groups["name"].Value;
-						if(id.Length > 0) {
-							subexprs.Add(Tuple.Create(ExprType.ID, id));
-							int oldSize = s.Length;
-							s = s.Remove(i, id.Length).Insert(i, "@" + (subexprs.Count - 1).ToString() + "@");
-							i += s.Length - oldSize;
+				for(int i = 0; i < s.Length;) {
+					if(nesting.Count == 0 || (nesting.Peek().Item1 != ExprType.Quote && nesting.Peek().Item1 != ExprType.DoubleQuote)) {
+						var sub = s.Substring(i);
+						var m1 = findName.Match(sub);
+						if(m1.Success) {
+							var id = m1.Groups["name"].Value;
+							if(id.Length > 0) {
+								subexprs.Add(Tuple.Create(ExprType.ID, id));
+								var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
+								s = s.Remove(i, id.Length).Insert(i, newstr);
+								i += newstr.Length;
+								continue;
+							}
 						}
-					}
-					var m2 = findNumber.Match(s.Substring(i));
-					if(m2.Success) {
-						var num = m2.Groups["number"].Value;
-						if(num.Length > 0) {
-							subexprs.Add(Tuple.Create(ExprType.Number, num));
-							int oldSize = s.Length;
-							s = s.Remove(i, num.Length).Insert(i, "@" + (subexprs.Count - 1).ToString() + "@");
-							i += s.Length - oldSize;
+						var m2 = findNumber.Match(sub);
+						if(m2.Success) {
+							var num = m2.Groups["number"].Value;
+							if(num.Length > 0) {
+								subexprs.Add(Tuple.Create(ExprType.Number, num));
+								var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
+								s = s.Remove(i, num.Length).Insert(i, newstr);
+								i += newstr.Length;
+								continue;
+							}
 						}
 					}
 					switch(s[i]) {
@@ -144,11 +149,11 @@ namespace Petri {
 						nesting.Push(Tuple.Create(special ? ExprType.Invocation : ExprType.Parenthesis, i));
 						break;
 					case ')':
-						if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Invocation || nesting.Peek().Item1 == ExprType.Parenthesis) {
+						if(nesting.Count > 0 && (nesting.Peek().Item1 == ExprType.Invocation || nesting.Peek().Item1 == ExprType.Parenthesis)) {
 							subexprs.Add(Tuple.Create(nesting.Peek().Item1, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
-							int oldSize = s.Length;
-							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + (subexprs.Count - 1).ToString() + "@" + (nesting.Peek().Item1 == ExprType.Invocation ? "()" : ""));
-							i += s.Length - oldSize;
+							var newstr = "@" + (subexprs.Count - 1).ToString() + "@" + (nesting.Peek().Item1 == ExprType.Invocation ? "()" : "");
+							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, newstr);
+							i += newstr.Length;
 							nesting.Pop();
 						}
 						else
@@ -160,9 +165,9 @@ namespace Petri {
 					case '}':
 						if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Brackets) {
 							subexprs.Add(Tuple.Create(ExprType.Brackets, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
-							int oldSize = s.Length;
-							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + (subexprs.Count - 1).ToString() + "@");
-							i += s.Length - oldSize;
+							var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
+							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, newstr);
+							i += newstr.Length;
 							nesting.Pop();
 						}
 						else
@@ -174,9 +179,9 @@ namespace Petri {
 					case ']':
 						if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Subscript) {
 							subexprs.Add(Tuple.Create(nesting.Peek().Item1, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
-							int oldSize = s.Length;
-							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + (subexprs.Count - 1).ToString() + "@");
-							i += s.Length - oldSize;
+							var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
+							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, newstr);
+							i += newstr.Length;
 							nesting.Pop();
 						}
 						else
@@ -190,9 +195,9 @@ namespace Petri {
 						// Second quote
 						else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.DoubleQuote && s[i - 1] != '\\') {
 							subexprs.Add(Tuple.Create(ExprType.DoubleQuote, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
-							int oldSize = s.Length;
-							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + (subexprs.Count - 1).ToString() + "@");
-							i += s.Length - oldSize;
+							var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
+							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, newstr);
+							i += newstr.Length;
 							nesting.Pop();
 						}
 						else
@@ -206,15 +211,17 @@ namespace Petri {
 						// Second quote
 						else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] != '\\') {
 							subexprs.Add(Tuple.Create(ExprType.Quote, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
-							int oldSize = s.Length;
-							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, "@" + (subexprs.Count - 1).ToString() + "@");
-							i += s.Length - oldSize;
+							var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
+							s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, newstr);
+							i += newstr.Length;
 							nesting.Pop();
 						}
 						else
 							throw new Exception(nesting.Peek().Item1 + " expected, but \' found!");
 						break;
 					}
+
+					++i;
 				}
 
 				var newExprs = new List<Tuple<ExprType, string>>();
@@ -289,7 +296,7 @@ namespace Petri {
 				for(int i = allowComma ? 17 : 16; i >= 0; --i) {
 					int bound;
 					int direction;
-					if(Cpp.Operator.Properties[Cpp.Operator.ByPrecedence[i][0]].associativity == Petri.Cpp.Operator.Associativity.LeftToRight) {
+					if(Cpp.Operator.Properties[Cpp.Operator.ByPrecedence[i][0]].associativity == Petri.Cpp.Operator.Associativity.RightToLeft) {
 						bound = s.Length;
 						direction = -1;
 					}
@@ -309,16 +316,15 @@ namespace Petri {
 								if(opIndex == -1)
 									break;
 								opIndex += currentIndex;
-								
+
 								// If we have found an operator closer to the end of the string (in relation to the operator associativity)
 								if(opIndex.CompareTo(index) == direction) {
 									if(!Match(opIndex, s, prop)) {
-										++currentIndex;
+										currentIndex = opIndex + prop.lexed.Length;
 										continue;
 									}
 									index = opIndex;
 									foundOperator = op;
-									break;
 								}
 								++currentIndex;
 							}
@@ -337,7 +343,7 @@ namespace Petri {
 								int paramIndex = e2.Substring(0, e2.LastIndexOf("@")).LastIndexOf("@");
 								var args = Parser.RemoveParenthesis(Expression.GetStringFromPreprocessed(e2.Substring(paramIndex, e2.Length - paramIndex - 2) + "()", subexprs));
 								var tup = Expression.Preprocess(args);
-								var argsList = tup.Item1.Split(new char[]{ ',' }, StringSplitOptions.None);
+								var argsList = tup.Item1.Split(new string[] {Cpp.Operator.Properties[Cpp.Operator.Name.Comma].lexed}, StringSplitOptions.None);
 								var param = new List<Expression>();
 								if(tup.Item1.Length > 0) {
 									foreach(var a in argsList) {
@@ -369,7 +375,7 @@ namespace Petri {
 								int paramIndex = s.Substring(0, s.Substring(0, index).LastIndexOf("@")).LastIndexOf("@");
 								var args = Parser.RemoveParenthesis(Expression.GetStringFromPreprocessed(s.Substring(paramIndex, index - paramIndex) + "()", subexprs));
 								var tup = Expression.Preprocess(args);
-								var argsList = tup.Item1.Split(new char[]{ ',' }, StringSplitOptions.None);
+								var argsList = tup.Item1.Split(new string[] {Cpp.Operator.Properties[Cpp.Operator.Name.Comma].lexed}, StringSplitOptions.None);
 								var param = new List<Expression>();
 								if(tup.Item1.Length > 0) {
 									foreach(var a in argsList) {
