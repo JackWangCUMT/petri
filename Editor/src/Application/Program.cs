@@ -72,17 +72,20 @@ namespace Petri
 		}
 
 		private static int PrintUsage() {
-			Console.WriteLine("Usage: mono Petri.exe [--generate] [--compile \"document.petri\" --arch (32|64)]");
+			Console.WriteLine("Usage: mono Petri.exe [--generate] [--compile] [--arch (32|64)] [--verbose|-v] \"Path/To/Document.petri\"");
 			return 1;
 		}
 
 		public static int Main(string[] args) {
 			if(args.Length > 1) {
-				bool generate = args[0] == "--generate";
-				bool compile = generate ? args.Length == 3 && args[1] == "--compile" : args[0] == "--compile";
+				bool generate = false;
+				bool compile = false;
 				bool verbose = false;
 				int arch = 0;
-				for(int i = 1; i < args.Length; ++i) {
+				var used = new bool[args.Length];
+				used[0] = true;
+				used.Initialize();
+				for(int i = 0; i < args.Length; ++i) {
 					if(args[i] == "--arch") {
 						if(i < args.Length - 1) {
 							if(int.TryParse(args[i + 1], out arch)) {
@@ -93,8 +96,10 @@ namespace Petri
 								else {
 									return PrintUsage();
 								}
+								used[i] = used[i + 1] = true;
 							}
 							else {
+								Console.WriteLine("Wrong architecture specified!");
 								return PrintUsage();
 							}
 						}
@@ -104,11 +109,26 @@ namespace Petri
 					}
 					else if(args[i] == "-v" || args[i] == "--verbose") {
 						verbose = true;
+						used[i] = true;
+					}
+					else if(args[i] == "--generate") {
+						generate = true;
+						used[i] = true;
+					}
+					else if(args[i] == "--compile") {
+						compile = true;
+						used[i] = true;
 					}
 				}
-				string path = generate && compile ? args[2] : args[1];
+				if(used[args.Length - 1]) {
+					// Did not specify document path
+					Console.WriteLine("The path to the Petri document must be specified as the last program argument!");
+					return PrintUsage();
+				}
+				string path = args[args.Length - 1];
 
 				if(!compile && !generate) {
+					Console.WriteLine("Must specify \"--generate\" and/or \"--compile\"!");
 					return PrintUsage();
 				}
 
