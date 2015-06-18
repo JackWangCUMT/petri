@@ -115,7 +115,7 @@ namespace Petri
 				Configuration.Get().LoadLanguage();
 			}
 			if(!Configuration._localizedStrings.ContainsKey(value)) {
-				Console.WriteLine("No localization found for locale " + Language + " and key \"" + value + "\"");
+				Console.WriteLine("No localization found for locale \"" + Language + "\" and key \"" + value + "\"");
 				return value;
 				//return GetLocalized("__noloc__");
 			}
@@ -253,7 +253,12 @@ namespace Petri
 					key = element.Value;
 				}
 				else {
-					_localizedStrings.Add(key, element.Value);
+					if(_localizedStrings.ContainsKey(key)) {
+						Console.WriteLine("Warning: the key \"" + key + "\" is already present for the locale \"" + Language + "\".");
+					}
+					else {
+						_localizedStrings.Add(key, element.Value);
+					}
 					key = null;
 				}
 			}

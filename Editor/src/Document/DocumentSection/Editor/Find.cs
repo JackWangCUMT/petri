@@ -13,7 +13,7 @@ namespace Petri
 		}
 
 		public void Show() {
-			_window.Title = Configuration.GetLocalized("Rechercher dans le document {0}", _document.Window.Title);
+			_window.Title = Configuration.GetLocalized("Find in the document {0}", _document.Window.Title);
 			_window.ShowAll();
 			_window.Present();
 			_document.AssociatedWindows.Add(_window);
@@ -44,7 +44,7 @@ namespace Petri
 			_document = doc;
 
 			_window = new Window(WindowType.Toplevel);
-			_window.Title = Configuration.GetLocalized("Rechercher dans le document");
+			_window.Title = Configuration.GetLocalized("Find in the document");
 
 			_window.DefaultWidth = 400;
 			_window.DefaultHeight = 100;
@@ -60,16 +60,16 @@ namespace Petri
 			_window.Add(vbox);
 
 			var hbox = new HBox();
-			var label = new Label(Configuration.GetLocalized("Rechercher parmi les entités de type :"));
+			var label = new Label(Configuration.GetLocalized("Find among the entities of kind:"));
 			hbox.PackStart(label, false, false, 0);
 			vbox.PackStart(hbox, false, false, 0);
 
 			ComboBox combo = ComboBox.NewText();
 
-			combo.AppendText(Configuration.GetLocalized("Toutes les entités"));
-			combo.AppendText(Configuration.GetLocalized("Action"));
-			combo.AppendText(Configuration.GetLocalized("Transition"));
-			combo.AppendText(Configuration.GetLocalized("Commentaire"));
+			combo.AppendText(Configuration.GetLocalized("All entities"));
+			combo.AppendText(Configuration.GetLocalized("States"));
+			combo.AppendText(Configuration.GetLocalized("Transitions"));
+			combo.AppendText(Configuration.GetLocalized("Comments"));
 			TreeIter iter;
 			combo.Model.GetIterFirst(out iter);
 			combo.SetActiveIter(iter);
@@ -92,8 +92,8 @@ namespace Petri
 			vbox.PackStart(_what, true, true, 0);
 
 			hbox = new HBox(false, 5);
-			var cancel = new Button(new Label(Configuration.GetLocalized("Annuler")));
-			var find = new Button(new Label(Configuration.GetLocalized("Rechercher")));
+			var cancel = new Button(new Label(Configuration.GetLocalized("Cancel")));
+			var find = new Button(new Label(Configuration.GetLocalized("Find")));
 			cancel.Clicked += (sender, e) => {
 				Hide();
 			};

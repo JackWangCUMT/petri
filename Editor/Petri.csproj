@@ -154,7 +154,7 @@
     <EmbeddedResource Include="Resources\transition.png">
       <LogicalName>transition</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\fr.lang">
+    <EmbeddedResource Include="Resources\fr.xml">
       <LogicalName>fr.lang</LogicalName>
     </EmbeddedResource>
   </ItemGroup>

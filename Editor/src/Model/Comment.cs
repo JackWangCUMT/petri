@@ -32,7 +32,7 @@ namespace Petri
 	{
 		public Comment(HeadlessDocument doc, PetriNet parent, Cairo.PointD pos) : base(doc, parent) {
 			this.Position = pos;
-			this.Name = Configuration.GetLocalized("Commentaire");
+			this.Name = Configuration.GetLocalized("DefaultCommentName");
 			this.SizeToFit();
 
 			this.Color = new Color(1, 1, 0.7, 1);

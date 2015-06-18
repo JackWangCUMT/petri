@@ -225,9 +225,9 @@ namespace Petri
 		public bool CloseAndConfirm() {
 			if(this.DebugController.Server.SessionRunning) {
 				Window.Present();
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, Configuration.GetLocalized("Une session de débuggeur est toujours active. Souhaitez-vous l'arrêter ?"));
-				d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
-				d.AddButton(Configuration.GetLocalized("Arrêter la session"), ResponseType.Yes).HasDefault = true;
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, Configuration.GetLocalized("A debugger session is still running. Do you want to stop it?"));
+				d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
+				d.AddButton(Configuration.GetLocalized("Stop the session"), ResponseType.Yes).HasDefault = true;
 
 				ResponseType result = (ResponseType)d.Run();
 
@@ -243,10 +243,10 @@ namespace Petri
 
 			if(Modified) {
 				Window.Present();
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, Configuration.GetLocalized("Souhaitez-vous enregistrer les modifications apportées au graphe ? Vos modifications seront perdues si vous ne les enregistrez pas."));
-				d.AddButton(Configuration.GetLocalized("Ne pas enregistrer"), ResponseType.No);
-				d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
-				d.AddButton(Configuration.GetLocalized("Enregistrer"), ResponseType.Yes).HasDefault = true;
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, Configuration.GetLocalized("Do you want to save the changes made to the graph? If you don't save, all changes will be permanently lost."));
+				d.AddButton(Configuration.GetLocalized("Don't save"), ResponseType.No);
+				d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
+				d.AddButton(Configuration.GetLocalized("Save"), ResponseType.Yes).HasDefault = true;
 
 				ResponseType result = (ResponseType)d.Run();
 
@@ -280,10 +280,10 @@ namespace Petri
 		public void ExportAsPDF() {
 			string exportPath = "";
 
-			var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Exporter le PDF sous…"), Window,
+			var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Export the PDF as…"), Window,
 				FileChooserAction.Save,
-				new object[]{Configuration.GetLocalized("Annuler"),ResponseType.Cancel,
-					Configuration.GetLocalized("Enregistrer"), ResponseType.Accept});
+				new object[]{Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+					Configuration.GetLocalized("Save"), ResponseType.Accept});
 
 			if(Configuration.SavePath.Length > 0) {
 				fc.SetCurrentFolder(System.IO.Directory.GetParent(Configuration.SavePath).FullName);
@@ -309,10 +309,10 @@ namespace Petri
 		public bool SaveAs() {
 			string filename = null;
 
-			var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Enregistrer le graphe sous…"), Window,
+			var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Save the graph as…"), Window,
 				FileChooserAction.Save,
-				new object[]{Configuration.GetLocalized("Annuler"),ResponseType.Cancel,
-					Configuration.GetLocalized("Enregistrer"),ResponseType.Accept});
+				new object[]{Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+					Configuration.GetLocalized("Save"), ResponseType.Accept});
 
 			if(Configuration.SavePath.Length > 0) {
 				fc.SetCurrentFolder(System.IO.Directory.GetParent(Configuration.SavePath).FullName);
@@ -346,9 +346,9 @@ namespace Petri
 		public void Restore()
 		{
 			if(Modified) {
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Souhaitez-vous revenir à la dernière version enregistrée du graphe ? Vos modifications seront perdues.")));
-				d.AddButton(Configuration.GetLocalized("Annuler"), ResponseType.Cancel);
-				d.AddButton(Configuration.GetLocalized("Revenir"), ResponseType.Accept);
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Do you want to revert the graph to the last opened version? ? All changes will be permanently lost.")));
+				d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
+				d.AddButton(Configuration.GetLocalized("Revert"), ResponseType.Accept);
 
 				ResponseType result = (ResponseType)d.Run();
 
@@ -369,7 +369,7 @@ namespace Petri
 				if(Path == "") {
 					PetriNet = new RootPetriNet(this);
 					int docID = 1;
-					string prefix = Configuration.GetLocalized("Sans titre") + " ";
+					string prefix = Configuration.GetLocalized("Untitled") + " ";
 					foreach(var d in MainClass.Documents) {
 						if(d.Window.Title.StartsWith(prefix)) {
 							int id = 0;
@@ -404,7 +404,7 @@ namespace Petri
 				}
 
 
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Une erreur est survenue lors de du chargement du document : ") + e.Message));
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred upon document loading:") + " " + e.Message));
 				d.AddButton(Configuration.GetLocalized("OK"), ResponseType.Cancel);
 				d.Run();
 				d.Destroy();
@@ -424,20 +424,20 @@ namespace Petri
 					if(!Conflicts(PetriNet)) {
 						this.SaveCppDontAsk();
 						_modifiedSinceGeneration = false;
-						Window.EditorGui.Status = Configuration.GetLocalized("Le code C++ a été généré avec succès.");
+						Window.EditorGui.Status = Configuration.GetLocalized("The C++ code has been sucessfully generated.");
 					}
 					else {
-						MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, Configuration.GetLocalized("Le réseau de Pétri contient des entités en conflit. Veuillez les résoudre avant de pouvoir générer le code."));
+						MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, Configuration.GetLocalized("The Petri Net contains conflicting entities. Please solve them before you can generate the source code."));
 						d.AddButton(Configuration.GetLocalized("OK"), ResponseType.Accept);
 						d.Run();
 						d.Destroy();
 					}
 				}
 				else {
-					var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Enregistrer le code généré sous…"), Window,
+					var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Save the generated code as…"), Window,
 								FileChooserAction.SelectFolder,
-								new object[] {Configuration.GetLocalized("Annuler"), ResponseType.Cancel,
-								Configuration.GetLocalized("Enregistrer"), ResponseType.Accept
+								new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+								Configuration.GetLocalized("Save"), ResponseType.Accept
 						});
 
 					if(fc.Run() == (int)ResponseType.Accept) {
@@ -452,7 +452,7 @@ namespace Petri
 				}
 			}
 			else {
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, Configuration.GetLocalized("Veuillez enregistrer le document avant de générer le code C++."));
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, Configuration.GetLocalized("Please save the document before generating the C++ source code."));
 
 				d.Run();
 				d.Destroy();
@@ -464,7 +464,7 @@ namespace Petri
 				if(_modifiedSinceGeneration) {
 					SaveCpp();
 				}
-				Window.Gui.Status = Configuration.GetLocalized("Compilation en cours…");
+				Window.Gui.Status = Configuration.GetLocalized("Compiling…");
 				Task t = Task.Run((System.Action)CompileTask);
 				if(wait) {
 					t.Wait();
@@ -472,7 +472,7 @@ namespace Petri
 				return true;
 			}
 			else {
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, Configuration.GetLocalized("Veuillez enregistrer le document avant de le compiler."));
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, Configuration.GetLocalized("Please save the document before compiling it."));
 
 				d.Run();
 				d.Destroy();
@@ -489,27 +489,27 @@ namespace Petri
 			var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
 			if(o != "") {
 				GLib.Timeout.Add(0, () => {
-					MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, Configuration.GetLocalized("La compilation a échoué. Souhaitez-vous consulter les erreurs générées ?"));
-					d.AddButton(Configuration.GetLocalized("Non"), ResponseType.Cancel);
-					d.AddButton(Configuration.GetLocalized("Oui"), ResponseType.Accept);
+					MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, Configuration.GetLocalized("The compilation has failed. Do you want to see the generated errors?"));
+					d.AddButton(Configuration.GetLocalized("No"), ResponseType.Cancel);
+					d.AddButton(Configuration.GetLocalized("Yes"), ResponseType.Accept);
 					d.DefaultResponse = ResponseType.Accept;
 
 					ResponseType result = (ResponseType)d.Run();
 
 					d.Destroy();
 					if(result == ResponseType.Accept) {
-						o = Configuration.GetLocalized("Invocation du compilateur :") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath, Settings.LibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o;
+						o = Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath, Settings.LibPath) + "\n\n" + Configuration.GetLocalized("Errors:") + "\n" + o;
 						new CompilationErrorPresenter(this, o).Show();
 					}
 
-					Window.Gui.Status = Configuration.GetLocalized("La compilation a échoué.");
+					Window.Gui.Status = Configuration.GetLocalized("The compilation has failed.");
 
 					return false;
 				});
 			}
 			else {
 				GLib.Timeout.Add (0, () => { 
-					Window.Gui.Status = Configuration.GetLocalized("La compilation s'est terminée avec succès.");
+					Window.Gui.Status = Configuration.GetLocalized("The compilation has been successful.");
 					return false;
 				});
 			}
@@ -535,7 +535,7 @@ namespace Petri
 				_headersManager.Show();
 			}
 			else {
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, Configuration.GetLocalized("Veuillez enregistrer le document avant d'en modifier les headers."));
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, Configuration.GetLocalized("Please save the document before changing its headers."));
 
 				d.Run();
 				d.Destroy();
@@ -551,7 +551,7 @@ namespace Petri
 				_settingsEditor.Show();
 			}
 			else {
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, Configuration.GetLocalized("Veuillez enregistrer le document avant d'en modifier les réglages."));
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, Configuration.GetLocalized("Please save the document before changing its settings."));
 
 				d.Run();
 				d.Destroy();
@@ -571,8 +571,8 @@ namespace Petri
 
 			this.UpdateMenuItems();
 
-			(Window.UndoItem.Child as Label).Text = (UndoManager.NextUndo != null ? Configuration.GetLocalized("Annuler {0}", UndoManager.NextUndoDescription) : "Annuler");
-			(Window.RedoItem.Child as Label).Text = (UndoManager.NextRedo != null ? Configuration.GetLocalized("Rétablir {0}", UndoManager.NextRedoDescription) : "Rétablir");
+			(Window.UndoItem.Child as Label).Text = (UndoManager.NextUndo != null ? Configuration.GetLocalized("Undo {0}", UndoManager.NextUndoDescription) : Configuration.GetLocalized("Undo"));
+			(Window.RedoItem.Child as Label).Text = (UndoManager.NextRedo != null ? Configuration.GetLocalized("Redo {0}", UndoManager.NextRedoDescription) : Configuration.GetLocalized("Redo"));
 		}
 
 		public void UpdateMenuItems() {
@@ -585,17 +585,19 @@ namespace Petri
 		public override void UpdateConflicts() {
 			base.UpdateConflicts();
 			if(Conflicting.Count > 1) {
-				Window.EditorGui.Status = Configuration.GetLocalized("{0} entités en conflit.", Conflicting.Count);
+				Window.EditorGui.Status = Configuration.GetLocalized("{0} conflicting entities.", Conflicting.Count);
 			}
 			else if(Conflicting.Count == 1) {
-				Window.EditorGui.Status = Configuration.GetLocalized("1 entité en conflit.");
+				Window.EditorGui.Status = Configuration.GetLocalized("1 confliting entity.");
 			}
 			else {
-				Window.EditorGui.Status = Configuration.GetLocalized("0 entité en conflit.");
+				Window.EditorGui.Status = Configuration.GetLocalized("No conflicting entity.");
 			}
 			if(Conflicting.Count > 0) {
-				Window.EditorGui.Status += " " + Configuration.GetLocalized("Les conflits devront être résolus avant l'étape de génération/compilation.");
+				Window.EditorGui.Status += " " + Configuration.GetLocalized("Conflicts have to be solved before the generation/compilation step.");
 			}
+
+			Window.EditorGui.View.Redraw();
 		}
 
 		GuiAction _guiActionToMatchSave = null;

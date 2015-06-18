@@ -30,7 +30,7 @@ namespace Petri
 		public HeadersManager(Document doc) {
 			_document = doc;
 			_window = new Window(WindowType.Toplevel);
-			_window.Title = Configuration.GetLocalized("Headers associés à ") + doc.Window.Title;
+			_window.Title = Configuration.GetLocalized("Headers associated with") + " " + doc.Window.Title;
 
 			_window.DefaultWidth = 300;
 			_window.DefaultHeight = 300;
@@ -47,7 +47,7 @@ namespace Petri
 
 			_table = new TreeView();
 			TreeViewColumn c = new TreeViewColumn();
-			c.Title = Configuration.GetLocalized("Fichier");
+			c.Title = Configuration.GetLocalized("File HeadersManager");
 			var fileCell = new Gtk.CellRendererText();
 			c.PackStart(fileCell, true);
 			c.AddAttribute(fileCell, "text", 0);
@@ -115,12 +115,12 @@ namespace Petri
 		}
 
 		private void OnAdd(object sender, EventArgs e) {
-			var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Choisissez le fichier contenant les déclarations C++…"), _window,
+			var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Choose a file containing the C++ declarations…"), _window,
 				FileChooserAction.Open,
-				new object[]{Configuration.GetLocalized("Annuler"), ResponseType.Cancel,
-					Configuration.GetLocalized("Ouvrir"), ResponseType.Accept});
+				new object[]{Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+					Configuration.GetLocalized("Open"), ResponseType.Accept});
 
-			CheckButton b = new CheckButton(Configuration.GetLocalized("Chemin relatif"));
+			CheckButton b = new CheckButton(Configuration.GetLocalized("Relative path"));
 			b.Active = true;
 			fc.ActionArea.PackEnd(b);
 			b.Show();

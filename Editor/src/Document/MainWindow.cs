@@ -87,8 +87,8 @@ namespace Petri
 				IgeMacMenu.QuitMenuItem = _quitItem;
 
 				var appGroup = IgeMacMenu.AddAppMenuGroup();
-				appGroup.AddMenuItem(_aboutItem, Configuration.GetLocalized("À propos de Petri…"));
-				appGroup.AddMenuItem(_preferencesItem, Configuration.GetLocalized("Préférences…"));
+				appGroup.AddMenuItem(_aboutItem, Configuration.GetLocalized("About Petri…"));
+				appGroup.AddMenuItem(_preferencesItem, Configuration.GetLocalized("Preferences…"));
 
 				_vbox.Show();
 				this.Show();
@@ -318,46 +318,46 @@ namespace Petri
 			Menu viewMenu = new Menu();
 			Menu documentMenu = new Menu();
 			Menu helpMenu = new Menu();
-			MenuItem file = new MenuItem(Configuration.GetLocalized("Fichier"));
-			MenuItem edit = new MenuItem(Configuration.GetLocalized("Édition"));
-			MenuItem view = new MenuItem(Configuration.GetLocalized("Affichage"));
+			MenuItem file = new MenuItem(Configuration.GetLocalized("File"));
+			MenuItem edit = new MenuItem(Configuration.GetLocalized("Edit"));
+			MenuItem view = new MenuItem(Configuration.GetLocalized("View"));
 			MenuItem document = new MenuItem(Configuration.GetLocalized("Document"));
-			MenuItem help = new MenuItem(Configuration.GetLocalized("Aide"));
+			MenuItem help = new MenuItem(Configuration.GetLocalized("Help"));
 			file.Submenu = fileMenu;
 			edit.Submenu = editMenu;
 			view.Submenu = viewMenu;
 			document.Submenu = documentMenu;
 			help.Submenu = helpMenu;
 
-			_quitItem = new MenuItem(Configuration.GetLocalized("Quitter"));
+			_quitItem = new MenuItem(Configuration.GetLocalized("Quit"));
 			_quitItem.Activated += OnClickMenu;
 			_quitItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.q, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_newItem = new MenuItem(Configuration.GetLocalized("Nouveau"));
+			_newItem = new MenuItem(Configuration.GetLocalized("New"));
 			_newItem.Activated += OnClickMenu;
 			_newItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.n, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_openItem = new MenuItem(Configuration.GetLocalized("Ouvrir…"));
+			_openItem = new MenuItem(Configuration.GetLocalized("Open…"));
 			_openItem.Activated += OnClickMenu;
 			_openItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.o, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_closeItem = new MenuItem(Configuration.GetLocalized("Fermer"));
+			_closeItem = new MenuItem(Configuration.GetLocalized("Close"));
 			_closeItem.Activated += OnClickMenu;
 			_closeItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.w, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_saveItem = new MenuItem(Configuration.GetLocalized("Enregistrer"));
+			_saveItem = new MenuItem(Configuration.GetLocalized("Save"));
 			_saveItem.Activated += OnClickMenu;
 			_saveItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.s, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_saveAsItem = new MenuItem(Configuration.GetLocalized("Enregistrer sous…"));
+			_saveAsItem = new MenuItem(Configuration.GetLocalized("Save As…"));
 			_saveAsItem.Activated += OnClickMenu;
 			_saveAsItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.s, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
 
-			_exportItem = new MenuItem(Configuration.GetLocalized("Exporter en PDF…"));
+			_exportItem = new MenuItem(Configuration.GetLocalized("Export as PDF…"));
 			_exportItem.Activated += OnClickMenu;
 			_exportItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_revertItem = new MenuItem(Configuration.GetLocalized("Revenir…"));
+			_revertItem = new MenuItem(Configuration.GetLocalized("Revert…"));
 			_revertItem.Activated += OnClickMenu;
 			_revertItem.Sensitive = false;
 
@@ -370,39 +370,39 @@ namespace Petri
 			fileMenu.Append(_exportItem);
 			fileMenu.Append(_revertItem);
 
-			_undoItem = new MenuItem(Configuration.GetLocalized("Annuler"));
+			_undoItem = new MenuItem(Configuration.GetLocalized("Undo"));
 			_undoItem.Activated += OnClickMenu;
 			_undoItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.z, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_redoItem = new MenuItem(Configuration.GetLocalized("Rétablir"));
+			_redoItem = new MenuItem(Configuration.GetLocalized("Redo"));
 			_redoItem.Activated += OnClickMenu;
 			_redoItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.z, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
 
-			_cutItem = new MenuItem(Configuration.GetLocalized("Couper"));
+			_cutItem = new MenuItem(Configuration.GetLocalized("Cut"));
 			_cutItem.Activated += OnClickMenu;
 			_cutItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.x, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_copyItem = new MenuItem(Configuration.GetLocalized("Copier"));
+			_copyItem = new MenuItem(Configuration.GetLocalized("Copy"));
 			_copyItem.Activated += OnClickMenu;
 			_copyItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.c, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_selectAllItem = new MenuItem(Configuration.GetLocalized("Tout sélectionner"));
+			_selectAllItem = new MenuItem(Configuration.GetLocalized("Select All"));
 			_selectAllItem.Activated += OnClickMenu;
 			_selectAllItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.a, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_pasteItem = new MenuItem(Configuration.GetLocalized("Coller"));
+			_pasteItem = new MenuItem(Configuration.GetLocalized("Paste"));
 			_pasteItem.Activated += OnClickMenu;
 			_pasteItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.v, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_findItem = new MenuItem(Configuration.GetLocalized("Rechercher…"));
+			_findItem = new MenuItem(Configuration.GetLocalized("Find…"));
 			_findItem.Activated += OnClickMenu;
 			_findItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.f, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
-			_embedInMacro = new MenuItem(Configuration.GetLocalized("Regrouper dans une macro"));
+			_embedInMacro = new MenuItem(Configuration.GetLocalized("Group in a Macro"));
 			_embedInMacro.Activated += OnClickMenu;
 			_embedInMacro.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
 
-			_preferencesItem = new MenuItem(Configuration.GetLocalized("Préférences…"));
+			_preferencesItem = new MenuItem(Configuration.GetLocalized("Preferences…"));
 			_preferencesItem.Activated += OnClickMenu;
 			_preferencesItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.comma, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
@@ -425,13 +425,13 @@ namespace Petri
 			_copyItem.Sensitive = false;
 			_pasteItem.Sensitive = false;
 
-			_actualSizeItem = new MenuItem(Configuration.GetLocalized("Taille réelle"));
+			_actualSizeItem = new MenuItem(Configuration.GetLocalized("Actual Size"));
 			_actualSizeItem.Activated += OnClickMenu;
 			_actualSizeItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.Key_0, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
-			_zoomInItem = new MenuItem(Configuration.GetLocalized("Zoom avant"));
+			_zoomInItem = new MenuItem(Configuration.GetLocalized("Zoom In"));
 			_zoomInItem.Activated += OnClickMenu;
 			_zoomInItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.plus, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
-			_zoomOutItem = new MenuItem(Configuration.GetLocalized("Zoom arrière"));
+			_zoomOutItem = new MenuItem(Configuration.GetLocalized("Zoom Out"));
 			_zoomOutItem.Activated += OnClickMenu;
 			_zoomOutItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.minus, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
 
@@ -439,17 +439,17 @@ namespace Petri
 			viewMenu.Append(_zoomInItem);
 			viewMenu.Append(_zoomOutItem);
 
-			_showEditorItem = new MenuItem(Configuration.GetLocalized("Afficher l'éditeur"));
+			_showEditorItem = new MenuItem(Configuration.GetLocalized("Show Editor"));
 			_showEditorItem.Activated += OnClickMenu;
 			_showEditorItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
-			_showDebuggerItem = new MenuItem(Configuration.GetLocalized("Afficher le débuggueur"));
+			_showDebuggerItem = new MenuItem(Configuration.GetLocalized("Show Debugger"));
 			_showDebuggerItem.Activated += OnClickMenu;
 			_showDebuggerItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.d, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
-			_manageHeadersItem = new MenuItem(Configuration.GetLocalized("Gérer les headers…"));
+			_manageHeadersItem = new MenuItem(Configuration.GetLocalized("Manage Headers…"));
 			_manageHeadersItem.Activated += OnClickMenu;
-			_manageMacrosItem = new MenuItem(Configuration.GetLocalized("Gérer les macros…"));
+			_manageMacrosItem = new MenuItem(Configuration.GetLocalized("Manage Macros…"));
 			_manageMacrosItem.Activated += OnClickMenu;
-			_documentSettingsItem = new MenuItem(Configuration.GetLocalized("Réglages…"));
+			_documentSettingsItem = new MenuItem(Configuration.GetLocalized("Settings…"));
 			_documentSettingsItem.Activated += OnClickMenu;
 			_documentSettingsItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.comma, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
 
@@ -461,9 +461,9 @@ namespace Petri
 			documentMenu.Append(_documentSettingsItem);
 
 
-			_showHelpItem = new MenuItem(Configuration.GetLocalized("Aide…"));
+			_showHelpItem = new MenuItem(Configuration.GetLocalized("Help…"));
 			_showHelpItem.Activated += OnClickMenu;
-			_aboutItem = new MenuItem(Configuration.GetLocalized("À propos…"));
+			_aboutItem = new MenuItem(Configuration.GetLocalized("About…"));
 			_aboutItem.Activated += OnClickMenu;
 
 			helpMenu.Append(_showHelpItem);

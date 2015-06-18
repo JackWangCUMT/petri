@@ -28,20 +28,20 @@ namespace Petri
 	public class DebugEditor : PaneEditor {
 		public DebugEditor(Document doc, Entity selected) : base(doc, doc.Window.DebugGui.Editor) {
 			if(selected != null) {
-				var label = CreateLabel(0, "ID de l'entité : " + selected.ID.ToString());
+				var label = CreateLabel(0, Configuration.GetLocalized("Entity's ID:") + " " + selected.ID.ToString());
 				label.Markup = "<span color=\"grey\">" + label.Text + "</span>";
 			}
 			if(selected is Transition) {
-				CreateLabel(0, "Condition de la transition :");
+				CreateLabel(0, Configuration.GetLocalized("Transition's condition:"));
 				Entry e = CreateWidget<Entry>(true, 0, ((Transition)selected).Condition.MakeUserReadable());
 				e.IsEditable = false;
 			}
 			else if(selected is Action) {
-				CreateLabel(0, "Action de l'état :");
+				CreateLabel(0, Configuration.GetLocalized("State's action:"));
 				Entry ee = CreateWidget<Entry>(true, 0, ((Action)selected).Function.MakeUserReadable());
 				ee.IsEditable = false;
 
-				var active = CreateWidget<CheckButton>(false, 0, Configuration.GetLocalized("Point d'arrêt sur l'état"));
+				var active = CreateWidget<CheckButton>(false, 0, Configuration.GetLocalized("Breakpoint on the state"));
 				active.Active = _document.DebugController.Breakpoints.Contains((Action)selected);
 				active.Toggled += (sender, e) => {
 					if(_document.DebugController.Breakpoints.Contains((Action)selected)) {
@@ -55,12 +55,12 @@ namespace Petri
 				};
 			}
 
-			CreateLabel(0, Configuration.GetLocalized("Évaluer l'expression :"));
+			CreateLabel(0, Configuration.GetLocalized("Evaluate expression:"));
 			Entry entry = CreateWidget<Entry>(true, 0, Configuration.GetLocalized("Expression"));
-			Evaluate = CreateWidget<Button>(false, 0, Configuration.GetLocalized("Évaluer"));
+			Evaluate = CreateWidget<Button>(false, 0, Configuration.GetLocalized("Evaluate"));
 			Evaluate.Sensitive = _document.DebugController != null &&_document.DebugController.Server.SessionRunning && (!_document.DebugController.Server.PetriRunning || _document.DebugController.Server.Pause);
 
-			CreateLabel(0, Configuration.GetLocalized("Résultat :"));
+			CreateLabel(0, Configuration.GetLocalized("Result:"));
 
 			_buf = new TextBuffer(new TextTagTable());
 			_buf.Text = "";

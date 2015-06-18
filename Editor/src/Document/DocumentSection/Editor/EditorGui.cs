@@ -39,44 +39,44 @@ namespace Petri
 			this.PackStart(_toolbar, false, false, 0);
 
 			_save = new ToolButton(Stock.Save);
-			_save.Label = Configuration.GetLocalized("Enregistrer");
+			_save.Label = Configuration.GetLocalized("Save");
 
 			Pixbuf buf = Pixbuf.LoadFromResource("cpp");
 			IconTheme.AddBuiltinIcon("CppGen", buf.Width, buf);
 			_cpp = new ToolButton("CppGen");
 			_cpp.IconName = "CppGen";
-			_cpp.Label = Configuration.GetLocalized("Gén. C++");
+			_cpp.Label = Configuration.GetLocalized("Generate C++");
 
 			buf = Pixbuf.LoadFromResource("build");
 			IconTheme.AddBuiltinIcon("Build", (int)(buf.Width / 0.8), buf);
 			_compile = new ToolButton("Build");
 			_compile.IconName = "Build";
-			_compile.Label = Configuration.GetLocalized("Compiler");
+			_compile.Label = Configuration.GetLocalized("Compile");
 
 			buf = Pixbuf.LoadFromResource("arrow");
 			IconTheme.AddBuiltinIcon("Arrow", (int)(buf.Width / 0.8), buf);
 			_arrow = new ToggleToolButton("Arrow");
 			_arrow.Active = true;
 			_arrow.IconName = "Arrow";
-			_arrow.Label = Configuration.GetLocalized("Sélection");
+			_arrow.Label = Configuration.GetLocalized("Select");
 
 			buf = Pixbuf.LoadFromResource("action");
 			IconTheme.AddBuiltinIcon("Action", (int)(buf.Width / 0.8), buf);
 			_action = new ToggleToolButton("Action");
 			_action.IconName = "Action";
-			_action.Label = Configuration.GetLocalized("Action");
+			_action.Label = Configuration.GetLocalized("State toolbar");
 
 			buf = Pixbuf.LoadFromResource("transition");
 			IconTheme.AddBuiltinIcon("Transition", (int)(buf.Width / 0.8), buf);
 			_transition = new ToggleToolButton("Transition");
 			_transition.IconName = "Transition";
-			_transition.Label = Configuration.GetLocalized("Transition");
+			_transition.Label = Configuration.GetLocalized("Transition toolbar");
 
 			buf = Pixbuf.LoadFromResource("comment");
 			IconTheme.AddBuiltinIcon("Comment", (int)(buf.Width / 0.8), buf);
 			_comment = new ToggleToolButton("Comment");
 			_comment.IconName = "Comment";
-			_comment.Label = Configuration.GetLocalized("Comment.");
+			_comment.Label = Configuration.GetLocalized("Comment toolbar");
 
 			buf = Pixbuf.LoadFromResource("bug");
 			IconTheme.AddBuiltinIcon("Debug", (int)(buf.Width / 0.8), buf);
@@ -85,12 +85,12 @@ namespace Petri
 			_switchToDebug.Label = Configuration.GetLocalized("Debug");
 
 			_zoomIn = new ToolButton(Stock.ZoomIn);
-			_zoomIn.Label = Configuration.GetLocalized("Agrandir");
+			_zoomIn.Label = Configuration.GetLocalized("Zoom In toolbar");
 			_zoomOut = new ToolButton(Stock.ZoomOut);
-			_zoomOut.Label = Configuration.GetLocalized("Réduire");
+			_zoomOut.Label = Configuration.GetLocalized("Zoom Out toolbar");
 
 			_findTool = new ToolButton(Stock.Find);
-			_findTool.Label = Configuration.GetLocalized("Rechercher");
+			_findTool.Label = Configuration.GetLocalized("Find");
 
 			_save.Clicked += OnClick;
 			_cpp.Clicked += OnClick;
@@ -143,19 +143,19 @@ namespace Petri
 			c0.AddAttribute(idCell, "text", 0);
 
 			TreeViewColumn c1 = new TreeViewColumn();
-			c1.Title = Configuration.GetLocalized("Type");
+			c1.Title = Configuration.GetLocalized("Kind");
 			var typeCell = new Gtk.CellRendererText();
 			c1.PackStart(typeCell, true);
 			c1.AddAttribute(typeCell, "text", 1);
 
 			TreeViewColumn c2 = new TreeViewColumn();
-			c2.Title = Configuration.GetLocalized("Nom");
+			c2.Title = Configuration.GetLocalized("Name");
 			var nameCell = new Gtk.CellRendererText();
 			c2.PackStart(nameCell, true);
 			c2.AddAttribute(nameCell, "text", 2);
 
 			TreeViewColumn c3 = new TreeViewColumn();
-			c2.Title = Configuration.GetLocalized("Valeur");
+			c2.Title = Configuration.GetLocalized("Value");
 			var valueCell = new Gtk.CellRendererText();
 			c2.PackStart(valueCell, true);
 			c2.AddAttribute(valueCell, "text", 3);
@@ -305,7 +305,7 @@ namespace Petri
 					var e = (Action)ee;
 					if(e.Function.MakeUserReadable().Contains(what)) {
 						_findResults.Add(e);
-						_findStore.AppendValues(e.ID.ToString(), Configuration.GetLocalized("Action"), e.Name, e.Function.MakeUserReadable());
+						_findStore.AppendValues(e.ID.ToString(), Configuration.GetLocalized("State"), e.Name, e.Function.MakeUserReadable());
 					}
 				}
 				else if(ee is Transition && (type == Petri.Find.FindType.All || type == Petri.Find.FindType.Transition)) {
@@ -319,7 +319,7 @@ namespace Petri
 					var e = (Comment)ee;
 					if(e.Name.Contains(what)) {
 						_findResults.Add(e);
-						_findStore.AppendValues(e.ID.ToString(), Configuration.GetLocalized("Commentaire"), "-", e.Name);
+						_findStore.AppendValues(e.ID.ToString(), Configuration.GetLocalized("Comment"), "-", e.Name);
 					}
 				}
 			}

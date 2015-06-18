@@ -72,7 +72,7 @@ namespace Petri {
 				}
 
 				if(!(result is ExpressionType))
-					throw new Exception(Configuration.GetLocalized("Unable to get a valid expression"));
+					throw new Exception(Configuration.GetLocalized("Unable to get a valid expression."));
 
 				result.Unexpanded = unexpanded;
 				result.NeedsExpansion = !unexpanded.Equals(expanded);
@@ -217,7 +217,7 @@ namespace Petri {
 							nesting.Pop();
 						}
 						else
-							throw new Exception(Configuration.GetLocalized(" expected, but \' found!", nesting.Peek().Item1));
+							throw new Exception(Configuration.GetLocalized("{0} expected, but \' found!", nesting.Peek().Item1));
 						break;
 					}
 
@@ -359,7 +359,7 @@ namespace Petri {
 								})) as Cpp.Method;
 
 								if(m == null) {
-									throw new Exception(Configuration.GetLocalized("Aucune méthode ne correspond à l'expression demandée ({0})", GetStringFromPreprocessed(s, subexprs)));
+									throw new Exception(Configuration.GetLocalized("No method match the specified expression ({0}).", GetStringFromPreprocessed(s, subexprs)));
 								}
 
 								return new MethodInvocation(m, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), foundOperator == Cpp.Operator.Name.SelectionPtr, param.ToArray());
@@ -391,7 +391,7 @@ namespace Petri {
 								});
 							
 								if(f == null) {
-									throw new Exception(Configuration.GetLocalized("Aucune fonction ne correspond à l'expression demandée ({0})", GetStringFromPreprocessed(s, subexprs)));
+									throw new Exception(Configuration.GetLocalized("No function match the specified expression ({0}).", GetStringFromPreprocessed(s, subexprs)));
 								}
 							
 								return new FunctionInvocation(f, param.ToArray());
@@ -470,7 +470,7 @@ namespace Petri {
 				})) as Method;
 
 				if(m == null) {
-					throw new Exception(Configuration.GetLocalized("Aucune méthode ne correspond à l'expression demandée"));
+					throw new Exception(Configuration.GetLocalized("No method match the specified expression."));
 				}
 
 				return new MethodInvocation(m, Expression.CreateFromString<Expression>(invocation[0], entity), indirection, exprList.ToArray());
@@ -522,7 +522,7 @@ namespace Petri {
 
 			public override string MakeCpp() {
 				if(DoWeCare)
-					throw new Exception(Configuration.GetLocalized("Expression vide !"));
+					throw new Exception(Configuration.GetLocalized("Empty expression!"));
 				else
 					return "";
 			}
@@ -646,7 +646,7 @@ namespace Petri {
 				Regex name = new Regex(Cpp.Parser.NamePattern);
 				Match nameMatch = name.Match(expr);
 				if(!nameMatch.Success) {
-					throw new Exception(Configuration.GetLocalized("Invalid variable name specified"));
+					throw new Exception(Configuration.GetLocalized("Invalid variable name specified!"));
 				}
 			}
 

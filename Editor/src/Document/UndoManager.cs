@@ -215,7 +215,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Modifier le parent");
+				return Configuration.GetLocalized("Change Parent");
 			}
 		}
 
@@ -248,10 +248,10 @@ namespace Petri
 		public override string Description {
 			get {
 				if(_entity is Comment) {
-					return Configuration.GetLocalized("Modifier le commentaire");
+					return Configuration.GetLocalized("Change Comment");
 				}
 				else {
-					return Configuration.GetLocalized("Changer le nom");
+					return Configuration.GetLocalized("Change Name");
 				}
 			}
 		}
@@ -284,7 +284,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Changer le nombre de jetons requis");
+				return Configuration.GetLocalized("Change requested tokens count");
 			}
 		}
 
@@ -331,19 +331,19 @@ namespace Petri
 			get {
 				string entity;
 				if(_entity is State) {
-					entity = "l'état";
+					entity = Configuration.GetLocalized("the state");
 				}
 				else if(_entity is Transition) {
-					entity = "la transition";
+					entity = Configuration.GetLocalized("the transition");
 				}
 				else if(_entity is Comment) {
-					entity = "le commentaire";
+					entity = Configuration.GetLocalized("the comment");
 				}
 				else {// Too lazy to search for a counter example but should probably never happen
-					entity = "l'entité";
+					entity = Configuration.GetLocalized("the entity");
 				}
 
-				return Configuration.GetLocalized("Déplacer {0}", entity);
+				return Configuration.GetLocalized("Move {0}", entity);
 			}
 		}
 
@@ -373,7 +373,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Modifier l'état");
+				return Configuration.GetLocalized("Change the state");
 			}
 		}
 
@@ -403,7 +403,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Modifier la condition");
+				return Configuration.GetLocalized("Change the condition");
 			}
 		}
 
@@ -438,7 +438,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Modifier la fonction");
+				return Configuration.GetLocalized("Change the function");
 			}
 		}
 
@@ -471,7 +471,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Ajouter un commentaire");
+				return Configuration.GetLocalized("Add a comment");
 			}
 		}
 
@@ -499,7 +499,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Supprimer le commentaire");
+				return Configuration.GetLocalized("Remove the comment");
 			}
 		}
 
@@ -529,7 +529,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Changer la couleur du commentaire");
+				return Configuration.GetLocalized("Change the comment's color");
 			}
 		}
 
@@ -560,7 +560,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Redimensionner le commentaire");
+				return Configuration.GetLocalized("Resize the comment");
 			}
 		}
 
@@ -595,7 +595,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Ajouter une transition");
+				return Configuration.GetLocalized("Add a transition");
 			}
 		}
 
@@ -657,7 +657,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Changer l'extrémité de la transition");
+				return Configuration.GetLocalized("Change the transition's end");
 			}
 		}
 
@@ -691,7 +691,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Supprimer la transition");
+				return Configuration.GetLocalized("Remove the transition");
 			}
 		}
 
@@ -720,7 +720,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Ajouter un état");
+				return Configuration.GetLocalized("Add a state");
 			}
 		}
 
@@ -748,7 +748,7 @@ namespace Petri
 
 		public override string Description {
 			get {
-				return Configuration.GetLocalized("Supprimer l'état");
+				return Configuration.GetLocalized("Remove the state");
 			}
 		}
 

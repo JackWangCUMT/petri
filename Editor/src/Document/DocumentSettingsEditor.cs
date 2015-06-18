@@ -33,7 +33,7 @@ namespace Petri
 			_document = doc;
 
 			_window = new Window(WindowType.Toplevel);
-			_window.Title = "Réglages du document " + doc.Window.Title;
+			_window.Title = Configuration.GetLocalized("Document's settings:") + " " + doc.Window.Title;
 
 			_window.DefaultWidth = 400;
 			_window.DefaultHeight = 600;
@@ -58,15 +58,15 @@ namespace Petri
 			_window.Add(scrolledWindow);
 
 			{
-				Label label = new Label("Nom C++ du réseau de pétri :");
+				Label label = new Label(Configuration.GetLocalized("C++ name of the Petri net:"));
 				Entry entry = new Entry(_document.Settings.Name);
 				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					Regex name = new Regex(Cpp.Parser.NamePattern);
 					Match nameMatch = name.Match((obj as Entry).Text);
 
 					if(!nameMatch.Success || nameMatch.Value != (obj as Entry).Text) {
-						MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Le nom du réseau de Pétri n'est pas un identificateur C++ valide.");
-						d.AddButton("Annuler", ResponseType.Cancel);
+						MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, Configuration.GetLocalized("The Petri net's name is not a valid C++ identifier."));
+						d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
 						d.Run();
 						d.Destroy();
 
@@ -83,7 +83,7 @@ namespace Petri
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(entry, false, false, 0);
 
-				label = new Label("Enum \"Résultat Action\" :");
+				label = new Label(Configuration.GetLocalized("Enum \"Action Result\":"));
 				_customEnumEditor = new Entry("");
 
 				MainClass.RegisterValidation(_customEnumEditor, false, (obj, p) => {
@@ -94,8 +94,8 @@ namespace Petri
 						_document.Settings.Modified = true;
 					}
 					catch(Exception) {
-						MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, "Nom invalide pour l'enum ou pour une de ses valeurs.");
-						d.AddButton("Annuler", ResponseType.Cancel);
+						MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, Configuration.GetLocalized("Invalid name for the enum or one of its values."));
+						d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
 						d.Run();
 						d.Destroy();
 
@@ -109,7 +109,7 @@ namespace Petri
 				});
 
 				var radioVBox = new VBox(true, 2);
-				_defaultEnum = new RadioButton("Utiliser l'enum par défaut (ActionResult)");
+				_defaultEnum = new RadioButton(Configuration.GetLocalized("Use the default enum (ActionResult)"));
 				_defaultEnum.Toggled += (object sender, EventArgs e) => {
 					if((sender as RadioButton).Active) {
 						_customEnumEditor.Sensitive = false;
@@ -118,7 +118,7 @@ namespace Petri
 						_document.Modified = true;
 					}
 				};
-				_customEnum = new RadioButton(_defaultEnum, "Utiliser l'enum suivante (nom, valeur1, valeur2…) :");
+				_customEnum = new RadioButton(_defaultEnum, Configuration.GetLocalized("Use the following enum (name, value1, value2…):"));
 				_customEnum.Toggled += (object sender, EventArgs e) => {
 					if((sender as RadioButton).Active) {
 						_customEnumEditor.Sensitive = true;
@@ -146,7 +146,7 @@ namespace Petri
 				vbox.PackStart(radioVBox, false, false, 0);
 				vbox.PackStart(_customEnumEditor, false, false, 0);
 
-				label = new Label("Chemin vers le compilateur C++ :");
+				label = new Label(Configuration.GetLocalized("Path to the C++ compiler:"));
 				entry = new Entry(_document.Settings.Compiler);
 				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					_document.Settings.Compiler = (obj as Entry).Text;
@@ -158,7 +158,7 @@ namespace Petri
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(entry, false, false, 0);
 
-				label = new Label("Flags passés au compilateur C++ :");
+				label = new Label(Configuration.GetLocalized("Flags forwarded to the c++ compiler:"));
 				entry = new Entry(String.Join(" ", _document.Settings.CompilerFlags));
 				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					_document.Settings.CompilerFlags.Clear();
@@ -172,7 +172,7 @@ namespace Petri
 				vbox.PackStart(entry, false, false, 0);
 
 
-				label = new Label("Chemin où générer le code (relatif au document) :");
+				label = new Label(Configuration.GetLocalized("Output path for the generated code (relative to the document):"));
 				_sourceOutputPath = new Entry(_document.Settings.SourceOutputPath);
 				MainClass.RegisterValidation(_sourceOutputPath, false, (obj, p) => {
 					_document.Settings.SourceOutputPath = (obj as Entry).Text;
@@ -191,7 +191,7 @@ namespace Petri
 				hbox.PackStart(_selectSourceOutputPath, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 
-				label = new Label("Chemin où créer la librairie dynamique (relatif au document) :");
+				label = new Label(Configuration.GetLocalized("Output path for the dynamic library (relative to the document):"));
 				_libOutputPath = new Entry(_document.Settings.LibOutputPath);
 				MainClass.RegisterValidation(_libOutputPath, false, (obj, p) => {
 					_document.Settings.LibOutputPath = (obj as Entry).Text;
@@ -210,7 +210,7 @@ namespace Petri
 				hbox.PackStart(_selectLibOutputPath, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 
-				label = new Label("Nom d'hôte du débuggeur :");
+				label = new Label(Configuration.GetLocalized("Host name for the debugger:"));
 				entry = new Entry(_document.Settings.Hostname);
 				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					_document.Settings.Hostname = (obj as Entry).Text;
@@ -222,7 +222,7 @@ namespace Petri
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(entry, false, false, 0);
 
-				label = new Label("Port de communication avec le débuggueur :");
+				label = new Label(Configuration.GetLocalized("TCP Port for the debugger communication:"));
 				entry = new Entry(_document.Settings.Port.ToString());
 				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					try {
@@ -242,13 +242,13 @@ namespace Petri
 
 			{
 				var hbox = new HBox(false, 5);
-				Label label = new Label("Chemins de recherche des headers :");
+				Label label = new Label(Configuration.GetLocalized("Headers search paths:"));
 				hbox.PackStart(label, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 
 				_headersSearchPath = new TreeView();
 				TreeViewColumn c = new TreeViewColumn();
-				c.Title = "Chemin";
+				c.Title = Configuration.GetLocalized("Path");
 				var pathCell = new Gtk.CellRendererText();
 				pathCell.Editable = true;
 				pathCell.Edited += (object o, EditedArgs args) => {
@@ -262,7 +262,7 @@ namespace Petri
 				_headersSearchPath.AppendColumn(c);
 
 				c = new TreeViewColumn();
-				c.Title = "Récursif";
+				c.Title = "Recursive";
 				var recursivityCell = new Gtk.CellRendererToggle();
 				recursivityCell.Toggled += (object o, ToggledArgs args) => {
 					var tup = _document.Settings.IncludePaths[int.Parse(args.Path)];
@@ -290,13 +290,13 @@ namespace Petri
 
 			{
 				var hbox = new HBox(false, 5);
-				Label label = new Label("Chemins de recherche des librairies :");
+				Label label = new Label(Configuration.GetLocalized("Libraries search paths:"));
 				hbox.PackStart(label, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 
 				_libsSearchPath = new TreeView();
 				TreeViewColumn c = new TreeViewColumn();
-				c.Title = "Chemin";
+				c.Title = Configuration.GetLocalized("Path");
 				var pathCell = new Gtk.CellRendererText();
 				pathCell.Editable = true;
 				pathCell.Edited += (object o, EditedArgs args) => {
@@ -309,7 +309,7 @@ namespace Petri
 				_libsSearchPath.AppendColumn(c);
 
 				c = new TreeViewColumn();
-				c.Title = "Récursif";
+				c.Title = Configuration.GetLocalized("Recursive");
 				var recursivityCell = new Gtk.CellRendererToggle();
 				recursivityCell.Toggled += (object o, ToggledArgs args) => {
 					var tup = _document.Settings.LibPaths[int.Parse(args.Path)];
@@ -337,13 +337,13 @@ namespace Petri
 
 			{
 				var hbox = new HBox(false, 5);
-				Label label = new Label("Librairies utilisées par le document :");
+				Label label = new Label(Configuration.GetLocalized("Libraries used by the document:"));
 				hbox.PackStart(label, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 
 				_libs = new TreeView();
 				TreeViewColumn c = new TreeViewColumn();
-				c.Title = "Chemin";
+				c.Title = Configuration.GetLocalized("Path");
 				var pathCell = new Gtk.CellRendererText();
 				pathCell.Editable = true;
 				pathCell.Edited += (object o, EditedArgs args) => {
@@ -401,18 +401,18 @@ namespace Petri
 			FileFilter filter = null;
 
 			if(sender == _addHeaderSearchPath) {
-				title = "Sélectionnez le dossier où rechercher les headers…";
+				title = Configuration.GetLocalized("Select the directory where to search for the headers…");
 				action = FileChooserAction.SelectFolder;
 			}
 			else if(sender == _addLibSearchPath) {
-				title = "Sélectionnez le dossier où rechercher les librairies…";
+				title = Configuration.GetLocalized("Select the directory where to search for the libraries…");
 				action = FileChooserAction.SelectFolder;
 			}
 			else if(sender == _addLib) {
-				title = "Sélectionnez la librairie…";
+				title = Configuration.GetLocalized("Select the library…");
 				action = FileChooserAction.Open;
 				filter = new FileFilter();
-				filter.Name = "Librairie";
+				filter.Name = Configuration.GetLocalized("Library");
 
 				filter.AddPattern("*.a");
 				filter.AddPattern("*.lib");
@@ -420,18 +420,18 @@ namespace Petri
 				filter.AddPattern("*.dylib");
 			}
 			else if(sender == _selectSourceOutputPath) {
-				title = "Sélectionnez le dossier dans lequel générer le C++…";
+				title = Configuration.GetLocalized("Select the directory where to generate the C++ source code…");
 				action = FileChooserAction.SelectFolder;
 			}
 			else if(sender == _selectLibOutputPath) {
-				title = "Sélectionnez le dossier dans lequel générer la librairie…";
+				title = Configuration.GetLocalized("Select the directory where to generate the library…");
 				action = FileChooserAction.SelectFolder;
 			}
 
 			var fc = new Gtk.FileChooserDialog(title, _window,
 				action,
-				new object[]{"Annuler",ResponseType.Cancel,
-					"Ouvrir",ResponseType.Accept});
+				new object[]{Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+					Configuration.GetLocalized("Open"), ResponseType.Accept});
 			if(filter != null) {
 				fc.AddFilter(filter);
 			}

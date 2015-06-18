@@ -61,7 +61,7 @@ namespace Petri
 		public override void Cut() {
 			if(_document.Window.EditorGui.View.SelectedEntities.Count > 0) {
 				Copy();
-				_document.PostAction(new GuiActionWrapper(this.RemoveSelection(), Configuration.GetLocalized("Couper les entités")));
+				_document.PostAction(new GuiActionWrapper(this.RemoveSelection(), Configuration.GetLocalized("Cut the entities")));
 			}
 		}
 
@@ -91,7 +91,7 @@ namespace Petri
 				}
 
 				if(toRemove.Count > 0) {
-					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Impossible d'encapsuler la sélection dans une macro : des entités qui sont reliées à la sélection ne sont pas sélectionnées.")));
+					MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Unable to wrap the selection into a macro: some entities linked to the selection are not selected.")));
 					d.AddButton("OK", ResponseType.Cancel);
 					d.Run();
 					d.Destroy();
@@ -142,7 +142,7 @@ namespace Petri
 
 				actions.Add(new AddStateAction(macro));
 
-				_document.PostAction(new GuiActionList(actions, Configuration.GetLocalized("Regrouper dans une macro")));
+				_document.PostAction(new GuiActionList(actions, Configuration.GetLocalized("Wrap into a macro")));
 			}
 		}
 
@@ -185,7 +185,7 @@ namespace Petri
 
 			_document.Window.EditorGui.View.ResetSelection();
 
-			return new GuiActionList(deleteEntities, Configuration.GetLocalized("Supprimer les entités"));
+			return new GuiActionList(deleteEntities, Configuration.GetLocalized("Remove the entities"));
 		}
 
 		public override void SelectAll() {
@@ -273,7 +273,7 @@ namespace Petri
 				actionList.Add(new AddTransitionAction(t, false));
 			}
 
-			return new GuiActionList(actionList, Configuration.GetLocalized("Coller les entités"));
+			return new GuiActionList(actionList, Configuration.GetLocalized("Paste the entities"));
 		}
 
 		private List<Entity> CloneEntities(IEnumerable<Entity> entities, Document destination) {

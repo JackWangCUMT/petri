@@ -1,0 +1,727 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Language>
+
+<Key>Invalid arguments count.</Key>
+<Value>Nombre d'arguments invalide.</Value>
+
+<Key>The function is conflicting.</Key>
+<Value>La fonciton est en conflit.</Value>
+
+<Key>About Petri…</Key>
+<Value>À propos de Petri…</Value>
+
+<Key>Preferences…</Key>
+<Value>Préférences…</Value>
+
+<Key>File</Key>
+<Value>Fichier</Value>
+
+<Key>Edit</Key>
+<Value>Édition</Value>
+
+<Key>View</Key>
+<Value>Affichage</Value>
+
+<Key>Document</Key>
+<Value>Document</Value>
+
+<Key>Help</Key>
+<Value>Aide</Value>
+
+<Key>Quit</Key>
+<Value>Quitter</Value>
+
+<Key>New</Key>
+<Value>Nouveau</Value>
+
+<Key>Open…</Key>
+<Value>Ouvrir…</Value>
+
+<Key>Close</Key>
+<Value>Fermer</Value>
+
+<Key>Save</Key>
+<Value>Enregistrer</Value>
+
+<Key>Save As…</Key>
+<Value>Enregistrer Sous…</Value>
+
+<Key>Export as PDF…</Key>
+<Value>Exporter en PDF…</Value>
+
+<Key>Revert…</Key>
+<Value>Revenir…</Value>
+
+<Key>Cut</Key>
+<Value>Couper</Value>
+
+<Key>Copy</Key>
+<Value>Copier</Value>
+
+<Key>Select All</Key>
+<Value>Tout sélectionner</Value>
+
+<Key>Paste</Key>
+<Value>Coller</Value>
+
+<Key>Find…</Key>
+<Value>Rechercher…</Value>
+
+<Key>Group in a Macro</Key>
+<Value>Regrouper dans une macro</Value>
+
+<Key>Actual Size</Key>
+<Value>Taille réelle</Value>
+
+<Key>Zoom In</Key>
+<Value>Agrandier</Value>
+
+<Key>Zoom Out</Key>
+<Value>Réduire</Value>
+
+<Key>Show Editor</Key>
+<Value>Afficher l'éditeur</Value>
+
+<Key>Show Debugger</Key>
+<Value>Afficher le débuggueur</Value>
+
+<Key>Manage Headers…</Key>
+<Value>Gérer les headers…</Value>
+
+<Key>Manage Macros…</Key>
+<Value>Gérer les macros…</Value>
+
+<Key>Settings…</Key>
+<Value>Réglages…</Value>
+
+<Key>Help…</Key>
+<Value>Aide…</Value>
+
+<Key>About…</Key>
+<Value>À propos…</Value>
+
+<Key>No Exit node found in the saved Petri net!</Key>
+<Value>Pas d'état final dans le réseau de Pétri enregistré!</Value>
+
+<Key>Error: the file \"{0}\" doesn't exist. Please generate the source code before compiling.</Key>
+<Value>Erreur : le fichier \"{0}\" n'existe pas. Veuillez générer le code avant de compiler.</Value>
+
+<Key>Error: the compiler invocation is too long ({0}) characters. Try to remove some recursive inclusion paths.</Key>
+<Value>Erreur : l'invocation du compilateur est trop longue ({0}) caractères. Essayez de supprimer des chemins d'inclusion récursifs.</Value>
+
+<Key>{0} compilation output</Key>
+<Value>Sortie de la compilation de {0}</Value>
+
+<Key>Generate C++</Key>
+<Value>Gén. C++</Value>
+
+<Key>Compile</Key>
+<Value>Compiler</Value>
+
+<Key>Select</Key>
+<Value>Sélection</Value>
+
+<Key>State toolbar</Key>
+<Value>Action</Value>
+
+<Key>Transition toolbar</Key>
+<Value>Transition</Value>
+
+<Key>Comment toolbar</Key>
+<Value>Comment.</Value>
+
+<Key>Debug</Key>
+<Value>Debug</Value>
+
+<Key>Zoom In toolbar</Key>
+<Value>Agrandir</Value>
+
+<Key>Zoom Out toolbar</Key>
+<Value>Réduire</Value>
+
+<Key>Find</Key>
+<Value>Rechercher</Value>
+
+<Key>ID</Key>
+<Value>ID</Value>
+
+<Key>Kind</Key>
+<Value>Type</Value>
+
+<Key>Name</Key>
+<Value>Nom</Value>
+
+<Key>Value</Key>
+<Value>Valeur</Value>
+
+<Key>State</Key>
+<Value>Action</Value>
+
+<Key>Transition</Key>
+<Value>Transition</Value>
+
+<Key>Comment</Key>
+<Value>Commentaire</Value>
+
+<Key>The action list is empty!</Key>
+<Value>La liste d'actions est vide!</Value>
+
+<Key>Change Parent</Key>
+<Value>Modifier le parent</Value>
+
+<Key>Change Comment</Key>
+<Value>Modifier le commentaire</Value>
+
+<Key>Change Name</Key>
+<Value>Changer le nom</Value>
+
+<Key>Changer required tokens count</Key>
+<Value>Changer le nombre de jetons requis</Value>
+
+<Key>the state</Key>
+<Value>l'état</Value>
+
+<Key>the transition</Key>
+<Value>la transition</Value>
+
+<Key>the comment</Key>
+<Value>le commentaire</Value>
+
+<Key>the entity</Key>
+<Value>l'entité</Value>
+
+<Key>Move {0}</Key>
+<Value>Déplacer {0}</Value>
+
+<Key>Change the state</Key>
+<Value>Modifier l'état</Value>
+
+<Key>Change the condition</Key>
+<Value>Modifier la condition</Value>
+
+<Key>Change the function</Key>
+<Value>Modifier la fonction</Value>
+
+<Key>Add a comment</Key>
+<Value>Ajouter un commentaire</Value>
+
+<Key>Remove the comment</Key>
+<Value>Supprimer le commentaire</Value>
+
+<Key>Change the comment's color</Key>
+<Value>Changer la couleur du commentaire</Value>
+
+<Key>Resize the comment</Key>
+<Value>Redimensionner le commentaire</Value>
+
+<Key>Add a transition</Key>
+<Value>Ajouter une transition</Value>
+
+<Key>Change the transition's end</Key>
+<Value>Changer l'extrémité de la transition</Value>
+
+<Key>Remove the transition</Key>
+<Value>Supprimer la transition</Value>
+
+<Key>Add a state</Key>
+<Value>Ajouter un état</Value>
+
+<Key>Remove the state</Key>
+<Value>Supprimer l'état</Value>
+
+<Key>Open Petri Net…</Key>
+<Value>Ouvrir le réseau de Pétri…</Value>
+
+<Key>Cancel</Key>
+<Value>Annuler</Value>
+
+<Key>Open</Key>
+<Value>Ouvrir</Value>
+
+<Key>Fix</Key>
+<Value>Fix</Value>
+
+<Key>End session</Key>
+<Value>Terminer la session</Value>
+
+<Key>Editor</Key>
+<Value>Éditeur</Value>
+
+<Key>Disconnect</Key>
+<Value>Déconnexion</Value>
+
+<Key>Stop</Key>
+<Value>Stopper</Value>
+
+<Key>Continue</Key>
+<Value>Continuer</Value>
+
+<Key>Pause</Key>
+<Value>Pause</Value>
+
+<Key>Execute</Key>
+<Value>Exécuter</Value>
+
+<Key>Connection</Key>
+<Value>Connexion</Value>
+
+<Key>Do you really want to make the selecte state into a macro?</Key>
+<Value>Souhaitez-vous vraiment transformer l'action sélectionnée en macro ?</Value>
+
+<Key>Change the state into a macro</Key>
+<Value>Transformer l'entité en macro</Value>
+
+<Key>Move the entity</Key>
+<Value>Déplacer l'entité</Value>
+
+<Key>Move the entities</Key>
+<Value>Déplacer les entités</Value>
+
+<Key>Invalid timeout duration.</Key>
+<Value>Durée de timeout invalide.</Value>
+
+<Key>A debugger session is still running. Do you want to stop it?</Key>
+<Value>Une session de débuggeur est toujours active. Souhaitez-vous l'arrêter ?</Value>
+
+<Key>Stop the session</Key>
+<Value>Arrêter la session</Value>
+
+<Key>Do you want to save the changes made to the graph? If you don't save, all changes will be permanently lost.</Key>
+<Value>Souhaitez-vous enregistrer les modifications apportées au graphe ? Vos modifications seront perdues si vous ne les enregistrez pas.</Value>
+
+<Key>Don't save</Key>
+<Value>Ne pas enregistrer</Value>
+
+<Key>Export the PDF as…</Key>
+<Value>Exporter le PDF sous…</Value>
+
+<Key>Save the graph as…</Key>
+<Value>Enregistrer le graphe sous…</Value>
+
+<Key>Do you want to revert the graph to the last opened version? ? All changes will be permanently lost.</Key>
+<Value>Souhaitez-vous revenir à la dernière version enregistrée du graphe ? Vos modifications seront perdues.</Value>
+
+<Key>Revert</Key>
+<Value>Revenir</Value>
+
+<Key>Untitled</Key>
+<Value>Sans titre</Value>
+
+<Key>An error occurred upon document loading: </Key>
+<Value>Une erreur est survenue lors de du chargement du document :</Value>
+
+<Key>The C++ code has been sucessfully generated.</Key>
+<Value>Le code C++ a été généré avec succès.</Value>
+
+<Key>The Petri Net contains conflicting entities. Please solve them before you can generate the source code.</Key>
+<Value>Le réseau de Pétri contient des entités en conflit. Veuillez les résoudre avant de pouvoir générer le code.</Value>
+
+<Key>Save the generated code as…</Key>
+<Value>Enregistrer le code généré sous…</Value>
+
+<Key>Please save the document before generating the C++ source code.</Key>
+<Value>Veuillez enregistrer le document avant de générer le code C++.</Value>
+
+<Key>Compiling…</Key>
+<Value>Compilation en cours…</Value>
+
+<Key>Please save the document before compiling it.</Key>
+<Value>Veuillez enregistrer le document avant de le compiler.</Value>
+
+<Key>The compilation has failed. Do you want to see the generated errors?</Key>
+<Value>La compilation a échoué. Souhaitez-vous consulter les erreurs générées ?</Value>
+
+<Key>No</Key>
+<Value>Non</Value>
+
+<Key>Yes</Key>
+<Value>Oui</Value>
+
+<Key>Errors:</Key>
+<Value>Erreurs :</Value>
+
+<Key>The compilation has failed.</Key>
+<Value>La compilation a échoué.</Value>
+
+<Key>The compilation has been successful.</Key>
+<Value>La compilation s'est terminée avec succès.</Value>
+
+<Key>Please save the document before changing its headers.</Key>
+<Value>Veuillez enregistrer le document avant d'en modifier les headers.</Value>
+
+<Key>Please save the document before changing its settings.</Key>
+<Value>Veuillez enregistrer le document avant d'en modifier les réglages.</Value>
+
+<Key>Undo {0}</Key>
+<Value>Annuler {0}</Value>
+
+<Key>Undo</Key>
+<Value>Annuler</Value>
+
+<Key>Redo {0}</Key>
+<Value>Rétablir {0}</Value>
+
+<Key>Redo</Key>
+<Value>Rétablir</Value>
+
+<Key>{0} conflicting entities.</Key>
+<Value>{0} entités en conflit.</Value>
+
+<Key>1 conflicting entity.</Key>
+<Value>1 entité en conflit.</Value>
+
+<Key>No conflicting entity.</Key>
+<Value>0 entité en conflit.</Value>
+
+<Key>Conflicts have to be solved before the generation/compilation step.</Key>
+<Value>Les conflits devront être résolus avant l'étape de génération/compilation.</Value>
+
+<Key>Debugger still running!</Key>
+<Value>Le débuggueur est toujours lancé!</Value>
+
+<Key>An error occurred in the debugger:</Key>
+<Value>Une erreur est survenue dans le débuggueur :</Value>
+
+<Key>Reloading the petri net…</Key>
+<Value>Rechargement du réseau de pétri…</Value>
+
+<Key>A variable of the petri net cannot be evaluated when the petri net is not running.</Key>
+<Value>Impossible d'évaluer une variable du réseau de pétri tant que celui-ci n'est pas lancé.</Value>
+
+<Key>Compilation error:</Key>
+<Value>Erreur de compilation :</Value>
+
+<Key>Sucessfully connected.</Key>
+<Value>Connecté avec succès.</Value>
+
+<Key>An error was returned by the debugger:</Key>
+<Value>Une erreur a été retournée par le débuggueur :</Value>
+
+<Key>Invalid message received from debugger (expected ehlo).</Key>
+<Value>Message envoyé par le débuggueur invalide (ehlo attendu).</Value>
+
+<Key>Unable to connect to the server:</Key>
+<Value>Impossible de se connecter au serveur :</Value>
+
+<Key>The petri net is running.</Key>
+<Value>Exécution en cours.</Value>
+
+<Key>The petri net execution has ended.</Key>
+<Value>Exécution terminée.</Value>
+
+<Key>The Petri net has been successfully reloaded.</Key>
+<Value>Le réseau de Pétri a été rechargé avec succès.</Value>
+
+<Key>Paused.</Key>
+<Value>En pause.</Value>
+
+<Key>Disconnected.</Key>
+<Value>Déconnecté.</Value>
+
+<Key>Remote debugger requested a session termination for reason:</Key>
+<Value>Le débuggueur distant a provoqué la fin de la session pour la raison suivante :</Value>
+
+<Key>Entity sent from runtime doesn't exist on our side! (id: {0})</Key>
+<Value>L'entité référencée par la runtime n'existe pas chez nous ! (id: {0})</Value>
+
+<Key>Socket unexpectedly disconnected</Key>
+<Value>Le socket a été déconnecté de manière inattendue</Value>
+
+<Key>Remote debugger isn't available anymore!</Key>
+<Value>Le débuggueur distant n'est plus disponible !</Value>
+
+<Key>Entity's ID:</Key>
+<Value>ID de l'entité :</Value>
+
+<Key>State's name:</Key>
+<Value>Nom de l'action :</Value>
+
+<Key>Active on t=0:</Key>
+<Value>Active à t = 0 :</Value>
+
+<Key>Required tokens to enter the state:</Key>
+<Value>Jetons requis pour entrer dans l'action :</Value>
+
+<Key>Associated action:</Key>
+<Value>Action associée :</Value>
+
+<Key>Do Nothing</Key>
+<Value>Ne rien faire</Value>
+
+<Key>Show state's ID and Name</Key>
+<Value>Afficher ID + Nom action</Value>
+
+<Key>Sleep</Key>
+<Value>Pause</Value>
+
+<Key>Manual…</Key>
+<Value>Manuel…</Value>
+
+<Key>State's invocation:</Key>
+<Value>Invocation de l'action :</Value>
+
+<Key>Incorrect return type for the function: {0} expected, {1} found.</Key>
+<Value>Type de retour de la fonction incorrect : {0} attendu, {1} trouvé.</Value>
+
+<Key>The specified expression is invalid ({0}).</Key>
+<Value>L'expression spécifiée est invalide ({0}).</Value>
+
+<Key>*this object of type {0}:</Key>
+<Value>Objet *this de type {0} :</Value>
+
+<Key>Parameter {0} {1} :</Key>
+<Value>Paramètre {0} {1} :</Value>
+
+<Key>Color:</Key>
+<Value>Couleur :</Value>
+
+<Key>Yellow</Key>
+<Value>Jaune</Value>
+
+<Key>Red</Key>
+<Value>Rouge</Value>
+
+<Key>Green</Key>
+<Value>Vert</Value>
+
+<Key>Blue</Key>
+<Value>Bleu</Value>
+
+<Key>Pink</Key>
+<Value>Rose</Value>
+
+<Key>Comment:</Key>
+<Value>Commentaire :</Value>
+
+<Key>Transition's name:</Key>
+<Value>Nom de la transition :</Value>
+
+<Key>Transition's condition:</Key>
+<Value>Condition de la transition :</Value>
+
+<Key>The specified condition is invalid ({0}).</Key>
+<Value>La condition spécifiée est invalide ({0}).</Value>
+
+<Key>Graph's name:</Key>
+<Value>Nom du graphe :</Value>
+
+<Key>Graph's exit point</Key>
+<Value>Sortie du graphe</Value>
+
+<Key>Select only one object</Key>
+<Value>Sélectionnez un seul objet</Value>
+
+<Key>Select an object to edit</Key>
+<Value>Sélectionnez un objet à modifier</Value>
+
+<Key>Unable to get a valid expression.</Key>
+<Value>Impossible d'obtenir une expression valide.</Value>
+
+<Key>Unexpected closing parenthesis found!</Key>
+<Value>Parenthèse fermante inattendue trouvée !</Value>
+
+<Key>Unexpected closing bracket found!</Key>
+<Value>Accolade fermante inattendue trouvée !</Value>
+
+<Key>{0} expected, but " found!</Key>
+<Value>{0} attendu, mais " trouvé !</Value>
+
+<Key>{0} expected, but ' found!</Key>
+<Value>{0} attendu, but ' trouvé !</Value>
+
+<Key>No method match the specified expression ({0}).</Key>
+<Value>Aucune méthode ne correspond à l'expression demandée ({0}).</Value>
+
+<Key>No function match the specified expression ({0}).</Key>
+<Value>Aucune fonction ne correspond à l'expression demandée ({0}).</Value>
+
+<Key>No method match the specified expression.</Key>
+<Value>Aucune méthode ne correspond à l'expression demandée.</Value>
+
+<Key>Empty expression!</Key>
+<Value>Expression vide !</Value>
+
+<Key>Invalid variable name specified!</Key>
+<Value>Nom de variable invalide !</Value>
+
+<Key>Already managed in FunctionInvocation class!</Key>
+<Value>Déjà géré dans la classe FunctionInvocation !</Value>
+
+<Key>Operator not implemented!</Key>
+<Value>Opérateur non implémenté</Value>
+
+<Key>DefaultCommentName</Key>
+<Value>Commentaire</Value>
+
+<Key>Headers associated with</Key>
+<Value>Headers associés à</Value>
+
+<Key>File HeadersManager</Key>
+<Value>Fichier</Value>
+
+<Key>OK</Key>
+<Value>OK</Value>
+
+<Key>Choose a file containing the C++ declarations…</Key>
+<Value>Choisissez le fichier contenant les déclarations C++…</Value>
+
+<Key>Relative path</Key>
+<Value>Chemin relatif</Value>
+
+<Key>Cut the entities</Key>
+<Value>Couper les entités</Value>
+
+<Key>Unable to wrap the selection into a macro: some entities linked to the selection are not selected.</Key>
+<Value>Impossible d'encapsuler la sélection dans une macro : des entités qui sont reliées à la sélection ne sont pas sélectionnées.</Value>
+
+<Key>Wrap into a macro</Key>
+<Value>Regrouper dans une macro</Value>
+
+<Key>Remove the entities</Key>
+<Value>Supprimer les entités</Value>
+
+<Key>Paste the entities</Key>
+<Value>Coller les entités</Value>
+
+<Key>Macros associated with</Key>
+<Value>Macros associés à</Value>
+
+<Key>Removing a macro used in the document will make it inconsistent. Be careful!</Key>
+<Value>Supprimer une macro utilisé dans le document rendra celui-ci inconsistant. À manier avec précaution !</Value>
+
+<Key>Remove</Key>
+<Value>Supprimer</Value>
+
+<Key>Please write down the macro name (cannot be changed later):</Key>
+<Value>Veuillez entrer le nom de la macro (ne pourra être modifié ensuite) :</Value>
+
+<Key>Add the macro</Key>
+<Value>Ajouter la macro</Value>
+
+<Key>Invalid comma separated-stored C++ enum</Key>
+<Value>L'enum C++ séparée par des virgules est invalide</Value>
+
+<Key>State's action:</Key>
+<Value>Action de l'état :</Value>
+
+<Key>Breakpoint on the state</Key>
+<Value>Point d'arrêt sur l'état</Value>
+
+<Key>Evaluate expression:</Key>
+<Value>Évaluer l'expression :</Value>
+
+<Key>Expression</Key>
+<Value>Expression</Value>
+
+<Key>Evaluate</Key>
+<Value>Évaluer</Value>
+
+<Key>Result:</Key>
+<Value>Résultat :</Value>
+
+<Key>Find in the document {0}</Key>
+<Value>Rechercher dans le document {0}</Value>
+
+<Key>Find in the document</Key>
+<Value>Rechercher dans le document</Value>
+
+<Key>Find among the entities of kind:</Key>
+<Value>Rechercher parmi les entités de type :</Value>
+
+<Key>All entities</Key>
+<Value>Toutes les entités</Value>
+
+<Key>States</Key>
+<Value>Action</Value>
+
+<Key>Transitions</Key>
+<Value>Transition</Value>
+
+<Key>Comments</Key>
+<Value>Commentaire</Value>
+
+<Key>Empty path!</Key>
+<Value>Chemin vide !</Value>
+
+<Key>No source output path defined. Please open the Petri net with the graphical editor and generate the C++ code once.</Key>
+<Value>Pas de chemin de génération des sources. Veuillez ouvrir le réseau de pétri avec l'éditeur graphique et générer le code C++ au moins une fois.</Value>
+
+<Key>The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts.</Key>
+<Value>Le réseau de pétri a des états en conflit. Veuillez l'ouvrir avec l'éditeur graphique et résoudre les conflits.</Value>
+
+<Key>Erreurs :</Key>
+<Value>Erreurs :</Value>
+
+<Key>Document's settings:</Key>
+<Value>Réglages du document :</Value>
+
+<Key>C++ name of the Petri net:</Key>
+<Value>Nom C++ du réseau de pétri :</Value>
+
+<Key>The Petri net's name is not a valid C++ identifier.</Key>
+<Value>Le nom du réseau de Pétri n'est pas un identificateur C++ valide.</Value>
+
+<Key>Enum "Action Result":</Key>
+<Value>Enum "Résultat Action" :</Value>
+
+<Key>Invalid name for the enum or one of its values.</Key>
+<Value>Nom invalide pour l'enum ou pour une de ses valeurs.</Value>
+
+<Key>Use the default enum (ActionResult)</Key>
+<Value>Utiliser l'enum par défaut (ActionResult)</Value>
+
+<Key>Use the following enum (name, value1, value2…):</Key>
+<Value>Utiliser l'enum suivante (nom, valeur1, valeur2…) :</Value>
+
+<Key>Path to the C++ compiler:</Key>
+<Value>Chemin vers le compilateur C++ :</Value>
+
+<Key>Flags forwarded to the c++ compiler:</Key>
+<Value>Flags passés au compilateur C++ :</Value>
+
+<Key>Output path for the generated code (relative to the document):</Key>
+<Value>Chemin où générer le code (relatif au document) :</Value>
+
+<Key>Output path for the dynamic library (relative to the document):</Key>
+<Value>Chemin où créer la librairie dynamique (relatif au document) :</Value>
+
+<Key>Host name for the debugger:</Key>
+<Value>Nom d'hôte du débuggueur :</Value>
+
+<Key>TCP Port for the debugger communication:</Key>
+<Value>Port TCP de communication avec le débuggueur :</Value>
+
+<Key>Headers search paths:</Key>
+<Value>Chemins de recherche des headers :</Value>
+
+<Key>Path</Key>
+<Value>Chemin</Value>
+
+<Key>Libraries search paths:</Key>
+<Value>Chemins de recherche des librairies :</Value>
+
+<Key>Recursive</Key>>
+<Value>Récursif</Value>
+
+<Key>Libraries used by the document:</Key>
+<Value>Librairies utilisées par le document :</Value>
+
+<Key>Select the directory where to search for the headers…</Key>
+<Value>Sélectionnez le dossier où rechercher les headers…</Value>
+
+<Key>Select the directory where to search for the libraries…</Key>
+<Value>Sélectionnez le dossier où rechercher les librairies…</Value>
+
+<Key>Select the library…</Key>
+<Value>Sélectionnez la librairie…</Value>
+
+<Key>Library</Key>
+<Value>Librairie</Value>
+
+<Key>Select the directory where to generate the C++ source code…</Key>
+<Value>Sélectionnez le dossier dans lequel générer le C++…</Value>
+
+<Key>Select the directory where to generate the library…</Key>
+<Value>Sélectionnez le dossier dans lequel générer la librairie…</Value>
+
+</Language>

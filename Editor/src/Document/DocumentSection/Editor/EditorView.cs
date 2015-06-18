@@ -103,9 +103,9 @@ namespace Petri
 
 					// Change type from Action to InnerPetriNet
 					if(selected != null && selected is Action) {
-						MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, Configuration.GetLocalized("Souhaitez-vous vraiment transformer l'action sélectionnée en macro ?"));
-						d.AddButton(Configuration.GetLocalized("Non"), ResponseType.Cancel);
-						d.AddButton(Configuration.GetLocalized("Oui"), ResponseType.Accept);
+						MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Warning, ButtonsType.None, Configuration.GetLocalized("Do you really want to make the selecte state into a macro?"));
+						d.AddButton(Configuration.GetLocalized("No"), ResponseType.Cancel);
+						d.AddButton(Configuration.GetLocalized("Yes"), ResponseType.Accept);
 						d.DefaultResponse = ResponseType.Accept;
 
 						ResponseType result = (ResponseType)d.Run();
@@ -138,7 +138,7 @@ namespace Petri
 
 							guiActionList.Add(new RemoveStateAction(selected));
 							guiActionList.Add(new AddStateAction(inner));
-							var guiAction = new GuiActionList(guiActionList, Configuration.GetLocalized("Transformer l'entité en macro"));
+							var guiAction = new GuiActionList(guiActionList, Configuration.GetLocalized("Change the state into a macro"));
 							_document.PostAction(guiAction);
 							selected = inner;
 						}
@@ -286,7 +286,7 @@ namespace Petri
 							e.Position = new PointD(e.Position.X + backToPrevious.X, e.Position.Y + backToPrevious.Y);
 							actions.Add(new MoveAction(e, new PointD(-backToPrevious.X, -backToPrevious.Y), (!_altDown && e.StickToGrid) || (_altDown && !e.StickToGrid)));
 						}
-						_document.PostAction(new GuiActionList(actions, actions.Count > 1 ? Configuration.GetLocalized("Déplacer les entités") : Configuration.GetLocalized("Déplacer l'entité")));
+						_document.PostAction(new GuiActionList(actions, actions.Count > 1 ? Configuration.GetLocalized("Move the entities") : Configuration.GetLocalized("Move the entity")));
 					}
 				}
 				CurrentAction = EditorAction.None;

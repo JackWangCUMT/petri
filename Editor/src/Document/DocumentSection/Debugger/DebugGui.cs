@@ -45,13 +45,13 @@ namespace Petri
 			_reload.IconName = "Fix";
 			_reload.Label = Configuration.GetLocalized("Fix");
 			_exit = new ToolButton(Stock.Quit);
-			_exit.Label = Configuration.GetLocalized("Terminer la session");
+			_exit.Label = Configuration.GetLocalized("End session");
 			_switchToEditor = new ToolButton(Stock.Edit);
-			_switchToEditor.Label = Configuration.GetLocalized("Éditeur");
+			_switchToEditor.Label = Configuration.GetLocalized("Editor");
 			_zoomIn = new ToolButton(Stock.ZoomIn);
-			_zoomIn.Label = Configuration.GetLocalized("Agrandir");
+			_zoomIn.Label = Configuration.GetLocalized("Zoom In");
 			_zoomOut = new ToolButton(Stock.ZoomOut);
-			_zoomOut.Label = Configuration.GetLocalized("Réduire");
+			_zoomOut.Label = Configuration.GetLocalized("Zoom Out");
 
 			_attachDetach.Clicked += this.OnClick;
 			_startStopPetri.Clicked += this.OnClick;
@@ -155,15 +155,15 @@ namespace Petri
 					_reload.Sensitive = true;
 					_exit.Sensitive = true;
 
-					_attachDetach.Label = Configuration.GetLocalized("Déconnexion");
+					_attachDetach.Label = Configuration.GetLocalized("Disconnect");
 
 					if(_document.DebugController.Server.PetriRunning) {
-						_startStopPetri.Label = Configuration.GetLocalized("Stopper");
+						_startStopPetri.Label = Configuration.GetLocalized("Stop");
 						_startStopPetri.StockId = Stock.Stop;
 						_playPause.Sensitive = true;
 						_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
 						if(_document.DebugController.Server.Pause) {
-							_playPause.Label = Configuration.GetLocalized("Continuer");
+							_playPause.Label = Configuration.GetLocalized("Continue");
 							_playPause.StockId = Stock.MediaPlay;
 							_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
 						}
@@ -174,7 +174,7 @@ namespace Petri
 						}
 					}
 					else {
-						_startStopPetri.Label = Configuration.GetLocalized("Exécuter");
+						_startStopPetri.Label = Configuration.GetLocalized("Execute");
 						_startStopPetri.StockId = Stock.MediaPlay;
 						_playPause.Sensitive = false;
 						_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
@@ -183,8 +183,8 @@ namespace Petri
 					}
 				}
 				else {
-					_attachDetach.Label = Configuration.GetLocalized("Connexion");
-					_startStopPetri.Label = Configuration.GetLocalized("Exécuter");
+					_attachDetach.Label = Configuration.GetLocalized("Connection");
+					_startStopPetri.Label = Configuration.GetLocalized("Execute");
 					_startStopPetri.StockId = Stock.MediaPlay;
 					_startStopPetri.Sensitive = false;
 					_reload.Sensitive = false;
