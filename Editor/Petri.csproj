@@ -157,5 +157,8 @@
     <EmbeddedResource Include="Resources\fr.xml">
       <LogicalName>fr.lang</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\en.xml">
+      <LogicalName>en.lang</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
