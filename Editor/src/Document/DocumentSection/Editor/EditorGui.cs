@@ -204,6 +204,13 @@ namespace Petri
 					|Gdk.EventMask.PointerMotionMask));
 
 			_scroll = new ScrolledWindow();
+			_scroll.Hadjustment.ValueChanged += (object sender, EventArgs e) => {
+				_petriView.Redraw();
+			};
+			_scroll.Vadjustment.ValueChanged += (object sender, EventArgs e) => {
+				_petriView.Redraw();
+			};
+
 			_scroll.SetPolicy(PolicyType.Automatic, PolicyType.Automatic);
 
 			Viewport viewport2 = new Viewport();

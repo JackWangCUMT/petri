@@ -107,6 +107,12 @@ namespace Petri
 					|Gdk.EventMask.PointerMotionMask));
 
 			_scroll = new ScrolledWindow();
+			_scroll.Hadjustment.ValueChanged += (object sender, EventArgs e) => {
+				_view.Redraw();
+			};
+			_scroll.Vadjustment.ValueChanged += (object sender, EventArgs e) => {
+				_view.Redraw();
+			};
 			_scroll.SetPolicy(PolicyType.Never, PolicyType.Automatic);
 
 			Viewport viewport = new Viewport();

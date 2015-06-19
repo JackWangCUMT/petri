@@ -81,11 +81,13 @@ namespace Petri
 					_lastClickPosition.X = ev.X;
 					_lastClickPosition.Y = ev.Y;
 
-					if(ev.X / Zoom >= 15 && ev.X / Zoom < _parentHierarchy[_parentHierarchy.Count - 1].extents.Width + 15
-					   && ev.Y / Zoom >= 15 && ev.Y / Zoom < _parentHierarchy[_parentHierarchy.Count - 1].extents.Height + 15) {
+					var scrolled = _document.Window.Gui.ScrolledWindow;
+
+					if(ev.X >= 15 + scrolled.Hadjustment.Value && ev.X < _parentHierarchy[_parentHierarchy.Count - 1].extents.Width + 15 + scrolled.Hadjustment.Value
+						&& ev.Y >= 15 + scrolled.Vadjustment.Value && ev.Y < _parentHierarchy[_parentHierarchy.Count - 1].extents.Height + 15 + scrolled.Vadjustment.Value) {
 						double currX = 15;
 						foreach(var item in _parentHierarchy) {
-							if(item.petriNet != null && ev.X / Zoom - currX < item.extents.Width + pathSeparatorLenth) {
+							if(item.petriNet != null && ev.X - currX < item.extents.Width + pathSeparatorLenth + scrolled.Hadjustment.Value) {
 								_nextPetriNet = item.petriNet;
 								break;
 							}
@@ -142,6 +144,8 @@ namespace Petri
 		protected void RenderInternal(Context context, PetriNet petriNet) {
 			_needsRedraw = false;
 
+			var scrolled = _document.Window.Gui.ScrolledWindow;
+
 			var extents = new PointD();
 			extents.X = Math.Max(petriNet.Size.X, Allocation.Size.Width / Zoom);
 			extents.Y = Math.Max(petriNet.Size.Y, Allocation.Size.Height / Zoom);
@@ -156,8 +160,36 @@ namespace Petri
 			context.SetSourceRGBA(1, 1, 1, 1);
 			context.Fill();
 
+			double minX = 0, minY = 0;
+
+			foreach(var t in petriNet.Transitions) {
+				if(t.Position.X + t.Width / 2 > minX)
+					minX = t.Position.X + t.Width / 2;
+				if(t.Position.Y > minY + t.Height / 2)
+					minY = t.Position.Y + t.Height / 2;
+
+				this.EntityDraw.Draw(t, context);
+			}
+
+			foreach(var s in petriNet.States) {
+				if(s.Position.X + s.Radius / 2 > minX)
+					minX = s.Position.X + s.Radius / 2;
+				if(s.Position.Y + s.Radius / 2 > minY)
+					minY = s.Position.Y + s.Radius / 2;
+
+				this.EntityDraw.Draw(s, context);
+			}
+
+			foreach(var c in petriNet.Comments) {
+				if(c.Position.X + c.Size.X / 2 > minX)
+					minX = c.Position.X + c.Size.X / 2;
+				if(c.Position.Y + c.Size.Y / 2 > minY)
+					minY = c.Position.Y + c.Size.Y / 2;
+
+				this.EntityDraw.Draw(c, context);
+			}
+
 			{
-				context.SetSourceRGBA(0.0, 0.6, 0.2, 1);
 				context.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Normal);
 				context.SetFontSize(16);
 
@@ -190,44 +222,23 @@ namespace Petri
 					} while(petri != null);
 				}
 
+				context.SetSourceRGBA(0.9, 0.9, 0.9, 1);
 				TextExtents ext = _parentHierarchy[_parentHierarchy.Count - 1].extents;
-				context.MoveTo(15 - ext.XBearing, 15 - ext.YBearing);
+				context.Rectangle((scrolled.Hadjustment.Value + 10) / Zoom, (scrolled.Vadjustment.Value + 10) / Zoom, (ext.Width + 10) / Zoom, (ext.Height + 10) / Zoom);
+				context.Fill();
+
+				context.MoveTo((scrolled.Hadjustment.Value + 15 - ext.XBearing) / Zoom, (scrolled.Vadjustment.Value + 15 - ext.YBearing) / Zoom);
+
+				context.SetFontSize(16 / Zoom);
+				context.SetSourceRGBA(0.0, 0.6, 0.2, 1);
+
 				context.TextPath(val);
 				context.Fill();
 			}
 
-			double minX = 0, minY = 0;
-
-			foreach(var t in petriNet.Transitions) {
-				if(t.Position.X + t.Width / 2 > minX)
-					minX = t.Position.X + t.Width / 2;
-				if(t.Position.Y > minY + t.Height / 2)
-					minY = t.Position.Y + t.Height / 2;
-
-				this.EntityDraw.Draw(t, context);
-			}
-
-			foreach(var s in petriNet.States) {
-				if(s.Position.X + s.Radius / 2 > minX)
-					minX = s.Position.X + s.Radius / 2;
-				if(s.Position.Y + s.Radius / 2 > minY)
-					minY = s.Position.Y + s.Radius / 2;
-
-				this.EntityDraw.Draw(s, context);
-			}
-
-			foreach(var c in petriNet.Comments) {
-				if(c.Position.X + c.Size.X / 2 > minX)
-					minX = c.Position.X + c.Size.X / 2;
-				if(c.Position.Y + c.Size.Y / 2 > minY)
-					minY = c.Position.Y + c.Size.Y / 2;
-
-				this.EntityDraw.Draw(c, context);
-			}
-
 			this.SpecializedDrawing(context);
 
-			context.LineWidth = 4;
+			context.LineWidth = 4 / Zoom;
 			context.MoveTo(0, 0);
 			context.LineTo(extents.X, 0);
 			context.LineTo(extents.X, extents.Y);
@@ -242,7 +253,6 @@ namespace Petri
 			minX *= Zoom;
 			minY *= Zoom;
 
-			var scrolled = _document.Window.Gui.ScrolledWindow;
 			minX += scrolled.Hadjustment.PageSize / 2;
 			minY += scrolled.Vadjustment.PageSize / 2;
 
