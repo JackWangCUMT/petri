@@ -27,6 +27,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Reflection;
+using System.Linq;
 
 namespace Petri
 {

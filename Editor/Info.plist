@@ -6,5 +6,28 @@
 	<string>10.9</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>petri</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Petri Net document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+		</dict>
+	</array>
+	<key>CFBundleDisplayName</key>
+	<string>Petri</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.rems4e.petri</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.developer-tools</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>fr_FR</string>
 </dict>
 </plist>

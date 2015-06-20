@@ -34,8 +34,8 @@ namespace Petri
 			this.Name = "IA_Robot.MainWindow";
 			this.WindowPosition = ((global::Gtk.WindowPosition)(4));
 			this.AllowShrink = true;
-			this.DefaultWidth = 800;
-			this.DefaultHeight = 600;
+			this.DefaultWidth = 920;
+			this.DefaultHeight = 640;
 			this.DeleteEvent += this.OnDeleteEvent;
 
 			this.BorderWidth = 15;
@@ -79,6 +79,14 @@ namespace Petri
 					MainClass.SaveAndQuit();
 					// If we get here, the user has cancelled the action
 					e.UserCancelled = true;
+					e.Handled = true;
+				};
+
+				MonoDevelop.MacInterop.ApplicationEvents.OpenDocument += delegate (object sender, MonoDevelop.MacInterop.ApplicationDocumentEventArgs e) {
+					foreach(var pair in e.Documents) {
+						MainClass.OpenDocument(pair.Key);
+					}
+
 					e.Handled = true;
 				};
 

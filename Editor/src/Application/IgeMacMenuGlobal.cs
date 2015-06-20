@@ -40,9 +40,17 @@ namespace MonoDevelop.MacInterop
 	internal delegate CarbonEventHandlerStatus EventDelegate (IntPtr callRef, IntPtr eventRef, IntPtr userData);
 	internal delegate CarbonEventHandlerStatus AEHandlerDelegate (IntPtr inEvnt, IntPtr outEvt, uint refConst);
 
+	[StructLayout(LayoutKind.Sequential, Pack = 2)]
+	public struct AEDesc
+	{
+		public uint descriptorType;
+		public IntPtr dataHandle;
+	}
+
 	internal static class Carbon
 	{
 		public const string CarbonLib = "/System/Library/Frameworks/Carbon.framework/Versions/Current/Carbon";
+		const string CFLib = "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation";
 
 		[DllImport (CarbonLib)]
 		public static extern IntPtr GetApplicationEventTarget ();
@@ -72,6 +80,314 @@ namespace MonoDevelop.MacInterop
 			if (intStatus < 0)
 				throw new EventStatusException (status);
 		}
+
+		[DllImport (CarbonLib)]
+		public static extern EventStatus GetEventParameter (IntPtr eventRef, CarbonEventParameterName name, CarbonEventParameterType desiredType,
+			out CarbonEventParameterType actualType, uint size, ref uint outSize, ref IntPtr outPtr);
+
+		[DllImport (CarbonLib)]
+		static extern EventStatus GetEventParameter (IntPtr eventRef, CarbonEventParameterName name, CarbonEventParameterType desiredType,	
+			out CarbonEventParameterType actualType, uint size, ref uint outSize, IntPtr dataBuffer);
+
+		[DllImport (CarbonLib)]
+		static extern EventStatus GetEventParameter (IntPtr eventRef, CarbonEventParameterName name, CarbonEventParameterType desiredType,	
+			uint zero, uint size, uint zero2, IntPtr dataBuffer);
+
+		[DllImport (CarbonLib)]
+		public static extern AEDescStatus AEDisposeDesc (ref AEDesc desc);
+
+		[DllImport (CarbonLib)]
+		static extern AEDescStatus AECountItems (ref AEDesc descList, out int count); //return an OSErr
+
+		[DllImport (CarbonLib)]
+		static extern AEDescStatus AEGetNthPtr (ref AEDesc descList, int index, OSType desiredType, uint keyword,
+			uint zero, out IntPtr outPtr, int bufferSize, int zero2);
+
+		[DllImport (CarbonLib)]
+		static extern AEDescStatus AEGetNthPtr (ref AEDesc descList, int index, OSType desiredType, uint keyword,
+			out CarbonEventParameterType actualType, IntPtr buffer, int bufferSize, out int actualSize);
+
+		[DllImport (CarbonLib)]
+		static extern AEDescStatus AEGetNthPtr (ref AEDesc descList, int index, OSType desiredType, uint keyword,
+			uint zero, IntPtr buffer, int bufferSize, int zero2);
+
+		public static int AECountItems (ref AEDesc descList)
+		{
+			int count;
+			CheckReturnAE (AECountItems (ref descList, out count));
+			return count;
+		}
+
+		public static T AEGetNthPtr<T> (ref AEDesc descList, int index, OSType desiredType) where T : struct
+		{
+			int len = Marshal.SizeOf (typeof (T));
+			IntPtr bufferPtr = Marshal.AllocHGlobal (len);
+			try {
+				CheckReturnAE (AEGetNthPtr (ref descList, index, desiredType, 0, 0, bufferPtr, len, 0));
+				T val = (T)Marshal.PtrToStructure (bufferPtr, typeof (T));
+				return val;
+			} finally{ 
+				Marshal.FreeHGlobal (bufferPtr);
+			}
+		}
+
+		public static IntPtr AEGetNthPtr (ref AEDesc descList, int index, OSType desiredType)
+		{
+			IntPtr ret;
+			CheckReturnAE (AEGetNthPtr (ref descList, index, desiredType, 0, 0, out ret, 4, 0));
+			return ret;
+		}
+
+		public static IntPtr GetEventParameter (IntPtr eventRef, CarbonEventParameterName name, CarbonEventParameterType desiredType)
+		{
+			CarbonEventParameterType actualType;
+			uint outSize = 0;
+			IntPtr val = IntPtr.Zero;
+			CheckReturn (GetEventParameter (eventRef, name, desiredType, out actualType, (uint)IntPtr.Size, ref outSize, ref val));
+			return val;
+		} 
+
+		public static T GetEventParameter<T> (IntPtr eventRef, CarbonEventParameterName name, CarbonEventParameterType desiredType) where T : struct
+		{
+			int len = Marshal.SizeOf (typeof (T));
+			IntPtr bufferPtr = Marshal.AllocHGlobal (len);
+			CheckReturn (GetEventParameter (eventRef, name, desiredType, 0, (uint)len, 0, bufferPtr));
+			T val = (T)Marshal.PtrToStructure (bufferPtr, typeof (T));
+			Marshal.FreeHGlobal (bufferPtr);
+			return val;
+		}
+
+		public static T[] GetListFromAEDesc<T,TRef> (ref AEDesc list, AEDescValueSelector<TRef,T> sel, OSType type)
+			where TRef : struct
+		{
+			long count = AECountItems (ref list);
+			T[] arr = new T[count];
+			for (int i = 1; i <= count; i++) {
+				TRef r = AEGetNthPtr<TRef> (ref list, i, type);
+				arr [i - 1] = sel (ref r);
+			}
+			return arr;
+		}
+
+		static void CheckReturnAE (AEDescStatus status)
+		{
+			if (status != AEDescStatus.Ok)
+				throw new Exception ("Failed with code " + status.ToString ());
+		}
+
+		[DllImport (CarbonLib)]
+		static extern string GetMacOSStatusCommentString (int osErr);
+
+		public static void CheckReturn (int osErr)
+		{
+			if (osErr != 0) {
+				string s = GetMacOSStatusCommentString (osErr);
+				throw new SystemException ("Unexpected OS error code " + osErr + ": " + s);
+			}
+		}
+		public static Dictionary<string,int> GetFileListFromEventRef (IntPtr eventRef)
+		{
+			AEDesc list = GetEventParameter<AEDesc> (eventRef, CarbonEventParameterName.DirectObject, CarbonEventParameterType.AEList);
+			try {
+				int line = 0;
+				try {
+					SelectionRange range = GetEventParameter<SelectionRange> (eventRef, CarbonEventParameterName.AEPosition, CarbonEventParameterType.Char);
+					line = range.lineNum+1;
+				} catch {
+				}
+
+				var arr = GetListFromAEDesc<string,FSRef> (ref list, FSRefToString,
+					(OSType)(int)CarbonEventParameterType.FSRef);
+				var files = new Dictionary<string,int> ();
+				foreach (var s in arr) {
+					if (!string.IsNullOrEmpty (s))
+						files[s] = line;
+				}
+				return files;
+			} finally {
+				CheckReturn ((int)AEDisposeDesc (ref list));
+			}
+		}
+
+		public static string FSRefToString (ref FSRef fsref)
+		{
+			IntPtr url = IntPtr.Zero;
+			IntPtr str = IntPtr.Zero;
+			try {
+				url = CFURLCreateFromFSRef (IntPtr.Zero, ref fsref);
+				if (url == IntPtr.Zero)
+					return null;
+				str = CFURLCopyFileSystemPath (url, CFUrlPathStyle.Posix);
+				if (str == IntPtr.Zero)
+					return null;
+				return FetchString (str);
+			} finally {
+				if (url != IntPtr.Zero)
+					Release (url);
+				if (str != IntPtr.Zero)
+					Release (str);
+			}
+		}
+
+		[DllImport (CFLib, EntryPoint="CFRelease")]
+		public static extern void Release (IntPtr cfRef);
+
+		[DllImport (CFLib, CharSet=CharSet.Unicode)]
+		extern static int CFStringGetLength (IntPtr handle);
+
+		[DllImport (CFLib, CharSet=CharSet.Unicode)]
+		extern static IntPtr CFStringGetCharactersPtr (IntPtr handle);
+
+		[DllImport (CFLib, CharSet=CharSet.Unicode)]
+		extern static IntPtr CFStringGetCharacters (IntPtr handle, CFRange range, IntPtr buffer);
+
+		public static string FetchString (IntPtr handle)
+		{
+			if (handle == IntPtr.Zero)
+				return null;
+
+			string str;
+
+			int l = CFStringGetLength (handle);
+			IntPtr u = CFStringGetCharactersPtr (handle);
+			IntPtr buffer = IntPtr.Zero;
+			if (u == IntPtr.Zero){
+				CFRange r = new CFRange (0, l);
+				buffer = Marshal.AllocCoTaskMem (l * 2);
+				CFStringGetCharacters (handle, r, buffer);
+				u = buffer;
+			}
+			unsafe {
+				str = new string ((char *) u, 0, l);
+			}
+
+			if (buffer != IntPtr.Zero)
+				Marshal.FreeCoTaskMem (buffer);
+
+			return str;
+		}
+
+		[DllImport (CFLib)]
+		extern static IntPtr CFURLCreateFromFSRef (IntPtr allocator, ref FSRef fsref);
+
+		[DllImport (CFLib)]
+		extern static IntPtr CFURLCopyFileSystemPath (IntPtr urlRef, CFUrlPathStyle pathStyle);
+
+		internal static int ConvertCharCode (string fourcc)
+		{
+			Debug.Assert (fourcc != null);
+			Debug.Assert (fourcc.Length == 4);
+			return (fourcc[3]) | (fourcc[2] << 8) | (fourcc[1] << 16) | (fourcc[0] << 24);
+		}
+
+		internal static string UnConvertCharCode (int i)
+		{
+			return new string (new char[] {
+				(char)(i >> 24),
+				(char)(0xFF & (i >> 16)),
+				(char)(0xFF & (i >> 8)),
+				(char)(0xFF & i),
+			});
+		}
+
+		public delegate T AEDescValueSelector<TRef,T> (ref TRef desc);
+	}
+
+	struct CFRange {
+		public int Location, Length;
+		public CFRange (int l, int len)
+		{
+			Location = l;
+			Length = len;
+		}
+	}
+
+	enum CFUrlPathStyle
+	{
+		Posix = 0,
+		Hfs = 1,
+		Windows = 2
+	};
+
+	//this is an 80-byte opaque object
+	[StructLayout(LayoutKind.Sequential, Size = 80)]
+	struct FSRef
+	{
+	}
+
+	struct OSType {
+		int value;
+
+		public int Value {
+			get { return value; }
+		}
+
+		public OSType (int value)
+		{
+			this.value = value;
+		}
+
+		public OSType (string fourcc)
+		{
+			value = Carbon.ConvertCharCode (fourcc);
+		}
+
+		public static explicit operator OSType (string fourcc)
+		{
+			return new OSType (fourcc); 
+		}
+
+		public static implicit operator int (OSType o)
+		{
+			return o.value;
+		}
+
+		public static implicit operator OSType (int i)
+		{
+			return new OSType (i);
+		}
+	}
+
+	public enum AEDescStatus
+	{
+		Ok = 0,
+		MemoryFull = -108,
+		CoercionFail = -1700,
+		DescRecordNotFound = -1701,
+		WrongDataType = -1703,
+		NotAEDesc = -1704,
+		ReplyNotArrived = -1718,
+	}
+
+	[StructLayout(LayoutKind.Sequential)]
+	struct SelectionRange
+	{
+		public short unused1; // 0 (not used)
+		public short lineNum; // line to select (<0 to specify range)
+		public int startRange; // start of selection range (if line < 0)
+		public int endRange; // end of selection range (if line < 0)
+		public int unused2; // 0 (not used)
+		public int theDate; // modification date/time
+	}
+
+	internal enum CarbonEventParameterName : uint
+	{
+		DirectObject = 757935405, // '----'
+		AEPosition = 1802530675, // 'kpos'
+	}
+
+	internal enum CarbonEventParameterType : uint
+	{
+		HICommand = 1751346532, // 'hcmd'
+		MenuRef = 1835363957, // 'menu'
+		WindowRef = 2003398244, // 'wind'
+		Char = 1413830740, // 'TEXT'
+		UInt32 = 1835100014, // 'magn'
+		UTF8Text = 1970562616, // 'utf8'
+		UnicodeText = 1970567284, // 'utxt'
+		AEList = 1818850164, // 'list'
+		WildCard = 707406378, // '****'
+		FSRef = 1718841958, // 'fsrf' 
 	}
 
 	internal enum CarbonEventHandlerStatus //this is an OSStatus
@@ -216,7 +532,39 @@ namespace MonoDevelop.MacInterop
 		static object lockObj = new object ();
 
 		static EventHandler<ApplicationQuitEventArgs> quit;
-		static IntPtr quitHandlerRef = IntPtr.Zero;
+		static EventHandler<ApplicationDocumentEventArgs> document;
+		static IntPtr quitHandlerRef = IntPtr.Zero, documentHandlerRef = IntPtr.Zero;
+
+		public static event EventHandler<ApplicationDocumentEventArgs> OpenDocument {
+			add {
+				lock (lockObj) {
+					document += value;
+					if (documentHandlerRef == IntPtr.Zero)
+						documentHandlerRef = Carbon.InstallApplicationEventHandler (HandleDoc, CarbonEventApple.OpenDocuments);
+				}
+			}
+			remove {
+				lock (lockObj) {
+					document -= value;
+					if (document == null && documentHandlerRef != IntPtr.Zero) {
+						Carbon.RemoveEventHandler (documentHandlerRef);
+						documentHandlerRef = IntPtr.Zero;
+					}
+				}
+			}
+		}
+
+		static CarbonEventHandlerStatus HandleDoc (IntPtr callRef, IntPtr eventRef, IntPtr user_data)
+		{
+			try {
+				var docs = Carbon.GetFileListFromEventRef (eventRef);
+				var args = new ApplicationDocumentEventArgs (docs);
+				document (null, args);
+				return args.HandledStatus;
+			} catch (Exception ex) {
+				System.Console.WriteLine (ex);
+				return CarbonEventHandlerStatus.NotHandled;
+			}		}
 
 		public static event EventHandler<ApplicationQuitEventArgs> Quit {
 			add {
@@ -259,6 +607,16 @@ namespace MonoDevelop.MacInterop
 	public class ApplicationQuitEventArgs : ApplicationEventArgs
 	{
 		public bool UserCancelled { get; set; }
+	}
+
+	public class ApplicationDocumentEventArgs : ApplicationEventArgs
+	{
+		public ApplicationDocumentEventArgs (IDictionary<string,int> documents)
+		{
+			this.Documents = documents;
+		}		
+
+		public IDictionary<string,int> Documents { get; private set; }
 	}
 }
 

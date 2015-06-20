@@ -77,24 +77,6 @@ namespace Petri
 		}
 
 		public static int Main(string[] args) {
-			/*Application.Init();
-			var tdoc = new Document("");
-			var f = new Cpp.Function(new Cpp.Type("int", Cpp.Scope.EmptyScope), Cpp.Scope.MakeFromNamespace("Bla", Cpp.Scope.EmptyScope), "a", false);
-			f.AddParam(new Cpp.Param(new Cpp.Type("int", Cpp.Scope.EmptyScope), "param"));
-			f.AddParam(new Cpp.Param(new Cpp.Type("int", Cpp.Scope.EmptyScope), "param2"));
-			tdoc.AllFunctionsList.Add(f);
-			tdoc.Restore();
-
-			string cpp = "++a+++(b*3{4*2})-4";;
-			var expr = Cpp.Expression.CreateFromString(cpp, tdoc.PetriNet);
-
-
-			Console.WriteLine(expr.MakeUserReadable());
-			Console.WriteLine(expr);
-			Console.WriteLine(expr);
-
-			return 0;*/
-
 			if(args.Length > 1) {
 				bool generate = false;
 				bool compile = false;
@@ -248,26 +230,30 @@ namespace Petri
 			if(fc.Run() == (int)ResponseType.Accept) {
 				string filename = fc.Filename;
 				fc.Destroy();
-				foreach(var d in _documents) {
-					if(d.Path == filename) {
-						d.Window.Present();
-						return;
-					}
-				}
-
-				// Reuse last blank document which was created (typically the first one created on program launch)
-				if(_documents.Count > 0 && _documents[_documents.Count - 1].Blank) {
-					_documents[_documents.Count - 1].Path = filename;
-					_documents[_documents.Count - 1].Restore();
-					_documents[_documents.Count - 1].Window.Present();
-				}
-				else {
-					var doc = new Document(filename);
-					MainClass.AddDocument(doc);
-				}
+				OpenDocument(filename);
 			}
 			else {
 				fc.Destroy();
+			}
+		}
+
+		public static void OpenDocument(string filename) {
+			foreach(var d in _documents) {
+				if(d.Path == filename) {
+					d.Window.Present();
+					return;
+				}
+			}
+
+			// Reuse last blank document which was created (typically the first one created on program launch)
+			if(_documents.Count > 0 && _documents[_documents.Count - 1].Blank) {
+				_documents[_documents.Count - 1].Path = filename;
+				_documents[_documents.Count - 1].Restore();
+				_documents[_documents.Count - 1].Window.Present();
+			}
+			else {
+				var doc = new Document(filename);
+				MainClass.AddDocument(doc);
 			}
 		}
 
