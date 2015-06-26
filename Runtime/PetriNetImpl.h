@@ -52,7 +52,7 @@ namespace Petri {
 
 	struct PetriNet::Internals {
 
-		Internals(PetriNet &pn, std::string const &name) : _actionsPool(InitialThreadsActions, name), _name(name), _this(pn) {}
+		Internals(PetriNet &pn, std::string const &name) : _actionsPool(InitialThreadsActions, name.empty() ? "Anonymous PetriNet" : name), _name(name.empty() ? "Anonymous PetriNet" : name), _this(pn) {}
 		virtual ~Internals() {
 			
 		}

@@ -95,6 +95,7 @@ namespace Petri {
 
 	/**
 	 * Changes the required tokens of the Action to be activated.
+	 * @param requiredTokens The new required tokens count
 	 * @return The required tokens of the Action
 	 */
 	void Action::setRequiredTokens(std::size_t requiredTokens) {
@@ -105,7 +106,11 @@ namespace Petri {
 	 * Gets the current tokens count given to the Action by its preceding Actions.
 	 * @return The current tokens count of the Action
 	 */
-	std::size_t &Action::currentTokens() {
+	std::size_t Action::currentTokens() {
+		return _internals->_currentTokens;
+	}
+
+	std::size_t &Action::currentTokensRef(){
 		return _internals->_currentTokens;
 	}
 

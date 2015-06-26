@@ -290,7 +290,7 @@ namespace Petri
 
 			generator += "";
 
-			generator += "#include \"PetriDynamicLib.h\"\n";
+			generator += "#include \"Runtime/PetriDynamicLib.h\"\n";
 
 			generator += "#undef PETRI_PORT";
 

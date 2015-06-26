@@ -21,44 +21,17 @@
  */
 
 //
-//  Common.h
-//  Pétri
+//  Petri.h
+//  Petri
 //
-//  Created by Rémi on 15/04/2015.
+//  Created by Rémi on 26/06/2015.
 //
 
-#ifndef Petri_Common_h
-#define Petri_Common_h
+#ifndef Petri_C_h
+#define Petri_C_h
 
-#include <string>
-#include <cstdint>
-#include "C/Types.h"
+#include "PetriNet.h"
+#include "Transition.h"
+#include "Action.h"
 
-namespace Petri {
-	
-	void setThreadName(char const *name);
-	void setThreadName(std::string const &name);
-
-	using actionResult_t = Petri_actionResult_t;
-
-	template<typename T>
-	struct HasID {
-	public:
-		HasID(T id) : _id(id) { }
-
-		T ID() const {
-			return _id;
-		}
-
-		void setID(T id) {
-			_id = id;
-		}
-
-	private:
-		T _id;
-	};
-
-}
-
-
-#endif
+#endif /* Petri_h */

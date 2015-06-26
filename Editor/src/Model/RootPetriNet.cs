@@ -87,10 +87,10 @@ namespace Petri
 
 		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
 			source.AddHeader("<cstdint>");
-			source.AddHeader("\"PetriDebug.h\"");
-			source.AddHeader("\"PetriUtils.h\"");
-			source.AddHeader("\"Action.h\"");
-			source.AddHeader("\"Atomic.h\"");
+			source.AddHeader("\"Runtime/PetriDebug.h\"");
+			source.AddHeader("\"Runtime/PetriUtils.h\"");
+			source.AddHeader("\"Runtime/Action.h\"");
+			source.AddHeader("\"Runtime/Atomic.h\"");
 			foreach(var s in Document.Headers) {
 				var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, s);
 				var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath));

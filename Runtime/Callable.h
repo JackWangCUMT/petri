@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <type_traits>
+#include <iostream>
 
 template<typename ReturnType, typename ...Args>
 struct CallableBase {
@@ -29,7 +30,7 @@ struct Callable : public CallableBase<ReturnType, Args...> {
 	}
 
 private:
-	CallableType _c;
+	std::remove_reference_t<CallableType> _c;
 };
 
 #endif

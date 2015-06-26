@@ -255,8 +255,8 @@ namespace Petri
 					generator.AddHeader("\"" + Configuration.GetRelativePath(p1, p2) + "\"");
 				}
 			}
-			generator.AddHeader("\"Petri.h\"");
-			generator.AddHeader("\"Atomic.h\"");
+			generator.AddHeader("\"Runtime/Petri.h\"");
+			generator.AddHeader("\"Runtime/Atomic.h\"");
 			generator.AddHeader("<string>");
 			generator.AddHeader("<sstream>");
 

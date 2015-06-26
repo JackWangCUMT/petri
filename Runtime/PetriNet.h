@@ -41,9 +41,10 @@ namespace Petri {
 	class PetriNet {
 	public:
 		/**
-		 * Creates the PetriNet, assigning it a name which serves debug purposes (see ThreadPool constructor)
+		 * Creates the PetriNet, assigning it a name which serves debug purposes (see ThreadPool constructor).
+		 * @param name the name to assign to the PetriNet or a designated one if left empty
 		 */
-		PetriNet(std::string const &name);
+		PetriNet(std::string const &name = std::string());
 
 		virtual ~PetriNet();
 
@@ -76,7 +77,16 @@ namespace Petri {
 		 */
 		virtual void join();
 
+		/**
+		 * Adds an Atomic variable designated by the specified id.
+		 * @param id the id of the new Atomic variable
+		 */
 		void addVariable(std::uint_fast32_t id);
+
+		/**
+		 * Gets an atomic variable previously added to the Petri net. Trying to retrieve a non existing variable will throw an exception.
+		 * @param the id of the Atomic to retrieve.
+		 */
 		Atomic &getVariable(std::uint_fast32_t id);
 
 	protected:

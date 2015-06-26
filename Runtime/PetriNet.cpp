@@ -59,6 +59,9 @@ namespace Petri {
 
 	Atomic &PetriNet::getVariable(std::uint_fast32_t id) {
 		auto it = _internals->_variables.find(id);
+		if(it == _internals->_variables.end()) {
+			throw std::runtime_error("Non existing variable requested: " + std::to_string(id));
+		}
 		return *it->second;
 	}
 
@@ -123,8 +126,8 @@ namespace Petri {
 					if(isFulfilled) {
 						Action &a = (*it)->next();
 						std::lock_guard<std::mutex> tokensLock(a.tokensMutex());
-						if(++a.currentTokens() >= a.requiredTokens()) {
-							a.currentTokens() -= a.requiredTokens();
+						if(++a.currentTokensRef() >= a.requiredTokens()) {
+							a.currentTokensRef() -= a.requiredTokens();
 
 							if(nextState == nullptr) {
 								nextState = &a;

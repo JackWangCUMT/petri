@@ -50,6 +50,7 @@ namespace Petri {
 	 * A state composing a PetriNet.
 	 */
 	class Action : public HasID<uint64_t> {
+		friend class PetriNet;
 	public:
 		/**
 		 * Creates an empty action, associated to a null CallablePtr.
@@ -61,7 +62,9 @@ namespace Petri {
 		 * @param action The Callable which will be copied
 		 */
 		Action(uint64_t id, std::string const &name, ActionCallableBase const &action, size_t requiredTokens);
+
 		Action(Action &&);
+		Action(Action const &) = delete;
 
 		~Action();
 
@@ -70,6 +73,14 @@ namespace Petri {
 		 * @param transition the transition to be added
 		 */
 		void addTransition(Transition transition);
+
+		/**
+		 * Adds a Transition to the Action.
+		 * @param id the id of the Transition
+		 * @param name the name of the transition to be added
+		 * @param next the Action following the transition to be added
+		 * @param cond the condition of the Transition to be added
+		 */
 		void addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond);
 
 		/**
@@ -92,6 +103,7 @@ namespace Petri {
 
 		/**
 		 * Changes the required tokens of the Action to be activated.
+		 * @param requiredTokens The new required tokens count
 		 * @return The required tokens of the Action
 		 */
 		void setRequiredTokens(std::size_t requiredTokens);
@@ -100,9 +112,7 @@ namespace Petri {
 		 * Gets the current tokens count given to the Action by its preceding Actions.
 		 * @return The current tokens count of the Action
 		 */
-		std::size_t &currentTokens();
-
-		std::mutex &tokensMutex();
+		std::size_t currentTokens();
 
 		/**
 		 * Returns the name of the Action.
@@ -123,6 +133,9 @@ namespace Petri {
 		std::list<Transition> const &transitions() const;
 
 	private:
+		std::size_t &currentTokensRef();
+		std::mutex &tokensMutex();
+
 		struct Internals;
 		std::unique_ptr<Internals> _internals;
 	};

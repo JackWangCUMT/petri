@@ -21,44 +21,48 @@
  */
 
 //
-//  Common.h
-//  Pétri
+//  PetriNet.c
+//  Petri
 //
-//  Created by Rémi on 15/04/2015.
+//  Created by Rémi on 25/06/2015.
 //
 
-#ifndef Petri_Common_h
-#define Petri_Common_h
+#include "PetriNet.h"
+#include "Action.h"
+#include "../PetriNet.h"
+#include "../Action.h"
+#include "Types.hpp"
 
-#include <string>
-#include <cstdint>
-#include "C/Types.h"
-
-namespace Petri {
-	
-	void setThreadName(char const *name);
-	void setThreadName(std::string const &name);
-
-	using actionResult_t = Petri_actionResult_t;
-
-	template<typename T>
-	struct HasID {
-	public:
-		HasID(T id) : _id(id) { }
-
-		T ID() const {
-			return _id;
-		}
-
-		void setID(T id) {
-			_id = id;
-		}
-
-	private:
-		T _id;
-	};
-
+PetriNet *PetriNet_create(char const *name) {
+	return new PetriNet{std::make_unique<Petri::PetriNet>(name ? name : "")};
 }
 
+void PetriNet_destroy(PetriNet *pn) {
+	delete pn;
+}
 
-#endif
+void PetriNet_addAction(PetriNet *pn, PetriAction *action, bool active) {
+	auto &a = pn->petriNet->addAction(std::move(*action->owned), active);
+	action->owned.reset();
+	action->notOwned = &a;
+}
+
+bool PetriNet_isRunning(PetriNet *pn) {
+	return pn->petriNet->running();
+}
+
+void PetriNet_run(PetriNet *pn) {
+	pn->petriNet->run();
+}
+
+void PetriNet_stop(PetriNet *pn) {
+	pn->petriNet->stop();
+}
+
+void PetriNet_join(PetriNet *pn) {
+	pn->petriNet->join();
+}
+
+void PetriNet_addVariable(PetriNet *pn, uint_fast32_t id) {
+	pn->petriNet->addVariable(id);
+}
