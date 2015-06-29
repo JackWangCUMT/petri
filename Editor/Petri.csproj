@@ -69,6 +69,7 @@
     <Folder Include="Resources\" />
     <Folder Include="src\" />
     <Folder Include="src\Document\" />
+    <Folder Include="src\CodeGen\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Todo.txt" />
@@ -96,7 +97,6 @@
     <Compile Include="src\Model\Transition.cs" />
     <Compile Include="src\Cpp\FunctionInvocation.cs" />
     <Compile Include="src\Document\CppCompiler.cs" />
-    <Compile Include="src\Document\CppGenerator.cs" />
     <Compile Include="src\Document\Document.cs" />
     <Compile Include="src\Document\DocumentSettings.cs" />
     <Compile Include="src\Document\HeadersManager.cs" />
@@ -128,6 +128,10 @@
     <Compile Include="src\Document\DocumentSettingsEditor.cs" />
     <Compile Include="src\Cpp\Enum.cs" />
     <Compile Include="src\Document\DocumentSection\Editor\Find.cs" />
+    <Compile Include="src\CodeGen\CodeGen.cs" />
+    <Compile Include="src\CodeGen\PetriGen.cs" />
+    <Compile Include="src\CodeGen\CFamilyCodeGen.cs" />
+    <Compile Include="src\CodeGen\CppPetriGen.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

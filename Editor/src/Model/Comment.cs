@@ -89,10 +89,6 @@ namespace Petri
 			}
 		}
 
-		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
-			return "";
-		}
-
 		public void SizeToFit() {
 			var layout = new Pango.Layout(Gdk.PangoHelper.ContextGet());
 

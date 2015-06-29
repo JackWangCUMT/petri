@@ -247,18 +247,18 @@ namespace Petri
 				}
 			}
 
-			Cpp.Generator generator = new Cpp.Generator();
+			CodeGen generator = new CFamilyCodeGen(Language.Cpp);
 			foreach(string header in _document.Headers) {
 				foreach(var s in _document.Headers) {
 					var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(_document.Path).FullName, s);
 					var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(_document.Path).FullName, _document.Settings.SourceOutputPath));
-					generator.AddHeader("\"" + Configuration.GetRelativePath(p1, p2) + "\"");
+					generator += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
 				}
 			}
-			generator.AddHeader("\"Runtime/Petri.h\"");
-			generator.AddHeader("\"Runtime/Atomic.h\"");
-			generator.AddHeader("<string>");
-			generator.AddHeader("<sstream>");
+			generator += "#include \"Runtime/Petri.h\"";
+			generator += "#include \"Runtime/Atomic.h\"";
+			generator += "#include <string>";
+			generator += "#include <sstream>";
 
 			generator += "using namespace Petri;";
 
@@ -273,7 +273,7 @@ namespace Petri
 			generator += "return result.c_str();";
 			generator += "}\n";
 
-			generator.Write(sourceName);
+			System.IO.File.WriteAllText(sourceName, generator.Value);
 
 			string libName = System.IO.Path.GetTempFileName();
 

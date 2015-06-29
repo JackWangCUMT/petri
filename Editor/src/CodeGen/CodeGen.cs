@@ -21,57 +21,38 @@
  */
 
 using System;
-using System.Resources;
-using System.Xml;
-using System.Xml.Linq;
 
 namespace Petri
 {
-	public sealed class ExitPoint : NonRootState
-	{
-		public ExitPoint(HeadlessDocument doc, PetriNet parent, Cairo.PointD pos) : base(doc, parent, false, pos) {
-			this.Radius = 25;
-		}
+	public enum Language {
+		C,
+		Cpp
+	}
 
-		public ExitPoint(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
+	public abstract class CodeGen {
+		public CodeGen() {
 			
 		}
 
-		public override XElement GetXml() {
-			var elem = new XElement("Exit");
-			this.Serialize(elem);
-			return elem;
+		public abstract Language Language {
+			get;
 		}
 
-		public override bool Active {
-			get {
-				return false;
-			}
-			set {
-				base.Active = false;
-			}
+		public abstract string Value {
+			get;
 		}
 
-		public override int RequiredTokens {
-			get {
-				return this.TransitionsBefore.Count;
-			}
-			set {
-				
-			}
+		public abstract void Format();
+
+		public abstract void Add(string line);
+
+		public void AddLine(string line = "") {
+			Add(line + '\n');
 		}
 
-		public override string Name {
-			get {
-				return "End";
-			}
-			set {
-				base.Name = "End";
-			}
-		}
-
-		public override bool UsesFunction(Cpp.Function f) {
-			return false;
+		public static CodeGen operator +(CodeGen gen, string s) {
+			gen.AddLine(s);
+			return gen;
 		}
 	}
 }

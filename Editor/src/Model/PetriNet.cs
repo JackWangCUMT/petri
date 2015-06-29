@@ -197,21 +197,6 @@ namespace Petri
 			private set;
 		}
 
-		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
-			foreach(State s in this.States) {
-				s.GenerateCpp(source, lastID);
-			}
-			source += "\n";
-
-			foreach(Transition t in this.Transitions) {
-				t.GenerateCpp(source, lastID);
-			}
-
-			source += "\n";
-		
-			return "";
-		}
-
 		public Entity EntityFromID(UInt64 id) {
 			foreach(var s in States) {
 				if(s.ID == id)

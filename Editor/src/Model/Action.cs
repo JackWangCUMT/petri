@@ -118,67 +118,6 @@ namespace Petri
 			return Function.UsesFunction(f);
 		}
 
-		public override string GenerateCpp(Cpp.Generator source, IDManager lastID) {
-			var old = new Dictionary<Cpp.LiteralExpression, string>();
-			string enumName = Document.Settings.Enum.Name;
-
-			var litterals = Function.GetLiterals();
-			foreach(Cpp.LiteralExpression le in litterals) {
-				foreach(string e in Document.Settings.Enum.Members) {
-					if(le.Expression == e) {
-						old.Add(le, le.Expression);
-						le.Expression = "static_cast<actionResult_t>(" + enumName + "::" + le.Expression + ")";
-					}
-					else if(le.Expression == "$Name") {
-						old.Add(le, le.Expression);
-						le.Expression = "\"" + Name + "\"";
-					}
-					else if(le.Expression == "$ID") {
-						old.Add(le, le.Expression);
-						le.Expression = ID.ToString();
-					}
-				}
-			}
-
-			var cpp = "static_cast<actionResult_t>(" + Function.MakeCpp() + ")";
-
-			var cppVar = new HashSet<Cpp.VariableExpression>();
-			GetVariables(cppVar);
-
-			string action;
-
-			if(cppVar.Count == 0) {
-				action = "make_action_callable([&petriNet]() { return " + cpp + "; })";
-			}
-			else {
-				var cppLockLock = from v in cppVar
-								  select "_petri_lock_" + v.Expression;
-				
-				action = "make_action_callable([&petriNet]() {\n";
-				foreach(var v in cppVar) {
-					action += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + v.Expression + ")).getLock();\n";
-				}
-
-				if(cppVar.Count > 1)
-					action += "std::lock(" + String.Join(", ", cppLockLock) + ");\n";
-				else {
-					action += String.Join(", ", cppLockLock) + ".lock();\n";
-				}
-					
-				action += "return " + cpp + ";\n";
-				action += "})";
-			}
-
-			source += "auto &" + CppName + " = " + "petriNet.addAction("
-				+ "Action(" + this.ID.ToString() + ", \"" + this.Parent.Name + "_" + this.Name + "\", " + action + ", " + this.RequiredTokens.ToString() + "), " + ((this.Active && (this.Parent is RootPetriNet)) ? "true" : "false") + ");";
-
-			foreach(var tup in old) {
-				tup.Key.Expression = tup.Value;
-			}
-
-			return "";
-		}
-
 		public void GetVariables(HashSet<Cpp.VariableExpression> res) {				
 			var l = Function.GetLiterals();
 			foreach(var ll in l) {

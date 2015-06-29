@@ -50,7 +50,7 @@ namespace Petri
 			get;
 			set;
 		}
-			
+		
 		public List<string> Headers {
 			get;
 			private set;
@@ -273,46 +273,8 @@ namespace Petri
 				throw new Exception(Configuration.GetLocalized("The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts."));
 			}
 
-			var cppGen = PetriNet.GenerateCpp();
-			cppGen.Item1.AddHeader("\"" + Settings.Name + ".h\"");
-			cppGen.Item1.Write(System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.SourceOutputPath), Settings.Name) + ".cpp");
-
-			var generator = new Cpp.Generator();
-
-			generator += "#ifndef PETRI_" + Settings.Name + "_H";
-			generator += "#define PETRI_" + Settings.Name + "_H\n";
-
-			generator += "#define PETRI_CLASS_NAME " + Settings.Name;
-			generator += "#define PETRI_PREFIX \"" + CppPrefix + "\"";
-			generator += "#define PETRI_ENUM " + Settings.Enum.Name;
-			generator += "#define PETRI_PORT " + Settings.Port;
-
-
-			generator += "";
-
-			generator += "#include \"Runtime/PetriDynamicLib.h\"\n";
-
-			generator += "#undef PETRI_PORT";
-
-			generator += "#undef PETRI_ENUM";
-			generator += "#undef PETRI_PREFIX";
-			generator += "#undef PETRI_CLASS_NAME\n";
-
-			generator += "#endif"; // ifndef header guard
-
-			string path = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, Settings.SourceOutputPath), Settings.Name) + ".h";
-			bool generate = true;
-			string headerCode = generator.Value;
-			if(System.IO.File.Exists(path)) {
-				string existing = System.IO.File.ReadAllText(path);
-				if(existing.Length > 1 && existing.Substring(0, existing.Length - 1) == headerCode) {
-					generate = false;
-				}
-			}
-
-			if(generate) {
-				System.IO.File.WriteAllText(path, generator.Value);
-			}
+			var generator = new CppPetriGen(this);
+			generator.Write();
 		}
 
 		public virtual bool Compile(bool wait) {
@@ -345,7 +307,8 @@ namespace Petri
 		}
 
 		public string GetHash() {
-			return PetriNet.GetHash();
+			var generator = new CppPetriGen(this);
+			return generator.GetHash();
 		}
 
 		public HashSet<Entity> Conflicting {

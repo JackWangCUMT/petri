@@ -1,5 +1,5 @@
 /**
- * Obtained from here: https://github.com/mono/monodevelop/tree/master/main/src/addins/MacPlatform/MacInterop
+ * Obtained from https://github.com/mono/monodevelop/tree/master/main/src/addins/MacPlatform/MacInterop
  * Adapted for this application by Rémi Saurel.
  */
 
