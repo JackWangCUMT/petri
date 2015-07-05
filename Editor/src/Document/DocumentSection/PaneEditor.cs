@@ -51,7 +51,7 @@ namespace Petri
 						funcList.SetActiveIter(iter);
 						break;
 					}
-				} while (funcList.Model.IterNext(ref iter));
+				} while(funcList.Model.IterNext(ref iter));
 			}
 
 			return funcList;

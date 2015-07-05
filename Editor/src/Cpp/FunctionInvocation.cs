@@ -27,7 +27,7 @@ namespace Petri
 {
 	namespace Cpp {
 		public class FunctionInvocation : Expression {
-			public FunctionInvocation(Function function, params Expression[] arguments) : base(Cpp.Operator.Name.FunCall) {
+			public FunctionInvocation(Language language, Function function, params Expression[] arguments) : base(language, Cpp.Operator.Name.FunCall) {
 				if(arguments.Length != function.Parameters.Count) {
 					throw new Exception(Configuration.GetLocalized("Invalid arguments count."));
 				}
@@ -71,7 +71,16 @@ namespace Petri
 					if(i > 0) {
 						args += ", ";
 					}
-					args += "static_cast<" + Function.Parameters[i].Type.ToString() + ">(" + Arguments[i].MakeCpp() + ")";
+					if(Language == Language.C) {
+						args += "(" + Function.Parameters[i].Type.ToString() + ")(" + Arguments[i].MakeCpp() + ")";
+						continue;
+					}
+					else if(Language == Language.Cpp) {
+						args += "static_cast<" + Function.Parameters[i].Type.ToString() + ">(" + Arguments[i].MakeCpp() + ")";
+						continue;
+					}
+
+					throw new Exception("Should not get there!");
 				}
 
 				string template = "";
@@ -105,7 +114,7 @@ namespace Petri
 		}
 
 		public class MethodInvocation : FunctionInvocation {
-			public MethodInvocation(Method function, Expression that, bool indirection, params Expression[] arguments) : base(function, arguments) {
+			public MethodInvocation(Language language, Method function, Expression that, bool indirection, params Expression[] arguments) : base(language, function, arguments) {
 				this.This = that;
 				this.Indirection = indirection;
 			}
@@ -140,7 +149,7 @@ namespace Petri
 		}
 
 		public class ConflictFunctionInvocation : FunctionInvocation {
-			public ConflictFunctionInvocation(string value) : base(Dummy) {
+			public ConflictFunctionInvocation(string value) : base(Language.None, Dummy) {
 				_value = value;
 			}
 
@@ -166,18 +175,35 @@ namespace Petri
 		}
 
 		public class WrapperFunctionInvocation : FunctionInvocation {
-			public WrapperFunctionInvocation(Cpp.Type returnType, Expression expr) : base(GetWrapperFunction(returnType), expr) {
+			public WrapperFunctionInvocation(Language language, Cpp.Type returnType, Expression expr) : base(language, GetWrapperFunction(returnType), expr) {
 				
 			}
 
 			public static Cpp.Function GetWrapperFunction(Cpp.Type returnType) {
-				var f = new Function(returnType, Scope.MakeFromNamespace("PetriUtils", null), "", false);
+				var f = new Function(returnType, Scope.MakeFromNamespace("Utility", null), "", false);
 				f.AddParam(new Param(new Type("void", Scope.EmptyScope), "param"));
 				return f;
 			}
 
+			public override bool NeedsReturn {
+				get {
+					if(Language == Language.C) {
+						return true;
+					}
+
+					return false;
+				}
+			}
+
 			public override string MakeCpp() {
-				return "([&petriNet]() -> " + Function.ReturnType.Name + " { " + Arguments[0].MakeCpp() + "; return {}; })()";
+				if(Language == Language.C) {
+					return Arguments[0].MakeCpp() + ";";
+				}
+				else if(Language == Language.Cpp) {
+					return "([&petriNet]() -> " + Function.ReturnType.Name + " { " + Arguments[0].MakeCpp() + "; return {}; })()";
+				}
+
+				throw new Exception("Should not get there!");
 			}
 
 			public override string MakeUserReadable() {

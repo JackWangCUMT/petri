@@ -42,6 +42,9 @@ namespace Petri
 			get {
 				return _value;
 			}
+			set {
+				_value = value;
+			}
 		}
 
 		public override void Format() {
@@ -58,82 +61,86 @@ namespace Petri
 			var nesting = new Stack<Cpp.Expression.ExprType>();
 
 			foreach(string line in _value.Split('\n')) {
-				int existingIndent = 0;
-				for(int i = 0; i < line.Length; ++i) {
-					if(line[i] == '\t') {
-						++existingIndent;
+				string newLine = line;
+
+				if(!line.StartsWith("#")) {
+					int existingIndent = 0;
+					for(int i = 0; i < line.Length; ++i) {
+						if(line[i] == '\t') {
+							++existingIndent;
+						}
+						else {
+							break;
+						}
 					}
-					else {
-						break;
+					int firstIndent = 0;
+					int deltaNext = 0;
+
+					for(int i = 0; i < line.Length; ++i) {
+						int delta = 0;
+						switch(line[i]) {
+						case '(':
+							nesting.Push(ExprType.Parenthesis);
+							delta = 2;
+							break;
+						case ')':
+							if(nesting.Count > 0 && nesting.Peek() == ExprType.Parenthesis) {
+								delta = -2;
+								nesting.Pop();
+							}
+							break;
+						case '{':
+							delta = 1;
+							nesting.Push(ExprType.Brackets);
+							break;
+						case '}':
+							if(nesting.Count > 0 && nesting.Peek() == ExprType.Brackets) {
+								delta = -1;
+								nesting.Pop();
+							}
+							break;
+						case '[':
+							delta = 2;
+							nesting.Push(ExprType.Subscript);
+							break;
+						case ']':
+							if(nesting.Count > 0 && nesting.Peek() == ExprType.Subscript) {
+								delta = -2;
+								nesting.Pop();
+							}
+							break;
+						case '"':
+							// First quote
+							if(nesting.Count == 0 || (nesting.Peek() != ExprType.DoubleQuote && nesting.Peek() != ExprType.Quote)) {
+								nesting.Push(ExprType.DoubleQuote);
+							}
+							// Second quote
+							else if(nesting.Count > 0 && nesting.Peek() == ExprType.DoubleQuote && line[i - 1] != '\\') {
+								nesting.Pop();
+							}
+							break;
+						case '\'':
+							// First quote
+							if(nesting.Count == 0 || (nesting.Peek() != ExprType.Quote && nesting.Peek() != ExprType.DoubleQuote)) {
+								nesting.Push(ExprType.Quote);
+							}
+							// Second quote
+							else if(nesting.Count > 0 && nesting.Peek() == ExprType.Quote && line[i - 1] != '\\') {
+								nesting.Pop();
+							}
+							break;
+						}
+
+						if(i == 0 && delta < 0) {
+							firstIndent = delta;
+						}
+
+						deltaNext += delta;
 					}
+
+					newLine = GetNTab(currentIndent + firstIndent - existingIndent) + line;
+					currentIndent += deltaNext;
 				}
-				int firstIndent = 0;
-				int deltaNext = 0;
-
-				for(int i = 0; i < line.Length; ++i) {
-					int delta = 0;
-					switch(line[i]) {
-					case '(':
-						nesting.Push(ExprType.Parenthesis);
-						delta = 2;
-						break;
-					case ')':
-						if(nesting.Count > 0 && nesting.Peek() == ExprType.Parenthesis) {
-							delta = -2;
-							nesting.Pop();
-						}
-						break;
-					case '{':
-						delta = 1;
-						nesting.Push(ExprType.Brackets);
-						break;
-					case '}':
-						if(nesting.Count > 0 && nesting.Peek() == ExprType.Brackets) {
-							delta = -1;
-							nesting.Pop();
-						}
-						break;
-					case '[':
-						delta = 2;
-						nesting.Push(ExprType.Subscript);
-						break;
-					case ']':
-						if(nesting.Count > 0 && nesting.Peek() == ExprType.Subscript) {
-							delta = -2;
-							nesting.Pop();
-						}
-						break;
-					case '"':
-						// First quote
-						if(nesting.Count == 0 || (nesting.Peek() != ExprType.DoubleQuote && nesting.Peek() != ExprType.Quote)) {
-							nesting.Push(ExprType.DoubleQuote);
-						}
-						// Second quote
-						else if(nesting.Count > 0 && nesting.Peek() == ExprType.DoubleQuote && line[i - 1] != '\\') {
-							nesting.Pop();
-						}
-						break;
-					case '\'':
-						// First quote
-						if(nesting.Count == 0 || (nesting.Peek() != ExprType.Quote && nesting.Peek() != ExprType.DoubleQuote)) {
-							nesting.Push(ExprType.Quote);
-						}
-						// Second quote
-						else if(nesting.Count > 0 && nesting.Peek() == ExprType.Quote && line[i - 1] != '\\') {
-							nesting.Pop();
-						}
-						break;
-					}
-
-					if(i == 0 && delta < 0) {
-						firstIndent = delta;
-					}
-
-					deltaNext += delta;
-				}
-
-				string newLine = GetNTab(currentIndent + firstIndent - existingIndent) + line;
-				currentIndent += deltaNext;
 
 				newVal += newLine + "\n";
 			}

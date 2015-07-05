@@ -32,8 +32,9 @@ namespace Petri {
 		{
 			public enum ExprType {Parenthesis, Invocation, Subscript, Template, Quote, DoubleQuote, Brackets, Number, ID};
 
-			protected Expression(Operator.Name op) {
-				this.Operator = op;
+			protected Expression(Language language, Operator.Name op) {
+				Operator = op;
+				Language = language;
 				Unexpanded = "";
 			}
 
@@ -43,6 +44,12 @@ namespace Petri {
 			public abstract string MakeUserReadable();
 
 			public abstract List<LiteralExpression> GetLiterals();
+
+			public virtual bool NeedsReturn {
+				get {
+					return false;
+				}
+			}
 
 			public static Expression CreateFromString(string s, Entity entity, bool allowComma = true) {
 				return CreateFromString<Expression>(s, entity, allowComma);
@@ -63,7 +70,7 @@ namespace Petri {
 				                 select Expression.CreateFromPreprocessedString(e, entity, tup.Item2, true);
 				
 				if(parsedList.Count() > 1) {
-					result = new ExpressionList(parsedList);
+					result = new ExpressionList(entity.Document.Settings.Language, parsedList);
 				}
 				else {
 					var it = parsedList.GetEnumerator();
@@ -78,6 +85,11 @@ namespace Petri {
 				result.NeedsExpansion = !unexpanded.Equals(expanded);
 
 				return (ExpressionType)result;
+			}
+
+			public Language Language {
+				get;
+				private set;
 			}
 
 			public Operator.Name Operator {
@@ -362,13 +374,13 @@ namespace Petri {
 									throw new Exception(Configuration.GetLocalized("No method match the specified expression ({0}).", GetStringFromPreprocessed(s, subexprs)));
 								}
 
-								return new MethodInvocation(m, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), foundOperator == Cpp.Operator.Name.SelectionPtr, param.ToArray());
+								return new MethodInvocation(entity.Document.Settings.Language, m, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), foundOperator == Cpp.Operator.Name.SelectionPtr, param.ToArray());
 							}
 
-							return new BinaryExpression(foundOperator, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), Expression.CreateFromPreprocessedString(e2, entity, subexprs, true));
+							return new BinaryExpression(entity.Document.Settings.Language, foundOperator, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), Expression.CreateFromPreprocessedString(e2, entity, subexprs, true));
 						}
 						else if(prop.type == Petri.Cpp.Operator.Type.PrefixUnary) {
-							return new UnaryExpression(foundOperator, Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length), entity, subexprs, true));
+							return new UnaryExpression(entity.Document.Settings.Language, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length), entity, subexprs, true));
 						}
 						else if(prop.type == Petri.Cpp.Operator.Type.SuffixUnary) {
 							if(foundOperator == Petri.Cpp.Operator.Name.FunCall) {
@@ -394,9 +406,9 @@ namespace Petri {
 									throw new Exception(Configuration.GetLocalized("No function match the specified expression ({0}).", GetStringFromPreprocessed(s, subexprs)));
 								}
 							
-								return new FunctionInvocation(f, param.ToArray());
+								return new FunctionInvocation(entity.Document.Settings.Language, f, param.ToArray());
 							}
-							return new UnaryExpression(foundOperator, Expression.CreateFromPreprocessedString(s.Substring(0, index), entity, subexprs, true));
+							return new UnaryExpression(entity.Document.Settings.Language, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(0, index), entity, subexprs, true));
 						}
 					}
 				}
@@ -473,7 +485,7 @@ namespace Petri {
 					throw new Exception(Configuration.GetLocalized("No method match the specified expression."));
 				}
 
-				return new MethodInvocation(m, Expression.CreateFromString<Expression>(invocation[0], entity), indirection, exprList.ToArray());
+				return new MethodInvocation(entity.Document.Settings.Language, m, Expression.CreateFromString<Expression>(invocation[0], entity), indirection, exprList.ToArray());
 			}
 
 			protected static string Parenthesize(Expression parent, Expression child, string representation) {
@@ -514,7 +526,7 @@ namespace Petri {
 		}
 
 		public class EmptyExpression : Expression {
-			public EmptyExpression(bool doWeCare) : base(Cpp.Operator.Name.None) {}
+			public EmptyExpression(bool doWeCare) : base(Language.None, Cpp.Operator.Name.None) {}
 
 			public override bool UsesFunction(Function f) {
 				return false;
@@ -542,7 +554,7 @@ namespace Petri {
 		}
 
 		public class BracketedExpression : Expression {
-			public BracketedExpression(Expression b, Expression expr, Expression a) : base(Cpp.Operator.Name.None) {
+			public BracketedExpression(Expression b, Expression expr, Expression a) : base(Language.None, Cpp.Operator.Name.None) {
 				Before = b;
 				Expression = expr;
 				After = a;
@@ -613,11 +625,15 @@ namespace Petri {
 				return new LiteralExpression(s);
 			}
 
-			protected LiteralExpression(string expr) : base(Cpp.Operator.Name.None) {
+			protected LiteralExpression(string expr) : base(Language.None, Cpp.Operator.Name.None) {
 				Expression = expr.Trim();
 			}
 
-			public string Expression {
+			protected LiteralExpression(Language language, string expr) : base(language, Cpp.Operator.Name.None) {
+				Expression = expr.Trim();
+			}
+
+			public virtual string Expression {
 				get;
 				set;
 			}
@@ -642,7 +658,7 @@ namespace Petri {
 		}
 
 		public class VariableExpression : LiteralExpression {
-			public VariableExpression(string expr, Entity e) : base(expr) {
+			public VariableExpression(string expr, Entity e) : base(e.Document.Settings.Language, expr) {
 				Regex name = new Regex(Cpp.Parser.NamePattern);
 				Match nameMatch = name.Match(expr);
 				if(!nameMatch.Success) {
@@ -651,12 +667,20 @@ namespace Petri {
 			}
 
 			public override string MakeCpp() {
-				return "petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + Expression + ")).value()";
+				if(Language == Language.C) {
+					
+					return "(*PetriNet_getVariable(petriNet, (uint_fast32_t)(" + Prefix + Expression + ")))";
+				}
+				else if(Language == Language.Cpp) {
+					return "petriNet.getVariable(static_cast<std::uint_fast32_t>(" + Prefix + Expression + ")).value()";
+				}
+
+				throw new Exception("Should not get here!");
 			}
 
 			public override string MakeUserReadable() {
 				return "$" + Expression;
-			}
+			}				
 
 			public override bool Equals(object o) {
 				return o is VariableExpression && ((VariableExpression)o).Expression == Expression;
@@ -665,10 +689,29 @@ namespace Petri {
 			public override int GetHashCode() {
 				return Expression.GetHashCode();
 			}
+
+			public string Prefix {
+				get {
+					if(Language == Language.C) {
+						return EnumName + "_";
+					}
+					else if(Language == Language.Cpp) {
+						return EnumName + "::";
+					}
+
+					throw new Exception("Should not get here!");
+				}
+			}
+
+			public static string EnumName {
+				get {
+					return "Petri_Var_Enum";
+				}
+			}
 		}
 
 		public class UnaryExpression : Expression {
-			public UnaryExpression(Operator.Name o, Expression expr) : base(o) {
+			public UnaryExpression(Language language, Operator.Name o, Expression expr) : base(language, o) {
 				this.Expression = expr;
 			}
 
@@ -746,7 +789,7 @@ namespace Petri {
 		}
 
 		public class BinaryExpression : Expression {
-			public BinaryExpression(Operator.Name o, Expression expr1, Expression expr2) : base(o) {
+			public BinaryExpression(Language language, Operator.Name o, Expression expr1, Expression expr2) : base(language, o) {
 				this.Expression1 = expr1;
 				this.Expression2 = expr2;
 			}
@@ -895,7 +938,7 @@ namespace Petri {
 
 		// Could have been TernaryExpression, but there is only one ternary operator in C++, so we already specialize it.
 		public abstract class TernaryConditionExpression : Expression {
-			protected TernaryConditionExpression(Expression expr1, Expression expr2, Expression expr3) : base(Cpp.Operator.Name.TernaryConditional) {
+			protected TernaryConditionExpression(Language language, Expression expr1, Expression expr2, Expression expr3) : base(language, Cpp.Operator.Name.TernaryConditional) {
 				this.Expression1 = expr1;
 				this.Expression2 = expr2;
 				this.Expression3 = expr3;
@@ -938,7 +981,7 @@ namespace Petri {
 		}
 
 		public class ExpressionList : Expression {
-			public ExpressionList(IEnumerable<Expression> expressions) : base(Cpp.Operator.Name.None) {
+			public ExpressionList(Language language, IEnumerable<Expression> expressions) : base(language, Cpp.Operator.Name.None) {
 				Expressions = new List<Expression>(expressions);
 			}
 

@@ -42,7 +42,7 @@ namespace Petri {
 		NOK
 	};
 
-	namespace PetriUtils {
+	namespace Utility {
 		actionResult_t pause(std::chrono::nanoseconds const &delay);
 		actionResult_t printAction(std::string const &name, std::uint64_t id);
 		actionResult_t doNothing();

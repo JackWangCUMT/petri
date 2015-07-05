@@ -234,10 +234,6 @@ namespace Petri
 		}
 
 		public void Evaluate(Cpp.Expression expression) {
-			string sourceName = System.IO.Path.GetTempFileName();
-
-			string cppExpr = expression.MakeCpp();
-
 			if(!PetriRunning) {
 				var literals = expression.GetLiterals();
 				foreach(var l in literals) {
@@ -247,36 +243,12 @@ namespace Petri
 				}
 			}
 
-			CodeGen generator = new CFamilyCodeGen(Language.Cpp);
-			foreach(string header in _document.Headers) {
-				foreach(var s in _document.Headers) {
-					var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(_document.Path).FullName, s);
-					var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(_document.Path).FullName, _document.Settings.SourceOutputPath));
-					generator += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
-				}
-			}
-			generator += "#include \"Runtime/Petri.h\"";
-			generator += "#include \"Runtime/Atomic.h\"";
-			generator += "#include <string>";
-			generator += "#include <sstream>";
+			string sourceName = System.IO.Path.GetTempFileName();
 
-			generator += "using namespace Petri;";
-
-			generator += _document.GenerateVarEnum();
-
-			generator += "extern \"C\" char const *" + _document.CppPrefix + "_evaluate(void *petriPtr) {";
-			generator += "auto &petriNet = *static_cast<PetriDebug *>(petriPtr);";
-			generator += "static std::string result;";
-			generator += "std::ostringstream oss;";
-			generator += "oss << " + cppExpr + ";";
-			generator += "result = oss.str();";
-			generator += "return result.c_str();";
-			generator += "}\n";
-
-			System.IO.File.WriteAllText(sourceName, generator.Value);
+			var petriGen = PetriGen.PetriGenFromLanguage(_document.Settings.Language, _document);
+			petriGen.WriteExpressionEvaluator(expression, sourceName);
 
 			string libName = System.IO.Path.GetTempFileName();
-
 
 			var c = new CppCompiler(_document);
 			var o = c.CompileSource(sourceName, libName);

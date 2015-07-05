@@ -37,7 +37,7 @@ PetriTransition *PetriTransition_createEmpty(PetriAction *previous, PetriAction 
 	return new PetriTransition{std::make_unique<Petri::Transition>(getAction(previous), getAction(next))};
 }
 
-PetriTransition *PetriTransition_create(uint64_t id, char const *name, PetriAction *previous, PetriAction *next, transitionCallable_t cond) {
+PetriTransition *PetriTransition_createAndAdd(uint64_t id, char const *name, PetriAction *previous, PetriAction *next, transitionCallable_t cond) {
 	return new PetriTransition{std::make_unique<Petri::Transition>(id, name, getAction(previous), getAction(next), Petri::make_transition_callable(cond))};
 }
 

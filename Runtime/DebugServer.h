@@ -46,33 +46,67 @@ namespace Petri {
 	using namespace std::string_literals;
 	using namespace std::chrono_literals;
 
-	namespace DebugServer {
-		extern std::string getVersion();
-		extern std::chrono::system_clock::time_point getAPIdate();
-		extern std::chrono::system_clock::time_point getDateFromTimestamp(char const *timestamp);
-	}
-
-	class PetriDynamicLibCommon;
+	class PetriDynamicLib;
 	class PetriDebug;
 
-	class DebugSession {
+	class DebugServer {
+		friend class PetriDebug;
 	public:
-		DebugSession(PetriDynamicLibCommon &petri);
+		/**
+		 * Returns the DebugServer API's version
+		 * @return The current version of the API.
+		 */
+		static std::string const &getVersion();
 
-		~DebugSession();
+		/**
+		 * Returns the date on which the API was compiled.
+		 * @return The API compilation date.
+		 */
+		static std::chrono::system_clock::time_point getAPIdate();
+		
+		/*
+		 * Converts a timestamp string to a date.
+		 * @param timestamp The timestamp to convert.
+		 * @return The conversion result.
+		 */
+		static std::chrono::system_clock::time_point getDateFromTimestamp(char const *timestamp);
 
-		DebugSession(DebugSession const &) = delete;
-		DebugSession &operator=(DebugSession const &) = delete;
+		/**
+		 * Creates the DebugServer and binds it to the provided dynamic library.
+		 * @param petri The dynamic lib from which the debug server operates.
+		 */
+		DebugServer(PetriDynamicLib &petri);
 
+		/**
+		 * Destroys the debug server. If the server is running, a deleted or out of scope DebugServer
+		 * object will wait for the connected client to end the debug session to continue the program exectution.
+		 */
+		~DebugServer();
+
+		DebugServer(DebugServer const &) = delete;
+		DebugServer &operator=(DebugServer const &) = delete;
+
+		/**
+		 * Starts the debug server by listening on the debug port of the bound dynamic library, making it ready to receive a debugger connection.
+		 */
 		void start();
+
+		/**
+		 * Stops the debug server. After that, the debugging port is unbound.
+		 */
 		void stop();
+
+		/**
+		 * Checks whether the debug server is running or not.
+		 * @return true if the server is running, false otherwise.
+		 */
 		bool running() const;
 
+	protected:
 		void addActiveState(Action &a);
 		void removeActiveState(Action &a);
 		void notifyStop();
 
-	protected:
 		void serverCommunication();
 		void heartBeat();
 
@@ -99,7 +133,7 @@ namespace Petri {
 		Petri::Socket _client;
 		std::atomic_bool _running = {false};
 
-		PetriDynamicLibCommon &_petriNetFactory;
+		PetriDynamicLib &_petriNetFactory;
 		std::unique_ptr<PetriDebug> _petri;
 		std::mutex _sendMutex;
 		std::mutex _breakpointsMutex;

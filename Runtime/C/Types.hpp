@@ -30,10 +30,14 @@
 #ifndef Petri_Types_hpp
 #define Petri_Types_hpp
 
-#include <memory>
 #include "../PetriNet.h"
 #include "../Action.h"
 #include "../Transition.h"
+#include "../DebugServer.h"
+
+struct CPetriDynamicLib;
+
+#include <memory>
 
 struct PetriNet {
 	std::unique_ptr<Petri::PetriNet> petriNet;
@@ -48,6 +52,15 @@ struct PetriTransition {
 	std::unique_ptr<Petri::Transition> owned;
 	Petri::Transition *notOwned;
 };
+
+struct PetriDynamicLib {
+	std::unique_ptr<CPetriDynamicLib> lib;
+};
+
+struct PetriDebugServer {
+	std::unique_ptr<Petri::DebugServer> server;
+};
+
 
 #ifdef PETRI_NEEDS_GET_ACTION
 

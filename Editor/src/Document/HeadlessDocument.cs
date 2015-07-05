@@ -228,7 +228,7 @@ namespace Petri
 
 			var elem = document.FirstNode as XElement;
 
-			Settings = DocumentSettings.CreateSettings(elem.Element("Settings"));
+			Settings = DocumentSettings.CreateSettings(this, elem.Element("Settings"));
 
 			var winConf = elem.Element("Window");
 			SetWindowPosition(int.Parse(winConf.Attribute("X").Value), int.Parse(winConf.Attribute("Y").Value));
@@ -267,14 +267,14 @@ namespace Petri
 
 		public void SaveCppDontAsk() {
 			if(this.Settings.SourceOutputPath.Length == 0) {
-				throw new Exception(Configuration.GetLocalized("No source output path defined. Please open the Petri net with the graphical editor and generate the C++ code once."));
+				throw new Exception(Configuration.GetLocalized("No source output path defined. Please open the Petri net with the graphical editor and generate the <language> code once.", Settings.LanguageName()));
 			}
 			else if(Conflicts(PetriNet)) {
 				throw new Exception(Configuration.GetLocalized("The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts."));
 			}
 
-			var generator = new CppPetriGen(this);
-			generator.Write();
+			var generator = PetriGen.PetriGenFromLanguage(Settings.Language, this);
+			generator.WritePetriNet();
 		}
 
 		public virtual bool Compile(bool wait) {
@@ -334,17 +334,6 @@ namespace Petri
 		public virtual void UpdateConflicts() {
 			Conflicting.Clear();
 			PetriNet.UpdateConflicts();
-		}
-
-		public string GenerateVarEnum() {
-			var variables = PetriNet.Variables;
-			var cppVar = from v in variables
-			             select v.Expression;
-			if(variables.Count > 0) {
-				return "enum class Petri_Var_Enum : std::uint_fast32_t {" + String.Join(", ", cppVar) + "};";
-			}
-
-			return "";
 		}
 
 		int _wX, _wY, _wW, _wH;

@@ -21,12 +21,14 @@
  */
 
 using System;
+using System.Collections.Generic;
 
 namespace Petri
 {
 	public enum Language {
 		C,
-		Cpp
+		Cpp,
+		None
 	}
 
 	public abstract class CodeGen {
@@ -40,6 +42,7 @@ namespace Petri
 
 		public abstract string Value {
 			get;
+			set;
 		}
 
 		public abstract void Format();

@@ -37,7 +37,7 @@ namespace Petri
 
 			this.Active = active;
 
-			this.Function = new Cpp.FunctionInvocation(DoNothingFunction(doc));
+			this.Function = new Cpp.FunctionInvocation(doc.Settings.Language, DoNothingFunction(doc));
 		}
 
 		public Action(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
@@ -56,7 +56,7 @@ namespace Petri
 					Function = f;
 				}
 				else {
-					Function = new Cpp.WrapperFunctionInvocation(Document.Settings.Enum.Type, exp);
+					Function = new Cpp.WrapperFunctionInvocation(Document.Settings.Language, Document.Settings.Enum.Type, exp);
 				}
 			}
 			catch(Exception) {
@@ -81,28 +81,54 @@ namespace Petri
 		}
 
 		public Cpp.FunctionInvocation PrintAction() {
-			return new Petri.Cpp.FunctionInvocation(PrintFunction(Document), Cpp.LiteralExpression.CreateFromString("$Name", this), Cpp.LiteralExpression.CreateFromString("$ID", this));
+			return new Petri.Cpp.FunctionInvocation(Document.Settings.Language, PrintFunction(Document), Cpp.LiteralExpression.CreateFromString("$Name", this), Cpp.LiteralExpression.CreateFromString("$ID", this));
 		}
 
 		public static Cpp.Function PrintFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "printAction", false);
-			f.AddParam(new Cpp.Param(new Cpp.Type("std::string const &", Cpp.Scope.EmptyScope), "name"));
-			f.AddParam(new Cpp.Param(new Cpp.Type("std::uint64_t", Cpp.Scope.EmptyScope), "id"));
+			if(doc.Settings.Language == Language.Cpp) {
+				var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Utility", Cpp.Scope.EmptyScope), "printAction", false);
+				f.AddParam(new Cpp.Param(new Cpp.Type("std::string const &", Cpp.Scope.EmptyScope), "name"));
+				f.AddParam(new Cpp.Param(new Cpp.Type("std::uint64_t", Cpp.Scope.EmptyScope), "id"));
 
-			return f;
+				return f;
+			}
+			else if(doc.Settings.Language == Language.C) {
+				var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.EmptyScope, "PetriUtility_printAction", false);
+				f.AddParam(new Cpp.Param(new Cpp.Type("char const *", Cpp.Scope.EmptyScope), "name"));
+				f.AddParam(new Cpp.Param(new Cpp.Type("uint64_t", Cpp.Scope.EmptyScope), "id"));
+
+				return f;
+			}
+
+			throw new Exception("Should not get there !");
 		}
 
 		public static Cpp.Function DoNothingFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "doNothing", false);
+			if(doc.Settings.Language == Language.Cpp) {
+				var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Utility", Cpp.Scope.EmptyScope), "doNothing", false);
+				return f;
+			}
+			else if(doc.Settings.Language == Language.C) {
+				var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.EmptyScope, "PetriUtility_doNothing", false);
+				return f;
+			}
 
-			return f;
+			throw new Exception("Should not get there !");
 		}
 
 		public static Cpp.Function PauseFunction(HeadlessDocument doc) {
-			var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("PetriUtils", Cpp.Scope.EmptyScope), "pause", false);
-			f.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::nanoseconds", Cpp.Scope.EmptyScope), "delai"));
+			if(doc.Settings.Language == Language.Cpp) {
+				var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Utility", Cpp.Scope.EmptyScope), "pause", false);
+				f.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::nanoseconds", Cpp.Scope.EmptyScope), "delay"));
+				return f;
+			}
+			else if(doc.Settings.Language == Language.C) {
+				var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.EmptyScope, "PetriUtility_pause", false);
+				f.AddParam(new Cpp.Param(new Cpp.Type("time_t", Cpp.Scope.EmptyScope), "delay"));
+				return f;
+			}
 
-			return f;
+			throw new Exception("Should not get there !");
 		}
 
 		public Cpp.FunctionInvocation Function {

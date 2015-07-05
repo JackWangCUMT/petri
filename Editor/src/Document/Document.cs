@@ -29,6 +29,19 @@ using System.Threading.Tasks;
 
 namespace Petri
 {
+	public class LanguageChangeEventArgs : EventArgs {
+		public LanguageChangeEventArgs(Language l) {
+			NewLanguage = l;
+		}
+
+		public Language NewLanguage {
+			get;
+			private set;
+		}
+	}
+
+	public delegate void LanguageChangeEventHandler(object sender, LanguageChangeEventArgs e);
+
 	public class Document : HeadlessDocument {
 		public Document(string path) : base(path) {
 			Window = new MainWindow(this);
@@ -48,6 +61,8 @@ namespace Petri
 			Window.DebugGui.Paned.Position = Window.Allocation.Width - 200;
 			AssociatedWindows = new HashSet<Window>();
 		}
+
+		public event LanguageChangeEventHandler LanguageChanged;
 
 		public HashSet<Window> AssociatedWindows {
 			get;
@@ -163,6 +178,12 @@ namespace Petri
 			UpdateConflicts();
 
 			Modified = true;
+		}
+
+		public void OnLanguageChanged() {
+			if(LanguageChanged != null) {
+				LanguageChanged(this, new LanguageChangeEventArgs(Settings.Language));
+			}
 		}
 
 		private void RemoveHeaderNoUpdate(string header) {
@@ -410,8 +431,11 @@ namespace Petri
 				d.Destroy();
 			}
 			if(Settings == null) {
-				Settings = DocumentSettings.GetDefaultSettings();
+				Settings = DocumentSettings.GetDefaultSettings(this);
 			}
+
+			OnLanguageChanged();
+
 			Window.EditorGui.View.CurrentPetriNet = PetriNet;
 			Window.DebugGui.View.CurrentPetriNet = PetriNet;
 
@@ -424,7 +448,7 @@ namespace Petri
 					if(!Conflicts(PetriNet)) {
 						this.SaveCppDontAsk();
 						_modifiedSinceGeneration = false;
-						Window.EditorGui.Status = Configuration.GetLocalized("The C++ code has been sucessfully generated.");
+						Window.EditorGui.Status = Configuration.GetLocalized("The <language> code has been sucessfully generated.", Settings.LanguageName());
 					}
 					else {
 						MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, Configuration.GetLocalized("The Petri Net contains conflicting entities. Please solve them before you can generate the source code."));
@@ -452,7 +476,7 @@ namespace Petri
 				}
 			}
 			else {
-				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, Configuration.GetLocalized("Please save the document before generating the C++ source code."));
+				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Error, ButtonsType.Cancel, Configuration.GetLocalized("Please save the document before generating the <language> source code.", Settings.LanguageName()));
 
 				d.Run();
 				d.Destroy();

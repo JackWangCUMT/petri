@@ -29,22 +29,49 @@ namespace Petri
 {
 	public class CppPetriGen : PetriGen
 	{
-		public CppPetriGen(HeadlessDocument doc) : base(doc, new CFamilyCodeGen(Language.Cpp)) {
+		public CppPetriGen(HeadlessDocument doc) : base(doc, Language.Cpp, new CFamilyCodeGen(Language.Cpp)) {
 			_headerGen = new CFamilyCodeGen(Language.Cpp);	
 		}
 
-		public override string Extension {
-			get {
-				return "cpp";
-			}
-		}
-
-		public override void Write() {
-			base.Write();
+		public override void WritePetriNet() {
+			base.WritePetriNet();
 
 			if(_generateHeader) {
 				System.IO.File.WriteAllText(PathToFile(Document.Settings.Name + ".h"), _headerGen.Value);
 			}
+		}
+
+		public override void WriteExpressionEvaluator(Cpp.Expression expression, string path) {
+			string cppExpr = expression.MakeCpp();
+
+			CodeGen generator = new CFamilyCodeGen(Language.Cpp);
+			foreach(string header in Document.Headers) {
+				foreach(var s in Document.Headers) {
+					var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, s);
+					var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath));
+					generator += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
+				}
+			}
+
+			generator += "#include \"Runtime/Petri.h\"";
+			generator += "#include \"Runtime/Atomic.h\"";
+			generator += "#include <string>";
+			generator += "#include <sstream>";
+
+			generator += "using namespace Petri;";
+
+			generator += GenerateVarEnum();
+
+			generator += "extern \"C\" char const *" + Document.CppPrefix + "_evaluate(void *petriPtr) {";
+			generator += "auto &petriNet = *static_cast<PetriDebug *>(petriPtr);";
+			generator += "static std::string result;";
+			generator += "std::ostringstream oss;";
+			generator += "oss << " + cppExpr + ";";
+			generator += "result = oss.str();";
+			generator += "return result.c_str();";
+			generator += "}\n";
+
+			System.IO.File.WriteAllText(path, generator.Value);
 		}
 
 		protected override void Begin() {
@@ -62,52 +89,26 @@ namespace Petri
 			CodeGen.AddLine();
 
 			CodeGen += "#include \"" + Document.Settings.Name + ".h\"";
+			CodeGen += "";
 
 			CodeGen += "#define EXPORT extern \"C\"";
 			CodeGen += "#define PETRI_PREFIX \"" + Document.Settings.Name + "\"\n";
 
 			CodeGen += "\nusing namespace Petri;\n";
 
-			var variables = Document.PetriNet.Variables;
-			var cppVar = from v in variables
-				select v.Expression;
-
-			CodeGen += Document.GenerateVarEnum();
+			CodeGen += GenerateVarEnum();
 
 			CodeGen += "namespace {";
 			CodeGen += "void fill(PetriNet &petriNet) {";
 
-			foreach(var e in cppVar) {
-				CodeGen += "petriNet.addVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + e + "));";
+			foreach(var e in Document.PetriNet.Variables) {
+				CodeGen += "petriNet.addVariable(static_cast<std::uint_fast32_t>(" + e.Prefix + e.Expression + "));";
 			}
 		}
-
-		protected override void GenerateCodeFor(Entity entity, IDManager lastID) {
-			if(entity is InnerPetriNet) {
-				GenerateInnerPetriNet((InnerPetriNet)entity, lastID);
-			}
-			else if(entity is PetriNet) {
-				base.GenerateCodeFor(entity, lastID);
-			}
-			else if(entity is Action) {
-				GenerateAction((Action)entity, lastID);
-			}
-			else if(entity is ExitPoint) {
-				GenerateExitPoint((ExitPoint)entity, lastID);
-			}
-			else if(entity is Transition) {
-				GenerateTransition((Transition)entity);
-			}
-			else {
-				throw new Exception("Should not get there…");
-			}
-		}
-			
+					
 		protected override void End() {
 			CodeGen += "}"; // fill()
 			CodeGen += "}"; // namespace
-
-			CodeGen.Format();
 
 			string toHash = CodeGen.Value;
 
@@ -142,27 +143,49 @@ namespace Petri
 			CodeGen += "return __TIMESTAMP__;";
 			CodeGen += "}";
 
+			CodeGen.Format();
+
 			_headerGen += "#ifndef PETRI_" + Document.Settings.Name + "_H";
 			_headerGen += "#define PETRI_" + Document.Settings.Name + "_H\n";
 
-			_headerGen += "#define PETRI_CLASS_NAME " + Document.Settings.Name;
-			_headerGen += "#define PETRI_PREFIX \"" + Document.CppPrefix + "\"";
-			_headerGen += "#define PETRI_ENUM " + Document.Settings.Enum.Name;
-			_headerGen += "#define PETRI_PORT " + Document.Settings.Port;
-
 			_headerGen += "";
-
-			_headerGen += "#include \"Runtime/PetriDynamicLib.h\"\n";
-
-			_headerGen += "#undef PETRI_PORT";
-
-			_headerGen += "#undef PETRI_ENUM";
-			_headerGen += "#undef PETRI_PREFIX";
-			_headerGen += "#undef PETRI_CLASS_NAME\n";
+			_headerGen += "#include \"Runtime/PetriDynamicLib.h\"";
+			_headerGen += "";
+			_headerGen += "class " + Document.Settings.Name + " : public Petri::PetriDynamicLib {";
+			_headerGen += "public:";
+			_headerGen += "\t/**";
+			_headerGen += "\t * Creates the dynamic library wrapper. It still needs to be loaded to make it possible to create the PetriNet objects.";
+			_headerGen += "\t */";
+			_headerGen += "\t" + Document.Settings.Name + "() = default;";
+			_headerGen += "\t" + Document.Settings.Name + "(" + Document.Settings.Name + " const &pn) = delete;";
+			_headerGen += "\t" + Document.Settings.Name + " &operator=(" + Document.Settings.Name + " const &pn) = delete;";
+			_headerGen += "";
+			_headerGen += "\t" + Document.Settings.Name + "(" + Document.Settings.Name + " &&pn) = default;";
+			_headerGen += "\t" + Document.Settings.Name + " &operator=(" + Document.Settings.Name + " &&pn) = default;";
+			_headerGen += "\tvirtual ~" + Document.Settings.Name + "() = default;";
+			_headerGen += "";
+			_headerGen += "\t/**";
+			_headerGen += "\t * Returns the name of the Petri net.";
+			_headerGen += "\t * @return The name of the Petri net";
+			_headerGen += "\t */";
+			_headerGen += "\tvirtual std::string name() const override {";
+			_headerGen += "\t\treturn \"" + Document.CppPrefix + "\";";
+			_headerGen += "\t}";
+			_headerGen += "";
+			_headerGen += "\t/**";
+			_headerGen += "\t * Returns the TCP port on which a DebugSession initialized with this wrapper will listen to debugger connection.";
+			_headerGen += "\t * @return The TCP port which will be used by DebugSession";
+			_headerGen += "\t */";
+			_headerGen += "\tvirtual uint16_t port() const override {";
+			_headerGen += "\t\treturn " + Document.Settings.Port + ";";
+			_headerGen += "\t}";
+			_headerGen += "";
+			_headerGen += "\tvirtual char const *prefix() const override {";
+			_headerGen += "\t\treturn \"" + Document.CppPrefix + "\";";
+			_headerGen += "\t}";
+			_headerGen += "};";
 
 			_headerGen += "#endif"; // ifndef header guard
-
-			_headerGen.Format();
 
 			string path = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath), Document.Settings.Name) + ".h";
 			string headerCode = _headerGen.Value;
@@ -174,24 +197,26 @@ namespace Petri
 			}
 		}
 
-		private void GenerateAction(Action a, IDManager lastID) {
+		protected override void GenerateAction(Action a, IDManager lastID) {
 			var old = new Dictionary<Cpp.LiteralExpression, string>();
 			string enumName = Document.Settings.Enum.Name;
 
 			var litterals = a.Function.GetLiterals();
 			foreach(Cpp.LiteralExpression le in litterals) {
-				foreach(string e in Document.Settings.Enum.Members) {
-					if(le.Expression == e) {
-						old.Add(le, le.Expression);
-						le.Expression = "static_cast<actionResult_t>(" + enumName + "::" + le.Expression + ")";
-					}
-					else if(le.Expression == "$Name") {
-						old.Add(le, le.Expression);
-						le.Expression = "\"" + a.Name + "\"";
-					}
-					else if(le.Expression == "$ID") {
-						old.Add(le, le.Expression);
-						le.Expression = a.ID.ToString();
+				if(le.Expression == "$Name") {
+					old.Add(le, le.Expression);
+					le.Expression = "\"" + a.Name + "\"";
+				}
+				else if(le.Expression == "$ID") {
+					old.Add(le, le.Expression);
+					le.Expression = a.ID.ToString();
+				}
+				else {
+					foreach(string e in Document.Settings.Enum.Members) {
+						if(le.Expression == e) {
+							old.Add(le, le.Expression);
+							le.Expression = "static_cast<actionResult_t>(" + enumName + "::" + le.Expression + ")";
+						}
 					}
 				}
 			}
@@ -212,7 +237,7 @@ namespace Petri
 
 				action = "make_action_callable([&petriNet]() {\n";
 				foreach(var v in cppVar) {
-					action += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + v.Expression + ")).getLock();\n";
+					action += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(" + v.Prefix + v.Expression + ")).getLock();\n";
 				}
 
 				if(cppVar.Count > 1)
@@ -233,20 +258,18 @@ namespace Petri
 			}
 		}
 
-		private void GenerateExitPoint(ExitPoint e, IDManager lastID) {
+		protected override void GenerateExitPoint(ExitPoint e, IDManager lastID) {
 			CodeGen += "auto &" + e.CppName + " = petriNet.addAction(" +
 				"Action(" + e.ID.ToString() + ", \"" + e.Parent.Name + "_" + e.Name + "\", make_action_callable([](){ return actionResult_t(); }), "  + e.RequiredTokens.ToString()
 				+ "), false);";
 		}
 
-		private void GenerateInnerPetriNet(InnerPetriNet i, IDManager lastID) {
+		protected override void GenerateInnerPetriNet(InnerPetriNet i, IDManager lastID) {
 			string name = i.EntryPointName;
 
 			// Adding an entry point
 			CodeGen += "auto &" + name + " = petriNet.addAction("
 				+ "Action(" + i.EntryPointID + ", \"" + i.Name + "_Entry\", make_action_callable([](){ return actionResult_t(); }), " + i.RequiredTokens.ToString() + "), " + (i.Active ? "true" : "false") + ");";
-
-			base.GenerateCodeFor((PetriNet)i, lastID);
 
 			// Adding a transition from the entry point to all of the initially active states
 			foreach(State s in i.States) {
@@ -259,27 +282,29 @@ namespace Petri
 			}
 		}
 
-		private void GenerateTransition(Transition t) {
+		protected override void GenerateTransition(Transition t) {
 			var old = new Dictionary<Cpp.LiteralExpression, string>();
 			string enumName = Document.Settings.Enum.Name;
 
 			foreach(Cpp.LiteralExpression le in t.Condition.GetLiterals()) {
-				foreach(string e in Document.Settings.Enum.Members) {
-					if(le.Expression == e) {
-						old.Add(le, le.Expression);
-						le.Expression = "static_cast<actionResult_t>(" + enumName + "::" + le.Expression + ")";
-					}
-					else if(le.Expression == "$Res") {
-						old.Add(le, le.Expression);
-						le.Expression = "_PETRI_PRIVATE_GET_ACTION_RESULT_";
-					}
-					else if(le.Expression == "$Name") {
-						old.Add(le, le.Expression);
-						le.Expression = "\"" + t.Name + "\"";
-					}
-					else if(le.Expression == "$ID") {
-						old.Add(le, le.Expression);
-						le.Expression = t.ID.ToString();
+				if(le.Expression == "$Res") {
+					old.Add(le, le.Expression);
+					le.Expression = "_PETRI_PRIVATE_GET_ACTION_RESULT_";
+				}
+				else if(le.Expression == "$Name") {
+					old.Add(le, le.Expression);
+					le.Expression = "\"" + t.Name + "\"";
+				}
+				else if(le.Expression == "$ID") {
+					old.Add(le, le.Expression);
+					le.Expression = t.ID.ToString();
+				}
+				else {
+					foreach(string e in Document.Settings.Enum.Members) {
+						if(le.Expression == e) {
+							old.Add(le, le.Expression);
+							le.Expression = "static_cast<actionResult_t>(" + enumName + "::" + le.Expression + ")";
+						}
 					}
 				}
 			}
@@ -308,7 +333,7 @@ namespace Petri
 					select "_petri_lock_" + v.Expression;
 
 				foreach(var v in cppVar) {
-					lockString += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(Petri_Var_Enum::" + v.Expression + ")).getLock();\n";
+					lockString += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(" + v.Prefix + v.Expression + ")).getLock();\n";
 				}
 
 				if(cppVar.Count > 1)
@@ -328,6 +353,17 @@ namespace Petri
 			foreach(var tup in old) {
 				tup.Key.Expression = tup.Value;
 			}
+		}
+
+		protected string GenerateVarEnum() {
+			var variables = Document.PetriNet.Variables;
+			var cppVar = from v in variables
+				select v.Expression;
+			if(variables.Count > 0) {
+				return "enum class " + Cpp.VariableExpression.EnumName + "  : std::uint_fast32_t {" + String.Join(", ", cppVar) + "};\n";
+			}
+
+			return "";
 		}
 
 		private CodeGen _headerGen;

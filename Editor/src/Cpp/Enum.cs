@@ -52,7 +52,7 @@ namespace Petri
 				}
 
 				if(!ok) {
-					throw new Exception(Configuration.GetLocalized("Invalid comma separated-stored C++ enum"));
+					throw new Exception(Configuration.GetLocalized("Invalid comma separated-stored enum"));
 				}
 
 				Name = lst[0];

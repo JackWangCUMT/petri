@@ -49,8 +49,12 @@ extern "C" {
 	PetriAction *PetriAction_createEmpty();
 
 	/**
-	 * Creates an empty action, associated to a copy ofthe specified Callable.
-	 * @param action The Callable which will be copied
+	 * Creates an empty action, associated to the specified Callable.
+	 * @param id The ID of the new action.
+	 * @param name The name of the new action.
+	 * @param action The Callable which will be called when the action is run.
+	 * @param requiredTokens The number of tokens that must be inside the active action for it to execute.
+	 * @return The newly created action.
 	 */
 	PetriAction *PetriAction_create(uint64_t id, char const *name, callable_t action, size_t requiredTokens);
 
@@ -88,7 +92,7 @@ extern "C" {
 	 * @param next The Action following the transition to be added
 	 * @param cond The condition of the Transition to be added
 	 */
-	void PetriAction_createAndAddTransition(PetriAction *action, uint64_t id, char const *name, PetriAction *next, callable_t cond);
+	void PetriAction_createAndAddTransition(PetriAction *action, uint64_t id, char const *name, PetriAction *next, transitionCallable_t cond);
 
 	/**
 	 * Changes the action associated to the PetriAction

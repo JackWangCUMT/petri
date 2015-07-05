@@ -156,7 +156,7 @@ namespace Petri
 					if(combo.GetActiveIter(out iter)) {
 						var val = combo.Model.GetValue(iter, 0) as string;
 						if(val == nothingFunction) {
-							a.Function = new Cpp.FunctionInvocation(Action.DoNothingFunction(a.Document));
+							a.Function = new Cpp.FunctionInvocation(a.Document.Settings.Language, Action.DoNothingFunction(a.Document));
 							actionType = ActionType.Nothing;
 						}
 						else if(val == printFunction) {
@@ -164,7 +164,7 @@ namespace Petri
 							actionType = ActionType.Print;
 						}
 						else if(val == pauseFunction) {
-							a.Function = new Cpp.FunctionInvocation(Action.PauseFunction(a.Document), Cpp.LiteralExpression.CreateFromString("1s", a));
+							a.Function = new Cpp.FunctionInvocation(a.Document.Settings.Language, Action.PauseFunction(a.Document), Cpp.LiteralExpression.CreateFromString("1s", a));
 							actionType = ActionType.Pause;
 						}
 						else if(val == manual) {
@@ -184,10 +184,10 @@ namespace Petri
 								}
 								Cpp.FunctionInvocation invocation;
 								if(f is Cpp.Method) {
-									invocation = new Cpp.MethodInvocation(f as Cpp.Method, new Cpp.EmptyExpression(true), false, pp.ToArray());
+									invocation = new Cpp.MethodInvocation(a.Document.Settings.Language, f as Cpp.Method, new Cpp.EmptyExpression(true), false, pp.ToArray());
 								}
 								else {
-									invocation = new Cpp.FunctionInvocation(f, pp.ToArray());
+									invocation = new Cpp.FunctionInvocation(a.Document.Settings.Language, f, pp.ToArray());
 								}
 								_document.PostAction(new InvocationChangeAction(a, invocation));
 							}
@@ -231,7 +231,7 @@ namespace Petri
 							}
 						}
 						else {
-							funcInvocation = new Cpp.WrapperFunctionInvocation(_document.Settings.Enum.Type, cppExpr);
+							funcInvocation = new Cpp.WrapperFunctionInvocation(_document.Settings.Language, _document.Settings.Enum.Type, cppExpr);
 						}
 						_document.PostAction(new InvocationChangeAction(a, funcInvocation));
 					}
@@ -262,7 +262,7 @@ namespace Petri
 									args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, false));
 								}
 							}
-							_document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray())));
+							_document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(_document.Settings.Language, method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray())));
 						}
 						catch(Exception ex) {
 							MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).", ex.Message)));
@@ -303,10 +303,10 @@ namespace Petri
 					}
 					Cpp.FunctionInvocation invocation;
 					if(a.Function.Function is Cpp.Method) {
-						invocation = new Cpp.MethodInvocation(a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray());
+						invocation = new Cpp.MethodInvocation(_document.Settings.Language, a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray());
 					}
 					else {
-						invocation = new Cpp.FunctionInvocation(a.Function.Function, args.ToArray());
+						invocation = new Cpp.FunctionInvocation(_document.Settings.Language, a.Function.Function, args.ToArray());
 					}
 					_document.PostAction(new InvocationChangeAction(a, invocation));
 				}

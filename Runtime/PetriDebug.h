@@ -34,7 +34,7 @@
 
 namespace Petri {
 
-	class DebugSession;
+	class DebugServer;
 	template<typename _ReturnType>
 	class ThreadPool;
 
@@ -55,7 +55,7 @@ namespace Petri {
 		 * Sets the observer of the PetriDebug object. The observer will be notified by some of the Petri net events, such as when a state is activated or disabled.
 		 * @param session The observer which will be notified of the events
 		 */
-		void setObserver(DebugSession *session);
+		void setObserver(DebugServer *session);
 
 		/**
 		 * Retrieves the underlying ThreadPool object.

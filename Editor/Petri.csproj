@@ -132,6 +132,7 @@
     <Compile Include="src\CodeGen\PetriGen.cs" />
     <Compile Include="src\CodeGen\CFamilyCodeGen.cs" />
     <Compile Include="src\CodeGen\CppPetriGen.cs" />
+    <Compile Include="src\CodeGen\CPetriGen.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

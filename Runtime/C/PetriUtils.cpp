@@ -21,49 +21,32 @@
  */
 
 //
-//  DynamicLib.cpp
-//  IA Pétri
+//  PetriUtils.c
+//  Petri
 //
-//  Created by Rémi on 04/05/2015.
+//  Created by Rémi on 01/07/2015.
 //
 
-#include "DynamicLib.h"
-#include <dlfcn.h>
-#include <iostream>
+#include "PetriUtils.h"
+#include "../PetriUtils.h"
 
-namespace Petri {
-
-	void DynamicLib::load() {
-		if(this->loaded()) {
-			return;
-		}
-
-		std::string path = this->path();
-
-		_libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
-
-		if(_libHandle == nullptr) {
-			std::cerr << "Unable to load the dynamic library at path \"" << path << "\"!\n" << "Reason: " << dlerror() << std::endl;
-
-			throw std::runtime_error("Unable to load the dynamic library at path \"" + path + "\"!");
-		}
-	}
-
-	/**
-	 * Removes the dynamic library associated to this wrapper from memory.
-	 */
-	void DynamicLib::unload() {
-		if(this->loaded()) {
-			if(dlclose(_libHandle) != 0) {
-				std::cerr << "Unable to unload the dynamic library!\n" << "Reason: " << dlerror() << std::endl;
-			}
-		}
-
-		_libHandle = nullptr;
-	}
-
-	void *DynamicLib::_loadSymbol(const std::string &name) {
-		return dlsym(_libHandle, name.c_str());
-	}
-	
+Petri_actionResult_t PetriUtility_pause(uint64_t usdelay) {
+	return Petri::Utility::pause(std::chrono::microseconds(usdelay));
 }
+
+Petri_actionResult_t PetriUtility_printAction(char const *name, uint64_t id) {
+	return Petri::Utility::printAction(name, id);
+}
+
+Petri_actionResult_t PetriUtility_doNothing() {
+	return Petri::Utility::doNothing();
+}
+
+bool PetriUtility_returnTrue() {
+	return true;
+}
+
+Petri_actionResult_t PetriUtility_returnDefault(Petri_actionResult_t res) {
+	return 0;
+}
+

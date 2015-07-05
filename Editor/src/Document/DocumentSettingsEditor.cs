@@ -58,14 +58,46 @@ namespace Petri
 			_window.Add(scrolledWindow);
 
 			{
-				Label label = new Label(Configuration.GetLocalized("C++ name of the Petri net:"));
+				ComboBox combo = ComboBox.NewText();
+
+				foreach(Petri.Language l in Enum.GetValues(typeof(Petri.Language))) {
+					if(l == Language.None)
+						continue;
+					combo.AppendText(DocumentSettings.LanguageName(l));
+				}
+
+				TreeIter iter;
+				combo.Model.GetIterFirst(out iter);
+				combo.Model.GetIterFirst(out iter);
+				do {
+					GLib.Value thisRow = new GLib.Value();
+					combo.Model.GetValue(iter, 0, ref thisRow);
+					if((thisRow.Val as string).Equals(_document.Settings.LanguageName())) {
+						combo.SetActiveIter(iter);
+						break;
+					}
+				} while(combo.Model.IterNext(ref iter));
+
+				combo.Changed += (object sender, EventArgs e) => {
+					TreeIter it;
+
+					if(combo.GetActiveIter(out it)) {
+						_document.Settings.Language = (Petri.Language)int.Parse(combo.Model.GetStringFromIter(it));
+						_document.Settings.Modified = true;
+					}
+				};
+
+
+				Label labelName = new Label(Configuration.GetLocalized("<language> name of the Petri net:", _document.Settings.LanguageName()));
+				_document.LanguageChanged += (sender, e) => labelName.Text = Configuration.GetLocalized("<language> name of the Petri net:", _document.Settings.LanguageName());
+
 				Entry entry = new Entry(_document.Settings.Name);
 				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					Regex name = new Regex(Cpp.Parser.NamePattern);
 					Match nameMatch = name.Match((obj as Entry).Text);
 
 					if(!nameMatch.Success || nameMatch.Value != (obj as Entry).Text) {
-						MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, Configuration.GetLocalized("The Petri net's name is not a valid C++ identifier."));
+						MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, Configuration.GetLocalized("The Petri net's name is not a valid <language> identifier.", _document.Settings.LanguageName()));
 						d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
 						d.Run();
 						d.Destroy();
@@ -78,12 +110,13 @@ namespace Petri
 					}
 				});
 
+				vbox.PackStart(combo, false, false, 0);
 				var hbox = new HBox(false, 5);
-				hbox.PackStart(label, false, false, 0);
+				hbox.PackStart(labelName, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(entry, false, false, 0);
 
-				label = new Label(Configuration.GetLocalized("Enum \"Action Result\":"));
+				labelName = new Label(Configuration.GetLocalized("Enum \"Action Result\":"));
 				_customEnumEditor = new Entry("");
 
 				MainClass.RegisterValidation(_customEnumEditor, false, (obj, p) => {
@@ -141,12 +174,14 @@ namespace Petri
 				}
 
 				hbox = new HBox(false, 5);
-				hbox.PackStart(label, false, false, 0);
+				hbox.PackStart(labelName, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(radioVBox, false, false, 0);
 				vbox.PackStart(_customEnumEditor, false, false, 0);
 
-				label = new Label(Configuration.GetLocalized("Path to the C++ compiler:"));
+				var pathLabel = new Label(Configuration.GetLocalized("Path to the <language> compiler:", _document.Settings.LanguageName()));
+				_document.LanguageChanged += (sender, e) => pathLabel.Text = Configuration.GetLocalized("Path to the <language> compiler:", _document.Settings.LanguageName());
+
 				entry = new Entry(_document.Settings.Compiler);
 				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					_document.Settings.Compiler = (obj as Entry).Text;
@@ -154,11 +189,13 @@ namespace Petri
 				});
 
 				hbox = new HBox(false, 5);
-				hbox.PackStart(label, false, false, 0);
+				hbox.PackStart(pathLabel, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(entry, false, false, 0);
 
-				label = new Label(Configuration.GetLocalized("Flags forwarded to the c++ compiler:"));
+				var flagsLabel = new Label(Configuration.GetLocalized("Flags forwarded to the <language> compiler:", _document.Settings.LanguageName()));
+				_document.LanguageChanged += (sender, e) => flagsLabel.Text = Configuration.GetLocalized("Flags forwarded to the <language> compiler:", _document.Settings.LanguageName());
+
 				entry = new Entry(String.Join(" ", _document.Settings.CompilerFlags));
 				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					_document.Settings.CompilerFlags.Clear();
@@ -167,12 +204,12 @@ namespace Petri
 				});
 
 				hbox = new HBox(false, 5);
-				hbox.PackStart(label, false, false, 0);
+				hbox.PackStart(flagsLabel, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(entry, false, false, 0);
 
 
-				label = new Label(Configuration.GetLocalized("Output path for the generated code (relative to the document):"));
+				var outputLabel = new Label(Configuration.GetLocalized("Output path for the generated code (relative to the document):"));
 				_sourceOutputPath = new Entry(_document.Settings.SourceOutputPath);
 				MainClass.RegisterValidation(_sourceOutputPath, false, (obj, p) => {
 					_document.Settings.SourceOutputPath = (obj as Entry).Text;
@@ -180,7 +217,7 @@ namespace Petri
 				});
 
 				hbox = new HBox(false, 5);
-				hbox.PackStart(label, false, false, 0);
+				hbox.PackStart(outputLabel, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 
 				_selectSourceOutputPath = new Button("…");
@@ -191,7 +228,7 @@ namespace Petri
 				hbox.PackStart(_selectSourceOutputPath, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 
-				label = new Label(Configuration.GetLocalized("Output path for the dynamic library (relative to the document):"));
+				outputLabel = new Label(Configuration.GetLocalized("Output path for the dynamic library (relative to the document):"));
 				_libOutputPath = new Entry(_document.Settings.LibOutputPath);
 				MainClass.RegisterValidation(_libOutputPath, false, (obj, p) => {
 					_document.Settings.LibOutputPath = (obj as Entry).Text;
@@ -199,7 +236,7 @@ namespace Petri
 				});
 
 				hbox = new HBox(false, 5);
-				hbox.PackStart(label, false, false, 0);
+				hbox.PackStart(outputLabel, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 
 				_selectLibOutputPath = new Button("…");
@@ -210,7 +247,7 @@ namespace Petri
 				hbox.PackStart(_selectLibOutputPath, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 
-				label = new Label(Configuration.GetLocalized("Host name for the debugger:"));
+				var hostLabel = new Label(Configuration.GetLocalized("Host name for the debugger:"));
 				entry = new Entry(_document.Settings.Hostname);
 				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					_document.Settings.Hostname = (obj as Entry).Text;
@@ -218,11 +255,11 @@ namespace Petri
 				});
 
 				hbox = new HBox(false, 5);
-				hbox.PackStart(label, false, false, 0);
+				hbox.PackStart(hostLabel, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(entry, false, false, 0);
 
-				label = new Label(Configuration.GetLocalized("TCP Port for the debugger communication:"));
+				hostLabel = new Label(Configuration.GetLocalized("TCP Port for the debugger communication:"));
 				entry = new Entry(_document.Settings.Port.ToString());
 				MainClass.RegisterValidation(entry, false, (obj, p) => {
 					try {
@@ -235,7 +272,7 @@ namespace Petri
 				});
 
 				hbox = new HBox(false, 5);
-				hbox.PackStart(label, false, false, 0);
+				hbox.PackStart(hostLabel, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(entry, false, false, 0);
 			}
@@ -420,7 +457,7 @@ namespace Petri
 				filter.AddPattern("*.dylib");
 			}
 			else if(sender == _selectSourceOutputPath) {
-				title = Configuration.GetLocalized("Select the directory where to generate the C++ source code…");
+				title = Configuration.GetLocalized("Select the directory where to generate the <language> source code…", _document.Settings.LanguageName());
 				action = FileChooserAction.SelectFolder;
 			}
 			else if(sender == _selectLibOutputPath) {

@@ -45,7 +45,7 @@ namespace Petri {
 		setThreadName(name.c_str());
 	}
 	
-	namespace PetriUtils {
+	namespace Utility {
 		actionResult_t pause(std::chrono::nanoseconds const &delay) {
 			std::this_thread::sleep_for(delay);
 			return {};

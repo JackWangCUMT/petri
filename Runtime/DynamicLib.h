@@ -87,6 +87,9 @@ namespace Petri {
 
 		/**
 		 * Loads the specified function symbol and returns it as a function pointer.
+		 * @param name The name of the symbol to load.
+		 * @throws std::runtime_error When the dynamic library is not load()ed.
+		 * @throws std:runtime_error When the symbol could not be found in the library.
 		 */
 		template<typename FuncType>
 		FuncType *loadSymbol(std::string const &name) {

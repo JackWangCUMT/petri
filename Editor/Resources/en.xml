@@ -112,8 +112,8 @@
 <Key>{0} compilation output</Key>
 <Value>{0} compilation output</Value>
 
-<Key>Generate C++</Key>
-<Value>Generate C++</Value>
+<Key>Generate &lt;language&gt;</Key>
+<Value>Generate {0}</Value>
 
 <Key>Compile</Key>
 <Value>Compile</Value>
@@ -162,6 +162,9 @@
 
 <Key>Comment</Key>
 <Value>Comment</Value>
+
+<Key>Compiler invocation:</Key>
+<Value>Compiler invocation:</Value>
 
 <Key>The action list is empty!</Key>
 <Value>The action list is empty!</Value>
@@ -310,8 +313,8 @@
 <Key>An error occurred upon document loading: </Key>
 <Value>An error occurred upon document loading: </Value>
 
-<Key>The C++ code has been sucessfully generated.</Key>
-<Value>The C++ code has been sucessfully generated.</Value>
+<Key>The &lt;language&gt; code has been sucessfully generated.</Key>
+<Value>The {0} code has been sucessfully generated.</Value>
 
 <Key>The Petri Net contains conflicting entities. Please solve them before you can generate the source code.</Key>
 <Value>The Petri Net contains conflicting entities. Please solve them before you can generate the source code.</Value>
@@ -319,8 +322,8 @@
 <Key>Save the generated code as…</Key>
 <Value>Save the generated code as…</Value>
 
-<Key>Please save the document before generating the C++ source code.</Key>
-<Value>Please save the document before generating the C++ source code.</Value>
+<Key>Please save the document before generating the &lt;language&gt; source code.</Key>
+<Value>Please save the document before generating the {0} source code.</Value>
 
 <Key>Compiling…</Key>
 <Value>Compiling…</Value>
@@ -562,8 +565,8 @@
 <Key>OK</Key>
 <Value>OK</Value>
 
-<Key>Choose a file containing the C++ declarations…</Key>
-<Value>Choose a file containing the C++ declarations…</Value>
+<Key>Choose a file containing the &lt;language&gt; declarations…</Key>
+<Value>Choose a file containing the {0} declarations…</Value>
 
 <Key>Relative path</Key>
 <Value>Relative path</Value>
@@ -598,8 +601,8 @@
 <Key>Add the macro</Key>
 <Value>Add the macro</Value>
 
-<Key>Invalid comma separated-stored C++ enum</Key>
-<Value>Invalid comma separated-stored C++ enum</Value>
+<Key>Invalid comma separated-stored enum</Key>
+<Value>Invalid comma separated-stored enum</Value>
 
 <Key>State's action:</Key>
 <Value>State's action:</Value>
@@ -643,8 +646,8 @@
 <Key>Empty path!</Key>
 <Value>Empty path!</Value>
 
-<Key>No source output path defined. Please open the Petri net with the graphical editor and generate the C++ code once.</Key>
-<Value>No source output path defined. Please open the Petri net with the graphical editor and generate the C++ code once.</Value>
+<Key>No source output path defined. Please open the Petri net with the graphical editor and generate the &lt;language&gt; code once.</Key>
+<Value>No source output path defined. Please open the Petri net with the graphical editor and generate the {0} code once.</Value>
 
 <Key>The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts.</Key>
 <Value>The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts.</Value>
@@ -655,11 +658,11 @@
 <Key>Document's settings:</Key>
 <Value>Document's settings:</Value>
 
-<Key>C++ name of the Petri net:</Key>
-<Value>C++ name of the Petri net:</Value>
+<Key>&lt;language&gt; name of the Petri net:</Key>
+<Value>{0} name of the Petri net:</Value>
 
-<Key>The Petri net's name is not a valid C++ identifier.</Key>
-<Value>The Petri net's name is not a valid C++ identifier.</Value>
+<Key>The Petri net's name is not a valid &lt;language&gt; identifier.</Key>
+<Value>The Petri net's name is not a valid {0} identifier.</Value>
 
 <Key>Enum "Action Result":</Key>
 <Value>Enum "Action Result":</Value>
@@ -673,11 +676,11 @@
 <Key>Use the following enum (name, value1, value2…):</Key>
 <Value>Use the following enum (name, value1, value2…):</Value>
 
-<Key>Path to the C++ compiler:</Key>
-<Value>Path to the C++ compiler:</Value>
+<Key>Path to the &lt;language&gt; compiler:</Key>
+<Value>Path to the {0} compiler:</Value>
 
-<Key>Flags forwarded to the c++ compiler:</Key>
-<Value>Flags forwarded to the c++ compiler:</Value>
+<Key>Flags forwarded to the &lt;language&gt; compiler:</Key>
+<Value>Flags forwarded to the {0} compiler:</Value>
 
 <Key>Output path for the generated code (relative to the document):</Key>
 <Value>Output path for the generated code (relative to the document):</Value>
@@ -718,8 +721,8 @@
 <Key>Library</Key>
 <Value>Library</Value>
 
-<Key>Select the directory where to generate the C++ source code…</Key>
-<Value>Select the directory where to generate the C++ source code…</Value>
+<Key>Select the directory where to generate the &lt;language&gt; source code…</Key>
+<Value>Select the directory where to generate the {0} source code…</Value>
 
 <Key>Select the directory where to generate the library…</Key>
 <Value>Select the directory where to generate the library…</Value>

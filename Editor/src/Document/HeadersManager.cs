@@ -115,7 +115,7 @@ namespace Petri
 		}
 
 		private void OnAdd(object sender, EventArgs e) {
-			var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Choose a file containing the C++ declarations…"), _window,
+			var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Choose a file containing the <language> declarations…", _document.Settings.LanguageName()), _window,
 				FileChooserAction.Open,
 				new object[]{Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
 					Configuration.GetLocalized("Open"), ResponseType.Accept});

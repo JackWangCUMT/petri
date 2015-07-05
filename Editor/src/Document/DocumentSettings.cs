@@ -29,12 +29,12 @@ namespace Petri
 {
 	public class DocumentSettings
 	{
-		public static DocumentSettings CreateSettings(XElement node) {
-			return new DocumentSettings(node);
+		public static DocumentSettings CreateSettings(HeadlessDocument doc, XElement node) {
+			return new DocumentSettings(doc, node);
 		}
 
-		public static DocumentSettings GetDefaultSettings() {
-			return new DocumentSettings(null);
+		public static DocumentSettings GetDefaultSettings(HeadlessDocument doc) {
+			return new DocumentSettings(doc, null);
 		}
 
 		public XElement GetXml() {
@@ -45,6 +45,7 @@ namespace Petri
 			elem.SetAttributeValue("LibOutputPath", LibOutputPath);
 			elem.SetAttributeValue("Hostname", Hostname);
 			elem.SetAttributeValue("Port", Port.ToString());
+			elem.SetAttributeValue("Language", Language.ToString());
 
 			var node = new XElement("Compiler");
 			node.SetAttributeValue("Invocation", Compiler);
@@ -84,7 +85,9 @@ namespace Petri
 			return elem;
 		}
 
-		private DocumentSettings(XElement elem) {
+		private DocumentSettings(HeadlessDocument doc, XElement elem) {
+			_document = doc;
+
 			IncludePaths = new List<Tuple<string, bool>>();
 			LibPaths = new List<Tuple<string, bool>>();
 			Libs = new List<string>();
@@ -95,6 +98,7 @@ namespace Petri
 			this.LibOutputPath = "";
 			this.Hostname = "localhost";
 			this.Port = 12345;
+			this.Language = Language.Cpp;
 
 			Name = "MyPetriNet";
 			Enum = DefaultEnum;
@@ -121,6 +125,15 @@ namespace Petri
 
 				if(elem.Attribute("Port") != null)
 					Port = UInt16.Parse(elem.Attribute("Port").Value);
+
+				if(elem.Attribute("Language") != null) {
+					try {
+						Language = (Language)Language.Parse(Language.GetType(), elem.Attribute("Language").Value);
+					}
+					catch(Exception) {
+						
+					}
+				}
 
 				var node = elem.Element("Compiler");
 				if(node != null) {
@@ -223,9 +236,37 @@ namespace Petri
 			set;
 		}
 
+		public Language Language {
+			get {
+				return _language;
+			}
+			set {
+				_language = value;
+
+				if(_document.Settings != null && _document is Document) {
+					((Document)_document).OnLanguageChanged();
+				}
+			}
+		}
+
+		public static string LanguageName(Language language) {
+			switch(language) {
+			case Language.Cpp:
+				return "C++";
+			case Language.C:
+				return "C";
+			}
+
+			throw new Exception("Unsupported");
+		}
+
+		public string LanguageName() {
+			return LanguageName(Language);
+		}
+
 		public string SourcePath {
 			get {
-				return System.IO.Path.Combine(SourceOutputPath, this.Name + ".cpp");
+				return System.IO.Path.Combine(SourceOutputPath, this.Name + "." + PetriGen.SourceExtensionFromLanguage(Language));
 			}
 		}
 
@@ -238,60 +279,74 @@ namespace Petri
 		public string CompilerArguments(string source, string lib) {
 			string val = "";
 
-			val += "-shared ";
-			if(Configuration.RunningPlatform == Platform.Mac) {
-				val += "-undefined dynamic_lookup -flat_namespace ";
-			}
-			else if(Configuration.RunningPlatform == Platform.Linux) {
-				val += "-fPIC ";
-			}
-
-			foreach(var f in CompilerFlags) {
-				val += f + " ";
-			}
-
-			foreach(var i in IncludePaths) {
-				// Recursive?
-				if(i.Item2) {
-					var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
-					foreach(var dir in directories) {
-						val += "-I'" + dir + "' ";
-					}
+			if(Language == Language.C || Language == Language.Cpp) {
+				val += "-shared ";
+				if(Configuration.RunningPlatform == Platform.Mac) {
+					val += "-undefined dynamic_lookup -flat_namespace ";
 				}
-				val += "-iquote'" + i.Item1 + "' ";
-				val += "-I'" + i.Item1 + "' ";
-			}
-			val += "-iquote'" + SourceOutputPath + "' ";
-			val += "-I'" + SourceOutputPath + "' ";
-
-			foreach(var i in LibPaths) {
-				// Recursive?
-				if(i.Item2) {
-					var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
-					foreach(var dir in directories) {
-						val += "-L'" + dir + "' ";
-					}
+				else if(Configuration.RunningPlatform == Platform.Linux) {
+					val += "-fPIC ";
 				}
-				val += "-L'" + i.Item1 + "' ";
-			}
 
-			foreach(var l in Libs) {
-				val += "-l'" + l + "' ";
-			}
+				foreach(var f in CompilerFlags) {
+					val += f + " ";
+				}
 
-			if(Configuration.Arch == 64) {
-				val += "-m64 ";
-			}
-			else if(Configuration.Arch == 32) {
-				val += "-m32 ";
-			}
+				foreach(var i in IncludePaths) {
+					// Recursive?
+					if(i.Item2) {
+						var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
+						foreach(var dir in directories) {
+							val += "-I'" + dir + "' ";
+						}
+					}
+					val += "-iquote'" + i.Item1 + "' ";
+					val += "-I'" + i.Item1 + "' ";
+				}
+				val += "-iquote'" + SourceOutputPath + "' ";
+				val += "-I'" + SourceOutputPath + "' ";
 
-			val += "-o '" + lib + "' ";
+				foreach(var i in LibPaths) {
+					// Recursive?
+					if(i.Item2) {
+						var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
+						foreach(var dir in directories) {
+							val += "-L'" + dir + "' ";
+						}
+					}
+					val += "-L'" + i.Item1 + "' ";
+				}
 
-			val += "-x c++ '" + source + "'";
+				foreach(var l in Libs) {
+					val += "-l'" + l + "' ";
+				}
+
+				if(Language == Language.Cpp) {
+					val += "-std=c++1y ";
+				}
+
+				if(Configuration.Arch == 64) {
+					val += "-m64 ";
+				}
+				else if(Configuration.Arch == 32) {
+					val += "-m32 ";
+				}
+
+				val += "-o '" + lib + "' ";
+
+				if(Language == Language.Cpp) {
+					val += "-x c++ '" + source + "'";
+				}
+				else {
+					val += "-x c '" + source + "'";
+				}
+			}
 
 			return val;
 		}
+
+		private Language _language;
+		private HeadlessDocument _document;
 	}
 }
 

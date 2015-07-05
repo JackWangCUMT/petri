@@ -112,8 +112,8 @@
 <Key>{0} compilation output</Key>
 <Value>Sortie de la compilation de {0}</Value>
 
-<Key>Generate C++</Key>
-<Value>Gén. C++</Value>
+<Key>Generate &lt;language&gt;</Key>
+<Value>Gén. {0}</Value>
 
 <Key>Compile</Key>
 <Value>Compiler</Value>
@@ -162,6 +162,9 @@
 
 <Key>Comment</Key>
 <Value>Commentaire</Value>
+
+<Key>Compiler invocation:</Key>
+<Value>Invocation du compilateur :</Value>
 
 <Key>The action list is empty!</Key>
 <Value>La liste d'actions est vide!</Value>
@@ -310,8 +313,8 @@
 <Key>An error occurred upon document loading: </Key>
 <Value>Une erreur est survenue lors de du chargement du document :</Value>
 
-<Key>The C++ code has been sucessfully generated.</Key>
-<Value>Le code C++ a été généré avec succès.</Value>
+<Key>The &lt;language&gt; code has been sucessfully generated.</Key>
+<Value>Le code {0} a été généré avec succès.</Value>
 
 <Key>The Petri Net contains conflicting entities. Please solve them before you can generate the source code.</Key>
 <Value>Le réseau de Pétri contient des entités en conflit. Veuillez les résoudre avant de pouvoir générer le code.</Value>
@@ -319,8 +322,8 @@
 <Key>Save the generated code as…</Key>
 <Value>Enregistrer le code généré sous…</Value>
 
-<Key>Please save the document before generating the C++ source code.</Key>
-<Value>Veuillez enregistrer le document avant de générer le code C++.</Value>
+<Key>Please save the document before generating the &lt;language&gt; source code.</Key>
+<Value>Veuillez enregistrer le document avant de générer le code {0}.</Value>
 
 <Key>Compiling…</Key>
 <Value>Compilation en cours…</Value>
@@ -562,8 +565,8 @@
 <Key>OK</Key>
 <Value>OK</Value>
 
-<Key>Choose a file containing the C++ declarations…</Key>
-<Value>Choisissez le fichier contenant les déclarations C++…</Value>
+<Key>Choose a file containing the &lt;language&gt; declarations…</Key>
+<Value>Choisissez le fichier contenant les déclarations {0}…</Value>
 
 <Key>Relative path</Key>
 <Value>Chemin relatif</Value>
@@ -598,8 +601,8 @@
 <Key>Add the macro</Key>
 <Value>Ajouter la macro</Value>
 
-<Key>Invalid comma separated-stored C++ enum</Key>
-<Value>L'enum C++ séparée par des virgules est invalide</Value>
+<Key>Invalid comma separated-stored enum</Key>
+<Value>L'enum séparée par des virgules est invalide</Value>
 
 <Key>State's action:</Key>
 <Value>Action de l'état :</Value>
@@ -643,8 +646,8 @@
 <Key>Empty path!</Key>
 <Value>Chemin vide !</Value>
 
-<Key>No source output path defined. Please open the Petri net with the graphical editor and generate the C++ code once.</Key>
-<Value>Pas de chemin de génération des sources. Veuillez ouvrir le réseau de pétri avec l'éditeur graphique et générer le code C++ au moins une fois.</Value>
+<Key>No source output path defined. Please open the Petri net with the graphical editor and generate the &lt;language&gt; code once.</Key>
+<Value>Pas de chemin de génération des sources. Veuillez ouvrir le réseau de pétri avec l'éditeur graphique et générer le code {0} au moins une fois.</Value>
 
 <Key>The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts.</Key>
 <Value>Le réseau de pétri a des états en conflit. Veuillez l'ouvrir avec l'éditeur graphique et résoudre les conflits.</Value>
@@ -655,11 +658,11 @@
 <Key>Document's settings:</Key>
 <Value>Réglages du document :</Value>
 
-<Key>C++ name of the Petri net:</Key>
-<Value>Nom C++ du réseau de pétri :</Value>
+<Key>&lt;language&gt; name of the Petri net:</Key>
+<Value>Nom {0} du réseau de pétri :</Value>
 
-<Key>The Petri net's name is not a valid C++ identifier.</Key>
-<Value>Le nom du réseau de Pétri n'est pas un identificateur C++ valide.</Value>
+<Key>The Petri net's name is not a valid &lt;language&gt; identifier.</Key>
+<Value>Le nom du réseau de Pétri n'est pas un identificateur {0} valide.</Value>
 
 <Key>Enum "Action Result":</Key>
 <Value>Enum "Résultat Action" :</Value>
@@ -673,11 +676,11 @@
 <Key>Use the following enum (name, value1, value2…):</Key>
 <Value>Utiliser l'enum suivante (nom, valeur1, valeur2…) :</Value>
 
-<Key>Path to the C++ compiler:</Key>
-<Value>Chemin vers le compilateur C++ :</Value>
+<Key>Path to the &lt;language&gt; compiler:</Key>
+<Value>Chemin vers le compilateur {0} :</Value>
 
-<Key>Flags forwarded to the c++ compiler:</Key>
-<Value>Flags passés au compilateur C++ :</Value>
+<Key>Flags forwarded to the &lt;language&gt; compiler:</Key>
+<Value>Flags passés au compilateur {0} :</Value>
 
 <Key>Output path for the generated code (relative to the document):</Key>
 <Value>Chemin où générer le code (relatif au document) :</Value>
@@ -718,8 +721,8 @@
 <Key>Library</Key>
 <Value>Librairie</Value>
 
-<Key>Select the directory where to generate the C++ source code…</Key>
-<Value>Sélectionnez le dossier dans lequel générer le C++…</Value>
+<Key>Select the directory where to generate the &lt;language&gt; source code…</Key>
+<Value>Sélectionnez le dossier dans lequel générer le {0}…</Value>
 
 <Key>Select the directory where to generate the library…</Key>
 <Value>Sélectionnez le dossier dans lequel générer la librairie…</Value>

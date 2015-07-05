@@ -49,6 +49,10 @@ namespace Petri {
 			return std::unique_lock<std::mutex>{_mutex, std::defer_lock};
 		}
 
+		auto &getMutex() {
+			return _mutex;
+		}
+
 	private:
 		std::int64_t _value;
 		std::unique_lock<std::mutex> _lock;

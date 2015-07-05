@@ -10,10 +10,14 @@ Languages binding (Java, C#)
 Status bar when switching back to the application and there is still 0 conflicts
 Add debug functionalities to the C language binding
 
-Code generation in other languages than C++
+Debug Client
 
 Code compilation: parsing of errors and highligting conflicting entities
 
 Code completion
 
 Exception when code generation fails
+
+Restart from last active states when fixing in debugger
+
+Keyboard shortcuts target

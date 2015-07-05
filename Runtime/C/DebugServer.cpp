@@ -21,49 +21,45 @@
  */
 
 //
-//  DynamicLib.cpp
-//  IA Pétri
+//  DebugServer.c
+//  Petri
 //
-//  Created by Rémi on 04/05/2015.
+//  Created by Rémi on 04/07/2015.
 //
 
-#include "DynamicLib.h"
-#include <dlfcn.h>
-#include <iostream>
+#include "DebugServer.h"
+#include "../DebugServer.h"
+#include "PetriDynamicLib.hpp"
+#include "Types.hpp"
 
-namespace Petri {
+char const *PetriDebugServer_getVersion() {
+	return Petri::DebugServer::getVersion().c_str();
+}
 
-	void DynamicLib::load() {
-		if(this->loaded()) {
-			return;
-		}
+time_t PetriDebugServer_getAPIdate() {
+	return Petri::DebugServer::getAPIdate().time_since_epoch().count();
+}
 
-		std::string path = this->path();
+time_t PetriDebugServer_getDateFromTimestamp(char const *timestamp) {
+	return Petri::DebugServer::getDateFromTimestamp(timestamp).time_since_epoch().count();
+}
 
-		_libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
+PetriDebugServer *PetriDebugServer_create(PetriDynamicLib *petri) {
+	return new PetriDebugServer{std::make_unique<Petri::DebugServer>(*petri->lib)};
+}
 
-		if(_libHandle == nullptr) {
-			std::cerr << "Unable to load the dynamic library at path \"" << path << "\"!\n" << "Reason: " << dlerror() << std::endl;
+void PetriDebugServer_destroy(PetriDebugServer *server) {
+	delete server;
+}
 
-			throw std::runtime_error("Unable to load the dynamic library at path \"" + path + "\"!");
-		}
-	}
+void PetriDebugServer_start(PetriDebugServer *server) {
+	server->server->start();
+}
 
-	/**
-	 * Removes the dynamic library associated to this wrapper from memory.
-	 */
-	void DynamicLib::unload() {
-		if(this->loaded()) {
-			if(dlclose(_libHandle) != 0) {
-				std::cerr << "Unable to unload the dynamic library!\n" << "Reason: " << dlerror() << std::endl;
-			}
-		}
+void PetriDebugServer_stop(PetriDebugServer *server) {
+	server->server->stop();
+}
 
-		_libHandle = nullptr;
-	}
-
-	void *DynamicLib::_loadSymbol(const std::string &name) {
-		return dlsym(_libHandle, name.c_str());
-	}
-	
+bool PetriDebugServer_isRunning(PetriDebugServer *server) {
+	return server->server->running();
 }

@@ -39,14 +39,10 @@ namespace Petri {
 			
 		}
 
-		~Internals() {
-
-		}
-
 		void stateEnabled(Action &a) override;
 		void stateDisabled(Action &a) override;
 
-		DebugSession *_observer = nullptr;
+		DebugServer *_observer = nullptr;
 		std::unordered_map<uint64_t, Action *> _statesMap;
 	};
 
@@ -69,7 +65,7 @@ namespace Petri {
 	PetriDebug::~PetriDebug() = default;
 
 
-	void PetriDebug::setObserver(DebugSession *session) {
+	void PetriDebug::setObserver(DebugServer *session) {
 		static_cast<Internals &>(*_internals)._observer = session;
 	}
 	Action &PetriDebug::addAction(Action action, bool active) {

@@ -30,11 +30,17 @@
 #include "PetriNet.h"
 #include "Action.h"
 #include "../PetriNet.h"
+#include "../PetriDebug.h"
 #include "../Action.h"
 #include "Types.hpp"
+#include "../Atomic.h"
 
 PetriNet *PetriNet_create(char const *name) {
 	return new PetriNet{std::make_unique<Petri::PetriNet>(name ? name : "")};
+}
+
+PetriNet *PetriNet_createDebug(char const *name) {
+	return new PetriNet{std::make_unique<Petri::PetriDebug>(name ? name : "")};
 }
 
 void PetriNet_destroy(PetriNet *pn) {
@@ -66,3 +72,16 @@ void PetriNet_join(PetriNet *pn) {
 void PetriNet_addVariable(PetriNet *pn, uint_fast32_t id) {
 	pn->petriNet->addVariable(id);
 }
+
+int64_t PetriNet_getVariable(PetriNet *pn, uint_fast32_t id) {
+	return pn->petriNet->getVariable(id).value();
+}
+
+void PetriNet_lockVariable(PetriNet *pn, uint_fast32_t id) {
+	pn->petriNet->getVariable(id).getMutex().lock();
+}
+
+void PetriNet_unlockVariable(PetriNet *pn, uint_fast32_t id) {
+	pn->petriNet->getVariable(id).getMutex().unlock();
+}
+

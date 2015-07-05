@@ -45,7 +45,8 @@ namespace Petri
 			IconTheme.AddBuiltinIcon("CppGen", buf.Width, buf);
 			_cpp = new ToolButton("CppGen");
 			_cpp.IconName = "CppGen";
-			_cpp.Label = Configuration.GetLocalized("Generate C++");
+			_cpp.Label = Configuration.GetLocalized("Generate <language>", "C++");
+			_document.LanguageChanged += (sender, e) => _cpp.Label = Configuration.GetLocalized("Generate <language>", DocumentSettings.LanguageName(e.NewLanguage));
 
 			buf = Pixbuf.LoadFromResource("build");
 			IconTheme.AddBuiltinIcon("Build", (int)(buf.Width / 0.8), buf);
@@ -299,6 +300,12 @@ namespace Petri
 
 		public void Find() {
 			_find.Show();
+		}
+
+		public ToolButton CodeGen {
+			get {
+				return _cpp;
+			}
 		}
 
 		public void PerformFind(string what, Find.FindType type) {
