@@ -244,7 +244,7 @@ namespace Petri
 		}
 
 		public bool CloseAndConfirm() {
-			if(this.DebugController.Server.SessionRunning) {
+			if(this.DebugController.Client.SessionRunning) {
 				Window.Present();
 				MessageDialog d = new MessageDialog(Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, Configuration.GetLocalized("A debugger session is still running. Do you want to stop it?"));
 				d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
@@ -253,7 +253,7 @@ namespace Petri
 				ResponseType result = (ResponseType)d.Run();
 
 				if(result == ResponseType.Yes) {
-					DebugController.Server.Detach();
+					DebugController.Client.Detach();
 					d.Destroy();
 				}
 				else {

@@ -156,19 +156,19 @@ namespace Petri
 
 		public override void UpdateToolbar() {
 			GLib.Timeout.Add(0, () => {
-				if(_document.DebugController.Server.SessionRunning) {
+				if(_document.DebugController.Client.SessionRunning) {
 					_startStopPetri.Sensitive = true;
 					_reload.Sensitive = true;
 					_exit.Sensitive = true;
 
 					_attachDetach.Label = Configuration.GetLocalized("Disconnect");
 
-					if(_document.DebugController.Server.PetriRunning) {
+					if(_document.DebugController.Client.PetriRunning) {
 						_startStopPetri.Label = Configuration.GetLocalized("Stop");
 						_startStopPetri.StockId = Stock.Stop;
 						_playPause.Sensitive = true;
 						_document.DebugController.DebugEditor.Evaluate.Sensitive = false;
-						if(_document.DebugController.Server.Pause) {
+						if(_document.DebugController.Client.Pause) {
 							_playPause.Label = Configuration.GetLocalized("Continue");
 							_playPause.StockId = Stock.MediaPlay;
 							_document.DebugController.DebugEditor.Evaluate.Sensitive = true;
@@ -266,9 +266,9 @@ namespace Petri
 			}
 		}
 
-		protected DebugServer Server {
+		protected DebugClient Server {
 			get {
-				return _document.DebugController.Server;
+				return _document.DebugController.Client;
 			}
 		}
 

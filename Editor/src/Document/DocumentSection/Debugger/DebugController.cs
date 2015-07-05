@@ -29,7 +29,7 @@ namespace Petri
 	{
 		public DebugController(Document doc) {
 			Document = doc;
-			Server = new DebugServer(doc);
+			Client = new DebugClient(doc);
 			ActiveStates = new Dictionary<State, int>();
 			Breakpoints = new HashSet<Action>();
 			DebugEditor = new DebugEditor(doc, null);
@@ -40,7 +40,7 @@ namespace Petri
 			private set;
 		}
 
-		public DebugServer Server {
+		public DebugClient Client {
 			get;
 			private set;
 		}
@@ -62,12 +62,12 @@ namespace Petri
 			
 		public void AddBreakpoint(Action a) {
 			Breakpoints.Add(a);
-			Server.UpdateBreakpoints();
+			Client.UpdateBreakpoints();
 		}
 
 		public void RemoveBreakpoint(Action a) {
 			Breakpoints.Remove(a);
-			Server.UpdateBreakpoints();
+			Client.UpdateBreakpoints();
 		}
 
 		public override void ManageFocus(object focus) {

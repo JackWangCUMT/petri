@@ -58,7 +58,7 @@ namespace Petri
 			CreateLabel(0, Configuration.GetLocalized("Evaluate expression:"));
 			Entry entry = CreateWidget<Entry>(true, 0, Configuration.GetLocalized("Expression"));
 			Evaluate = CreateWidget<Button>(false, 0, Configuration.GetLocalized("Evaluate"));
-			Evaluate.Sensitive = _document.DebugController != null &&_document.DebugController.Server.SessionRunning && (!_document.DebugController.Server.PetriRunning || _document.DebugController.Server.Pause);
+			Evaluate.Sensitive = _document.DebugController != null &&_document.DebugController.Client.SessionRunning && (!_document.DebugController.Client.PetriRunning || _document.DebugController.Client.Pause);
 
 			CreateLabel(0, Configuration.GetLocalized("Result:"));
 
@@ -69,11 +69,11 @@ namespace Petri
 			result.WrapMode = WrapMode.Word;
 
 			Evaluate.Clicked += (sender, ev) => {
-				if(_document.DebugController.Server.SessionRunning && (!_document.DebugController.Server.PetriRunning || _document.DebugController.Server.Pause)) {
+				if(_document.DebugController.Client.SessionRunning && (!_document.DebugController.Client.PetriRunning || _document.DebugController.Client.Pause)) {
 					string str = entry.Text;
 					try {
 						Cpp.Expression expr = Cpp.Expression.CreateFromString<Cpp.Expression>(str, _document.PetriNet);
-						_document.DebugController.Server.Evaluate(expr);
+						_document.DebugController.Client.Evaluate(expr);
 					}
 					catch(Exception e) {
 						_buf.Text = e.Message;

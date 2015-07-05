@@ -111,7 +111,6 @@
     <Compile Include="src\Document\DocumentSection\Debugger\DebugGui.cs">
       <LogicalName>fix</LogicalName>
     </Compile>
-    <Compile Include="src\Document\DocumentSection\Debugger\DebugServer.cs" />
     <Compile Include="src\Document\DocumentSection\Debugger\DebugView.cs" />
     <Compile Include="src\Document\DocumentSection\Editor\EditorController.cs" />
     <Compile Include="src\Document\DocumentSection\Editor\EditorEntityDraw.cs" />
@@ -133,6 +132,7 @@
     <Compile Include="src\CodeGen\CFamilyCodeGen.cs" />
     <Compile Include="src\CodeGen\CppPetriGen.cs" />
     <Compile Include="src\CodeGen\CPetriGen.cs" />
+    <Compile Include="src\Document\DocumentSection\Debugger\DebugClient.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
