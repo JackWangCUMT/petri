@@ -37,7 +37,7 @@ namespace Petri {
 
 	class Atomic {
 	public:
-		Atomic() : _value(0), _lock(_mutex, std::defer_lock) {
+		Atomic() : _value(0) {
 
 		}
 
@@ -55,7 +55,6 @@ namespace Petri {
 
 	private:
 		std::int64_t _value;
-		std::unique_lock<std::mutex> _lock;
 		std::mutex _mutex;
 	};
 	

@@ -156,15 +156,15 @@ namespace Petri
 					if(combo.GetActiveIter(out iter)) {
 						var val = combo.Model.GetValue(iter, 0) as string;
 						if(val == nothingFunction) {
-							a.Function = new Cpp.FunctionInvocation(a.Document.Settings.Language, Action.DoNothingFunction(a.Document));
+							_document.PostAction(new InvocationChangeAction(a, new Cpp.FunctionInvocation(a.Document.Settings.Language, Action.DoNothingFunction(a.Document))));
 							actionType = ActionType.Nothing;
 						}
 						else if(val == printFunction) {
-							a.Function = a.PrintAction();
+							_document.PostAction(new InvocationChangeAction(a, a.PrintAction()));
 							actionType = ActionType.Print;
 						}
 						else if(val == pauseFunction) {
-							a.Function = new Cpp.FunctionInvocation(a.Document.Settings.Language, Action.PauseFunction(a.Document), Cpp.LiteralExpression.CreateFromString("1s", a));
+							_document.PostAction(new InvocationChangeAction(a, new Cpp.FunctionInvocation(a.Document.Settings.Language, Action.PauseFunction(a.Document), Cpp.LiteralExpression.CreateFromString("1s", a))));
 							actionType = ActionType.Pause;
 						}
 						else if(val == manual) {

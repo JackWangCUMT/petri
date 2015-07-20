@@ -33,6 +33,7 @@
 #include <string>
 #include <cstdint>
 #include "C/Types.h"
+#include <list>
 
 namespace Petri {
 	
@@ -54,8 +55,33 @@ namespace Petri {
 			_id = id;
 		}
 
+		/**
+		 * Adds a variable to the entity's associated ones.
+		 * @param id The new variable to add.
+		 */
+		void addVariable(std::uint_fast32_t id) {
+			_vars.push_back(id);
+		}
+
+		/**
+		 * Returns a list of the associated Atomic variables' IDs.
+		 * @return The list of variabels of the entity.
+		 */
+		std::list<uint_fast32_t> const &getVariables() const {
+			return _vars;
+		}
+
+		/**
+		 * Returns a list of the associated Atomic variables' IDs.
+		 * @return The list of variabels of the entity.
+		 */
+		std::list<uint_fast32_t> &getVariables() {
+			return _vars;
+		}
+
 	private:
 		T _id;
+		std::list<std::uint_fast32_t> _vars;
 	};
 
 }

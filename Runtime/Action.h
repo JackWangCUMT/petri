@@ -39,11 +39,19 @@ namespace Petri {
 
 	using namespace std::chrono_literals;
 
+	struct PetriNet;
+
 	using ActionCallableBase = CallableBase<actionResult_t>;
+	using ParametrizedActionCallableBase = CallableBase<actionResult_t, PetriNet &>;
 
 	template<typename CallableType>
 	auto make_action_callable(CallableType &&c) {
 		return Callable<CallableType, actionResult_t>(c);
+	}
+
+	template<typename CallableType>
+	auto make_param_action_callable(CallableType &&c) {
+		return Callable<CallableType, actionResult_t, PetriNet &>(c);
 	}
 
 	/**
@@ -66,6 +74,15 @@ namespace Petri {
 		 */
 		Action(uint64_t id, std::string const &name, ActionCallableBase const &action, size_t requiredTokens);
 
+		/**
+		 * Creates an empty action, associated to the specified Callable.
+		 * @param id The ID of the new action.
+		 * @param name The name of the new action.
+		 * @param action The Callable which will be called when the action is run.
+		 * @param requiredTokens The number of tokens that must be inside the active action for it to execute.
+		 */
+		Action(uint64_t id, std::string const &name, ParametrizedActionCallableBase const &action, size_t requiredTokens);
+
 		Action(Action &&);
 		Action(Action const &) = delete;
 
@@ -83,20 +100,27 @@ namespace Petri {
 		 * @param name the name of the transition to be added
 		 * @param next the Action following the transition to be added
 		 * @param cond the condition of the Transition to be added
+		 * @return The newly created transition.
 		 */
-		void addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond);
+		Transition &addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond);
 
 		/**
 		 * Returns the Callable asociated to the action. An Action with a null Callable must not invoke this method!
 		 * @return The Callable of the Action
 		 */
-		ActionCallableBase &action();
+		ParametrizedActionCallableBase &action();
 
 		/**
 		 * Changes the Callable associated to the Action
 		 * @param action The Callable which will be copied and put in the Action
 		 */
 		void setAction(ActionCallableBase const &action);
+
+		/**
+		 * Changes the Callable associated to the Action
+		 * @param action The Callable which will be copied and put in the Action
+		 */
+		void setAction(ParametrizedActionCallableBase const &action);
 
 		/**
 		 * Returns the required tokens of the Action to be activated, i.e. the count of Actions which must lead to *this and terminate for *this to activate.

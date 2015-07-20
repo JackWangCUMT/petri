@@ -110,7 +110,7 @@ extern "C" {
 	 * @param id The id of the new Atomic variable.
 	 * @return The value of the Atomic variable.
 	 */
-	int64_t *PetriNet_getVariable(PetriNet *pn, uint_fast32_t id);
+	int64_t PetriNet_getVariable(PetriNet *pn, uint_fast32_t id);
 
 	/**
 	 * Locks the Atomic variable designated by the specified id.

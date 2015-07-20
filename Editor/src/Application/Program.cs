@@ -193,8 +193,8 @@ namespace Petri
 			else {
 				Application.Init();
 
-				var doc = new Document("");
-				AddDocument(doc);
+				var document = new Document("");
+				AddDocument(document);
 
 				Application.Run();
 

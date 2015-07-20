@@ -37,7 +37,7 @@ namespace Petri {
 		Internals() = default;
 		Internals(std::string const &name, size_t requiredTokens) : _name(name), _requiredTokens(requiredTokens) {}
 		std::list<Transition> _transitions;
-		std::unique_ptr<ActionCallableBase> _action;
+		std::unique_ptr<ParametrizedActionCallableBase> _action;
 		std::string _name;
 		std::size_t _requiredTokens = 1;
 
@@ -66,14 +66,16 @@ namespace Petri {
 		_internals->_transitions.push_back(std::move(transition));
 	}
 
-	void Action::addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond) {
+	Transition &Action::addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond) {
 		_internals->_transitions.emplace_back(id, name, *this, next, cond);
+
+		return _internals->_transitions.back();
 	}
 	/**
 	 * Returns the Callable asociated to the action. An Action with a null Callable must not invoke this method!
 	 * @return The Callable of the Action
 	 */
-	ActionCallableBase &Action::action() {
+	ParametrizedActionCallableBase &Action::action() {
 		return *_internals->_action;
 	}
 
@@ -82,6 +84,18 @@ namespace Petri {
 	 * @param action The Callable which will be copied and put in the Action
 	 */
 	void Action::setAction(ActionCallableBase const &action) {
+		auto copy = action.copy_ptr();
+		auto shared_copy = std::shared_ptr<ActionCallableBase>(copy.release());
+		this->setAction(make_param_action_callable([shared_copy](PetriNet &) {
+			return shared_copy->operator()();
+		}));
+	}
+
+	/**
+	 * Changes the Callable associated to the Action
+	 * @param action The Callable which will be copied and put in the Action
+	 */
+	void Action::setAction(ParametrizedActionCallableBase const &action) {
 		_internals->_action = action.copy_ptr();
 	}
 
@@ -141,5 +155,5 @@ namespace Petri {
 	std::list<Transition> const &Action::transitions() const {
 		return _internals->_transitions;
 	}
-
+	
 }

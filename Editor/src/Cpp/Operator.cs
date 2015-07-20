@@ -234,7 +234,9 @@ namespace Petri
 					if(tup.Value.implemented)
 						Lex.Add(tup.Key);
 				}
-				Lex.Sort((x, y) => -Properties[x].cpp.CompareTo(Properties[y].cpp));
+				Lex.Sort((x, y) => {
+					return -Properties[x].cpp.Length.CompareTo(Properties[y].cpp.Length);
+				});
 				for(int i = 1; i < Lex.Count;) {
 					if(Properties[Lex[i]].cpp == Properties[Lex[i - 1]].cpp) {
 						Lex.RemoveAt(i);

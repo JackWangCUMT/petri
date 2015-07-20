@@ -180,26 +180,16 @@ namespace Petri
 			var cppVar = new HashSet<Cpp.VariableExpression>();
 			a.GetVariables(cppVar);
 
-			_functionPrototypes += "static Petri_actionResult_t " + a.CppName + "_invocation(PetriNet *);\n";
-			_functionBodies += "static Petri_actionResult_t " + a.CppName + "_invocation(PetriNet *petriNet) {\n";
+			_functionPrototypes += "static Petri_actionResult_t " + a.CppName + "_invocation();\n";
+			_functionBodies += "static Petri_actionResult_t " + a.CppName + "_invocation() {\n";
 
-			string lockString = "", unlockString = "";
-
-			foreach(var v in cppVar) {
-				lockString += "PetriNet_lockVariable(petriNet, (uint_fast32_t)(" + v.Prefix + v.Expression + "));\n";
-				unlockString += "PetriNet_unlockVariable(petriNet, (uint_fast32_t)(" + v.Prefix + v.Expression + "));\n";
-			}
-
-			_functionBodies += lockString;
 			if(a.Function.NeedsReturn) {
 				_functionBodies += a.Function.MakeCpp() + "\n";
 			}
 			else {
 				_functionBodies += Document.Settings.Enum.Name + " result = (Petri_actionResult_t)(" + a.Function.MakeCpp() + ")" + ";\n";
 			}
-
-			_functionBodies += unlockString;
-
+			
 			if(a.Function.NeedsReturn) {
 				_functionBodies += "return PetriUtility_returnDefault();\n";
 			}
@@ -288,22 +278,13 @@ namespace Petri
 
 			_functionPrototypes += "static bool " + t.CppName + "_invocation(Petri_actionResult_t);\n";
 			_functionBodies += "static bool " + t.CppName + "_invocation(Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n";
-			string lockString = "", unlockString = "";
 
-			foreach(var v in cppVar) {
-				lockString += "PetriNet_lockVariable(petriNet, (uint_fast32_t)(" + v.Prefix + v.Expression + "));\n";
-				unlockString += "PetriNet_unlockVariable(petriNet, (uint_fast32_t)(" + v.Prefix + v.Expression + "));\n";
-			}
-
-			_functionBodies += lockString;
 			if(t.Condition.NeedsReturn) {
 				_functionBodies += t.Condition.MakeCpp();
 			}
 			else {
 				_functionBodies += "bool result = " + t.Condition.MakeCpp() + ";\n";
 			}
-
-			_functionBodies += unlockString + "\n";
 
 			if(t.Condition.NeedsReturn) {
 				_functionBodies += "return true;\n";

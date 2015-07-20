@@ -29,6 +29,7 @@
 
 #include "PetriNet.h"
 #include "PetriNetImpl.h"
+#include "lock.h"
 
 namespace Petri {
 
@@ -96,8 +97,20 @@ namespace Petri {
 	void PetriNet::Internals::executeState(Action &a) {
 		Action *nextState = nullptr;
 
-		// Runs the Callable
-		auto res = a.action()();
+		actionResult_t res;
+
+		{
+			std::vector<std::unique_lock<std::mutex>> locks;
+			locks.reserve(a.getVariables().size());
+			for(auto &var : a.getVariables()) {
+				locks.emplace_back(_this.getVariable(var).getLock());
+			}
+
+			lock(locks.begin(), locks.end());
+
+			// Runs the Callable
+			res = a.action()(_this);
+		}
 
 		if(!a.transitions().empty()) {
 			std::list<Transition *> transitionsToTest;
@@ -116,7 +129,18 @@ namespace Petri {
 
 					if((now - lastTest) >= (*it)->delayBetweenEvaluation()) {
 						// Testing the transition
-						isFulfilled = (*it)->isFulfilled(res);
+						{
+							std::vector<std::unique_lock<std::mutex>> locks;
+							locks.reserve((*it)->getVariables().size());
+							for(auto &var : (*it)->getVariables()) {
+								locks.emplace_back(_this.getVariable(var).getLock());
+							}
+
+							lock(locks.begin(), locks.end());
+
+							isFulfilled = (*it)->isFulfilled(res);
+						}
+
 						minDelay = std::min(minDelay, (*it)->delayBetweenEvaluation());
 					}
 					else {
@@ -197,12 +221,12 @@ namespace Petri {
 
 	void PetriNet::Internals::disableState(Action &a) {
 		std::lock_guard<std::mutex> lk(_activationMutex);
-		
+
 		auto it = _activeStates.find(&a);
 		assert(it != _activeStates.end());
-		
+
 		_activeStates.erase(it);
-		
+
 		this->stateDisabled(a);
 		if(_activeStates.size() == 0 && _running) {
 			_this.stop();

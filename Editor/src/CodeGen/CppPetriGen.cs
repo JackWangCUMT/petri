@@ -31,6 +31,8 @@ namespace Petri
 	{
 		public CppPetriGen(HeadlessDocument doc) : base(doc, Language.Cpp, new CFamilyCodeGen(Language.Cpp)) {
 			_headerGen = new CFamilyCodeGen(Language.Cpp);	
+			_functionBodies = "";
+			_functionPrototypes = "";
 		}
 
 		public override void WritePetriNet() {
@@ -99,6 +101,7 @@ namespace Petri
 			CodeGen += GenerateVarEnum();
 
 			CodeGen += "namespace {";
+			_prototypesIndex = CodeGen.Value.Length;
 			CodeGen += "void fill(PetriNet &petriNet) {";
 
 			foreach(var e in Document.PetriNet.Variables) {
@@ -107,7 +110,12 @@ namespace Petri
 		}
 					
 		protected override void End() {
+			CodeGen.Value = CodeGen.Value.Substring(0, _prototypesIndex) + _functionPrototypes + "\n" + CodeGen.Value.Substring(_prototypesIndex);
+
 			CodeGen += "}"; // fill()
+
+			CodeGen += _functionBodies;
+
 			CodeGen += "}"; // namespace
 
 			string toHash = CodeGen.Value;
@@ -226,32 +234,18 @@ namespace Petri
 			var cppVar = new HashSet<Cpp.VariableExpression>();
 			a.GetVariables(cppVar);
 
-			string action;
+			_functionPrototypes += "Petri_actionResult_t " + a.CppName + "_invocation(PetriNet &);\n";
+			_functionBodies += "Petri_actionResult_t " + a.CppName + "_invocation(PetriNet &petriNet) {\nreturn " + cpp + ";\n}\n";
 
-			if(cppVar.Count == 0) {
-				action = "make_action_callable([&petriNet]() { return " + cpp + "; })";
-			}
-			else {
-				var cppLockLock = from v in cppVar
-					select "_petri_lock_" + v.Expression;
-
-				action = "make_action_callable([&petriNet]() {\n";
-				foreach(var v in cppVar) {
-					action += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(" + v.Prefix + v.Expression + ")).getLock();\n";
-				}
-
-				if(cppVar.Count > 1)
-					action += "std::lock(" + String.Join(", ", cppLockLock) + ");\n";
-				else {
-					action += String.Join(", ", cppLockLock) + ".lock();\n";
-				}
-
-				action += "return " + cpp + ";\n";
-				action += "})";
-			}
+			//string action = "make_action_callable([&petriNet]() { return " + cpp + "; })";
+			string action = "&" + a.CppName + "_invocation";
 
 			CodeGen += "auto &" + a.CppName + " = " + "petriNet.addAction("
-				+ "Action(" + a.ID.ToString() + ", \"" + a.Parent.Name + "_" + a.Name + "\", " + action + ", " + a.RequiredTokens.ToString() + "), " + ((a.Active && (a.Parent is RootPetriNet)) ? "true" : "false") + ");";
+				+ "Action(" + a.ID.ToString() + ", \"" + a.Parent.Name + "_" + a.Name + "\", make_param_action_callable(" + action + "), " + a.RequiredTokens.ToString() + "), " + ((a.Active && (a.Parent is RootPetriNet)) ? "true" : "false") + ");";
+
+			foreach(var v in cppVar) {
+				CodeGen += a.CppName + ".addVariable(" + "static_cast<std::uint_fast32_t>(" + v.Prefix + v.Expression + "));";
+			}
 
 			foreach(var tup in old) {
 				tup.Key.Expression = tup.Value;
@@ -327,28 +321,16 @@ namespace Petri
 			var cppVar = new HashSet<Cpp.VariableExpression>();
 			t.GetVariables(cppVar);
 
-			if(cppVar.Count > 0) {
-				string lockString = "";
-				var cppLockLock = from v in cppVar
-					select "_petri_lock_" + v.Expression;
+			_functionPrototypes += "bool " + t.CppName + "_invocation(Petri_actionResult_t);\n";
+			_functionBodies += "bool " + t.CppName + "_invocation(Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
 
-				foreach(var v in cppVar) {
-					lockString += "auto _petri_lock_" + v.Expression + " = petriNet.getVariable(static_cast<std::uint_fast32_t>(" + v.Prefix + v.Expression + ")).getLock();\n";
-				}
+			//cpp = "[&petriNet](actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) -> bool { " + cpp + " }";
+			cpp = "&" + t.CppName + "_invocation";
 
-				if(cppVar.Count > 1)
-					lockString += "std::lock(" + String.Join(", ", cppLockLock) + ");\n";
-				else {
-					lockString += String.Join(", ", cppLockLock) + ".lock();\n";
-				}
-
-				cpp = "\n" + lockString + cpp + "\n";
+			CodeGen += "auto &" + t.CppName + " = " + bName + ".addTransition(" + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", make_transition_callable(" + cpp + "));";
+			foreach(var v in cppVar) {
+				CodeGen += t.CppName + ".addVariable(" + "static_cast<std::uint_fast32_t>(" + v.Prefix + v.Expression + "));";
 			}
-
-
-			cpp = "[&petriNet](actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) -> bool { " + cpp + " }";
-
-			CodeGen += bName + ".addTransition(" + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", make_transition_callable(" + cpp + "));";
 
 			foreach(var tup in old) {
 				tup.Key.Expression = tup.Value;
@@ -366,8 +348,11 @@ namespace Petri
 			return "";
 		}
 
+		private string _functionBodies;
+		private string _functionPrototypes;
 		private CodeGen _headerGen;
 		private bool _generateHeader = true;
+		private int _prototypesIndex;
 	}
 }
 

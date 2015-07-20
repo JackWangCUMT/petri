@@ -23,6 +23,7 @@
 using System;
 using System.Diagnostics;
 using Gtk;
+using System.Text;
 
 namespace Petri
 {
@@ -53,15 +54,28 @@ namespace Petri
 			else {
 				return Configuration.GetLocalized("Error: the compiler invocation is too long ({0}) characters. Try to remove some recursive inclusion paths.", s.Length);
 			}
+
+			StringBuilder outputBuilder = new StringBuilder();
+
+			p.OutputDataReceived += (object sender, DataReceivedEventArgs e) => {
+				if(!String.IsNullOrEmpty(e.Data)) {
+					outputBuilder.Append(e.Data);
+				}
+			};
+
 			p.Start();
 
-			string output = p.StandardOutput.ReadToEnd();
-			output += p.StandardError.ReadToEnd();
+			p.BeginOutputReadLine();
+
+			string err = p.StandardError.ReadToEnd();
+
 			p.WaitForExit();
 
 			System.IO.Directory.SetCurrentDirectory(cd);
 
-			return output;
+			outputBuilder.Append(err);
+
+			return outputBuilder.ToString();
 		}
 
 		HeadlessDocument _document;
