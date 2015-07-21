@@ -66,7 +66,7 @@ namespace Petri {
 		Action();
 
 		/**
-		 * Creates an empty action, associated to the specified Callable.
+		 * Creates an empty action, associated to a copy of the specified Callable.
 		 * @param id The ID of the new action.
 		 * @param name The name of the new action.
 		 * @param action The Callable which will be called when the action is run.
@@ -75,7 +75,7 @@ namespace Petri {
 		Action(uint64_t id, std::string const &name, ActionCallableBase const &action, size_t requiredTokens);
 
 		/**
-		 * Creates an empty action, associated to the specified Callable.
+		 * Creates an empty action, associated to a copy of the specified Callable.
 		 * @param id The ID of the new action.
 		 * @param name The name of the new action.
 		 * @param action The Callable which will be called when the action is run.

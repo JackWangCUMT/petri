@@ -39,7 +39,10 @@
 extern "C" {
 #endif
 
+	typedef struct PetriNet PetriNet;
+
 	typedef Petri_actionResult_t (*callable_t)();
+	typedef Petri_actionResult_t (*parametrizedCallable_t)(PetriNet *);
 
 	typedef struct PetriAction PetriAction;
 
@@ -57,6 +60,16 @@ extern "C" {
 	 * @return The newly created action.
 	 */
 	PetriAction *PetriAction_create(uint64_t id, char const *name, callable_t action, size_t requiredTokens);
+
+	/**
+	 * Creates an empty action, associated to the specified Callable.
+	 * @param id The ID of the new action.
+	 * @param name The name of the new action.
+	 * @param action The Callable which will be called when the action is run.
+	 * @param requiredTokens The number of tokens that must be inside the active action for it to execute.
+	 * @return The newly created action.
+	 */
+	PetriAction *PetriAction_createWithParam(uint64_t id, char const *name, parametrizedCallable_t action, size_t requiredTokens);
 
 	/**
 	 * Destroys a PetriAction instance created by one of the PetriAction_create functions.
@@ -100,6 +113,13 @@ extern "C" {
 	 * @param a The Callable which will be copied and put in the Action
 	 */
 	void PetriAction_setAction(PetriAction *action, callable_t a);
+
+	/**
+	 * Changes the action associated to the PetriAction
+	 * @param action The PetriAction instance of which the action will be changed.
+	 * @param a The Callable which will be copied and put in the Action
+	 */
+	void PetriAction_setActionParam(PetriAction *action, parametrizedCallable_t a);
 
 	/**
 	 * Returns the required tokens of the Action to be activated, i.e. the count of Actions which must lead to *this and terminate for *this to activate.

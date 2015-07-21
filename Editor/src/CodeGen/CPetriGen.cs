@@ -180,8 +180,8 @@ namespace Petri
 			var cppVar = new HashSet<Cpp.VariableExpression>();
 			a.GetVariables(cppVar);
 
-			_functionPrototypes += "static Petri_actionResult_t " + a.CppName + "_invocation();\n";
-			_functionBodies += "static Petri_actionResult_t " + a.CppName + "_invocation() {\n";
+			_functionPrototypes += "static Petri_actionResult_t " + a.CppName + "_invocation(PetriNet *);\n";
+			_functionBodies += "static Petri_actionResult_t " + a.CppName + "_invocation(PetriNet *petriNet) {\n";
 
 			if(a.Function.NeedsReturn) {
 				_functionBodies += a.Function.MakeCpp() + "\n";
@@ -199,7 +199,7 @@ namespace Petri
 
 			_functionBodies += "}\n\n";
 
-			CodeGen += "PetriAction *" + a.CppName + " = PetriAction_create(" + a.ID.ToString() + ", \""
+			CodeGen += "PetriAction *" + a.CppName + " = PetriAction_createParam(" + a.ID.ToString() + ", \""
 				+ a.Parent.Name + "_" + a.Name + "\", &" + a.CppName + "_invocation, " + a.RequiredTokens.ToString() + ");";
 			CodeGen += "PetriNet_addAction(petriNet, " + a.CppName + ", " + ((a.Active && (a.Parent is RootPetriNet)) ? "true" : "false") + ");";
 

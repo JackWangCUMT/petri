@@ -116,7 +116,7 @@ namespace Petri
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(entry, false, false, 0);
 
-				labelName = new Label(Configuration.GetLocalized("Enum \"Action Result\":"));
+				Label labelEnum = new Label(Configuration.GetLocalized("Enum \"Action Result\":"));
 				_customEnumEditor = new Entry("");
 
 				MainClass.RegisterValidation(_customEnumEditor, false, (obj, p) => {
@@ -174,7 +174,7 @@ namespace Petri
 				}
 
 				hbox = new HBox(false, 5);
-				hbox.PackStart(labelName, false, false, 0);
+				hbox.PackStart(labelEnum, false, false, 0);
 				vbox.PackStart(hbox, false, false, 0);
 				vbox.PackStart(radioVBox, false, false, 0);
 				vbox.PackStart(_customEnumEditor, false, false, 0);

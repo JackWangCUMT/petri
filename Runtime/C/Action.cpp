@@ -34,12 +34,30 @@
 #include "Types.hpp"
 #include <memory>
 
+namespace {
+	Petri::ParametrizedActionCallableBase getParametrizedCallable(parametrizedCallable_t action) {
+		return Petri::make_param_action_callable([action](Petri::PetriNet &pn) {
+			PetriNet petriNet{std::unique_ptr<Petri::PetriNet>(&pn)};
+
+			auto result = action(&petriNet);
+
+			petriNet.petriNet.release();
+
+			return result;
+		});
+	}
+}
+
 PetriAction *PetriAction_createEmpty() {
 	return new PetriAction{std::make_unique<Petri::Action>(), nullptr};
 }
 
 PetriAction *PetriAction_create(uint64_t id, char const *name, callable_t action, size_t requiredTokens) {
 	return new PetriAction{std::make_unique<Petri::Action>(id, name, Petri::make_action_callable(action), requiredTokens), nullptr};
+}
+
+PetriAction *PetriAction_createWithParam(uint64_t id, char const *name, parametrizedCallable_t action, size_t requiredTokens) {
+	return new PetriAction{std::make_unique<Petri::Action>(id, name, getParametrizedCallable(action), requiredTokens), nullptr};
 }
 
 void PetriAction_destroy(PetriAction *action) {
@@ -64,7 +82,13 @@ void PetriAction_createAndAddTransition(PetriAction *action, uint64_t id, char c
 }
 
 void PetriAction_setAction(PetriAction *action, callable_t a) {
-	getAction(action).setAction(Petri::make_action_callable(a));
+	getAction(action).setAction(Petri::make_action_callable([a]() {
+		return a();
+	}));
+}
+
+void PetriAction_setActionParam(PetriAction *action, parametrizedCallable_t a) {
+	getAction(action).setAction(getParametrizedCallable(a));
 }
 
 size_t PetriAction_getRequiredTokens(PetriAction *action) {

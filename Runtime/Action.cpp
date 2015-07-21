@@ -48,10 +48,18 @@ namespace Petri {
 	Action::Action() : HasID(0), _internals(std::make_unique<Internals>()) {}
 
 	/**
-	 * Creates an empty action, associated to a copy ofthe specified Callable.
+	 * Creates an empty action, associated to a copy of the specified Callable.
 	 * @param action The Callable which will be copied
 	 */
 	Action::Action(uint64_t id, std::string const &name, ActionCallableBase const &action, size_t requiredTokens) : HasID(id), _internals(std::make_unique<Internals>(name, requiredTokens)) {
+		this->setAction(action);
+	}
+
+	/**
+	 * Creates an empty action, associated to a copy of the specified Callable.
+	 * @param action The Callable which will be copied
+	 */
+	Action::Action(uint64_t id, std::string const &name, ParametrizedActionCallableBase const &action, size_t requiredTokens) : HasID(id), _internals(std::make_unique<Internals>(name, requiredTokens)) {
 		this->setAction(action);
 	}
 
