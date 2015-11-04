@@ -163,9 +163,6 @@
 <Key>Comment</Key>
 <Value>Commentaire</Value>
 
-<Key>Compiler invocation:</Key>
-<Value>Invocation du compilateur :</Value>
-
 <Key>The action list is empty!</Key>
 <Value>La liste d'actions est vide!</Value>
 
@@ -327,6 +324,12 @@
 
 <Key>Compiling…</Key>
 <Value>Compilation en cours…</Value>
+
+<Key>Compilation failed.</Key>
+<Value>La compilation a échoué.</Value>
+
+<Key>Compiler invocation:</Key>
+<Value>Invocation du compilateur :</Value>
 
 <Key>Please save the document before compiling it.</Key>
 <Value>Veuillez enregistrer le document avant de le compiler.</Value>

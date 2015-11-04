@@ -294,11 +294,19 @@ namespace Petri
 
 				foreach(var i in IncludePaths) {
 					// Recursive?
-					if(i.Item2) {
-						var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
-						foreach(var dir in directories) {
-							val += "-I'" + dir + "' ";
+					if(System.IO.Directory.Exists(i.Item1)) {
+						if(i.Item2) {
+							var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
+							foreach(var dir in directories) {
+								// Do not add dotted files
+								if(!dir.StartsWith(".")) {
+									val += "-I'" + dir + "' ";
+								}
+							}
 						}
+					}
+					else {
+						Console.Error.WriteLine("Unable to find the include directory " + i.Item1 + "!");
 					}
 					val += "-iquote'" + i.Item1 + "' ";
 					val += "-I'" + i.Item1 + "' ";

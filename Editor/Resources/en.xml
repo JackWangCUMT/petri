@@ -163,9 +163,6 @@
 <Key>Comment</Key>
 <Value>Comment</Value>
 
-<Key>Compiler invocation:</Key>
-<Value>Compiler invocation:</Value>
-
 <Key>The action list is empty!</Key>
 <Value>The action list is empty!</Value>
 
@@ -327,6 +324,12 @@
 
 <Key>Compiling…</Key>
 <Value>Compiling…</Value>
+
+<Key>Compilation failed.</Key>
+<Value>Compilation failed.</Value>
+
+<Key>Compiler invocation:</Key>
+<Value>Compiler invocation:</Value>
 
 <Key>Please save the document before compiling it.</Key>
 <Value>Please save the document before compiling it.</Value>
