@@ -30,6 +30,7 @@ namespace Petri
 {
 	public class HeadlessDocument {
 		public HeadlessDocument(string path) {
+			LastHeadersUpdate = DateTime.MinValue;
 			Headers = new List<string>();
 			CppActions = new List<Cpp.Function>();
 			AllFunctionsList = new List<Cpp.Function>();
@@ -164,6 +165,11 @@ namespace Petri
 			_wY = y;
 		}
 
+		protected DateTime LastHeadersUpdate {
+			get;
+			set;
+		}
+
 		public virtual void Save() {
 			string tempFileName = "";
 			if(Path == "") {
@@ -245,6 +251,7 @@ namespace Petri
 					this.AddHeaderNoUpdate(e.Attribute("File").Value);
 				}
 			}
+			LastHeadersUpdate = DateTime.Now;
 
 			node = elem.Element("Macros");
 			if(node != null) {

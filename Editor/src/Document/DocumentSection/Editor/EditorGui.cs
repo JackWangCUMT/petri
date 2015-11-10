@@ -231,8 +231,7 @@ namespace Petri
 			_paned.Pack2(_editor, false, true);
 		}
 
-		protected void OnClick(object sender, EventArgs e)
-		{
+		protected void OnClick(object sender, EventArgs e) {
 			if(_toggling)
 				return;
 			_toggling = true;

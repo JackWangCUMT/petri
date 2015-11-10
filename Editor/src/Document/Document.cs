@@ -199,19 +199,31 @@ namespace Petri
 			Headers.Remove(header);
 		}
 
-		public void ReloadHeaders() {
-			var backup = Headers.ToArray();
-
-			foreach(var h in backup) {
-				RemoveHeaderNoUpdate(h);
+		public void ReloadHeadersIfNecessary() {
+			bool needsToReload = false;
+			foreach(string h in Headers) {
+				if(!System.IO.File.Exists(h) || System.IO.File.GetLastWriteTime(h) > LastHeadersUpdate) {
+					needsToReload = true;
+					break;
+				}
 			}
 
-			foreach(var h in backup) {
-				AddHeaderNoUpdate(h);
-			}
+			if(needsToReload) {
+				var backup = new List<string>(Headers);
 
-			DispatchFunctions();
-			UpdateConflicts();
+				LastHeadersUpdate = DateTime.Now;
+
+				foreach(var h in backup) {
+					RemoveHeaderNoUpdate(h);
+				}
+
+				foreach(var h in backup) {
+					AddHeaderNoUpdate(h);
+				}
+
+				DispatchFunctions();
+				UpdateConflicts();
+			}
 		}
 
 		public override void Save() {

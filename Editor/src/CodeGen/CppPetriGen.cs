@@ -47,12 +47,10 @@ namespace Petri
 			string cppExpr = expression.MakeCpp();
 
 			CodeGen generator = new CFamilyCodeGen(Language.Cpp);
-			foreach(string header in Document.Headers) {
-				foreach(var s in Document.Headers) {
-					var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, s);
-					var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath));
-					generator += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
-				}
+			foreach(var s in Document.Headers) {
+				var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, s);
+				var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath));
+				generator += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
 			}
 
 			generator += "#include \"Runtime/Petri.h\"";
