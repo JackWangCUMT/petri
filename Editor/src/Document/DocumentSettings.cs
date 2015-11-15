@@ -330,7 +330,7 @@ namespace Petri
 				}
 
 				if(Language == Language.Cpp) {
-					val += "-std=c++1y ";
+					val += "-std=c++14 ";
 				}
 
 				if(Configuration.Arch == 64) {

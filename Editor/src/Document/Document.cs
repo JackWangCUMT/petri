@@ -202,7 +202,8 @@ namespace Petri
 		public void ReloadHeadersIfNecessary() {
 			bool needsToReload = false;
 			foreach(string h in Headers) {
-				if(!System.IO.File.Exists(h) || System.IO.File.GetLastWriteTime(h) > LastHeadersUpdate) {
+				string hh = GetAbsoluteFromRelativeToDoc(h);
+				if(!System.IO.File.Exists(hh) || System.IO.File.GetLastWriteTime(hh) > LastHeadersUpdate) {
 					needsToReload = true;
 					break;
 				}

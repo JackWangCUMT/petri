@@ -147,6 +147,14 @@ namespace Petri
 			return Configuration.GetRelativePath(path, parent);
 		}
 
+		public string GetAbsoluteFromRelativeToDoc(string path) {
+			if(!System.IO.Path.IsPathRooted(path)) {
+				return System.IO.Path.Combine(System.IO.Directory.GetParent(Path).FullName, path);
+			}
+
+			return path;
+		}
+
 		protected virtual Tuple<int, int> GetWindowSize() {
 			return Tuple.Create(_wW, _wH);
 		}
