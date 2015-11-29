@@ -26,52 +26,54 @@ using System.Xml.Linq;
 
 namespace Petri
 {
-	public sealed class InnerPetriNet : PetriNet
-	{
-		public InnerPetriNet(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos)
-		{
-			_exitPoint = new ExitPoint(doc, this, new Cairo.PointD(300, 100));
-			this.AddState(this.ExitPoint);
-			this.EntryPointID = Document.LastEntityID++;
-		}
+    public sealed class InnerPetriNet : PetriNet
+    {
+        public InnerPetriNet(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos)
+        {
+            _exitPoint = new ExitPoint(doc, this, new Cairo.PointD(300, 100));
+            this.AddState(this.ExitPoint);
+            this.EntryPointID = Document.LastEntityID++;
+        }
 
-		public InnerPetriNet(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor) {
-			EntryPointID = UInt64.Parse(descriptor.Attribute("EntryPointID").Value);
+        public InnerPetriNet(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor)
+        {
+            EntryPointID = UInt64.Parse(descriptor.Attribute("EntryPointID").Value);
 
-			foreach(var s in this.States) {
-				if(s.GetType() == typeof(ExitPoint)) {
-					_exitPoint = s as ExitPoint;
-					break;
-				}
-			}
+            foreach(var s in this.States) {
+                if(s.GetType() == typeof(ExitPoint)) {
+                    _exitPoint = s as ExitPoint;
+                    break;
+                }
+            }
 
-			if(_exitPoint == null)
-				throw new Exception(Configuration.GetLocalized("No Exit node found in the saved Petri net!"));
-		}
+            if(_exitPoint == null)
+                throw new Exception(Configuration.GetLocalized("No Exit node found in the saved Petri net!"));
+        }
 
-		public override void Serialize(XElement elem) {
-			elem.SetAttributeValue("EntryPointID", this.EntryPointID);
-			base.Serialize(elem);
-		}
+        public override void Serialize(XElement elem)
+        {
+            elem.SetAttributeValue("EntryPointID", this.EntryPointID);
+            base.Serialize(elem);
+        }
 
-		public ExitPoint ExitPoint {
-			get {
-				return _exitPoint;
-			}
-		}
+        public ExitPoint ExitPoint {
+            get {
+                return _exitPoint;
+            }
+        }
 
-		public UInt64 EntryPointID {
-			get;
-			set;
-		}
+        public UInt64 EntryPointID {
+            get;
+            set;
+        }
 
-		public string EntryPointName {
-			get {
-				return this.CppName + "_Entry";
-			}
-		}
+        public string EntryPointName {
+            get {
+                return this.CppName + "_Entry";
+            }
+        }
 
-		ExitPoint _exitPoint;
-	}
+        ExitPoint _exitPoint;
+    }
 }
 

@@ -27,123 +27,130 @@ using System.Text;
 
 namespace Petri
 {
-	public class CppCompiler {
-		public CppCompiler(HeadlessDocument doc) {
-			_document = doc;
-		}
+    public class CppCompiler
+    {
+        public CppCompiler(HeadlessDocument doc)
+        {
+            _document = doc;
+        }
 
-		public string CompileSource(string source, string lib) {
-			string cd = System.IO.Directory.GetCurrentDirectory();
-			System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(_document.Path).FullName);
-			if(!System.IO.File.Exists(source)) {
-				return Configuration.GetLocalized("Error: the file \"{0}\" doesn't exist. Please generate the source code before compiling.", source);
-			}
+        public string CompileSource(string source, string lib)
+        {
+            string cd = System.IO.Directory.GetCurrentDirectory();
+            System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(_document.Path).FullName);
+            if(!System.IO.File.Exists(source)) {
+                return Configuration.GetLocalized("Error: the file \"{0}\" doesn't exist. Please generate the source code before compiling.", source);
+            }
 
-			System.IO.File.SetLastWriteTime(source, DateTime.Now);
+            System.IO.File.SetLastWriteTime(source, DateTime.Now);
 
-			Process p = new Process();
+            Process p = new Process();
 
-			p.StartInfo.UseShellExecute = false;
-			p.StartInfo.RedirectStandardOutput = true;
-			p.StartInfo.RedirectStandardError = true;
-			p.StartInfo.FileName = _document.Settings.Compiler;
-			string s = _document.Settings.CompilerArguments(source, lib);
-			if(s.Length < 5000) {
-				p.StartInfo.Arguments = s;
-			}
-			else {
-				return Configuration.GetLocalized("Error: the compiler invocation is too long ({0}) characters. Try to remove some recursive inclusion paths.", s.Length);
-			}
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.FileName = _document.Settings.Compiler;
+            string s = _document.Settings.CompilerArguments(source, lib);
+            if(s.Length < 5000) {
+                p.StartInfo.Arguments = s;
+            }
+            else {
+                return Configuration.GetLocalized("Error: the compiler invocation is too long ({0}) characters. Try to remove some recursive inclusion paths.", s.Length);
+            }
 
-			StringBuilder outputBuilder = new StringBuilder();
+            StringBuilder outputBuilder = new StringBuilder();
 
-			p.OutputDataReceived += (object sender, DataReceivedEventArgs e) => {
-				if(!String.IsNullOrEmpty(e.Data)) {
-					outputBuilder.Append(e.Data);
-				}
-			};
+            p.OutputDataReceived += (object sender, DataReceivedEventArgs e) => {
+                if(!String.IsNullOrEmpty(e.Data)) {
+                    outputBuilder.Append(e.Data);
+                }
+            };
 
-			p.Start();
+            p.Start();
 
-			p.BeginOutputReadLine();
+            p.BeginOutputReadLine();
 
-			string err = p.StandardError.ReadToEnd();
+            string err = p.StandardError.ReadToEnd();
 
-			p.WaitForExit();
+            p.WaitForExit();
 
-			System.IO.Directory.SetCurrentDirectory(cd);
+            System.IO.Directory.SetCurrentDirectory(cd);
 
-			outputBuilder.Append(err);
+            outputBuilder.Append(err);
 
-			return outputBuilder.ToString();
-		}
+            return outputBuilder.ToString();
+        }
 
-		HeadlessDocument _document;
-	}
+        HeadlessDocument _document;
+    }
 
-	public class CompilationErrorPresenter {
-		public CompilationErrorPresenter(Document doc, string error) {
-			_document = doc;
+    public class CompilationErrorPresenter
+    {
+        public CompilationErrorPresenter(Document doc, string error)
+        {
+            _document = doc;
 
-			_window = new Window(WindowType.Toplevel);
-			_window.Title = Configuration.GetLocalized("{0} compilation output", doc.Window.Title);
+            _window = new Window(WindowType.Toplevel);
+            _window.Title = Configuration.GetLocalized("{0} compilation output", doc.Window.Title);
 
-			_window.DefaultWidth = 600;
-			_window.DefaultHeight = 400;
+            _window.DefaultWidth = 600;
+            _window.DefaultHeight = 400;
 
-			_window.SetPosition(WindowPosition.Center);
-			int x, y;
-			_window.GetPosition(out x, out y);
-			_window.Move(x, 2 * y / 3);
-			_window.BorderWidth = 15;
-			_window.AllowShrink = true;
+            _window.SetPosition(WindowPosition.Center);
+            int x, y;
+            _window.GetPosition(out x, out y);
+            _window.Move(x, 2 * y / 3);
+            _window.BorderWidth = 15;
+            _window.AllowShrink = true;
 
-			ScrolledWindow scrolledWindow = new ScrolledWindow();
-			scrolledWindow.SetPolicy(PolicyType.Automatic, PolicyType.Automatic);
+            ScrolledWindow scrolledWindow = new ScrolledWindow();
+            scrolledWindow.SetPolicy(PolicyType.Automatic, PolicyType.Automatic);
 
-			Viewport viewport = new Viewport();
+            Viewport viewport = new Viewport();
 
-			var tagTable = new TextTagTable();
-			var tag = new TextTag("mytag");
-			tagTable.Add(tag);
-			var buf = new TextBuffer(tagTable);
-			tag.Family = "Monospace";
+            var tagTable = new TextTagTable();
+            var tag = new TextTag("mytag");
+            tagTable.Add(tag);
+            var buf = new TextBuffer(tagTable);
+            tag.Family = "Monospace";
 
 
-			TextView view = new TextView(buf);
-			view.Editable = false;
-			view.Buffer.Text = error;
-			buf.ApplyTag("mytag", buf.StartIter, buf.EndIter);
+            TextView view = new TextView(buf);
+            view.Editable = false;
+            view.Buffer.Text = error;
+            buf.ApplyTag("mytag", buf.StartIter, buf.EndIter);
 
-			viewport.Add(view);
+            viewport.Add(view);
 
-			view.SizeRequested += (o, args) => {
-				viewport.WidthRequest = viewport.Child.Requisition.Width;
-				viewport.HeightRequest = viewport.Child.Requisition.Height;
-			};
+            view.SizeRequested += (o, args) => {
+                viewport.WidthRequest = viewport.Child.Requisition.Width;
+                viewport.HeightRequest = viewport.Child.Requisition.Height;
+            };
 
-			scrolledWindow.Add(viewport);
+            scrolledWindow.Add(viewport);
 
-			var hbox = new HBox(false, 0);
-			hbox.PackStart(scrolledWindow, true, true, 0);
-			_window.Add(hbox);
+            var hbox = new HBox(false, 0);
+            hbox.PackStart(scrolledWindow, true, true, 0);
+            _window.Add(hbox);
 
-			_window.DeleteEvent += (o, args) => this.Hide();
-		}
+            _window.DeleteEvent += (o, args) => this.Hide();
+        }
 
-		public void Show() {
-			_window.ShowAll();
-			_window.Present();
-			_document.AssociatedWindows.Add(_window);
-		}
+        public void Show()
+        {
+            _window.ShowAll();
+            _window.Present();
+            _document.AssociatedWindows.Add(_window);
+        }
 
-		public void Hide() {
-			_document.AssociatedWindows.Remove(_window);
-			_window.Hide();
-		}
+        public void Hide()
+        {
+            _document.AssociatedWindows.Remove(_window);
+            _window.Hide();
+        }
 
-		Window _window;
-		Document _document;
-	}
+        Window _window;
+        Document _document;
+    }
 }
 

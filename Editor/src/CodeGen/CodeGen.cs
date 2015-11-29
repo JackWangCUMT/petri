@@ -25,38 +25,43 @@ using System.Collections.Generic;
 
 namespace Petri
 {
-	public enum Language {
-		C,
-		Cpp,
-		None
-	}
+    public enum Language
+    {
+        C,
+        Cpp,
+        None
+    }
 
-	public abstract class CodeGen {
-		public CodeGen() {
+    public abstract class CodeGen
+    {
+        public CodeGen()
+        {
 			
-		}
+        }
 
-		public abstract Language Language {
-			get;
-		}
+        public abstract Language Language {
+            get;
+        }
 
-		public abstract string Value {
-			get;
-			set;
-		}
+        public abstract string Value {
+            get;
+            set;
+        }
 
-		public abstract void Format();
+        public abstract void Format();
 
-		public abstract void Add(string line);
+        public abstract void Add(string line);
 
-		public void AddLine(string line = "") {
-			Add(line + '\n');
-		}
+        public void AddLine(string line = "")
+        {
+            Add(line + '\n');
+        }
 
-		public static CodeGen operator +(CodeGen gen, string s) {
-			gen.AddLine(s);
-			return gen;
-		}
-	}
+        public static CodeGen operator +(CodeGen gen, string s)
+        {
+            gen.AddLine(s);
+            return gen;
+        }
+    }
 }
 

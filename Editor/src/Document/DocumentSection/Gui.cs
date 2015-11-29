@@ -25,51 +25,53 @@ using Gtk;
 
 namespace Petri
 {
-	public abstract class Gui : VBox
-	{
-		public Gui() {
-			_status = new Label();
-			var hbox = new HBox(false, 0);
-			hbox.PackStart(_status, false, true, 5);
-			PackEnd(hbox, false, true, 5);
-		}
+    public abstract class Gui : VBox
+    {
+        public Gui()
+        {
+            _status = new Label();
+            var hbox = new HBox(false, 0);
+            hbox.PackStart(_status, false, true, 5);
+            PackEnd(hbox, false, true, 5);
+        }
 
-		public abstract void FocusIn();
-		public abstract void FocusOut();
+        public abstract void FocusIn();
 
-		public abstract void Redraw();
+        public abstract void FocusOut();
 
-		public abstract void UpdateToolbar();
+        public abstract void Redraw();
 
-		public abstract ScrolledWindow ScrolledWindow {
-			get;
-		}
+        public abstract void UpdateToolbar();
 
-		public abstract PetriView BaseView {
-			get;
-		}
+        public abstract ScrolledWindow ScrolledWindow {
+            get;
+        }
 
-		public abstract Fixed Editor {
-			get;
-		}
+        public abstract PetriView BaseView {
+            get;
+        }
 
-		public HPaned Paned {
-			get {
-				return _paned;
-			}
-		}
+        public abstract Fixed Editor {
+            get;
+        }
 
-		public string Status {
-			get {
-				return _status.Text;
-			}
-			set {
-				_status.Text = value;
-			}
-		}
+        public HPaned Paned {
+            get {
+                return _paned;
+            }
+        }
 
-		protected HPaned _paned;
-		protected Label _status;
-	}
+        public string Status {
+            get {
+                return _status.Text;
+            }
+            set {
+                _status.Text = value;
+            }
+        }
+
+        protected HPaned _paned;
+        protected Label _status;
+    }
 }
 

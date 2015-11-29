@@ -24,125 +24,138 @@ using System;
 
 namespace Petri
 {
-	public abstract class PetriGen {
-		public static PetriGen PetriGenFromLanguage(Language language, HeadlessDocument document) {
-			if(language == Language.Cpp) {
-				return new CppPetriGen(document);
-			}
-			else if(language == Language.C) {
-				return new CPetriGen(document);
-			}
+    public abstract class PetriGen
+    {
+        public static PetriGen PetriGenFromLanguage(Language language, HeadlessDocument document)
+        {
+            if(language == Language.Cpp) {
+                return new CppPetriGen(document);
+            }
+            else if(language == Language.C) {
+                return new CPetriGen(document);
+            }
 
-			throw new Exception("Unsupported language: " + language);
-		}
+            throw new Exception("Unsupported language: " + language);
+        }
 
-		public static string SourceExtensionFromLanguage(Language language) {
-			if(language == Language.Cpp) {
-				return "cpp";
-			}
-			else if(language == Language.C) {
-				return "c";
-			}
+        public static string SourceExtensionFromLanguage(Language language)
+        {
+            if(language == Language.Cpp) {
+                return "cpp";
+            }
+            else if(language == Language.C) {
+                return "c";
+            }
 
-			throw new Exception("Unsupported language: " + language);
-		}
+            throw new Exception("Unsupported language: " + language);
+        }
 
-		protected PetriGen(HeadlessDocument doc, Language language, CodeGen generator) {
-			CodeGen = generator;
-			Document = doc;
-			Language = language;
-		}
+        protected PetriGen(HeadlessDocument doc, Language language, CodeGen generator)
+        {
+            CodeGen = generator;
+            Document = doc;
+            Language = language;
+        }
 
-		public Language Language {
-			get;
-			private set;
-		}
+        public Language Language {
+            get;
+            private set;
+        }
 
-		protected HeadlessDocument Document {
-			get;
-			private set;
-		}
+        protected HeadlessDocument Document {
+            get;
+            private set;
+        }
 
-		protected CodeGen CodeGen {
-			get;
-			set;
-		}
+        protected CodeGen CodeGen {
+            get;
+            set;
+        }
 
-		protected abstract void Begin();
+        protected abstract void Begin();
 
-		protected void GenerateCodeFor(Entity entity, IDManager lastID) {
-			if(entity is InnerPetriNet) {
-				GeneratePetriNet((PetriNet)entity, lastID);
-				GenerateInnerPetriNet((InnerPetriNet)entity, lastID);
-			}
-			else if(entity is PetriNet) {
-				GeneratePetriNet((PetriNet)entity, lastID);
-			}
-			else if(entity is Action) {
-				GenerateAction((Action)entity, lastID);
-			}
-			else if(entity is ExitPoint) {
-				GenerateExitPoint((ExitPoint)entity, lastID);
-			}
-			else if(entity is Transition) {
-				GenerateTransition((Transition)entity);
-			}
-			else {
-				throw new Exception("Should not get there…");
-			}
-		}
+        protected void GenerateCodeFor(Entity entity, IDManager lastID)
+        {
+            if(entity is InnerPetriNet) {
+                GeneratePetriNet((PetriNet)entity, lastID);
+                GenerateInnerPetriNet((InnerPetriNet)entity, lastID);
+            }
+            else if(entity is PetriNet) {
+                GeneratePetriNet((PetriNet)entity, lastID);
+            }
+            else if(entity is Action) {
+                GenerateAction((Action)entity, lastID);
+            }
+            else if(entity is ExitPoint) {
+                GenerateExitPoint((ExitPoint)entity, lastID);
+            }
+            else if(entity is Transition) {
+                GenerateTransition((Transition)entity);
+            }
+            else {
+                throw new Exception("Should not get there…");
+            }
+        }
 
-		protected void GeneratePetriNet(PetriNet pn, IDManager lastID) {
-			foreach(State s in pn.States) {
-				GenerateCodeFor(s, lastID);
-			}
+        protected void GeneratePetriNet(PetriNet pn, IDManager lastID)
+        {
+            foreach(State s in pn.States) {
+                GenerateCodeFor(s, lastID);
+            }
 
-			CodeGen += "\n";
+            CodeGen += "\n";
 
-			foreach(Transition t in pn.Transitions) {
-				GenerateCodeFor(t, lastID);
-			}
-		}
+            foreach(Transition t in pn.Transitions) {
+                GenerateCodeFor(t, lastID);
+            }
+        }
 
-		protected abstract void GenerateAction(Action a, IDManager lastID);
-		protected abstract void GenerateExitPoint(ExitPoint e, IDManager lastID);
-		protected abstract void GenerateInnerPetriNet(InnerPetriNet i, IDManager lastID);
-		protected abstract void GenerateTransition(Transition t);
+        protected abstract void GenerateAction(Action a, IDManager lastID);
 
+        protected abstract void GenerateExitPoint(ExitPoint e, IDManager lastID);
 
-		protected abstract void End();
+        protected abstract void GenerateInnerPetriNet(InnerPetriNet i, IDManager lastID);
 
-		protected void Format() {
-			CodeGen.Format();
-		}
-
-		public string GetHash() {
-			Begin();
-			GenerateCodeFor(Document.PetriNet, new IDManager(Document.LastEntityID + 1));
-			End();
-
-			return Hash;
-		}
-
-		public virtual void WritePetriNet() {
-			Begin();
-			GenerateCodeFor(Document.PetriNet, new IDManager(Document.LastEntityID + 1));
-			End();
-
-			System.IO.File.WriteAllText(PathToFile(Document.Settings.Name + "." + PetriGen.SourceExtensionFromLanguage(Language)), CodeGen.Value);
-		}
-
-		public abstract void WriteExpressionEvaluator(Cpp.Expression expression, string path);
-
-		protected string PathToFile(string filename) {
-			return System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath), filename);
-		}
+        protected abstract void GenerateTransition(Transition t);
 
 
-		protected string Hash {
-			get;
-			set;
-		}
-	}
+        protected abstract void End();
+
+        protected void Format()
+        {
+            CodeGen.Format();
+        }
+
+        public string GetHash()
+        {
+            Begin();
+            GenerateCodeFor(Document.PetriNet, new IDManager(Document.LastEntityID + 1));
+            End();
+
+            return Hash;
+        }
+
+        public virtual void WritePetriNet()
+        {
+            Begin();
+            GenerateCodeFor(Document.PetriNet, new IDManager(Document.LastEntityID + 1));
+            End();
+
+            System.IO.File.WriteAllText(PathToFile(Document.Settings.Name + "." + PetriGen.SourceExtensionFromLanguage(Language)), CodeGen.Value);
+        }
+
+        public abstract void WriteExpressionEvaluator(Cpp.Expression expression, string path);
+
+        protected string PathToFile(string filename)
+        {
+            return System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath), filename);
+        }
+
+
+        protected string Hash {
+            get;
+            set;
+        }
+    }
 }
 

@@ -25,122 +25,130 @@ using Gtk;
 
 namespace Petri
 {
-	public class HeadersManager
-	{
-		public HeadersManager(Document doc) {
-			_document = doc;
-			_window = new Window(WindowType.Toplevel);
-			_window.Title = Configuration.GetLocalized("Headers associated with") + " " + doc.Window.Title;
+    public class HeadersManager
+    {
+        public HeadersManager(Document doc)
+        {
+            _document = doc;
+            _window = new Window(WindowType.Toplevel);
+            _window.Title = Configuration.GetLocalized("Headers associated with") + " " + doc.Window.Title;
 
-			_window.DefaultWidth = 300;
-			_window.DefaultHeight = 300;
+            _window.DefaultWidth = 300;
+            _window.DefaultHeight = 300;
 
-			_window.SetPosition(WindowPosition.Center);
-			int x, y;
-			_window.GetPosition(out x, out y);
-			_window.Move(x, 2 * y / 3);
-			_window.BorderWidth = 15;
+            _window.SetPosition(WindowPosition.Center);
+            int x, y;
+            _window.GetPosition(out x, out y);
+            _window.Move(x, 2 * y / 3);
+            _window.BorderWidth = 15;
 
-			var vbox = new VBox(false, 5);
+            var vbox = new VBox(false, 5);
 
-			_window.Add(vbox);
+            _window.Add(vbox);
 
-			_table = new TreeView();
-			TreeViewColumn c = new TreeViewColumn();
-			c.Title = Configuration.GetLocalized("File HeadersManager");
-			var fileCell = new Gtk.CellRendererText();
-			c.PackStart(fileCell, true);
-			c.AddAttribute(fileCell, "text", 0);
+            _table = new TreeView();
+            TreeViewColumn c = new TreeViewColumn();
+            c.Title = Configuration.GetLocalized("File HeadersManager");
+            var fileCell = new Gtk.CellRendererText();
+            c.PackStart(fileCell, true);
+            c.AddAttribute(fileCell, "text", 0);
 
-			_table.AppendColumn(c);
-			_headersStore = new Gtk.ListStore(typeof(string));
-			_table.Model = _headersStore;
+            _table.AppendColumn(c);
+            _headersStore = new Gtk.ListStore(typeof(string));
+            _table.Model = _headersStore;
 
-			vbox.PackStart(_table, true, true, 0);
+            vbox.PackStart(_table, true, true, 0);
 
-			var hbox = new HBox(false, 5);
-			var plus = new Button(new Label("+"));
-			var minus = new Button(new Label("-"));
-			plus.Clicked += OnAdd;
-			minus.Clicked += OnRemove;
-			hbox.PackStart(plus, false, false, 0);
-			hbox.PackStart(minus, false, false, 0);
-			vbox.PackStart(hbox, false, false, 0);
+            var hbox = new HBox(false, 5);
+            var plus = new Button(new Label("+"));
+            var minus = new Button(new Label("-"));
+            plus.Clicked += OnAdd;
+            minus.Clicked += OnRemove;
+            hbox.PackStart(plus, false, false, 0);
+            hbox.PackStart(minus, false, false, 0);
+            vbox.PackStart(hbox, false, false, 0);
 
-			var OK = new Button(new Label(Configuration.GetLocalized("OK")));
-			hbox.PackEnd(OK, false, false, 0);
-			OK.Clicked += (sender, e) => _window.Hide();
+            var OK = new Button(new Label(Configuration.GetLocalized("OK")));
+            hbox.PackEnd(OK, false, false, 0);
+            OK.Clicked += (sender, e) => _window.Hide();
 
-			_window.DeleteEvent += OnDeleteEvent;
-		}
+            _window.DeleteEvent += OnDeleteEvent;
+        }
 
-		public void Show() {
-			this.BuildList();
-			_window.ShowAll();
-			_window.Present();
-			_document.AssociatedWindows.Add(_window);
-		}
+        public void Show()
+        {
+            this.BuildList();
+            _window.ShowAll();
+            _window.Present();
+            _document.AssociatedWindows.Add(_window);
+        }
 
-		public void Hide() {
-			_document.AssociatedWindows.Remove(_window);
-			_window.Hide();
-		}
+        public void Hide()
+        {
+            _document.AssociatedWindows.Remove(_window);
+            _window.Hide();
+        }
 
-		private void BuildList() {
-			_headersStore.Clear();
-			foreach(string h in _document.Headers) {
-				_headersStore.AppendValues(h);
-			}
+        private void BuildList()
+        {
+            _headersStore.Clear();
+            foreach(string h in _document.Headers) {
+                _headersStore.AppendValues(h);
+            }
 
-			_window.ShowAll();
-		}
+            _window.ShowAll();
+        }
 
-		protected void OnRemove(object sender, EventArgs e) {
-			TreeIter iter;
-			TreePath[] treePath = _table.Selection.GetSelectedRows();
+        protected void OnRemove(object sender, EventArgs e)
+        {
+            TreeIter iter;
+            TreePath[] treePath = _table.Selection.GetSelectedRows();
 
-			for (int i  = treePath.Length; i > 0; i--) {
-				_headersStore.GetIter(out iter, treePath[(i - 1)]);
-				_document.RemoveHeader(_headersStore.GetValue(iter, 0) as string);
-			}
+            for(int i = treePath.Length; i > 0; i--) {
+                _headersStore.GetIter(out iter, treePath[(i - 1)]);
+                _document.RemoveHeader(_headersStore.GetValue(iter, 0) as string);
+            }
 
-			this.BuildList();
-		}
+            this.BuildList();
+        }
 
 
-		protected void OnDeleteEvent(object sender, DeleteEventArgs a) {
-			_window.Hide();
-			// We do not close the window so that there is no need to recreate it upon reopening
-			a.RetVal = true;
-		}
+        protected void OnDeleteEvent(object sender, DeleteEventArgs a)
+        {
+            _window.Hide();
+            // We do not close the window so that there is no need to recreate it upon reopening
+            a.RetVal = true;
+        }
 
-		private void OnAdd(object sender, EventArgs e) {
-			var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Choose a file containing the <language> declarations…", _document.Settings.LanguageName()), _window,
-				FileChooserAction.Open,
-				new object[]{Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
-					Configuration.GetLocalized("Open"), ResponseType.Accept});
+        private void OnAdd(object sender, EventArgs e)
+        {
+            var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Choose a file containing the <language> declarations…", _document.Settings.LanguageName()), _window,
+                FileChooserAction.Open,
+                new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+                    Configuration.GetLocalized("Open"), ResponseType.Accept
+                });
 
-			CheckButton b = new CheckButton(Configuration.GetLocalized("Relative path"));
-			b.Active = true;
-			fc.ActionArea.PackEnd(b);
-			b.Show();
+            CheckButton b = new CheckButton(Configuration.GetLocalized("Relative path"));
+            b.Active = true;
+            fc.ActionArea.PackEnd(b);
+            b.Show();
 
-			if(fc.Run() == (int)ResponseType.Accept) {
-				string filename = fc.Filename;
-				if(b.Active) {
-					filename = _document.GetRelativeToDoc(filename);
-				}
-				_document.AddHeader(filename);
-			}
-			fc.Destroy();
+            if(fc.Run() == (int)ResponseType.Accept) {
+                string filename = fc.Filename;
+                if(b.Active) {
+                    filename = _document.GetRelativeToDoc(filename);
+                }
+                _document.AddHeader(filename);
+            }
+            fc.Destroy();
 
-			this.BuildList();
-		}
+            this.BuildList();
+        }
 
-		Document _document;
-		Window _window;
-		TreeView _table;
-		ListStore _headersStore;
-	}
+        Document _document;
+        Window _window;
+        TreeView _table;
+        ListStore _headersStore;
+    }
 }
 

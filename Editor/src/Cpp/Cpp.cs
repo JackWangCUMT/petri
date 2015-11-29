@@ -27,32 +27,34 @@ using System.Linq;
 
 namespace Petri
 {
-	namespace Cpp
-	{
-		public class Duration {
-			public Duration(string s) {
-				this.Value = s;
-			}
+    namespace Cpp
+    {
+        public class Duration
+        {
+            public Duration(string s)
+            {
+                this.Value = s;
+            }
 
-			public string Value {
-				get {
-					return _value;
-				}
-				set {
-					Regex regex = new Regex(@"^[0-9]*(\.[0-9]+)?(ns|us|ms|s)");
-					var match = regex.Match(value);
-					if(!match.Success) {
-						throw new ArgumentException(Configuration.GetLocalized("Invalid timeout duration."));
-					}
-					else {
-						this._value = value;
-					}
+            public string Value {
+                get {
+                    return _value;
+                }
+                set {
+                    Regex regex = new Regex(@"^[0-9]*(\.[0-9]+)?(ns|us|ms|s)");
+                    var match = regex.Match(value);
+                    if(!match.Success) {
+                        throw new ArgumentException(Configuration.GetLocalized("Invalid timeout duration."));
+                    }
+                    else {
+                        this._value = value;
+                    }
 
-				}
-			}
+                }
+            }
 
-			private string _value;
-		}
-	}
+            private string _value;
+        }
+    }
 }
 

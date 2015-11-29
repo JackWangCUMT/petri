@@ -26,145 +26,149 @@ using ExprType = Petri.Cpp.Expression.ExprType;
 
 namespace Petri
 {
-	public class CFamilyCodeGen : CodeGen
-	{
-		public CFamilyCodeGen(Language language) {
-			_lang = language;
-		}
+    public class CFamilyCodeGen : CodeGen
+    {
+        public CFamilyCodeGen(Language language)
+        {
+            _lang = language;
+        }
 
-		public override Language Language {
-			get {
-				return _lang;
-			}
-		}
+        public override Language Language {
+            get {
+                return _lang;
+            }
+        }
 
-		public override string Value {
-			get {
-				return _value;
-			}
-			set {
-				_value = value;
-			}
-		}
+        public override string Value {
+            get {
+                return _value;
+            }
+            set {
+                _value = value;
+            }
+        }
 
-		public override void Format() {
-			string newVal = "";
+        public override void Format()
+        {
+            string newVal = "";
 
-			Dictionary<char, int> dict = new Dictionary<char, int>();
-			dict['{'] = 1;
-			dict['}'] = -1;
-			dict['('] = 2;
-			dict[')'] = -2;
+            Dictionary<char, int> dict = new Dictionary<char, int>();
+            dict['{'] = 1;
+            dict['}'] = -1;
+            dict['('] = 2;
+            dict[')'] = -2;
 
-			int currentIndent = 0;
+            int currentIndent = 0;
 
-			var nesting = new Stack<Cpp.Expression.ExprType>();
+            var nesting = new Stack<Cpp.Expression.ExprType>();
 
-			foreach(string line in _value.Split('\n')) {
-				string newLine = line;
+            foreach(string line in _value.Split('\n')) {
+                string newLine = line;
 
-				if(!line.StartsWith("#")) {
-					int existingIndent = 0;
-					for(int i = 0; i < line.Length; ++i) {
-						if(line[i] == '\t') {
-							++existingIndent;
-						}
-						else {
-							break;
-						}
-					}
-					int firstIndent = 0;
-					int deltaNext = 0;
+                if(!line.StartsWith("#")) {
+                    int existingIndent = 0;
+                    for(int i = 0; i < line.Length; ++i) {
+                        if(line[i] == '\t') {
+                            ++existingIndent;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    int firstIndent = 0;
+                    int deltaNext = 0;
 
-					for(int i = 0; i < line.Length; ++i) {
-						int delta = 0;
-						switch(line[i]) {
-						case '(':
-							nesting.Push(ExprType.Parenthesis);
-							delta = 2;
-							break;
-						case ')':
-							if(nesting.Count > 0 && nesting.Peek() == ExprType.Parenthesis) {
-								delta = -2;
-								nesting.Pop();
-							}
-							break;
-						case '{':
-							delta = 1;
-							nesting.Push(ExprType.Brackets);
-							break;
-						case '}':
-							if(nesting.Count > 0 && nesting.Peek() == ExprType.Brackets) {
-								delta = -1;
-								nesting.Pop();
-							}
-							break;
-						case '[':
-							delta = 2;
-							nesting.Push(ExprType.Subscript);
-							break;
-						case ']':
-							if(nesting.Count > 0 && nesting.Peek() == ExprType.Subscript) {
-								delta = -2;
-								nesting.Pop();
-							}
-							break;
-						case '"':
+                    for(int i = 0; i < line.Length; ++i) {
+                        int delta = 0;
+                        switch(line[i]) {
+                        case '(':
+                            nesting.Push(ExprType.Parenthesis);
+                            delta = 2;
+                            break;
+                        case ')':
+                            if(nesting.Count > 0 && nesting.Peek() == ExprType.Parenthesis) {
+                                delta = -2;
+                                nesting.Pop();
+                            }
+                            break;
+                        case '{':
+                            delta = 1;
+                            nesting.Push(ExprType.Brackets);
+                            break;
+                        case '}':
+                            if(nesting.Count > 0 && nesting.Peek() == ExprType.Brackets) {
+                                delta = -1;
+                                nesting.Pop();
+                            }
+                            break;
+                        case '[':
+                            delta = 2;
+                            nesting.Push(ExprType.Subscript);
+                            break;
+                        case ']':
+                            if(nesting.Count > 0 && nesting.Peek() == ExprType.Subscript) {
+                                delta = -2;
+                                nesting.Pop();
+                            }
+                            break;
+                        case '"':
 							// First quote
-							if(nesting.Count == 0 || (nesting.Peek() != ExprType.DoubleQuote && nesting.Peek() != ExprType.Quote)) {
-								nesting.Push(ExprType.DoubleQuote);
-							}
+                            if(nesting.Count == 0 || (nesting.Peek() != ExprType.DoubleQuote && nesting.Peek() != ExprType.Quote)) {
+                                nesting.Push(ExprType.DoubleQuote);
+                            }
 							// Second quote
 							else if(nesting.Count > 0 && nesting.Peek() == ExprType.DoubleQuote && line[i - 1] != '\\') {
-								nesting.Pop();
-							}
-							break;
-						case '\'':
+                                nesting.Pop();
+                            }
+                            break;
+                        case '\'':
 							// First quote
-							if(nesting.Count == 0 || (nesting.Peek() != ExprType.Quote && nesting.Peek() != ExprType.DoubleQuote)) {
-								nesting.Push(ExprType.Quote);
-							}
+                            if(nesting.Count == 0 || (nesting.Peek() != ExprType.Quote && nesting.Peek() != ExprType.DoubleQuote)) {
+                                nesting.Push(ExprType.Quote);
+                            }
 							// Second quote
 							else if(nesting.Count > 0 && nesting.Peek() == ExprType.Quote && line[i - 1] != '\\') {
-								nesting.Pop();
-							}
-							break;
-						}
+                                nesting.Pop();
+                            }
+                            break;
+                        }
 
-						if(i == 0 && delta < 0) {
-							firstIndent = delta;
-						}
+                        if(i == 0 && delta < 0) {
+                            firstIndent = delta;
+                        }
 
-						deltaNext += delta;
-					}
+                        deltaNext += delta;
+                    }
 
-					newLine = GetNTab(currentIndent + firstIndent - existingIndent) + line;
-					currentIndent += deltaNext;
-				}
+                    newLine = GetNTab(currentIndent + firstIndent - existingIndent) + line;
+                    currentIndent += deltaNext;
+                }
 
-				newVal += newLine + "\n";
-			}
+                newVal += newLine + "\n";
+            }
 
-			_value = newVal;
-		}
+            _value = newVal;
+        }
 
-		public override void Add(string line) {
-			_value += line;
-		}
+        public override void Add(string line)
+        {
+            _value += line;
+        }
 
 
-		// TODO: better complexity, please.
-		private static string GetNTab(int n) {
-			string s = "";
-			for(int i = 0; i < n; ++i) {
-				s += '\t';
-			}
+        // TODO: better complexity, please.
+        private static string GetNTab(int n)
+        {
+            string s = "";
+            for(int i = 0; i < n; ++i) {
+                s += '\t';
+            }
 
-			return s;
-		}
+            return s;
+        }
 
-		private Language _lang;
-		private string _value = "";
-	}
+        private Language _lang;
+        private string _value = "";
+    }
 }
 

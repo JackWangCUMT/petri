@@ -29,183 +29,192 @@ using System.Linq;
 
 namespace Petri
 {
-	public class Transition : Entity
-	{
-		public Transition(HeadlessDocument doc, PetriNet s, State before, State after) : base(doc, s)
-		{
-			this.Before = before;
-			this.After = after;
+    public class Transition : Entity
+    {
+        public Transition(HeadlessDocument doc, PetriNet s, State before, State after) : base(doc, s)
+        {
+            this.Before = before;
+            this.After = after;
 
-			this.Name = ID.ToString();
+            this.Name = ID.ToString();
 
-			this.Width = 50;
-			this.Height = 30;
+            this.Width = 50;
+            this.Height = 30;
 
-			if(Before == After) {
-				this.Shift = new PointD(40, 40);
-			}
-			else {
-				this.Shift = new PointD(0, 0);
-			}
+            if(Before == After) {
+                this.Shift = new PointD(40, 40);
+            }
+            else {
+                this.Shift = new PointD(0, 0);
+            }
 
-			base.Position = new PointD(0, 0);
-			this.ShiftAmplitude = PetriView.Norm(Direction);
+            base.Position = new PointD(0, 0);
+            this.ShiftAmplitude = PetriView.Norm(Direction);
 
-			this.Condition = Cpp.Expression.CreateFromString<Cpp.Expression>("true", this);
+            this.Condition = Cpp.Expression.CreateFromString<Cpp.Expression>("true", this);
 
-			UpdatePrivate();
-		}
+            UpdatePrivate();
+        }
 
-		public Transition(HeadlessDocument doc, PetriNet parent, XElement descriptor, IDictionary<UInt64, State> statesTable) : base(doc, parent, descriptor) {
-			this.Before = statesTable[UInt64.Parse(descriptor.Attribute("BeforeID").Value)];
-			this.After = statesTable[UInt64.Parse(descriptor.Attribute("AfterID").Value)];
+        public Transition(HeadlessDocument doc, PetriNet parent, XElement descriptor, IDictionary<UInt64, State> statesTable) : base(doc, parent, descriptor)
+        {
+            this.Before = statesTable[UInt64.Parse(descriptor.Attribute("BeforeID").Value)];
+            this.After = statesTable[UInt64.Parse(descriptor.Attribute("AfterID").Value)];
 
-			TrySetCondition(descriptor.Attribute("Condition").Value);
+            TrySetCondition(descriptor.Attribute("Condition").Value);
 
-			this.Width = double.Parse(descriptor.Attribute("W").Value);
-			this.Height = double.Parse(descriptor.Attribute("H").Value);
+            this.Width = double.Parse(descriptor.Attribute("W").Value);
+            this.Height = double.Parse(descriptor.Attribute("H").Value);
 
-			this.Shift = new Cairo.PointD(XmlConvert.ToDouble(descriptor.Attribute("ShiftX").Value), XmlConvert.ToDouble(descriptor.Attribute("ShiftY").Value));
-			this.ShiftAmplitude = XmlConvert.ToDouble(descriptor.Attribute("ShiftAmplitude").Value);
+            this.Shift = new Cairo.PointD(XmlConvert.ToDouble(descriptor.Attribute("ShiftX").Value), XmlConvert.ToDouble(descriptor.Attribute("ShiftY").Value));
+            this.ShiftAmplitude = XmlConvert.ToDouble(descriptor.Attribute("ShiftAmplitude").Value);
 
-			this.Position = this.Position;
-		}
+            this.Position = this.Position;
+        }
 
-		private void TrySetCondition(string s) {
-			try {
-				Condition = Cpp.Expression.CreateFromString<Cpp.Expression>(s, this);
-			}
-			catch(Exception) {
-				Document.Conflicting.Add(this);
-				Condition = Cpp.LiteralExpression.CreateFromString(s, this);
-			}
-		}
+        private void TrySetCondition(string s)
+        {
+            try {
+                Condition = Cpp.Expression.CreateFromString<Cpp.Expression>(s, this);
+            }
+            catch(Exception) {
+                Document.Conflicting.Add(this);
+                Condition = Cpp.LiteralExpression.CreateFromString(s, this);
+            }
+        }
 
-		public void UpdateConflicts() {
-			this.TrySetCondition(Condition.MakeUserReadable());
-		}
+        public void UpdateConflicts()
+        {
+            this.TrySetCondition(Condition.MakeUserReadable());
+        }
 
-		public override XElement GetXml() {
-			var elem = new XElement("Transition");
-			this.Serialize(elem);
-			return elem;
-		}
+        public override XElement GetXml()
+        {
+            var elem = new XElement("Transition");
+            this.Serialize(elem);
+            return elem;
+        }
 
-		public override void Serialize(XElement elem) {
-			base.Serialize(elem);
-			elem.SetAttributeValue("BeforeID", this.Before.ID);
-			elem.SetAttributeValue("AfterID", this.After.ID);
+        public override void Serialize(XElement elem)
+        {
+            base.Serialize(elem);
+            elem.SetAttributeValue("BeforeID", this.Before.ID);
+            elem.SetAttributeValue("AfterID", this.After.ID);
 
-			elem.SetAttributeValue("Condition", this.Condition.MakeUserReadable());
+            elem.SetAttributeValue("Condition", this.Condition.MakeUserReadable());
 
-			elem.SetAttributeValue("W", this.Width);
-			elem.SetAttributeValue("H", this.Height);
+            elem.SetAttributeValue("W", this.Width);
+            elem.SetAttributeValue("H", this.Height);
 
-			elem.SetAttributeValue("ShiftX", this.Shift.X);
-			elem.SetAttributeValue("ShiftY", this.Shift.Y);
-			elem.SetAttributeValue("ShiftAmplitude", this.ShiftAmplitude);
-		}
+            elem.SetAttributeValue("ShiftX", this.Shift.X);
+            elem.SetAttributeValue("ShiftY", this.Shift.Y);
+            elem.SetAttributeValue("ShiftAmplitude", this.ShiftAmplitude);
+        }
 
-		public override bool UsesFunction(Cpp.Function f) {
-			return Condition.UsesFunction(f);
-		}
+        public override bool UsesFunction(Cpp.Function f)
+        {
+            return Condition.UsesFunction(f);
+        }
 
-		public PointD Direction {
-			get {
-				if(Before == After) {
-					var dir = new PointD(Before.Position.X - Position.X, Before.Position.Y - Position.Y);
-					return dir;
-				}
+        public PointD Direction {
+            get {
+                if(Before == After) {
+                    var dir = new PointD(Before.Position.X - Position.X, Before.Position.Y - Position.Y);
+                    return dir;
+                }
 
-				return new PointD(After.Position.X - Before.Position.X, After.Position.Y - Before.Position.Y);
-			}
-		}
+                return new PointD(After.Position.X - Before.Position.X, After.Position.Y - Before.Position.Y);
+            }
+        }
 
-		public void UpdatePosition() {
-			if(Before != After) {
-				UpdatePrivate();
-			}
-		}
+        public void UpdatePosition()
+        {
+            if(Before != After) {
+                UpdatePrivate();
+            }
+        }
 
-		private void UpdatePrivate() {
-			double norm = PetriView.Norm(Direction);
-			PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
-			double amplitude = ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1);
-			var pos = new PointD(center.X + Shift.X * norm / amplitude, center.Y + Shift.Y * norm / amplitude);
-			Position = pos;
-		}
+        private void UpdatePrivate()
+        {
+            double norm = PetriView.Norm(Direction);
+            PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
+            double amplitude = ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1);
+            var pos = new PointD(center.X + Shift.X * norm / amplitude, center.Y + Shift.Y * norm / amplitude);
+            Position = pos;
+        }
 
-		public State Before {
-			get;
-			set;
-		}
+        public State Before {
+            get;
+            set;
+        }
 
-		public State After {
-			get;
-			set;
-		}
+        public State After {
+            get;
+            set;
+        }
 
-		public override PointD Position {
-			get {
-				return base.Position;
-			}
-			set {
-				base.Position = value;
+        public override PointD Position {
+            get {
+                return base.Position;
+            }
+            set {
+                base.Position = value;
 
-				// Prevents access during construction
-				if(After != null) {
-					ShiftAmplitude = PetriView.Norm(Direction);
-					PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
-					Shift = new PointD(value.X - center.X, value.Y - center.Y);
-				}
-			}
-		}
+                // Prevents access during construction
+                if(After != null) {
+                    ShiftAmplitude = PetriView.Norm(Direction);
+                    PointD center = new PointD((Before.Position.X + After.Position.X) / 2, (Before.Position.Y + After.Position.Y) / 2);
+                    Shift = new PointD(value.X - center.X, value.Y - center.Y);
+                }
+            }
+        }
 
-		public double Width {
-			get;
-			set;
-		}
+        public double Width {
+            get;
+            set;
+        }
 
-		public double Height {
-			get;
-			set;
-		}
+        public double Height {
+            get;
+            set;
+        }
 
-		public PointD Shift {
-			get;
-			set;
-		}
+        public PointD Shift {
+            get;
+            set;
+        }
 
-		public double ShiftAmplitude {
-			get;
-			set;
-		}
+        public double ShiftAmplitude {
+            get;
+            set;
+        }
 
-		public Cpp.Expression Condition {
-			get;
-			set;
-		}
+        public Cpp.Expression Condition {
+            get;
+            set;
+        }
 
-		public override string CppName {
-			get {
-				return "transition_" + this.ID.ToString();
-			}
-		}
+        public override string CppName {
+            get {
+                return "transition_" + this.ID.ToString();
+            }
+        }
 
-		public override bool StickToGrid {
-			get {
-				return false;
-			}
-		}
+        public override bool StickToGrid {
+            get {
+                return false;
+            }
+        }
 
-		public void GetVariables(HashSet<Cpp.VariableExpression> res) {				
-			var l = Condition.GetLiterals();
-			foreach(var ll in l) {
-				if(ll is Cpp.VariableExpression) {
-					res.Add(ll as Cpp.VariableExpression);
-				}
-			}
-		}
-	}
+        public void GetVariables(HashSet<Cpp.VariableExpression> res)
+        {				
+            var l = Condition.GetLiterals();
+            foreach(var ll in l) {
+                if(ll is Cpp.VariableExpression) {
+                    res.Add(ll as Cpp.VariableExpression);
+                }
+            }
+        }
+    }
 }
 

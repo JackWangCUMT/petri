@@ -28,313 +28,335 @@ using System.Linq;
 
 namespace Petri
 {
-	[System.ComponentModel.ToolboxItem(true)]
-	public abstract class PetriView : Gtk.DrawingArea
-	{
-		public PetriView(Document doc) {
-			_document = doc;
-			_needsRedraw = false;
-			_deltaClick = new PointD(0, 0);
-			_originalPosition = new PointD();
-			_lastClickDate = DateTime.Now;
-			_lastClickPosition = new PointD(0, 0);
+    [System.ComponentModel.ToolboxItem(true)]
+    public abstract class PetriView : Gtk.DrawingArea
+    {
+        public PetriView(Document doc)
+        {
+            _document = doc;
+            _needsRedraw = false;
+            _deltaClick = new PointD(0, 0);
+            _originalPosition = new PointD();
+            _lastClickDate = DateTime.Now;
+            _lastClickPosition = new PointD(0, 0);
 
-			Zoom = 1.0f;
+            Zoom = 1.0f;
 
-			this.ButtonPressEvent += (object o, ButtonPressEventArgs args) => {
-				this.HasFocus = true;
-			};
-		}
+            this.ButtonPressEvent += (object o, ButtonPressEventArgs args) => {
+                this.HasFocus = true;
+            };
+        }
 
-		public void Redraw() {
-			if(_document.Window.Gui == null || _document.Window.Gui.BaseView == this) {
-				if(_needsRedraw == false) {
-					_needsRedraw = true;
-					this.QueueDraw();
-				}
-			}
-		}
+        public void Redraw()
+        {
+            if(_document.Window.Gui == null || _document.Window.Gui.BaseView == this) {
+                if(_needsRedraw == false) {
+                    _needsRedraw = true;
+                    this.QueueDraw();
+                }
+            }
+        }
 
-		public virtual void FocusIn() {
-			this.Redraw();
-		}
+        public virtual void FocusIn()
+        {
+            this.Redraw();
+        }
 
-		public virtual void FocusOut() {
-			this.Redraw();
-		}
+        public virtual void FocusOut()
+        {
+            this.Redraw();
+        }
 
-		protected virtual void ManageTwoButtonPress(uint button, double x, double y) {}
-		protected virtual void ManageOneButtonPress(uint button, double x, double y) {}
-		protected virtual void ManageButtonRelease(uint button, double x, double y) {}
-		protected virtual void ManageMotion(double x, double y) {}
+        protected virtual void ManageTwoButtonPress(uint button, double x, double y)
+        {
+        }
 
-		protected override bool OnButtonPressEvent(Gdk.EventButton ev) {
-			if(ev.Type == Gdk.EventType.ButtonPress) {
-				// The Windows version of GTK# currently doesn't detect TwoButtonPress events, so here is a lame simulation of it.
-				if(/*ev.Type == Gdk.EventType.TwoButtonPress || */(_lastClickPosition.X == ev.X && _lastClickPosition.Y == ev.Y && (DateTime.Now - _lastClickDate).TotalMilliseconds < 500)) {
-					_lastClickPosition.X = -12345;
+        protected virtual void ManageOneButtonPress(uint button, double x, double y)
+        {
+        }
 
-					this.ManageTwoButtonPress(ev.Button, ev.X / Zoom, ev.Y / Zoom);
-				}
-				else {
-					_lastClickDate = DateTime.Now;
-					_lastClickPosition.X = ev.X;
-					_lastClickPosition.Y = ev.Y;
+        protected virtual void ManageButtonRelease(uint button, double x, double y)
+        {
+        }
 
-					var scrolled = _document.Window.Gui.ScrolledWindow;
+        protected virtual void ManageMotion(double x, double y)
+        {
+        }
 
-					if(ev.X >= 15 + scrolled.Hadjustment.Value && ev.X < _parentHierarchy[_parentHierarchy.Count - 1].extents.Width + 15 + scrolled.Hadjustment.Value
-						&& ev.Y >= 15 + scrolled.Vadjustment.Value && ev.Y < _parentHierarchy[_parentHierarchy.Count - 1].extents.Height + 15 + scrolled.Vadjustment.Value) {
-						double currX = 15;
-						foreach(var item in _parentHierarchy) {
-							if(item.petriNet != null && ev.X - currX < item.extents.Width + pathSeparatorLenth + scrolled.Hadjustment.Value) {
-								_nextPetriNet = item.petriNet;
-								break;
-							}
-							currX += item.extents.Width + pathSeparatorLenth;
-						}
-					}
-					else {
-						this.ManageOneButtonPress(ev.Button, ev.X / Zoom, ev.Y / Zoom);
-					}
-				}
-			}
+        protected override bool OnButtonPressEvent(Gdk.EventButton ev)
+        {
+            if(ev.Type == Gdk.EventType.ButtonPress) {
+                // The Windows version of GTK# currently doesn't detect TwoButtonPress events, so here is a lame simulation of it.
+                if(/*ev.Type == Gdk.EventType.TwoButtonPress || */(_lastClickPosition.X == ev.X && _lastClickPosition.Y == ev.Y && (DateTime.Now - _lastClickDate).TotalMilliseconds < 500)) {
+                    _lastClickPosition.X = -12345;
 
-			return base.OnButtonPressEvent(ev);
-		}
+                    this.ManageTwoButtonPress(ev.Button, ev.X / Zoom, ev.Y / Zoom);
+                }
+                else {
+                    _lastClickDate = DateTime.Now;
+                    _lastClickPosition.X = ev.X;
+                    _lastClickPosition.Y = ev.Y;
 
-		protected override bool OnButtonReleaseEvent(Gdk.EventButton ev) {
-			if(_nextPetriNet != null) {
-				CurrentPetriNet = _nextPetriNet;
-				this.Redraw();
-			}
-			else {
-				this.ManageButtonRelease(ev.Button, ev.X / Zoom, ev.Y / Zoom);
-			}
-			return base.OnButtonReleaseEvent(ev);
-		}
+                    var scrolled = _document.Window.Gui.ScrolledWindow;
 
-		protected override bool OnMotionNotifyEvent(Gdk.EventMotion ev) {
-			_nextPetriNet = null;
-			this.ManageMotion(ev.X / Zoom, ev.Y / Zoom);
-			return base.OnMotionNotifyEvent(ev);
-		}
-			
-		public void KeyPress(Gdk.EventKey ev)
-		{
-			this.OnKeyPressEvent(ev);
-		}
+                    if(ev.X >= 15 + scrolled.Hadjustment.Value && ev.X < _parentHierarchy[_parentHierarchy.Count - 1].extents.Width + 15 + scrolled.Hadjustment.Value
+                    && ev.Y >= 15 + scrolled.Vadjustment.Value && ev.Y < _parentHierarchy[_parentHierarchy.Count - 1].extents.Height + 15 + scrolled.Vadjustment.Value) {
+                        double currX = 15;
+                        foreach(var item in _parentHierarchy) {
+                            if(item.petriNet != null && ev.X - currX < item.extents.Width + pathSeparatorLenth + scrolled.Hadjustment.Value) {
+                                _nextPetriNet = item.petriNet;
+                                break;
+                            }
+                            currX += item.extents.Width + pathSeparatorLenth;
+                        }
+                    }
+                    else {
+                        this.ManageOneButtonPress(ev.Button, ev.X / Zoom, ev.Y / Zoom);
+                    }
+                }
+            }
 
-		protected abstract EntityDraw EntityDraw {
-			get;
-			set;
-		}
+            return base.OnButtonPressEvent(ev);
+        }
 
-		protected override bool OnExposeEvent(Gdk.EventExpose ev) {
-			base.OnExposeEvent(ev);
+        protected override bool OnButtonReleaseEvent(Gdk.EventButton ev)
+        {
+            if(_nextPetriNet != null) {
+                CurrentPetriNet = _nextPetriNet;
+                this.Redraw();
+            }
+            else {
+                this.ManageButtonRelease(ev.Button, ev.X / Zoom, ev.Y / Zoom);
+            }
+            return base.OnButtonReleaseEvent(ev);
+        }
 
-			using(Cairo.Context context = Gdk.CairoHelper.Create(this.GdkWindow)) {
-				context.Scale(this.Zoom, this.Zoom);
-				this.RenderInternal(context, CurrentPetriNet);
-			}
+        protected override bool OnMotionNotifyEvent(Gdk.EventMotion ev)
+        {
+            _nextPetriNet = null;
+            this.ManageMotion(ev.X / Zoom, ev.Y / Zoom);
+            return base.OnMotionNotifyEvent(ev);
+        }
 
-			return true;
-		}
+        public void KeyPress(Gdk.EventKey ev)
+        {
+            this.OnKeyPressEvent(ev);
+        }
 
-		protected void RenderInternal(Context context, PetriNet petriNet) {
-			_needsRedraw = false;
+        protected abstract EntityDraw EntityDraw {
+            get;
+            set;
+        }
 
-			var scrolled = _document.Window.Gui.ScrolledWindow;
+        protected override bool OnExposeEvent(Gdk.EventExpose ev)
+        {
+            base.OnExposeEvent(ev);
 
-			var extents = new PointD();
-			extents.X = Math.Max(petriNet.Size.X, Allocation.Size.Width / Zoom);
-			extents.Y = Math.Max(petriNet.Size.Y, Allocation.Size.Height / Zoom);
+            using(Cairo.Context context = Gdk.CairoHelper.Create(this.GdkWindow)) {
+                context.Scale(this.Zoom, this.Zoom);
+                this.RenderInternal(context, CurrentPetriNet);
+            }
 
-			context.LineWidth = 4;
-			context.MoveTo(0, 0);
-			context.LineTo(extents.X, 0);
-			context.LineTo(extents.X, extents.Y);
-			context.LineTo(0, extents.Y);
-			context.LineTo(0, 0);
+            return true;
+        }
 
-			context.SetSourceRGBA(1, 1, 1, 1);
-			context.Fill();
+        protected void RenderInternal(Context context, PetriNet petriNet)
+        {
+            _needsRedraw = false;
 
-			double minX = 0, minY = 0;
+            var scrolled = _document.Window.Gui.ScrolledWindow;
 
-			foreach(var t in petriNet.Transitions) {
-				if(t.Position.X + t.Width / 2 > minX)
-					minX = t.Position.X + t.Width / 2;
-				if(t.Position.Y > minY + t.Height / 2)
-					minY = t.Position.Y + t.Height / 2;
+            var extents = new PointD();
+            extents.X = Math.Max(petriNet.Size.X, Allocation.Size.Width / Zoom);
+            extents.Y = Math.Max(petriNet.Size.Y, Allocation.Size.Height / Zoom);
 
-				this.EntityDraw.Draw(t, context);
-			}
+            context.LineWidth = 4;
+            context.MoveTo(0, 0);
+            context.LineTo(extents.X, 0);
+            context.LineTo(extents.X, extents.Y);
+            context.LineTo(0, extents.Y);
+            context.LineTo(0, 0);
 
-			foreach(var s in petriNet.States) {
-				if(s.Position.X + s.Radius / 2 > minX)
-					minX = s.Position.X + s.Radius / 2;
-				if(s.Position.Y + s.Radius / 2 > minY)
-					minY = s.Position.Y + s.Radius / 2;
+            context.SetSourceRGBA(1, 1, 1, 1);
+            context.Fill();
 
-				this.EntityDraw.Draw(s, context);
-			}
+            double minX = 0, minY = 0;
 
-			foreach(var c in petriNet.Comments) {
-				if(c.Position.X + c.Size.X / 2 > minX)
-					minX = c.Position.X + c.Size.X / 2;
-				if(c.Position.Y + c.Size.Y / 2 > minY)
-					minY = c.Position.Y + c.Size.Y / 2;
+            foreach(var t in petriNet.Transitions) {
+                if(t.Position.X + t.Width / 2 > minX)
+                    minX = t.Position.X + t.Width / 2;
+                if(t.Position.Y > minY + t.Height / 2)
+                    minY = t.Position.Y + t.Height / 2;
 
-				this.EntityDraw.Draw(c, context);
-			}
+                this.EntityDraw.Draw(t, context);
+            }
 
-			{
-				context.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Normal);
-				context.SetFontSize(16);
+            foreach(var s in petriNet.States) {
+                if(s.Position.X + s.Radius / 2 > minX)
+                    minX = s.Position.X + s.Radius / 2;
+                if(s.Position.Y + s.Radius / 2 > minY)
+                    minY = s.Position.Y + s.Radius / 2;
 
-				string val = "";
-				PetriNet petri = CurrentPetriNet;
-				if(_parentHierarchy.Count == 0) {
-					pathSeparatorLenth = context.TextExtents(" / ").Width;
-					do {
-						ParentStruct pStruct = new ParentStruct();
-						pStruct.petriNet = petri;
-						string sep = petri.Parent == null ? "" : " / ";
-						pStruct.extents = context.TextExtents(sep + petri.Name);
-						val = sep + petri.Name + val;
-						_parentHierarchy.Insert(0, pStruct);
-						petri = petri.Parent;
-					} while(petri != null);
+                this.EntityDraw.Draw(s, context);
+            }
 
-					ParentStruct path = new ParentStruct();
-					path.petriNet = null;
-					path.extents = context.TextExtents(val);
-					_parentHierarchy.Add(path);
-				}
-				else {
-					do {
-						ParentStruct pStruct = new ParentStruct();
-						pStruct.petriNet = petri;
-						string sep = petri.Parent == null ? "" : " / ";
-						val = sep + petri.Name + val;
-						petri = petri.Parent;
-					} while(petri != null);
-				}
+            foreach(var c in petriNet.Comments) {
+                if(c.Position.X + c.Size.X / 2 > minX)
+                    minX = c.Position.X + c.Size.X / 2;
+                if(c.Position.Y + c.Size.Y / 2 > minY)
+                    minY = c.Position.Y + c.Size.Y / 2;
 
-				context.SetSourceRGBA(0.9, 0.9, 0.9, 1);
-				TextExtents ext = _parentHierarchy[_parentHierarchy.Count - 1].extents;
-				context.Rectangle((scrolled.Hadjustment.Value + 10) / Zoom, (scrolled.Vadjustment.Value + 10) / Zoom, (ext.Width + 10) / Zoom, (ext.Height + 10) / Zoom);
-				context.Fill();
+                this.EntityDraw.Draw(c, context);
+            }
 
-				context.MoveTo((scrolled.Hadjustment.Value + 15 - ext.XBearing) / Zoom, (scrolled.Vadjustment.Value + 15 - ext.YBearing) / Zoom);
+            {
+                context.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Normal);
+                context.SetFontSize(16);
 
-				context.SetFontSize(16 / Zoom);
-				context.SetSourceRGBA(0.0, 0.6, 0.2, 1);
+                string val = "";
+                PetriNet petri = CurrentPetriNet;
+                if(_parentHierarchy.Count == 0) {
+                    pathSeparatorLenth = context.TextExtents(" / ").Width;
+                    do {
+                        ParentStruct pStruct = new ParentStruct();
+                        pStruct.petriNet = petri;
+                        string sep = petri.Parent == null ? "" : " / ";
+                        pStruct.extents = context.TextExtents(sep + petri.Name);
+                        val = sep + petri.Name + val;
+                        _parentHierarchy.Insert(0, pStruct);
+                        petri = petri.Parent;
+                    } while(petri != null);
 
-				context.TextPath(val);
-				context.Fill();
-			}
+                    ParentStruct path = new ParentStruct();
+                    path.petriNet = null;
+                    path.extents = context.TextExtents(val);
+                    _parentHierarchy.Add(path);
+                }
+                else {
+                    do {
+                        ParentStruct pStruct = new ParentStruct();
+                        pStruct.petriNet = petri;
+                        string sep = petri.Parent == null ? "" : " / ";
+                        val = sep + petri.Name + val;
+                        petri = petri.Parent;
+                    } while(petri != null);
+                }
 
-			this.SpecializedDrawing(context);
+                context.SetSourceRGBA(0.9, 0.9, 0.9, 1);
+                TextExtents ext = _parentHierarchy[_parentHierarchy.Count - 1].extents;
+                context.Rectangle((scrolled.Hadjustment.Value + 10) / Zoom, (scrolled.Vadjustment.Value + 10) / Zoom, (ext.Width + 10) / Zoom, (ext.Height + 10) / Zoom);
+                context.Fill();
 
-			context.LineWidth = 4 / Zoom;
-			context.MoveTo(0, 0);
-			context.LineTo(extents.X, 0);
-			context.LineTo(extents.X, extents.Y);
-			context.LineTo(0, extents.Y);
-			context.LineTo(0, 0);
-			context.SetSourceRGBA(0.7, 0.7, 0.7, 1);
-			context.Stroke();
+                context.MoveTo((scrolled.Hadjustment.Value + 15 - ext.XBearing) / Zoom, (scrolled.Vadjustment.Value + 15 - ext.YBearing) / Zoom);
 
-			minX += 50;
-			minY += 50;
+                context.SetFontSize(16 / Zoom);
+                context.SetSourceRGBA(0.0, 0.6, 0.2, 1);
 
-			minX *= Zoom;
-			minY *= Zoom;
+                context.TextPath(val);
+                context.Fill();
+            }
 
-			minX += scrolled.Hadjustment.PageSize / 2;
-			minY += scrolled.Vadjustment.PageSize / 2;
+            this.SpecializedDrawing(context);
 
-			int prevX, prevY;
-			this.GetSizeRequest(out prevX, out prevY);
-			this.SetSizeRequest((int)minX, (int)minY);
-			petriNet.Size = new PointD(minX, minY);
-			if(Math.Abs(minX - prevX) > 10 || Math.Abs(minY - prevY) > 10)
-				this.RenderInternal(context, petriNet);
-		}
+            context.LineWidth = 4 / Zoom;
+            context.MoveTo(0, 0);
+            context.LineTo(extents.X, 0);
+            context.LineTo(extents.X, extents.Y);
+            context.LineTo(0, extents.Y);
+            context.LineTo(0, 0);
+            context.SetSourceRGBA(0.7, 0.7, 0.7, 1);
+            context.Stroke();
 
-		protected virtual void SpecializedDrawing(Cairo.Context context) {
+            minX += 50;
+            minY += 50;
 
-		}
+            minX *= Zoom;
+            minY *= Zoom;
 
-		public float Zoom {
-			get;
-			set;
-		}
+            minX += scrolled.Hadjustment.PageSize / 2;
+            minY += scrolled.Vadjustment.PageSize / 2;
 
-		public RootPetriNet RootPetriNet {
-			get {
-				return _document.PetriNet;
-			}
-		}
+            int prevX, prevY;
+            this.GetSizeRequest(out prevX, out prevY);
+            this.SetSizeRequest((int)minX, (int)minY);
+            petriNet.Size = new PointD(minX, minY);
+            if(Math.Abs(minX - prevX) > 10 || Math.Abs(minY - prevY) > 10)
+                this.RenderInternal(context, petriNet);
+        }
 
-		public virtual PetriNet CurrentPetriNet {
-			get {
-				return _editedPetriNet;
-			}
-			set {
-				_document.EditorController.EditedObject = null;
-				_editedPetriNet = value;
-				_parentHierarchy.Clear();
-				_nextPetriNet = null;
-				this.Redraw();
-			}
-		}
+        protected virtual void SpecializedDrawing(Cairo.Context context)
+        {
 
-		public static double Norm(PointD vec)
-		{
-			return Math.Sqrt(Math.Pow(vec.X, 2) + Math.Pow(vec.Y, 2));
-		}
+        }
 
-		public static double Norm(double x, double y)
-		{
-			return Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
-		}
+        public float Zoom {
+            get;
+            set;
+        }
 
-		public static PointD Normalized(PointD vec)
-		{
-			double norm = PetriView.Norm(vec);
-			if(norm < 1e-3) {
-				return new PointD(0, 0);
-			}
+        public RootPetriNet RootPetriNet {
+            get {
+                return _document.PetriNet;
+            }
+        }
 
-			return new PointD(vec.X / norm, vec.Y / norm);
-		}
+        public virtual PetriNet CurrentPetriNet {
+            get {
+                return _editedPetriNet;
+            }
+            set {
+                _document.EditorController.EditedObject = null;
+                _editedPetriNet = value;
+                _parentHierarchy.Clear();
+                _nextPetriNet = null;
+                this.Redraw();
+            }
+        }
 
-		public static PointD Normalized(double x, double y)
-		{
-			return PetriView.Normalized(new PointD(x, y));
-		}
+        public static double Norm(PointD vec)
+        {
+            return Math.Sqrt(Math.Pow(vec.X, 2) + Math.Pow(vec.Y, 2));
+        }
 
-		private struct ParentStruct {
-			public PetriNet petriNet;
-			public TextExtents extents;
-		}
+        public static double Norm(double x, double y)
+        {
+            return Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
+        }
 
-		protected Document _document;
+        public static PointD Normalized(PointD vec)
+        {
+            double norm = PetriView.Norm(vec);
+            if(norm < 1e-3) {
+                return new PointD(0, 0);
+            }
 
-		protected PetriNet _editedPetriNet;
-		bool _needsRedraw;
+            return new PointD(vec.X / norm, vec.Y / norm);
+        }
 
-		protected PointD _deltaClick;
-		protected PointD _originalPosition;
+        public static PointD Normalized(double x, double y)
+        {
+            return PetriView.Normalized(new PointD(x, y));
+        }
 
-		PointD _lastClickPosition;
-		System.DateTime _lastClickDate;
+        private struct ParentStruct
+        {
+            public PetriNet petriNet;
+            public TextExtents extents;
+        }
 
-		private PetriNet _nextPetriNet;
-		private double pathSeparatorLenth;
-		private List<ParentStruct> _parentHierarchy = new List<ParentStruct>();
-	}
+        protected Document _document;
+
+        protected PetriNet _editedPetriNet;
+        bool _needsRedraw;
+
+        protected PointD _deltaClick;
+        protected PointD _originalPosition;
+
+        PointD _lastClickPosition;
+        System.DateTime _lastClickDate;
+
+        private PetriNet _nextPetriNet;
+        private double pathSeparatorLenth;
+        private List<ParentStruct> _parentHierarchy = new List<ParentStruct>();
+    }
 }

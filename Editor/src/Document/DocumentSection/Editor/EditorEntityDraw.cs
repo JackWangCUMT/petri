@@ -25,206 +25,223 @@ using Cairo;
 
 namespace Petri
 {
-	public class EditorEntityDraw : EntityDraw
-	{
-		public EditorEntityDraw(EditorView editor) {
-			_editor = editor;
-		}
+    public class EditorEntityDraw : EntityDraw
+    {
+        public EditorEntityDraw(EditorView editor)
+        {
+            _editor = editor;
+        }
 
-		protected override void InitContextForBorder(Comment c, Context context) {
-			base.InitContextForBorder(c, context);
-			if(_editor.EntitySelected(c)) {
-				context.LineWidth = 2;
-			}
-			context.SetSourceRGBA(0.8, 0.6, 0.4, 1);
-		}
+        protected override void InitContextForBorder(Comment c, Context context)
+        {
+            base.InitContextForBorder(c, context);
+            if(_editor.EntitySelected(c)) {
+                context.LineWidth = 2;
+            }
+            context.SetSourceRGBA(0.8, 0.6, 0.4, 1);
+        }
 
-		protected override void DrawBorder(Comment c, Context context) {
-			base.DrawBorder(c, context);
-			if(_editor.EntitySelected(c)) {
-				PointD point = new PointD(c.Position.X - c.Size.X / 2 - 2, c.Position.Y - 2);
-				context.MoveTo(point);
-				point.X += 6;
-				context.LineTo(point);
-				point.Y += 6;
-				context.LineTo(point);
-				point.X -= 6;
-				context.LineTo(point);
-				point.Y -= 6;
-				context.LineTo(point);
+        protected override void DrawBorder(Comment c, Context context)
+        {
+            base.DrawBorder(c, context);
+            if(_editor.EntitySelected(c)) {
+                PointD point = new PointD(c.Position.X - c.Size.X / 2 - 2, c.Position.Y - 2);
+                context.MoveTo(point);
+                point.X += 6;
+                context.LineTo(point);
+                point.Y += 6;
+                context.LineTo(point);
+                point.X -= 6;
+                context.LineTo(point);
+                point.Y -= 6;
+                context.LineTo(point);
 
-				point.X = c.Position.X + c.Size.X / 2 - 7;
-				context.MoveTo(point);
-				point.X += 6;
-				context.LineTo(point);
-				point.Y += 6;
-				context.LineTo(point);
-				point.X -= 6;
-				context.LineTo(point);
-				point.Y -= 6;
-				context.LineTo(point);
-				context.Fill();
-			}
-		}
+                point.X = c.Position.X + c.Size.X / 2 - 7;
+                context.MoveTo(point);
+                point.X += 6;
+                context.LineTo(point);
+                point.Y += 6;
+                context.LineTo(point);
+                point.X -= 6;
+                context.LineTo(point);
+                point.Y -= 6;
+                context.LineTo(point);
+                context.Fill();
+            }
+        }
 
-		protected override void InitContextForBackground(State s, Context context) {
-			Color color = new Color(1, 1, 1, 1);
+        protected override void InitContextForBackground(State s, Context context)
+        {
+            Color color = new Color(1, 1, 1, 1);
 
-			if(_editor.RootPetriNet.Document.Conflicts(s)) {
-				if(s is PetriNet) {
-					color.R = 1;
-					color.G = 0.7;
-					color.B = 0.3;
-				}
-				else {
-					color.R = 1;
-					color.G = 0.6;
-					color.B = 0.6;
-				}
-			}
+            if(_editor.RootPetriNet.Document.Conflicts(s)) {
+                if(s is PetriNet) {
+                    color.R = 1;
+                    color.G = 0.7;
+                    color.B = 0.3;
+                }
+                else {
+                    color.R = 1;
+                    color.G = 0.6;
+                    color.B = 0.6;
+                }
+            }
 
-			context.SetSourceRGBA(color.R, color.G, color.B, color.A);
-		}
+            context.SetSourceRGBA(color.R, color.G, color.B, color.A);
+        }
 
-		protected override void InitContextForBorder(State s, Context context) {
-			Color color = new Color(0, 0, 0, 1);
-			double lineWidth = 3;
+        protected override void InitContextForBorder(State s, Context context)
+        {
+            Color color = new Color(0, 0, 0, 1);
+            double lineWidth = 3;
 
-			if(_editor.EntitySelected(s)) {
-				color.R = 1;
-			}
-			context.LineWidth = lineWidth;
-			context.SetSourceRGBA(color.R, color.G, color.B, color.A);
+            if(_editor.EntitySelected(s)) {
+                color.R = 1;
+            }
+            context.LineWidth = lineWidth;
+            context.SetSourceRGBA(color.R, color.G, color.B, color.A);
 
-			if(s == _editor.HoveredItem && _editor.CurrentAction == EditorView.EditorAction.CreatingTransition) {
-				lineWidth += 2;
-			}
+            if(s == _editor.HoveredItem && _editor.CurrentAction == EditorView.EditorAction.CreatingTransition) {
+                lineWidth += 2;
+            }
 
-			context.LineWidth = lineWidth;
-		}
-		protected override void InitContextForName(State s, Context context) {
-			base.InitContextForName(s, context);
-			if(_editor.EntitySelected(s)) {
-				context.SetSourceRGBA(1, 0, 0, 1);
-			}
-		}
+            context.LineWidth = lineWidth;
+        }
 
-		protected override double GetArrowScale(Transition t) {
-			if(_editor.EntitySelected(t)) {
-				return 18;
-			}
-			else {
-				return base.GetArrowScale(t);
-			}
-		}
-		protected override void InitContextForLine(Transition t, Context context) {
-			Color c = new Color(0.1, 0.6, 1, 1);
-			double lineWidth = 2;
+        protected override void InitContextForName(State s, Context context)
+        {
+            base.InitContextForName(s, context);
+            if(_editor.EntitySelected(s)) {
+                context.SetSourceRGBA(1, 0, 0, 1);
+            }
+        }
 
-			if(_editor.EntitySelected(t)) {
-				if(_editor.CurrentAction == EditorView.EditorAction.ChangingTransitionDestination || _editor.CurrentAction == EditorView.EditorAction.ChangingTransitionOrigin) {
-					c.R = 0.6;
-					c.G = 0.6;
-					c.B = 0.6;
-				}
-				else {
-					c.R = 0.3;
-					c.G = 0.8;
-					lineWidth += 2;
-				}
-			}
-			context.SetSourceRGBA(c.R, c.G, c.B, c.A);
-			context.LineWidth = lineWidth;
-		}
+        protected override double GetArrowScale(Transition t)
+        {
+            if(_editor.EntitySelected(t)) {
+                return 18;
+            }
+            else {
+                return base.GetArrowScale(t);
+            }
+        }
 
-		protected override void InitContextForBackground(Transition t, Context context) {
-			Color color = new Color(1, 1, 1, 1);
+        protected override void InitContextForLine(Transition t, Context context)
+        {
+            Color c = new Color(0.1, 0.6, 1, 1);
+            double lineWidth = 2;
 
-			if(_editor.RootPetriNet.Document.Conflicts(t)) {
-				color.R = 1;
-				color.G = 0.6;
-				color.B = 0.6;
-			}
+            if(_editor.EntitySelected(t)) {
+                if(_editor.CurrentAction == EditorView.EditorAction.ChangingTransitionDestination || _editor.CurrentAction == EditorView.EditorAction.ChangingTransitionOrigin) {
+                    c.R = 0.6;
+                    c.G = 0.6;
+                    c.B = 0.6;
+                }
+                else {
+                    c.R = 0.3;
+                    c.G = 0.8;
+                    lineWidth += 2;
+                }
+            }
+            context.SetSourceRGBA(c.R, c.G, c.B, c.A);
+            context.LineWidth = lineWidth;
+        }
 
-			context.SetSourceRGBA(color.R, color.G, color.B, color.A);
-		}
+        protected override void InitContextForBackground(Transition t, Context context)
+        {
+            Color color = new Color(1, 1, 1, 1);
 
-		protected override void DrawLine(Transition t, Context context) {
-			base.DrawLine(t, context);
+            if(_editor.RootPetriNet.Document.Conflicts(t)) {
+                color.R = 1;
+                color.G = 0.6;
+                color.B = 0.6;
+            }
 
-			if(_editor.EntitySelected(t) && !_editor.MultipleSelection) {
-				PointD direction = TransitionDirection(t);
+            context.SetSourceRGBA(color.R, color.G, color.B, color.A);
+        }
 
-				double radB = t.Before.Radius;
-				double radA = t.After.Radius;
+        protected override void DrawLine(Transition t, Context context)
+        {
+            base.DrawLine(t, context);
 
-				if(PetriView.Norm(direction) > radB) {
-					direction = PetriView.Normalized(direction);
-					PointD destination = TransitionDestination(t, direction);
+            if(_editor.EntitySelected(t) && !_editor.MultipleSelection) {
+                PointD direction = TransitionDirection(t);
 
-					PointD origin = TransitionOrigin(t);
-					direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
+                double radB = t.Before.Radius;
+                double radA = t.After.Radius;
 
-					context.Arc(origin.X + 5 * direction.X, origin.Y + 5 * direction.Y, 5, 0, 2 * Math.PI);
+                if(PetriView.Norm(direction) > radB) {
+                    direction = PetriView.Normalized(direction);
+                    PointD destination = TransitionDestination(t, direction);
 
-					PointD direction2 = new PointD(destination.X - t.Position.X, destination.Y - t.Position.Y);
-					direction2 = PetriView.Normalized(direction2);
-					context.Arc(destination.X - 5 * direction2.X, destination.Y - 5 * direction2.Y, 5, 0, 2 * Math.PI);
+                    PointD origin = TransitionOrigin(t);
+                    direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
 
-					context.Fill();
-				}
-			}
-		}
+                    context.Arc(origin.X + 5 * direction.X, origin.Y + 5 * direction.Y, 5, 0, 2 * Math.PI);
 
-		static public PointD GetOriginHandle(Transition t) {
-			PointD origin = TransitionOrigin(t);
-			PointD direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
+                    PointD direction2 = new PointD(destination.X - t.Position.X, destination.Y - t.Position.Y);
+                    direction2 = PetriView.Normalized(direction2);
+                    context.Arc(destination.X - 5 * direction2.X, destination.Y - 5 * direction2.Y, 5, 0, 2 * Math.PI);
 
-			return new PointD(origin.X + 5 * direction.X, origin.Y + 5 * direction.Y);
-		}
+                    context.Fill();
+                }
+            }
+        }
 
-		static public PointD GetDestinationHandle(Transition t) {
-			PointD direction = PetriView.Normalized(TransitionDirection(t));
-			PointD destination = TransitionDestination(t, direction);
+        static public PointD GetOriginHandle(Transition t)
+        {
+            PointD origin = TransitionOrigin(t);
+            PointD direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
 
-			PointD direction2 = new PointD(destination.X - t.Position.X, destination.Y - t.Position.Y);
-			direction2 = PetriView.Normalized(direction2);
+            return new PointD(origin.X + 5 * direction.X, origin.Y + 5 * direction.Y);
+        }
 
-			return new PointD(destination.X - 5 * direction2.X, destination.Y - 5 * direction2.Y);
-		}
+        static public PointD GetDestinationHandle(Transition t)
+        {
+            PointD direction = PetriView.Normalized(TransitionDirection(t));
+            PointD destination = TransitionDestination(t, direction);
 
-		static public bool IsOnOriginHandle(double x, double y, Entity e) {
-			if(!(e is Transition))
-				return false;
+            PointD direction2 = new PointD(destination.X - t.Position.X, destination.Y - t.Position.Y);
+            direction2 = PetriView.Normalized(direction2);
 
-			var pos = GetOriginHandle((Transition)e);
-			if(Math.Abs(x - pos.X) < 10.0 / 2 && Math.Abs(y - pos.Y) < 10.0 / 2) {
-				return true;
-			}
+            return new PointD(destination.X - 5 * direction2.X, destination.Y - 5 * direction2.Y);
+        }
 
-			return false;
-		}
+        static public bool IsOnOriginHandle(double x, double y, Entity e)
+        {
+            if(!(e is Transition))
+                return false;
 
-		static public bool IsOnDestinationHandle(double x, double y, Entity e) {
-			if(!(e is Transition))
-				return false;
+            var pos = GetOriginHandle((Transition)e);
+            if(Math.Abs(x - pos.X) < 10.0 / 2 && Math.Abs(y - pos.Y) < 10.0 / 2) {
+                return true;
+            }
 
-			var pos = GetDestinationHandle((Transition)e);
-			if(Math.Abs(x - pos.X) < 10.0 / 2 && Math.Abs(y - pos.Y) < 10.0 / 2) {
-				return true;
-			}
+            return false;
+        }
 
-			return false;
-		}
+        static public bool IsOnDestinationHandle(double x, double y, Entity e)
+        {
+            if(!(e is Transition))
+                return false;
 
-		protected override void InitContextForText(Transition t, Context context) {
-			base.InitContextForText(t, context);
-			if(_editor.EntitySelected(t) && (_editor.CurrentAction == EditorView.EditorAction.ChangingTransitionDestination || _editor.CurrentAction == EditorView.EditorAction.ChangingTransitionOrigin)) {
-				context.SetSourceRGBA(0.6, 0.6, 0.6, 1);
-			}
-		}
+            var pos = GetDestinationHandle((Transition)e);
+            if(Math.Abs(x - pos.X) < 10.0 / 2 && Math.Abs(y - pos.Y) < 10.0 / 2) {
+                return true;
+            }
 
-		private EditorView _editor;
-	}
+            return false;
+        }
+
+        protected override void InitContextForText(Transition t, Context context)
+        {
+            base.InitContextForText(t, context);
+            if(_editor.EntitySelected(t) && (_editor.CurrentAction == EditorView.EditorAction.ChangingTransitionDestination || _editor.CurrentAction == EditorView.EditorAction.ChangingTransitionOrigin)) {
+                context.SetSourceRGBA(0.6, 0.6, 0.6, 1);
+            }
+        }
+
+        private EditorView _editor;
+    }
 }
 

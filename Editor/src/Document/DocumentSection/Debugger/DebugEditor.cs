@@ -25,75 +25,78 @@ using Gtk;
 
 namespace Petri
 {
-	public class DebugEditor : PaneEditor {
-		public DebugEditor(Document doc, Entity selected) : base(doc, doc.Window.DebugGui.Editor) {
-			if(selected != null) {
-				var label = CreateLabel(0, Configuration.GetLocalized("Entity's ID:") + " " + selected.ID.ToString());
-				label.Markup = "<span color=\"grey\">" + label.Text + "</span>";
-			}
-			if(selected is Transition) {
-				CreateLabel(0, Configuration.GetLocalized("Transition's condition:"));
-				Entry e = CreateWidget<Entry>(true, 0, ((Transition)selected).Condition.MakeUserReadable());
-				e.IsEditable = false;
-			}
-			else if(selected is Action) {
-				CreateLabel(0, Configuration.GetLocalized("State's action:"));
-				Entry ee = CreateWidget<Entry>(true, 0, ((Action)selected).Function.MakeUserReadable());
-				ee.IsEditable = false;
+    public class DebugEditor : PaneEditor
+    {
+        public DebugEditor(Document doc, Entity selected) : base(doc, doc.Window.DebugGui.Editor)
+        {
+            if(selected != null) {
+                var label = CreateLabel(0, Configuration.GetLocalized("Entity's ID:") + " " + selected.ID.ToString());
+                label.Markup = "<span color=\"grey\">" + label.Text + "</span>";
+            }
+            if(selected is Transition) {
+                CreateLabel(0, Configuration.GetLocalized("Transition's condition:"));
+                Entry e = CreateWidget<Entry>(true, 0, ((Transition)selected).Condition.MakeUserReadable());
+                e.IsEditable = false;
+            }
+            else if(selected is Action) {
+                CreateLabel(0, Configuration.GetLocalized("State's action:"));
+                Entry ee = CreateWidget<Entry>(true, 0, ((Action)selected).Function.MakeUserReadable());
+                ee.IsEditable = false;
 
-				var active = CreateWidget<CheckButton>(false, 0, Configuration.GetLocalized("Breakpoint on the state"));
-				active.Active = _document.DebugController.Breakpoints.Contains((Action)selected);
-				active.Toggled += (sender, e) => {
-					if(_document.DebugController.Breakpoints.Contains((Action)selected)) {
-						_document.DebugController.RemoveBreakpoint((Action)selected);
-					}
-					else {
-						_document.DebugController.AddBreakpoint((Action)selected);
-					}
+                var active = CreateWidget<CheckButton>(false, 0, Configuration.GetLocalized("Breakpoint on the state"));
+                active.Active = _document.DebugController.Breakpoints.Contains((Action)selected);
+                active.Toggled += (sender, e) => {
+                    if(_document.DebugController.Breakpoints.Contains((Action)selected)) {
+                        _document.DebugController.RemoveBreakpoint((Action)selected);
+                    }
+                    else {
+                        _document.DebugController.AddBreakpoint((Action)selected);
+                    }
 
-					_document.Window.DebugGui.View.Redraw();
-				};
-			}
+                    _document.Window.DebugGui.View.Redraw();
+                };
+            }
 
-			CreateLabel(0, Configuration.GetLocalized("Evaluate expression:"));
-			Entry entry = CreateWidget<Entry>(true, 0, Configuration.GetLocalized("Expression"));
-			Evaluate = CreateWidget<Button>(false, 0, Configuration.GetLocalized("Evaluate"));
-			Evaluate.Sensitive = _document.DebugController != null &&_document.DebugController.Client.SessionRunning && (!_document.DebugController.Client.PetriRunning || _document.DebugController.Client.Pause);
+            CreateLabel(0, Configuration.GetLocalized("Evaluate expression:"));
+            Entry entry = CreateWidget<Entry>(true, 0, Configuration.GetLocalized("Expression"));
+            Evaluate = CreateWidget<Button>(false, 0, Configuration.GetLocalized("Evaluate"));
+            Evaluate.Sensitive = _document.DebugController != null && _document.DebugController.Client.SessionRunning && (!_document.DebugController.Client.PetriRunning || _document.DebugController.Client.Pause);
 
-			CreateLabel(0, Configuration.GetLocalized("Result:"));
+            CreateLabel(0, Configuration.GetLocalized("Result:"));
 
-			_buf = new TextBuffer(new TextTagTable());
-			_buf.Text = "";
-			var result = CreateWidget<TextView>(true, 0, _buf);
-			result.Editable = false;
-			result.WrapMode = WrapMode.Word;
+            _buf = new TextBuffer(new TextTagTable());
+            _buf.Text = "";
+            var result = CreateWidget<TextView>(true, 0, _buf);
+            result.Editable = false;
+            result.WrapMode = WrapMode.Word;
 
-			Evaluate.Clicked += (sender, ev) => {
-				if(_document.DebugController.Client.SessionRunning && (!_document.DebugController.Client.PetriRunning || _document.DebugController.Client.Pause)) {
-					string str = entry.Text;
-					try {
-						Cpp.Expression expr = Cpp.Expression.CreateFromString<Cpp.Expression>(str, _document.PetriNet);
-						_document.DebugController.Client.Evaluate(expr);
-					}
-					catch(Exception e) {
-						_buf.Text = e.Message;
-					}
-				}
-			};
+            Evaluate.Clicked += (sender, ev) => {
+                if(_document.DebugController.Client.SessionRunning && (!_document.DebugController.Client.PetriRunning || _document.DebugController.Client.Pause)) {
+                    string str = entry.Text;
+                    try {
+                        Cpp.Expression expr = Cpp.Expression.CreateFromString<Cpp.Expression>(str, _document.PetriNet);
+                        _document.DebugController.Client.Evaluate(expr);
+                    }
+                    catch(Exception e) {
+                        _buf.Text = e.Message;
+                    }
+                }
+            };
 
-			this.FormatAndShow();
-		}
+            this.FormatAndShow();
+        }
 
-		public void OnEvaluate(string result) {
-			_buf.Text = result;
-		}
+        public void OnEvaluate(string result)
+        {
+            _buf.Text = result;
+        }
 
-		public Button Evaluate {
-			get;
-			private set;
-		}
+        public Button Evaluate {
+            get;
+            private set;
+        }
 
-		TextBuffer _buf;
-	}
+        TextBuffer _buf;
+    }
 }
 

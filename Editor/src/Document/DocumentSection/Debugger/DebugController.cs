@@ -25,74 +25,83 @@ using System.Collections.Generic;
 
 namespace Petri
 {
-	public class DebugController : Controller
-	{
-		public DebugController(Document doc) {
-			Document = doc;
-			Client = new DebugClient(doc);
-			ActiveStates = new Dictionary<State, int>();
-			Breakpoints = new HashSet<Action>();
-			DebugEditor = new DebugEditor(doc, null);
-		}
+    public class DebugController : Controller
+    {
+        public DebugController(Document doc)
+        {
+            Document = doc;
+            Client = new DebugClient(doc);
+            ActiveStates = new Dictionary<State, int>();
+            Breakpoints = new HashSet<Action>();
+            DebugEditor = new DebugEditor(doc, null);
+        }
 
-		public Document Document {
-			get;
-			private set;
-		}
+        public Document Document {
+            get;
+            private set;
+        }
 
-		public DebugClient Client {
-			get;
-			private set;
-		}
+        public DebugClient Client {
+            get;
+            private set;
+        }
 
-		public DebugEditor DebugEditor {
-			get;
-			set;
-		}
+        public DebugEditor DebugEditor {
+            get;
+            set;
+        }
 
-		public Dictionary<State, int> ActiveStates {
-			get;
-			private set;
-		}
+        public Dictionary<State, int> ActiveStates {
+            get;
+            private set;
+        }
 
-		public HashSet<Action> Breakpoints {
-			get;
-			private set;
-		}
-			
-		public void AddBreakpoint(Action a) {
-			Breakpoints.Add(a);
-			Client.UpdateBreakpoints();
-		}
+        public HashSet<Action> Breakpoints {
+            get;
+            private set;
+        }
 
-		public void RemoveBreakpoint(Action a) {
-			Breakpoints.Remove(a);
-			Client.UpdateBreakpoints();
-		}
+        public void AddBreakpoint(Action a)
+        {
+            Breakpoints.Add(a);
+            Client.UpdateBreakpoints();
+        }
 
-		public override void ManageFocus(object focus) {
+        public void RemoveBreakpoint(Action a)
+        {
+            Breakpoints.Remove(a);
+            Client.UpdateBreakpoints();
+        }
 
-		}
+        public override void ManageFocus(object focus)
+        {
 
-		public override void UpdateMenuItems() {
-			Document.Window.EmbedItem.Sensitive = false;
-		}
+        }
 
-		public override void Copy() {
+        public override void UpdateMenuItems()
+        {
+            Document.Window.EmbedItem.Sensitive = false;
+        }
 
-		}
+        public override void Copy()
+        {
 
-		public override void Cut() {
+        }
 
-		}
+        public override void Cut()
+        {
 
-		public override void Paste() {
+        }
 
-		}
+        public override void Paste()
+        {
 
-		public override void SelectAll() {
+        }
 
-		}
-	}
+        public override void SelectAll()
+        {
+
+        }
+    }
 }
 
