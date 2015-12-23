@@ -1,0 +1,30 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetriMac", "PetriMac.csproj", "{B36436E7-0E17-4C0E-A664-E9E4B4D77942}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B36436E7-0E17-4C0E-A664-E9E4B4D77942}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B36436E7-0E17-4C0E-A664-E9E4B4D77942}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B36436E7-0E17-4C0E-A664-E9E4B4D77942}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B36436E7-0E17-4C0E-A664-E9E4B4D77942}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = None
+		$1.ResourceNamePolicy = FileFormatDefault
+		$0.TextStylePolicy = $2
+		$2.FileWidth = 120
+		$2.NoTabsAfterNonTabs = True
+		$2.EolMarker = Unix
+		$2.inheritsSet = VisualStudio
+		$2.inheritsScope = text/plain
+		$2.scope = text/plain
+	EndGlobalSection
+EndGlobal

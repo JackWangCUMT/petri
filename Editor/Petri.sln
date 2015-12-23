@@ -1,7 +1,7 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Petri", "Petri.csproj", "{B36436E7-0E17-4C0E-A664-E9E4B4D77942}"
+
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Petri", "Petri.csproj", "{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,22 +9,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B36436E7-0E17-4C0E-A664-E9E4B4D77942}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B36436E7-0E17-4C0E-A664-E9E4B4D77942}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B36436E7-0E17-4C0E-A664-E9E4B4D77942}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B36436E7-0E17-4C0E-A664-E9E4B4D77942}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		Policies = $0
-		$0.DotNetNamingPolicy = $1
-		$1.DirectoryNamespaceAssociation = None
-		$1.ResourceNamePolicy = FileFormatDefault
-		$0.TextStylePolicy = $2
-		$2.FileWidth = 120
-		$2.NoTabsAfterNonTabs = True
-		$2.EolMarker = Unix
-		$2.inheritsSet = VisualStudio
-		$2.inheritsScope = text/plain
-		$2.scope = text/plain
+		{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
