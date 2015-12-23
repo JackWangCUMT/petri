@@ -123,6 +123,7 @@ namespace Petri
             if(!Configuration._localizedStrings.ContainsKey(value)) {
                 Console.WriteLine("No localization found for locale \"" + Language + "\" and key \"" + value + "\"");
                 return value;
+                //return GetLocalized("__noloc__");
             }
             else {
                 return Configuration._localizedStrings[value];
