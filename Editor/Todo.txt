@@ -17,4 +17,6 @@ Exception when code generation fails
 
 Restart from last active states when fixing in debugger
 
-Keyboard shortcuts target
+Fix keyboard shortcuts target (copy paste and others)
+
+Headless petri net compiler

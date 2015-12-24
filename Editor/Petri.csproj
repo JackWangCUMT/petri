@@ -61,7 +61,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
     <Reference Include="Newtonsoft.Json">
-      <HintPath>Newtonsoft.Json.dll</HintPath>
+      <HintPath>src\Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -156,5 +156,8 @@
     <EmbeddedResource Include="Resources\transition.png">
       <LogicalName>transition</LogicalName>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Todo.txt" />
   </ItemGroup>
 </Project>

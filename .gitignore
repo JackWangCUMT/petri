@@ -3,11 +3,14 @@
 *.mdb
 *.config
 *~
+*.userprefs
 
 /Editor/obj
-/Editor/Petri.userprefs
 /Editor/MonoMac.dll
 /Editor/bin
+/Editor/packages
+/Editor/Petri.app
+/Editor/Petri.exe
 
 /Editor/Test/bin
 /Editor/Test/obj
