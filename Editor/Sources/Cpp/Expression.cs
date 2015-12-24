@@ -33,7 +33,7 @@ namespace Petri
         {
             public enum ExprType
             {
-Parenthesis,
+                Parenthesis,
                 Invocation,
                 Subscript,
                 Template,
@@ -66,16 +66,16 @@ Parenthesis,
                 }
             }
 
-            public static Expression CreateFromString(string s, Entity entity, bool allowComma = true)
+            public static Expression CreateFromString(string s, Entity entity = null, bool allowComma = true)
             {
                 return CreateFromString<Expression>(s, entity, allowComma);
             }
 
-            public static ExpressionType CreateFromString<ExpressionType>(string s, Entity entity, bool allowComma = true) where ExpressionType : Expression
+            public static ExpressionType CreateFromString<ExpressionType>(string s, Entity entity = null, bool allowComma = true) where ExpressionType : Expression
             {
                 string unexpanded = s;
 
-                string expanded = Expand(s, entity.Document.CppMacros);
+                string expanded = Expand(s, entity?.Document.CppMacros);
                 s = expanded;
 
                 var tup = Expression.Preprocess(s);
@@ -84,10 +84,10 @@ Parenthesis,
 
                 var exprList = tup.Item1.Split(new char[]{ ';' });
                 var parsedList = from e in exprList
-                                 select Expression.CreateFromPreprocessedString(e, entity, tup.Item2, true);
-				
+                                             select Expression.CreateFromPreprocessedString(e, entity, tup.Item2, true);
+
                 if(parsedList.Count() > 1) {
-                    result = new ExpressionList(entity.Document.Settings.Language, parsedList);
+                    result = new ExpressionList(entity?.Document.Settings.Language ?? Language.None, parsedList);
                 }
                 else {
                     var it = parsedList.GetEnumerator();
@@ -387,7 +387,7 @@ Parenthesis,
                                 var func = Expression.GetStringFromPreprocessed(e2.Substring(0, paramIndex), subexprs);
                                 tup = Expression.Preprocess(func);
                                 var funcScope = Parser.ExtractScope(Expression.GetStringFromPreprocessed(tup.Item1, subexprs));
-                                Cpp.Method m = (entity.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
+                                Cpp.Method m = (entity?.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
                                     return (ff is Cpp.Method) && ff.Parameters.Count == param.Count && funcScope.Item2 == ff.Name && funcScope.Item1.Equals(ff.Enclosing);
                                 })) as Cpp.Method;
 
@@ -395,13 +395,13 @@ Parenthesis,
                                     throw new Exception(Configuration.GetLocalized("No method match the specified expression ({0}).", GetStringFromPreprocessed(s, subexprs)));
                                 }
 
-                                return new MethodInvocation(entity.Document.Settings.Language, m, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), foundOperator == Cpp.Operator.Name.SelectionPtr, param.ToArray());
+                                return new MethodInvocation(entity?.Document.Settings.Language ?? Language.None, m, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), foundOperator == Cpp.Operator.Name.SelectionPtr, param.ToArray());
                             }
 
-                            return new BinaryExpression(entity.Document.Settings.Language, foundOperator, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), Expression.CreateFromPreprocessedString(e2, entity, subexprs, true));
+                            return new BinaryExpression(entity?.Document.Settings.Language ?? Language.None, foundOperator, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), Expression.CreateFromPreprocessedString(e2, entity, subexprs, true));
                         }
                         else if(prop.type == Petri.Cpp.Operator.Type.PrefixUnary) {
-                            return new UnaryExpression(entity.Document.Settings.Language, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length), entity, subexprs, true));
+                            return new UnaryExpression(entity?.Document.Settings.Language ?? Language.None, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length), entity, subexprs, true));
                         }
                         else if(prop.type == Petri.Cpp.Operator.Type.SuffixUnary) {
                             if(foundOperator == Petri.Cpp.Operator.Name.FunCall) {
@@ -419,7 +419,7 @@ Parenthesis,
                                 var func = Expression.GetStringFromPreprocessed(s.Substring(0, paramIndex), subexprs);
                                 tup = Expression.Preprocess(func);
                                 var funcScope = Parser.ExtractScope(Expression.GetStringFromPreprocessed(tup.Item1, subexprs));
-                                Cpp.Function f = entity.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
+                                Cpp.Function f = entity?.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
                                     return ff.Parameters.Count == param.Count && funcScope.Item2 == ff.Name && funcScope.Item1.Equals(ff.Enclosing);
                                 });
 							
@@ -427,9 +427,9 @@ Parenthesis,
                                     throw new Exception(Configuration.GetLocalized("No function match the specified expression ({0}).", GetStringFromPreprocessed(s, subexprs)));
                                 }
 							
-                                return new FunctionInvocation(entity.Document.Settings.Language, f, param.ToArray());
+                                return new FunctionInvocation(entity?.Document.Settings.Language ?? Language.None, f, param.ToArray());
                             }
-                            return new UnaryExpression(entity.Document.Settings.Language, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(0, index), entity, subexprs, true));
+                            return new UnaryExpression(entity?.Document.Settings.Language ?? Language.None, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(0, index), entity, subexprs, true));
                         }
                     }
                 }
@@ -488,7 +488,7 @@ Parenthesis,
 
             private static MethodInvocation CreateInvocation(bool indirection, List<string> invocation, Entity entity)
             {
-                var func = Expand(invocation[1], entity.Document.CppMacros);
+                var func = Expand(invocation[1], entity?.Document.CppMacros);
                 func = Parser.RemoveParenthesis(func);
 
                 int index = func.IndexOf("(");
@@ -500,7 +500,7 @@ Parenthesis,
                 foreach(var ss in argsList) {
                     exprList.Add(Expression.CreateFromString<Expression>(Parser.RemoveParenthesis(ss), entity));
                 }
-                Cpp.Method m = (entity.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
+                Cpp.Method m = (entity?.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
                     return (ff is Method) && ff.Parameters.Count == argsList.Count && tup.Item2 == ff.Name && tup.Item1.Equals(ff.Enclosing);
                 })) as Method;
 
@@ -508,7 +508,7 @@ Parenthesis,
                     throw new Exception(Configuration.GetLocalized("No method match the specified expression."));
                 }
 
-                return new MethodInvocation(entity.Document.Settings.Language, m, Expression.CreateFromString<Expression>(invocation[0], entity), indirection, exprList.ToArray());
+                return new MethodInvocation(entity?.Document.Settings.Language ?? Language.None, m, Expression.CreateFromString<Expression>(invocation[0], entity), indirection, exprList.ToArray());
             }
 
             protected static string Parenthesize(Expression parent, Expression child, string representation)
@@ -1072,13 +1072,13 @@ Parenthesis,
             public override string MakeCpp()
             {
                 return String.Join(";\n", from e in Expressions
-                                          select e.MakeCpp());
+                                                      select e.MakeCpp());
             }
 
             public override string MakeUserReadable()
             {
                 return String.Join("; ", from e in Expressions
-                                         select e.MakeUserReadable());
+                                                     select e.MakeUserReadable());
             }
 
             public override List<LiteralExpression> GetLiterals()

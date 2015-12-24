@@ -89,8 +89,8 @@ namespace Petri
                 bool verbose = false;
                 int arch = 0;
                 var used = new bool[args.Length];
-                used[0] = true;
                 used.Initialize();
+                used[0] = true;
                 for(int i = 0; i < args.Length; ++i) {
                     if(args[i] == "--arch") {
                         if(i < args.Length - 1) {
@@ -150,7 +150,7 @@ namespace Petri
                     bool forceGeneration = false;
                     if(!generate && compile) {
                         if(!System.IO.File.Exists(cppPath)
-                        || System.IO.File.GetLastWriteTime(cppPath) < System.IO.File.GetLastWriteTime(document.Path)) {
+                           || System.IO.File.GetLastWriteTime(cppPath) < System.IO.File.GetLastWriteTime(document.Path)) {
                             generate = true;
                             forceGeneration = true;
                         }
@@ -227,8 +227,8 @@ namespace Petri
         public static void OpenDocument()
         {
             var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Open Petri Net…"), null,
-                FileChooserAction.Open,
-                new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+                         FileChooserAction.Open,
+                         new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
                     Configuration.GetLocalized("Open"), ResponseType.Accept
                 });
 
