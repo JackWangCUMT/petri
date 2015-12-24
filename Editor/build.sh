@@ -13,5 +13,10 @@ mdtool build -t:Clean "$dir"/Petri.sln
     chmod +x "$dir"/clean.sh
 fi
 
-mdtool build "$dir"/Petri.sln
+configuration="Release"
+if [[ $# = 1 ]]; then
+    configuration="Debug"
+fi
+
+mdtool build -c:"$configuration" "$dir"/Petri.sln
 
