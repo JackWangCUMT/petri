@@ -31,12 +31,6 @@ namespace TestPetri
         }
 
         [Test()]
-        public void TestThatFails()
-        {
-            Assert.AreEqual("expected", "actual");
-        }
-
-        [Test()]
         public void TestThatSucceeds()
         {
             Assert.AreEqual("expected", "expected");
@@ -45,19 +39,9 @@ namespace TestPetri
         [Test()]
         public void TestThatThrows1()
         {
-            Assert.Throws(typeof(Exception), () => { throw new Exception("message");} );
-        }
-
-        [Test()]
-        public void TestThatThrows2()
-        {
-            throw new Exception("message");
-        }
-
-        [Test()]
-        public void TestThatDoesntCompile()
-        {
-            arg!
+            Assert.Throws(typeof(Exception), () => {
+                throw new Exception("message");
+            });
         }
     }
 }
