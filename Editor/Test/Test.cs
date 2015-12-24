@@ -53,6 +53,12 @@ namespace TestPetri
         {
             throw new Exception("message");
         }
+
+        [Test()]
+        public void TestThatDoesntCompile()
+        {
+            arg!
+        }
     }
 }
 
