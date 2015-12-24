@@ -6,11 +6,12 @@
 *.userprefs
 
 /Editor/obj
-/Editor/MonoMac.dll
 /Editor/bin
 /Editor/packages
 /Editor/Petri.app
 /Editor/Petri.exe
+/Editor/*.dll
+/Editor/Projects/obj
 
 /Editor/Test/bin
 /Editor/Test/obj

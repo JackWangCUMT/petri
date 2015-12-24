@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>.</OutputPath>
+    <OutputPath>..</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -36,7 +36,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
-    <OutputPath>.</OutputPath>
+    <OutputPath>..</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <StartupObject>Statechart.MainClass</StartupObject>
@@ -67,17 +67,19 @@
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
+    <Compile Include="..\Sources\Application\MacMain.cs">
+      <Link>MacMain.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\Info.plist">
+      <Link>Info.plist</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="Petri.csproj">
       <Project>{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}</Project>
       <Name>Petri</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <BundleResource Include="Resources\Info.plist" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="src\Application\MacMain.cs">
-      <Link>MacMain.cs</Link>
-    </Compile>
   </ItemGroup>
 </Project>

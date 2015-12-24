@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Petri", "Petri.csproj", "{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Petri", "Projects\Petri.csproj", "{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetriMac", "PetriMac.csproj", "{B36436E7-0E17-4C0E-A664-E9E4B4D77942}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetriMac", "Projects\PetriMac.csproj", "{B36436E7-0E17-4C0E-A664-E9E4B4D77942}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{B8412830-6539-4240-91E6-E9E3CA1E160E}"
 EndProject
