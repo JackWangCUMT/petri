@@ -2,16 +2,19 @@
 
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [ ! -f "$dir"/clean.sh ]; then
-    echo '#!/bin/bash
+echo '#!/bin/bash
 
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-mdtool build -t:Clean "$dir"/Petri.sln
+configuration="Release"
+if [[ $# = 1 ]]; then
+    configuration="Debug"
+fi
+
+mdtool build -t:Clean -c:"$configuration" "$dir"/Petri.sln
 ' > "$dir"/clean.sh
 
-    chmod +x "$dir"/clean.sh
-fi
+chmod +x "$dir"/clean.sh
 
 configuration="Release"
 if [[ $# = 1 ]]; then
