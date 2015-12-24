@@ -7,11 +7,13 @@
     <ProjectGuid>{B36436E7-0E17-4C0E-A664-E9E4B4D77942}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Petri</RootNamespace>
-    <StartupObject>Petri.MainClass</StartupObject>
+    <StartupObject>PetriMac.MacMain</StartupObject>
     <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
     <AssemblyName>Petri</AssemblyName>
     <SuppressXamMacUpsell>True</SuppressXamMacUpsell>
     <SuppressXamMacMigration>True</SuppressXamMacMigration>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,6 +32,7 @@
     <IncludeMonoRuntime>false</IncludeMonoRuntime>
     <UseRefCounting>false</UseRefCounting>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Profiling>false</Profiling>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -45,129 +48,18 @@
     <ConsolePause>false</ConsolePause>
     <UseRefCounting>false</UseRefCounting>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Profiling>false</Profiling>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
     <Reference Include="MonoMac" />
-    <Reference Include="atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
-    <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="Mono.Cairo" />
-    <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
-    <Reference Include="Mono.Posix" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System" />
-    <Reference Include="System.Windows" />
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="pango-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
-    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
-    <Folder Include="src\" />
-    <Folder Include="src\Document\" />
-    <Folder Include="src\CodeGen\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Todo.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <BundleResource Include="Info.plist" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="src\Application\Configuration.cs" />
-    <Compile Include="src\Application\IgeMacMenuGlobal.cs" />
-    <Compile Include="src\Application\Program.cs" />
-    <Compile Include="src\Cpp\Cpp.cs" />
-    <Compile Include="src\Cpp\Expression.cs" />
-    <Compile Include="src\Cpp\Function.cs" />
-    <Compile Include="src\Cpp\Operator.cs" />
-    <Compile Include="src\Cpp\Parser.cs" />
-    <Compile Include="src\Cpp\Type.cs" />
-    <Compile Include="src\Model\Action.cs" />
-    <Compile Include="src\Model\Entity.cs" />
-    <Compile Include="src\Model\ExitPoint.cs" />
-    <Compile Include="src\Model\InnerPetriNet.cs" />
-    <Compile Include="src\Model\PetriNet.cs" />
-    <Compile Include="src\Model\RootPetriNet.cs" />
-    <Compile Include="src\Model\State.cs" />
-    <Compile Include="src\Model\Transition.cs" />
-    <Compile Include="src\Cpp\FunctionInvocation.cs" />
-    <Compile Include="src\Document\CppCompiler.cs" />
-    <Compile Include="src\Document\Document.cs" />
-    <Compile Include="src\Document\DocumentSettings.cs" />
-    <Compile Include="src\Document\HeadersManager.cs" />
-    <Compile Include="src\Document\MainWindow.cs" />
-    <Compile Include="src\Document\UndoManager.cs" />
-    <Compile Include="src\Document\DocumentSection\Controller.cs" />
-    <Compile Include="src\Document\DocumentSection\EntityDraw.cs" />
-    <Compile Include="src\Document\DocumentSection\Gui.cs" />
-    <Compile Include="src\Document\DocumentSection\PetriView.cs" />
-    <Compile Include="src\Document\DocumentSection\Debugger\DebugController.cs" />
-    <Compile Include="src\Document\DocumentSection\Debugger\DebugEntityDraw.cs" />
-    <Compile Include="src\Document\DocumentSection\Debugger\DebugGui.cs">
-      <LogicalName>fix</LogicalName>
-    </Compile>
-    <Compile Include="src\Document\DocumentSection\Debugger\DebugView.cs" />
-    <Compile Include="src\Document\DocumentSection\Editor\EditorController.cs" />
-    <Compile Include="src\Document\DocumentSection\Editor\EditorEntityDraw.cs" />
-    <Compile Include="src\Document\DocumentSection\Editor\EditorGui.cs" />
-    <Compile Include="src\Document\DocumentSection\Editor\EditorView.cs" />
-    <Compile Include="src\Document\DocumentSection\Editor\EntityEditor.cs" />
-    <Compile Include="src\Model\Comment.cs" />
-    <Compile Include="src\Document\DocumentSection\RenderView.cs" />
-    <Compile Include="src\Document\DocumentSection\RenderEntityDraw.cs" />
-    <Compile Include="src\Document\MacrosManager.cs" />
-    <Compile Include="src\Document\DocumentSection\Debugger\DebugEditor.cs" />
-    <Compile Include="src\Document\DocumentSection\PaneEditor.cs" />
-    <Compile Include="src\Document\HeadlessDocument.cs" />
-    <Compile Include="src\Document\DocumentSettingsEditor.cs" />
-    <Compile Include="src\Cpp\Enum.cs" />
-    <Compile Include="src\Document\DocumentSection\Editor\Find.cs" />
-    <Compile Include="src\CodeGen\CodeGen.cs" />
-    <Compile Include="src\CodeGen\PetriGen.cs" />
-    <Compile Include="src\CodeGen\CFamilyCodeGen.cs" />
-    <Compile Include="src\CodeGen\CppPetriGen.cs" />
-    <Compile Include="src\CodeGen\CPetriGen.cs" />
-    <Compile Include="src\Document\DocumentSection\Debugger\DebugClient.cs" />
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\cpp.png">
-      <LogicalName>cpp</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\bug.png">
-      <LogicalName>bug</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\build.png">
-      <LogicalName>build</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\fix.png">
-      <LogicalName>fix</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\action.png">
-      <LogicalName>action</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\arrow.png">
-      <LogicalName>arrow</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\comment.png">
-      <LogicalName>comment</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\transition.png">
-      <LogicalName>transition</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\fr.xml">
-      <LogicalName>fr.lang</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\en.xml">
-      <LogicalName>en.lang</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
@@ -177,4 +69,18 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <ProjectReference Include="Petri.csproj">
+      <Project>{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}</Project>
+      <Name>Petri</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Resources\Info.plist" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\Application\MacMain.cs">
+      <Link>MacMain.cs</Link>
+    </Compile>
+  </ItemGroup>
 </Project>
