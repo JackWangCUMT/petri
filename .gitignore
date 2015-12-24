@@ -12,6 +12,7 @@
 /Editor/Petri.exe
 /Editor/*.dll
 /Editor/Projects/obj
+/Editor/Todo.txt
 
 /Editor/Test/bin
 /Editor/Test/obj
