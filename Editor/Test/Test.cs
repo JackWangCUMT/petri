@@ -19,13 +19,15 @@ namespace TestPetri
         }
 
         [TestFixtureSetUp()]
-        public void FixtureSetUp()
+        public void TestFixtureSetUp()
         {
+            Console.WriteLine("TestFixtureSetUp");
         }
 
         [TestFixtureTearDown()]
-        public void FixtureTearDown()
+        public void TestFixtureTearDown()
         {
+            Console.WriteLine("TestFixtureTearDown");
         }
 
         [Test()]
@@ -41,10 +43,9 @@ namespace TestPetri
         }
 
         [Test()]
-        [ExpectedException(typeof(Exception))]
         public void TestThatThrows1()
         {
-            throw new Exception("message");
+            Assert.Throws(typeof(Exception), () => { throw new Exception("message");} );
         }
 
         [Test()]
