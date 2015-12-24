@@ -24,10 +24,12 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.rems4e.petri</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>1.1</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>fr_FR</string>
+	<key>CFBundleName</key>
+	<string>Petri</string>
 </dict>
 </plist>
