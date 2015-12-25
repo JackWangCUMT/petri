@@ -143,6 +143,14 @@ namespace Petri
                     Console.Error.WriteLine("The path to the Petri document must be specified as the last program argument!");
                     return PrintUsage();
                 }
+
+                for(int i = 0; i < args.Length - 1; ++i) {
+                    if(!used[i]) {
+                        Console.Error.WriteLine("Invalid argument \"" + args[i] + "\"");
+                        return PrintUsage();
+                    }
+                }
+
                 string path = args[args.Length - 1];
 
                 if(!compile && !generate) {
