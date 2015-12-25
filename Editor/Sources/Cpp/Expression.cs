@@ -150,7 +150,9 @@ namespace Petri
                 s = Parser.RemoveParenthesis(s.Trim()).Trim();
                 var subexprs = new List<Tuple<ExprType, string>>();
 
-                var findName = new Regex("(" + Parser.NamePattern + ")?.*");
+                string namePattern = Parser.NamePattern;
+                namePattern = namePattern.Substring(0, namePattern.Length - 1) + "\\s*)?.*";
+                var findName = new Regex(namePattern);
                 var findNumber = new Regex("(" + Parser.NumberPattern + ")?.*");
 
                 var nesting = new Stack<Tuple<ExprType, int>>();
@@ -183,6 +185,7 @@ namespace Petri
                     switch(s[i]) {
                     case '(':
                         bool special = false;
+                        // FIXME: bug
                         if(i > 0 && s[i - 1] == '@') {
                             // It is a call operator invocation
                             special = true;
