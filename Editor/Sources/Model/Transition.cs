@@ -51,7 +51,7 @@ namespace Petri
             base.Position = new PointD(0, 0);
             this.ShiftAmplitude = PetriView.Norm(Direction);
 
-            this.Condition = Cpp.Expression.CreateFromString<Cpp.Expression>("true", this);
+            this.Condition = Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>("true", this);
 
             UpdatePrivate();
         }
@@ -75,11 +75,11 @@ namespace Petri
         private void TrySetCondition(string s)
         {
             try {
-                Condition = Cpp.Expression.CreateFromString<Cpp.Expression>(s, this);
+                Condition = Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>(s, this);
             }
             catch(Exception) {
                 Document.Conflicting.Add(this);
-                Condition = Cpp.LiteralExpression.CreateFromString(s, this);
+                Condition = Cpp.LiteralExpression.CreateFromStringAndEntity(s, this);
             }
         }
 

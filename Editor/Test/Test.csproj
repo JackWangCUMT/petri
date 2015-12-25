@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B8412830-6539-4240-91E6-E9E3CA1E160E}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Test</RootNamespace>
+    <RootNamespace>TestPetri</RootNamespace>
     <AssemblyName>Test</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <ReleaseVersion>1.1</ReleaseVersion>
@@ -16,7 +16,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin/Debug</OutputPath>
+    <OutputPath>bin\Debug</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin/Release</OutputPath>
+    <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -37,7 +37,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestCpp.cs" />
+    <Compile Include="Cpp\TestLiterals.cs" />
+    <Compile Include="Cpp\TestPrecedence.cs" />
+    <Compile Include="Cpp\Utility.cs" />
+    <Compile Include="Cpp\TestFunctions.cs" />
+    <Compile Include="Cpp\TestExpressionToString.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -48,5 +52,8 @@
       <Project>{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}</Project>
       <Name>Petri</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Cpp\" />
   </ItemGroup>
 </Project>

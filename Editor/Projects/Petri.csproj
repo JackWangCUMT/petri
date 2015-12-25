@@ -270,5 +270,6 @@
     <Compile Include="..\Sources\Model\Transition.cs">
       <Link>Sources\Model\Transition.cs</Link>
     </Compile>
+    <Compile Include="Sources\Cpp\Scope.cs" />
   </ItemGroup>
 </Project>

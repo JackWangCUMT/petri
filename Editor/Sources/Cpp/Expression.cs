@@ -66,16 +66,26 @@ namespace Petri
                 }
             }
 
-            public static Expression CreateFromString(string s, Entity entity = null, bool allowComma = true)
+            public static Expression CreateFromStringAndEntity(string s, Entity entity, bool allowComma = true)
             {
-                return CreateFromString<Expression>(s, entity, allowComma);
+                return CreateFromStringAndEntity<Expression>(s, entity, allowComma);
             }
 
-            public static ExpressionType CreateFromString<ExpressionType>(string s, Entity entity = null, bool allowComma = true) where ExpressionType : Expression
+            public static Expression CreateFromString(string s, Language language = Language.None, IEnumerable<Cpp.Function> functions = null, Dictionary<string, string> macros = null, bool allowComma = true)
+            {
+                return CreateFromString<Expression>(s, language, functions, macros, allowComma);
+            }
+
+            public static ExpressionType CreateFromStringAndEntity<ExpressionType>(string s, Entity entity, bool allowComma = true) where ExpressionType : Expression
+            {
+                return CreateFromString<ExpressionType>(s, entity?.Document.Settings.Language ?? Language.None, entity?.Document.AllFunctions, entity?.Document.CppMacros, allowComma);
+            }
+
+            public static ExpressionType CreateFromString<ExpressionType>(string s, Language language = Language.None, IEnumerable<Cpp.Function> functions = null, Dictionary<string, string> macros = null, bool allowComma = true) where ExpressionType : Expression
             {
                 string unexpanded = s;
 
-                string expanded = Expand(s, entity?.Document.CppMacros);
+                string expanded = Expand(s, macros);
                 s = expanded;
 
                 var tup = Expression.Preprocess(s);
@@ -84,10 +94,10 @@ namespace Petri
 
                 var exprList = tup.Item1.Split(new char[]{ ';' });
                 var parsedList = from e in exprList
-                                             select Expression.CreateFromPreprocessedString(e, entity, tup.Item2, true);
+                                             select Expression.CreateFromPreprocessedString(e, language, functions, macros, tup.Item2, true);
 
                 if(parsedList.Count() > 1) {
-                    result = new ExpressionList(entity?.Document.Settings.Language ?? Language.None, parsedList);
+                    result = new ExpressionList(language, parsedList);
                 }
                 else {
                     var it = parsedList.GetEnumerator();
@@ -310,7 +320,7 @@ namespace Petri
                 return true;
             }
 
-            protected static Expression CreateFromPreprocessedString(string s, Entity entity, List<Tuple<ExprType, string>> subexprs, bool allowComma)
+            protected static Expression CreateFromPreprocessedString(string s, Language language, IEnumerable<Cpp.Function> functions, Dictionary<string, string> macros, List<Tuple<ExprType, string>> subexprs, bool allowComma)
             {
                 if(Regex.Match(s, "^@[0-9]+@$").Success) {
                     int nb = int.Parse(s.Substring(1, s.Length - 2));
@@ -373,68 +383,26 @@ namespace Petri
 
                             // Method call
                             if(foundOperator == Petri.Cpp.Operator.Name.SelectionRef || foundOperator == Petri.Cpp.Operator.Name.SelectionPtr) {
-                                int paramIndex = e2.Substring(0, e2.LastIndexOf("@")).LastIndexOf("@");
-                                var args = Parser.RemoveParenthesis(Expression.GetStringFromPreprocessed(e2.Substring(paramIndex, e2.Length - paramIndex - 2) + "()", subexprs));
-                                var tup = Expression.Preprocess(args);
-                                var argsList = tup.Item1.Split(new string[] { Cpp.Operator.Properties[Cpp.Operator.Name.Comma].lexed }, StringSplitOptions.None);
-                                var param = new List<Expression>();
-                                if(tup.Item1.Length > 0) {
-                                    foreach(var a in argsList) {
-                                        param.Add(Expression.CreateFromPreprocessedString(a, entity, tup.Item2, false));
-                                    }
-                                }
-
-                                var func = Expression.GetStringFromPreprocessed(e2.Substring(0, paramIndex), subexprs);
-                                tup = Expression.Preprocess(func);
-                                var funcScope = Parser.ExtractScope(Expression.GetStringFromPreprocessed(tup.Item1, subexprs));
-                                Cpp.Method m = (entity?.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
-                                    return (ff is Cpp.Method) && ff.Parameters.Count == param.Count && funcScope.Item2 == ff.Name && funcScope.Item1.Equals(ff.Enclosing);
-                                })) as Cpp.Method;
-
-                                if(m == null) {
-                                    throw new Exception(Configuration.GetLocalized("No method match the specified expression ({0}).", GetStringFromPreprocessed(s, subexprs)));
-                                }
-
-                                return new MethodInvocation(entity?.Document.Settings.Language ?? Language.None, m, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), foundOperator == Cpp.Operator.Name.SelectionPtr, param.ToArray());
+                                string that = Expression.GetStringFromPreprocessed(e1, subexprs);
+                                string invocation = Expression.GetStringFromPreprocessed(e2, subexprs);
+                                return CreateMethodInvocation(foundOperator == Cpp.Operator.Name.SelectionPtr, new List<String>{that, invocation}, language, functions, macros); 
                             }
 
-                            return new BinaryExpression(entity?.Document.Settings.Language ?? Language.None, foundOperator, Expression.CreateFromPreprocessedString(e1, entity, subexprs, true), Expression.CreateFromPreprocessedString(e2, entity, subexprs, true));
+                            return new BinaryExpression(language, foundOperator, Expression.CreateFromPreprocessedString(e1, language, functions, macros, subexprs, true), Expression.CreateFromPreprocessedString(e2, language, functions, macros, subexprs, true));
                         }
                         else if(prop.type == Petri.Cpp.Operator.Type.PrefixUnary) {
-                            return new UnaryExpression(entity?.Document.Settings.Language ?? Language.None, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length), entity, subexprs, true));
+                            return new UnaryExpression(language, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length), language, functions, macros, subexprs, true));
                         }
                         else if(prop.type == Petri.Cpp.Operator.Type.SuffixUnary) {
                             if(foundOperator == Petri.Cpp.Operator.Name.FunCall) {
-                                int paramIndex = s.Substring(0, s.Substring(0, index).LastIndexOf("@")).LastIndexOf("@");
-                                var args = Parser.RemoveParenthesis(Expression.GetStringFromPreprocessed(s.Substring(paramIndex, index - paramIndex) + "()", subexprs));
-                                var tup = Expression.Preprocess(args);
-                                var argsList = tup.Item1.Split(new string[] { Cpp.Operator.Properties[Cpp.Operator.Name.Comma].lexed }, StringSplitOptions.None);
-                                var param = new List<Expression>();
-                                if(tup.Item1.Length > 0) {
-                                    foreach(var a in argsList) {
-                                        param.Add(Expression.CreateFromPreprocessedString(a, entity, tup.Item2, false));
-                                    }
-                                }
-
-                                var func = Expression.GetStringFromPreprocessed(s.Substring(0, paramIndex), subexprs);
-                                tup = Expression.Preprocess(func);
-                                var funcScope = Parser.ExtractScope(Expression.GetStringFromPreprocessed(tup.Item1, subexprs));
-                                Cpp.Function f = entity?.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
-                                    return ff.Parameters.Count == param.Count && funcScope.Item2 == ff.Name && funcScope.Item1.Equals(ff.Enclosing);
-                                });
-							
-                                if(f == null) {
-                                    throw new Exception(Configuration.GetLocalized("No function match the specified expression ({0}).", GetStringFromPreprocessed(s, subexprs)));
-                                }
-							
-                                return new FunctionInvocation(entity?.Document.Settings.Language ?? Language.None, f, param.ToArray());
+                                return CreateFunctionInvocation(GetStringFromPreprocessed(s, subexprs), language, functions, macros);
                             }
-                            return new UnaryExpression(entity?.Document.Settings.Language ?? Language.None, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(0, index), entity, subexprs, true));
+                            return new UnaryExpression(language, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(0, index), language, functions, macros, subexprs, true));
                         }
                     }
                 }
 
-                return LiteralExpression.CreateFromString(GetStringFromPreprocessed(s, subexprs), entity);
+                return LiteralExpression.CreateFromString(GetStringFromPreprocessed(s, subexprs), language);
             }
 
             protected static string GetStringFromPreprocessed(string prep, List<Tuple<ExprType, string>> subexprs)
@@ -478,7 +446,7 @@ namespace Petri
                         prep = prep.Remove(index, lastIndex - index + 1).Insert(index, subexprs[expr].Item2);
                         break;
                     case ExprType.Invocation:
-                        prep = prep.Remove(index, lastIndex - index + 3).Insert(index, subexprs[expr].Item2);
+                        prep = prep.Remove(index, lastIndex - index + 4).Insert(index, subexprs[expr].Item2);
                         break;
                     }
                 }
@@ -486,9 +454,8 @@ namespace Petri
                 return prep;
             }
 
-            private static MethodInvocation CreateInvocation(bool indirection, List<string> invocation, Entity entity)
-            {
-                var func = Expand(invocation[1], entity?.Document.CppMacros);
+            private static Tuple<Scope, string, List<Expression>> ExtractScopeNameAndArgs(string invocation, Language language, IEnumerable<Cpp.Function> functions, Dictionary<string, string> macros) {
+                var func = Expand(invocation, macros);
                 func = Parser.RemoveParenthesis(func);
 
                 int index = func.IndexOf("(");
@@ -498,17 +465,60 @@ namespace Petri
                 var argsList = Parser.SyntacticSplit(args, ",");
                 var exprList = new List<Expression>();
                 foreach(var ss in argsList) {
-                    exprList.Add(Expression.CreateFromString<Expression>(Parser.RemoveParenthesis(ss), entity));
-                }
-                Cpp.Method m = (entity?.Document.AllFunctions.FirstOrDefault(delegate(Cpp.Function ff) {
-                    return (ff is Method) && ff.Parameters.Count == argsList.Count && tup.Item2 == ff.Name && tup.Item1.Equals(ff.Enclosing);
-                })) as Method;
-
-                if(m == null) {
-                    throw new Exception(Configuration.GetLocalized("No method match the specified expression."));
+                    exprList.Add(Expression.CreateFromString<Expression>(Parser.RemoveParenthesis(ss), language, functions, macros));
                 }
 
-                return new MethodInvocation(entity?.Document.Settings.Language ?? Language.None, m, Expression.CreateFromString<Expression>(invocation[0], entity), indirection, exprList.ToArray());
+                return Tuple.Create(tup.Item1, tup.Item2, exprList);
+            }
+
+            private static FunctionInvocation CreateFunctionInvocation(string invocation, Language language, IEnumerable<Cpp.Function> functions, Dictionary<string, string> macros)
+            {
+                var scopeNameAndArgs = ExtractScopeNameAndArgs(invocation, language, functions, macros);
+
+                Cpp.Function f;
+                if(functions == null) {
+                    f = new Cpp.Function(Type.UnknownType, scopeNameAndArgs.Item1, scopeNameAndArgs.Item2, false);
+                    int i = 0;
+                    foreach(Expression e in scopeNameAndArgs.Item3) {
+                        f.Parameters.Add(new Param(Type.UnknownType, "param" + (i++).ToString()));
+                    }
+                }
+                else {
+                    f = (functions.FirstOrDefault(delegate(Cpp.Function ff) {
+                        return !(ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && scopeNameAndArgs.Item1.Equals(ff.Enclosing);
+                    })) as Function;
+
+                    if(f == null) {
+                        throw new Exception(Configuration.GetLocalized("No function match the specified expression."));
+                    }
+                }
+
+                return new FunctionInvocation(language, f, scopeNameAndArgs.Item3.ToArray());
+            }
+
+            private static MethodInvocation CreateMethodInvocation(bool indirection, List<string> invocation, Language language, IEnumerable<Cpp.Function> functions, Dictionary<string, string> macros)
+            {
+                var scopeNameAndArgs = ExtractScopeNameAndArgs(invocation[1], language, functions, macros);
+
+                Cpp.Method m;
+                if(functions == null) {
+                    m = new Cpp.Method(Type.UnknownType, Type.UnknownType, scopeNameAndArgs.Item2, "", false);
+                    int i = 0;
+                    foreach(Expression e in scopeNameAndArgs.Item3) {
+                        m.Parameters.Add(new Param(Type.UnknownType, "param" + (i++).ToString()));
+                    }
+                }
+                else {
+                    m = (functions.FirstOrDefault(delegate(Cpp.Function ff) {
+                        return (ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && scopeNameAndArgs.Item1.Equals(ff.Enclosing);
+                    })) as Method;
+
+                    if(m == null) {
+                        throw new Exception(Configuration.GetLocalized("No method match the specified expression."));
+                    }
+                }
+
+                return new MethodInvocation(language, m, Expression.CreateFromString<Expression>(invocation[0], language, functions, macros), indirection, scopeNameAndArgs.Item3.ToArray());
             }
 
             protected static string Parenthesize(Expression parent, Expression child, string representation)
@@ -635,10 +645,10 @@ namespace Petri
 
         public class LiteralExpression : Expression
         {
-            static public Expression CreateFromString(string s, Entity e)
+            static public Expression CreateFromString(string s, Language language)
             {
                 if(s.Length >= 2 && s.StartsWith("$") && char.IsLower(s[1])) {
-                    return new VariableExpression(s.Substring(1), e);
+                    return new VariableExpression(s.Substring(1), language);
                 }
                 if(s.Contains("{")) {
                     var tup = Cpp.Expression.Preprocess(s);
@@ -651,9 +661,9 @@ namespace Petri
                         int lastIndex = tup.Item1.Substring(index + 1).IndexOf("@") + index + 1;
                         int expr = int.Parse(tup.Item1.Substring(index + 1, lastIndex - (index + 1)));
                         if(tup.Item2[expr].Item1 == ExprType.Brackets) {
-                            return new BracketedExpression(Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(0, index), e, tup.Item2, true),
-                                Cpp.Expression.CreateFromPreprocessedString(tup.Item2[expr].Item2.Substring(1, tup.Item2[expr].Item2.Length - 2), e, tup.Item2, true),
-                                Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(lastIndex + 1), e, tup.Item2, true));
+                            return new BracketedExpression(Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(0, index), language, null, null, tup.Item2, true),
+                                Cpp.Expression.CreateFromPreprocessedString(tup.Item2[expr].Item2.Substring(1, tup.Item2[expr].Item2.Length - 2), language, null, null, tup.Item2, true),
+                                Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(lastIndex + 1), language, null, null, tup.Item2, true));
                         }
                         else {
                             currentIndex = lastIndex + 1;
@@ -704,7 +714,7 @@ namespace Petri
 
         public class VariableExpression : LiteralExpression
         {
-            public VariableExpression(string expr, Entity e) : base(e.Document.Settings.Language, expr)
+            public VariableExpression(string expr, Language language = Language.None) : base(language, expr)
             {
                 Regex name = new Regex(Cpp.Parser.NamePattern);
                 Match nameMatch = name.Match(expr);

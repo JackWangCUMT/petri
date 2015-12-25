@@ -39,7 +39,7 @@ namespace Petri
                 foreach(var arg in arguments) {
                     var a = arg;
                     if(a.MakeUserReadable() == "")
-                        a = LiteralExpression.CreateFromString("void", null);
+                        a = LiteralExpression.CreateFromString("void");
 
                     this.Arguments.Add(a);
                 }
@@ -76,16 +76,16 @@ namespace Petri
                     if(i > 0) {
                         args += ", ";
                     }
-                    if(Language == Language.C) {
+
+                    switch(Language) {
+                    case Language.Cpp:
+                        args += "static_cast<" + Function.Parameters[i].Type.ToString() + ">(" + Arguments[i].MakeCpp() + ")";
+                        continue;
+                    case Language.C:
+                    case Language.None:
                         args += "(" + Function.Parameters[i].Type.ToString() + ")(" + Arguments[i].MakeCpp() + ")";
                         continue;
                     }
-                    else if(Language == Language.Cpp) {
-                        args += "static_cast<" + Function.Parameters[i].Type.ToString() + ">(" + Arguments[i].MakeCpp() + ")";
-                        continue;
-                    }
-
-                    throw new Exception("Should not get there!");
                 }
 
                 string template = "";
@@ -179,7 +179,7 @@ namespace Petri
             static Function Dummy {
                 get {
                     if(_dummy == null) {
-                        _dummy = new Cpp.Function(new Type("void", Scope.EmptyScope), Scope.EmptyScope, "dummy", false);
+                        _dummy = new Cpp.Function(new Type("void"), null, "dummy", false);
                     }
                     return _dummy;
                 }
@@ -198,8 +198,8 @@ namespace Petri
 
             public static Cpp.Function GetWrapperFunction(Cpp.Type returnType)
             {
-                var f = new Function(returnType, Scope.MakeFromNamespace("Utility", null), "", false);
-                f.AddParam(new Param(new Type("void", Scope.EmptyScope), "param"));
+                var f = new Function(returnType, Scope.MakeFromNamespace("Utility"), "", false);
+                f.AddParam(new Param(new Type("void"), "param"));
                 return f;
             }
 

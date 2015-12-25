@@ -157,13 +157,13 @@ namespace Petri
 
         public class Method : Function
         {
-            public Method(Type classType, Type returnType, string name, string attrib, bool template) : base(returnType, Scope.MakeFromClass(classType), name, template)
+            public Method(Type classType, Type returnType, string name, string qualifiers, bool template) : base(returnType, Scope.MakeFromClass(classType), name, template)
             {
-                Attributes = attrib;
+                Qualifiers = qualifiers;
                 Class = classType;
             }
 
-            public string Attributes {
+            public string Qualifiers {
                 get;
                 private set;
             }
@@ -176,11 +176,11 @@ namespace Petri
             public override string Signature {
                 get {
                     string sig = base.Signature;
-                    return sig + (this.Attributes.Length > 0 ? " " + this.Attributes : "");
+                    return sig + (this.Qualifiers.Length > 0 ? " " + this.Qualifiers : "");
                 }
             }
 
-            public static string AttributesPattern {
+            public static string QualifiersPattern {
                 get {
                     return "(?<attributes>(const|volatile|override|final|nothrow|= ?(default|0|delete)| )*)";
                 }
@@ -188,7 +188,7 @@ namespace Petri
 
             public static string MethodPattern {
                 get {
-                    return @"^(" + Function.StaticInlinePattern + " )?" + Type.RegexPattern + @" " + Parser.NamePattern + " ?" + Function.ParameterPattern + " ?" + AttributesPattern + " ?";// + Parser.DeclarationEndPattern;
+                    return @"^(" + Function.StaticInlinePattern + " )?" + Type.RegexPattern + @" " + Parser.NamePattern + " ?" + Function.ParameterPattern + " ?" + QualifiersPattern + " ?";// + Parser.DeclarationEndPattern;
                 }
             }
 

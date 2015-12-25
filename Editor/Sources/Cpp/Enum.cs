@@ -75,7 +75,7 @@ namespace Petri
 
             public Cpp.Type Type {
                 get {
-                    return new Cpp.Type(Name, Cpp.Scope.EmptyScope);
+                    return new Cpp.Type(Name);
                 }
             }
 

@@ -42,8 +42,8 @@ namespace Petri
 
             Conflicting = new HashSet<Entity>();
 
-            var timeout = new Cpp.Function(new Cpp.Type("Timeout", Cpp.Scope.EmptyScope), Cpp.Scope.EmptyScope, "Timeout", false);
-            timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>", Cpp.Scope.EmptyScope), "timeout"));
+            var timeout = new Cpp.Function(new Cpp.Type("Timeout"), null, "Timeout", false);
+            timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>"), "timeout"));
             CppConditions.Add(timeout);
 
             Path = path;
@@ -125,7 +125,7 @@ namespace Petri
         {
             CppActions.Clear();
             CppConditions.Clear();
-            Cpp.Type e = Settings.Enum.Type, b = new Cpp.Type("bool", Cpp.Scope.EmptyScope);
+            Cpp.Type e = Settings.Enum.Type, b = new Cpp.Type("bool");
 
             foreach(Cpp.Function f in AllFunctions) {
                 if(f.ReturnType.Equals(e)) {

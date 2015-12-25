@@ -75,14 +75,15 @@ namespace Petri
             }
         }
 
-        private static int PrintUsage()
+        private static int PrintUsage(int returnCode = 1)
         {
             Console.WriteLine("Usage: mono Petri.exe [--generate] [--compile] [--arch (32|64)] [--verbose|-v] \"Path/To/Document.petri\"");
-            return 1;
+            return returnCode;
         }
 
         public static int Main(string[] args)
         {
+            // TODO: check args
             if(args.Length > 1) {
                 bool generate = false;
                 bool compile = false;
@@ -92,7 +93,10 @@ namespace Petri
                 used.Initialize();
                 used[0] = true;
                 for(int i = 0; i < args.Length; ++i) {
-                    if(args[i] == "--arch") {
+                    if(args[i] == "--help" || args[i] == "-h") {
+                        return PrintUsage(0);
+                    }
+                    else if(args[i] == "--arch") {
                         if(i < args.Length - 1) {
                             if(int.TryParse(args[i + 1], out arch)) {
                                 if(arch == 32 || arch == 64) {

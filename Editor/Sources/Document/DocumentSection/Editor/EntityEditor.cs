@@ -177,7 +177,7 @@ namespace Petri
                             actionType = ActionType.Print;
                         }
                         else if(val == pauseFunction) {
-                            _document.PostAction(new InvocationChangeAction(a, new Cpp.FunctionInvocation(a.Document.Settings.Language, Action.PauseFunction(a.Document), Cpp.LiteralExpression.CreateFromString("1s", a))));
+                            _document.PostAction(new InvocationChangeAction(a, new Cpp.FunctionInvocation(a.Document.Settings.Language, Action.PauseFunction(a.Document), Cpp.LiteralExpression.CreateFromStringAndEntity("1s", a))));
                             actionType = ActionType.Pause;
                         }
                         else if(val == manual) {
@@ -237,7 +237,7 @@ namespace Petri
                     Cpp.Expression cppExpr = null;
                     Cpp.FunctionInvocation funcInvocation = null;
                     try {
-                        cppExpr = Cpp.Expression.CreateFromString<Cpp.Expression>((obj as Entry).Text, a);
+                        cppExpr = Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>((obj as Entry).Text, a);
                         if(cppExpr is Cpp.FunctionInvocation) {
                             funcInvocation = (Cpp.FunctionInvocation)cppExpr;
                             if(!funcInvocation.Function.ReturnType.Equals(_document.Settings.Enum.Type)) {
@@ -273,10 +273,10 @@ namespace Petri
                             for(int j = 2; j < editorFields.Count; ++j) {
                                 Widget w = editorFields[j];
                                 if(w.GetType() == typeof(Entry)) {
-                                    args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a, false));
+                                    args.Add(Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>((w as Entry).Text, a, false));
                                 }
                             }
-                            _document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(_document.Settings.Language, method.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray())));
+                            _document.PostAction(new InvocationChangeAction(a, new Cpp.MethodInvocation(_document.Settings.Language, method.Function as Cpp.Method, Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray())));
                         }
                         catch(Exception ex) {
                             MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).", ex.Message)));
@@ -313,12 +313,12 @@ namespace Petri
                     for(int j = (a.Function.Function is Cpp.Method) ? 2 : 0; j < editorFields.Count; ++j) {
                         Widget w = editorFields[j];
                         if(w.GetType() == typeof(Entry)) {
-                            args.Add(Cpp.Expression.CreateFromString<Cpp.Expression>((w as Entry).Text, a));
+                            args.Add(Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>((w as Entry).Text, a));
                         }
                     }
                     Cpp.FunctionInvocation invocation;
                     if(a.Function.Function is Cpp.Method) {
-                        invocation = new Cpp.MethodInvocation(_document.Settings.Language, a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromString<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray());
+                        invocation = new Cpp.MethodInvocation(_document.Settings.Language, a.Function.Function as Cpp.Method, Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray());
                     }
                     else {
                         invocation = new Cpp.FunctionInvocation(_document.Settings.Language, a.Function.Function, args.ToArray());
@@ -447,7 +447,7 @@ namespace Petri
             var condition = CreateWidget<Entry>(true, 0, userReadable);
             MainClass.RegisterValidation(condition, false, (obj, p) => {
                 try {
-                    var cond = new ConditionChangeAction(t, Cpp.Expression.CreateFromString<Cpp.Expression>((obj as Entry).Text, t));
+                    var cond = new ConditionChangeAction(t, Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>((obj as Entry).Text, t));
                     _document.PostAction(cond);
                 }
                 catch(Exception e) {

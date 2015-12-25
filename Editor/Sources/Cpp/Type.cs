@@ -30,7 +30,7 @@ namespace Petri
     {
         public enum CVQualifier
         {
-None = 0,
+            None = 0,
             Const = 1,
             Volatile = 2}
 
@@ -38,15 +38,22 @@ None = 0,
 
         public class Type : IEquatable<Type>, IEquatable<string>
         {
-            public Type(string s, Scope enclosing)
+            public static Type UnknownType {
+                get {
+                    return _unknownType ?? (_unknownType = new Type("UnknownType", Scope.MakeFromNamespace("Petri")));
+                }
+            }
+
+            public Type(string name, Scope enclosing = null)
             {
+                String s = name.Clone() as string;
                 s.Replace("*", " * ");
                 s = s.TrimSpaces();
 
                 s = s.TrimStart(new char[]{ ' ' }).TrimEnd(new char[]{ ' ' });
 
                 if(s.EndsWith("&")) {
-                    isReference = true;
+                    _isReference = true;
                     s = s.Substring(0, s.Length - 1);
                 }
 
@@ -91,18 +98,18 @@ None = 0,
 					foreach(var e in t) {
 						template.Add(Expression.CreateFromString<Expression>(e, notnullplease, new List<Function>()));
 					}*/
-                    template = s.Substring(index + 1, s.Length - index - 2);
+                    _template = s.Substring(index + 1, s.Length - index - 2);
                 }
                 else {
-                    template = "";
+                    _template = "";
                     index = s.Length;
                 }
 
                 var tup = Parser.ExtractScope(s.Substring(0, index).Trim());
-                name = tup.Item2;
+                _name = tup.Item2;
                 Enclosing = Scope.MakeFromScopes(enclosing, tup.Item1);
 
-                cvQualifiers = q.ToArray();
+                _cvQualifiers = q.ToArray();
             }
 
             public override string ToString()
@@ -114,16 +121,16 @@ None = 0,
 						v += e.MakeUserReadable();
 					}
 					val += "<" + val + ">";*/
-                    val += "<" + template + ">";
+                    val += "<" + _template + ">";
                 }
 
-                for(int i = 0; i < cvQualifiers.Length; ++i) {
+                for(int i = 0; i < _cvQualifiers.Length; ++i) {
                     if(i != 0)
                         val += " *";
 
-                    if((cvQualifiers[i] | CVQualifier.Volatile) == cvQualifiers[i])
+                    if((_cvQualifiers[i] | CVQualifier.Volatile) == _cvQualifiers[i])
                         val += " volatile";
-                    if((cvQualifiers[i] | CVQualifier.Const) == cvQualifiers[i])
+                    if((_cvQualifiers[i] | CVQualifier.Const) == _cvQualifiers[i])
                         val += " const";
                 }
 
@@ -135,7 +142,7 @@ None = 0,
 
             public string Name {
                 get {
-                    return name;
+                    return _name;
                 }
             }
 
@@ -146,19 +153,19 @@ None = 0,
 
             public /*List<Expression>*/string Template {
                 get {
-                    return template;
+                    return _template;
                 }
             }
 
             public IEnumerable<CVQualifier> CVQualifiers {
                 get {
-                    return cvQualifiers;
+                    return _cvQualifiers;
                 }
             }
 
             public bool IsReference {
                 get {
-                    return isReference;
+                    return _isReference;
                 }
             }
 
@@ -167,11 +174,11 @@ None = 0,
                 if(Name != type.Name || Template != type.Template || IsReference != type.IsReference)
                     return false;
 
-                if(cvQualifiers.Length != type.cvQualifiers.Length)
+                if(_cvQualifiers.Length != type._cvQualifiers.Length)
                     return false;
 
-                for(int i = 0; i < cvQualifiers.Length; ++i) {
-                    if(cvQualifiers[i] != type.cvQualifiers[i])
+                for(int i = 0; i < _cvQualifiers.Length; ++i) {
+                    if(_cvQualifiers[i] != type._cvQualifiers[i])
                         return false;
                 }
 
@@ -189,14 +196,14 @@ None = 0,
             // Is var1 = var2 a valid expression, where var1's type is 'type' and var2's type is 'this' ?
             public bool ConvertibleTo(Type type)
             {
-                if(this.Name != type.Name || this.Template != this.Template || this.cvQualifiers.Length != type.cvQualifiers.Length)
+                if(this.Name != type.Name || this.Template != this.Template || this._cvQualifiers.Length != type._cvQualifiers.Length)
                     return false;
 
-                int cvCount = this.cvQualifiers.Length;
+                int cvCount = this._cvQualifiers.Length;
 
-                int lastTest = (!type.IsReference) ? this.cvQualifiers.Length - 1 : this.cvQualifiers.Length;
+                int lastTest = (!type.IsReference) ? this._cvQualifiers.Length - 1 : this._cvQualifiers.Length;
                 for(int i = 0; i < lastTest; ++i) {
-                    if(!ConvertibleTo(this.cvQualifiers[i], type.cvQualifiers[i]))
+                    if(!ConvertibleTo(this._cvQualifiers[i], type._cvQualifiers[i]))
                         return false;
                 }
 
@@ -254,100 +261,12 @@ None = 0,
                 return s;
             }
 
-            CVQualifier[] cvQualifiers;
-            bool isReference;
-            string name;
-            //List<Expression> template;
-            string template;
-        }
-
-        public class Scope : IEquatable<Scope>
-        {
-            public static Scope MakeFromNamespace(string ns, Scope enclosing)
-            {
-                Scope s = new Scope();
-                s.Class = null;
-                s.Namespace = ns;
-                s.Enclosing = enclosing; 
-
-                return s;
-            }
-
-            public static Scope MakeFromClass(Type classType)
-            {
-                Scope s = new Scope();
-                s.Class = classType;
-                s.Namespace = null;
-                s.Enclosing = classType.Enclosing; 
-
-                return s;
-            }
-
-            public static Scope MakeFromScopes(Scope enclosing, Scope inner)
-            {
-                Scope i = inner;
-                while(true) {
-                    if(i.Enclosing != null) {
-                        i = i.Enclosing;
-                    }
-                    else {
-                        i.Enclosing = enclosing;
-                        break;
-                    }
-                }
-
-                return inner;
-            }
-
-            public static Scope EmptyScope {
-                get {
-                    return MakeFromNamespace("", null);
-                }
-            }
-
-            public bool IsClass {
-                get {
-                    return Class != null;
-                }
-            }
-
-            public bool IsNamespace {
-                get {
-                    return Namespace != null;
-                }
-            }
-
-            public Type Class {
-                get;
-                private set;
-            }
-
-            public string Namespace {
-                get;
-                private set;
-            }
-
-            public override string ToString()
-            {
-                string enclosing = "";
-                if(Enclosing != null)
-                    enclosing = Enclosing.ToString();
-
-                if(IsNamespace)
-                    return enclosing + (Namespace.Length > 0 ? Namespace + "::" : "");
-                else
-                    return enclosing + Class.ToString() + "::";
-            }
-
-            public Scope Enclosing {
-                get;
-                private set;
-            }
-
-            public bool Equals(Scope s)
-            {
-                return ToString() == s.ToString();
-            }
+            CVQualifier[] _cvQualifiers;
+            bool _isReference;
+            string _name;
+            //List<Expression> _template;
+            string _template;
+            static Type _unknownType;
         }
     }
 }
