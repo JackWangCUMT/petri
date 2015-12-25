@@ -77,26 +77,32 @@ namespace Petri
 
         private static int PrintUsage(int returnCode = 1)
         {
-            Console.WriteLine("Usage: mono Petri.exe [--generate] [--compile] [--arch (32|64)] [--verbose|-v] \"Path/To/Document.petri\"");
+            string message = "Usage: mono Petri.exe [--generate] [--compile] [--arch (32|64)] [--verbose|-v] \"Path/To/Document.petri\"";
+            if(returnCode == 0) {
+                Console.WriteLine(message);
+            }
+            else {
+                Console.Error.WriteLine(message);
+            }
             return returnCode;
         }
 
         public static int Main(string[] args)
         {
-            // TODO: check args
-            if(args.Length > 1) {
+            if(args.Length > 0) {
                 bool generate = false;
                 bool compile = false;
                 bool verbose = false;
                 int arch = 0;
                 var used = new bool[args.Length];
                 used.Initialize();
-                used[0] = true;
+
+                if(args[0] == "--help" || args[0] == "-h") {
+                    return PrintUsage(0);
+                }
+
                 for(int i = 0; i < args.Length; ++i) {
-                    if(args[i] == "--help" || args[i] == "-h") {
-                        return PrintUsage(0);
-                    }
-                    else if(args[i] == "--arch") {
+                    if(args[i] == "--arch") {
                         if(i < args.Length - 1) {
                             if(int.TryParse(args[i + 1], out arch)) {
                                 if(arch == 32 || arch == 64) {
@@ -107,13 +113,15 @@ namespace Petri
                                     return PrintUsage();
                                 }
                                 used[i] = used[i + 1] = true;
+                                ++i;
                             }
                             else {
-                                Console.WriteLine("Wrong architecture specified!");
+                                Console.Error.WriteLine("Wrong architecture specified!");
                                 return PrintUsage();
                             }
                         }
                         else {
+                            Console.Error.WriteLine("Missing architecture value!");
                             return PrintUsage();
                         }
                     }
@@ -132,13 +140,13 @@ namespace Petri
                 }
                 if(used[args.Length - 1]) {
                     // Did not specify document path
-                    Console.WriteLine("The path to the Petri document must be specified as the last program argument!");
+                    Console.Error.WriteLine("The path to the Petri document must be specified as the last program argument!");
                     return PrintUsage();
                 }
                 string path = args[args.Length - 1];
 
                 if(!compile && !generate) {
-                    Console.WriteLine("Must specify \"--generate\" and/or \"--compile\"!");
+                    Console.Error.WriteLine("Must specify \"--generate\" and/or \"--compile\"!");
                     return PrintUsage();
                 }
 
@@ -181,7 +189,7 @@ namespace Petri
                             }
                             bool res = document.Compile(false);
                             if(!res) {
-                                Console.WriteLine("Compilation failed, aborting!");
+                                Console.Error.WriteLine("Compilation failed, aborting!");
                                 return 3;
                             }
                             else if(verbose) {
@@ -194,7 +202,7 @@ namespace Petri
                     }
                 }
                 catch(Exception e) {
-                    Console.WriteLine("An exception occurred: " + e.Message);
+                    Console.Error.WriteLine("An exception occurred: " + e.Message);
                     return 2;
                 }
 
