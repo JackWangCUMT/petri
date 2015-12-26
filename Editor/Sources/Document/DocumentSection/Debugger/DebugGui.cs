@@ -93,7 +93,6 @@ namespace Petri
                     int x, y;
                     _document.Window.GetSize(out x, out y);
                     p.Position = x - 250;
-                    Console.WriteLine(p.Position);
                     _document.DebugController.DebugEditor.Resize(200);
                 }
             };

@@ -311,7 +311,7 @@ namespace Petri
             var c = new CppCompiler(this);
             var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
             if(o != "") {
-                Console.WriteLine(Configuration.GetLocalized("Compilation failed.") + "\n" + Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath, Settings.LibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o);
+                Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.") + "\n" + Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath, Settings.LibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o);
                 return false;
             }
 

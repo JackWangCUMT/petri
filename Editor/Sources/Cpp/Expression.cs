@@ -71,17 +71,31 @@ namespace Petri
                 return CreateFromStringAndEntity<Expression>(s, entity, allowComma);
             }
 
-            public static Expression CreateFromString(string s, Language language = Language.None, IEnumerable<Cpp.Function> functions = null, Dictionary<string, string> macros = null, bool allowComma = true)
+            public static Expression CreateFromString(string s,
+                                                      Language language = Language.None,
+                                                      IEnumerable<Cpp.Function> functions = null,
+                                                      Dictionary<string, string> macros = null,
+                                                      bool allowComma = true)
             {
                 return CreateFromString<Expression>(s, language, functions, macros, allowComma);
             }
 
-            public static ExpressionType CreateFromStringAndEntity<ExpressionType>(string s, Entity entity, bool allowComma = true) where ExpressionType : Expression
+            public static ExpressionType CreateFromStringAndEntity<ExpressionType>(string s,
+                                                                                   Entity entity,
+                                                                                   bool allowComma = true) where ExpressionType : Expression
             {
-                return CreateFromString<ExpressionType>(s, entity?.Document.Settings.Language ?? Language.None, entity?.Document.AllFunctions, entity?.Document.CppMacros, allowComma);
+                return CreateFromString<ExpressionType>(s,
+                                                        entity?.Document.Settings.Language ?? Language.None,
+                                                        entity?.Document.AllFunctions,
+                                                        entity?.Document.CppMacros,
+                                                        allowComma);
             }
 
-            public static ExpressionType CreateFromString<ExpressionType>(string s, Language language = Language.None, IEnumerable<Cpp.Function> functions = null, Dictionary<string, string> macros = null, bool allowComma = true) where ExpressionType : Expression
+            public static ExpressionType CreateFromString<ExpressionType>(string s,
+                                                                          Language language = Language.None,
+                                                                          IEnumerable<Cpp.Function> functions = null,
+                                                                          Dictionary<string, string> macros = null,
+                                                                          bool allowComma = true) where ExpressionType : Expression
             {
                 string unexpanded = s;
 
@@ -94,7 +108,12 @@ namespace Petri
 
                 var exprList = tup.Item1.Split(new char[]{ ';' });
                 var parsedList = from e in exprList
-                                             select Expression.CreateFromPreprocessedString(e, language, functions, macros, tup.Item2, true);
+                                             select Expression.CreateFromPreprocessedString(e,
+                                                                                            language,
+                                                                                            functions,
+                                                                                            macros,
+                                                                                            tup.Item2,
+                                                                                            true);
 
                 if(parsedList.Count() > 1) {
                     result = new ExpressionList(language, parsedList);
@@ -185,7 +204,6 @@ namespace Petri
                     switch(s[i]) {
                     case '(':
                         bool special = false;
-                        // FIXME: bug
                         if(i > 0 && s[i - 1] == '@') {
                             // It is a call operator invocation
                             special = true;
@@ -194,9 +212,12 @@ namespace Petri
                         break;
                     case ')':
                         if(nesting.Count > 0 && (nesting.Peek().Item1 == ExprType.Invocation || nesting.Peek().Item1 == ExprType.Parenthesis)) {
-                            subexprs.Add(Tuple.Create(nesting.Peek().Item1, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
+                            subexprs.Add(Tuple.Create(nesting.Peek().Item1,
+                                                      s.Substring(nesting.Peek().Item2,
+                                                                                        i - nesting.Peek().Item2 + 1)));
                             var newstr = "@" + (subexprs.Count - 1).ToString() + "@" + (nesting.Peek().Item1 == ExprType.Invocation ? "()" : "");
-                            s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, newstr);
+                            s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2,
+                                                                                                    newstr);
                             i += newstr.Length;
                             nesting.Pop();
                         }
@@ -208,9 +229,12 @@ namespace Petri
                         break;
                     case '}':
                         if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Brackets) {
-                            subexprs.Add(Tuple.Create(ExprType.Brackets, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
+                            subexprs.Add(Tuple.Create(ExprType.Brackets,
+                                                      s.Substring(nesting.Peek().Item2,
+                                                                                     i - nesting.Peek().Item2 + 1)));
                             var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
-                            s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, newstr);
+                            s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2,
+                                                                                                    newstr);
                             i += newstr.Length;
                             nesting.Pop();
                         }
@@ -222,9 +246,12 @@ namespace Petri
                         break;
                     case ']':
                         if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Subscript) {
-                            subexprs.Add(Tuple.Create(nesting.Peek().Item1, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
+                            subexprs.Add(Tuple.Create(nesting.Peek().Item1,
+                                                      s.Substring(nesting.Peek().Item2,
+                                                                                        i - nesting.Peek().Item2 + 1)));
                             var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
-                            s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, newstr);
+                            s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2,
+                                                                                                    newstr);
                             i += newstr.Length;
                             nesting.Pop();
                         }
@@ -238,14 +265,18 @@ namespace Petri
                         }
 						// Second quote
 						else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.DoubleQuote && s[i - 1] != '\\') {
-                            subexprs.Add(Tuple.Create(ExprType.DoubleQuote, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
+                            subexprs.Add(Tuple.Create(ExprType.DoubleQuote,
+                                                      s.Substring(nesting.Peek().Item2,
+                                                                                        i - nesting.Peek().Item2 + 1)));
                             var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
-                            s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, newstr);
+                            s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2,
+                                                                                                    newstr);
                             i += newstr.Length;
                             nesting.Pop();
                         }
                         else
-                            throw new Exception(Configuration.GetLocalized("{0} expected, but \" found!", nesting.Peek().Item1));
+                            throw new Exception(Configuration.GetLocalized("{0} expected, but \" found!",
+                                                                           nesting.Peek().Item1));
                         break;
                     case '\'':
 						// First quote
@@ -254,14 +285,18 @@ namespace Petri
                         }
 						// Second quote
 						else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] != '\\') {
-                            subexprs.Add(Tuple.Create(ExprType.Quote, s.Substring(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1)));
+                            subexprs.Add(Tuple.Create(ExprType.Quote,
+                                                      s.Substring(nesting.Peek().Item2,
+                                                                                  i - nesting.Peek().Item2 + 1)));
                             var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
-                            s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2, newstr);
+                            s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2,
+                                                                                                    newstr);
                             i += newstr.Length;
                             nesting.Pop();
                         }
                         else
-                            throw new Exception(Configuration.GetLocalized("{0} expected, but \' found!", nesting.Peek().Item1));
+                            throw new Exception(Configuration.GetLocalized("{0} expected, but \' found!",
+                                                                           nesting.Peek().Item1));
                         break;
                     }
 
@@ -323,7 +358,12 @@ namespace Petri
                 return true;
             }
 
-            protected static Expression CreateFromPreprocessedString(string s, Language language, IEnumerable<Cpp.Function> functions, Dictionary<string, string> macros, List<Tuple<ExprType, string>> subexprs, bool allowComma)
+            protected static Expression CreateFromPreprocessedString(string s,
+                                                                     Language language,
+                                                                     IEnumerable<Cpp.Function> functions,
+                                                                     Dictionary<string, string> macros,
+                                                                     List<Tuple<ExprType, string>> subexprs,
+                                                                     bool allowComma)
             {
                 if(Regex.Match(s, "^@[0-9]+@$").Success) {
                     int nb = int.Parse(s.Substring(1, s.Length - 2));
@@ -388,19 +428,57 @@ namespace Petri
                             if(foundOperator == Petri.Cpp.Operator.Name.SelectionRef || foundOperator == Petri.Cpp.Operator.Name.SelectionPtr) {
                                 string that = Expression.GetStringFromPreprocessed(e1, subexprs);
                                 string invocation = Expression.GetStringFromPreprocessed(e2, subexprs);
-                                return CreateMethodInvocation(foundOperator == Cpp.Operator.Name.SelectionPtr, new List<String>{that, invocation}, language, functions, macros); 
+                                return CreateMethodInvocation(foundOperator == Cpp.Operator.Name.SelectionPtr,
+                                                              new List<String> {
+                                    that,
+                                    invocation
+                                },
+                                                              language,
+                                                              functions,
+                                                              macros); 
                             }
 
-                            return new BinaryExpression(language, foundOperator, Expression.CreateFromPreprocessedString(e1, language, functions, macros, subexprs, true), Expression.CreateFromPreprocessedString(e2, language, functions, macros, subexprs, true));
+                            return new BinaryExpression(language,
+                                                        foundOperator,
+                                                        Expression.CreateFromPreprocessedString(e1,
+                                                                                                                         language,
+                                                                                                                         functions,
+                                                                                                                         macros,
+                                                                                                                         subexprs,
+                                                                                                                         true),
+                                                        Expression.CreateFromPreprocessedString(e2,
+                                                                                                                                                                                                                   language,
+                                                                                                                                                                                                                   functions,
+                                                                                                                                                                                                                   macros,
+                                                                                                                                                                                                                   subexprs,
+                                                                                                                                                                                                                   true));
                         }
                         else if(prop.type == Petri.Cpp.Operator.Type.PrefixUnary) {
-                            return new UnaryExpression(language, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length), language, functions, macros, subexprs, true));
+                            return new UnaryExpression(language,
+                                                       foundOperator,
+                                                       Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length),
+                                                                                                                        language,
+                                                                                                                        functions,
+                                                                                                                        macros,
+                                                                                                                        subexprs,
+                                                                                                                        true));
                         }
                         else if(prop.type == Petri.Cpp.Operator.Type.SuffixUnary) {
                             if(foundOperator == Petri.Cpp.Operator.Name.FunCall) {
-                                return CreateFunctionInvocation(GetStringFromPreprocessed(s, subexprs), language, functions, macros);
+                                return CreateFunctionInvocation(GetStringFromPreprocessed(s, subexprs),
+                                                                language,
+                                                                functions,
+                                                                macros);
                             }
-                            return new UnaryExpression(language, foundOperator, Expression.CreateFromPreprocessedString(s.Substring(0, index), language, functions, macros, subexprs, true));
+                            return new UnaryExpression(language,
+                                                       foundOperator,
+                                                       Expression.CreateFromPreprocessedString(s.Substring(0,
+                                                                                                                                    index),
+                                                                                                                        language,
+                                                                                                                        functions,
+                                                                                                                        macros,
+                                                                                                                        subexprs,
+                                                                                                                        true));
                         }
                     }
                 }
@@ -411,7 +489,8 @@ namespace Petri
             protected static string GetStringFromPreprocessed(string prep, List<Tuple<ExprType, string>> subexprs)
             {
                 foreach(var name in Cpp.Operator.Lex) {
-                    prep = prep.Replace(Cpp.Operator.Properties[name].lexed, " " + Cpp.Operator.Properties[name].cpp + " ");
+                    prep = prep.Replace(Cpp.Operator.Properties[name].lexed,
+                                        " " + Cpp.Operator.Properties[name].cpp + " ");
                     var newExprs = new List<Tuple<ExprType, string>>();
                     foreach(var expr in subexprs) {
                         switch(expr.Item1) {
@@ -420,7 +499,9 @@ namespace Petri
                         case ExprType.Subscript:
                         case ExprType.Invocation:
                         case ExprType.Template:
-                            newExprs.Add(Tuple.Create(expr.Item1, expr.Item2.Replace(Cpp.Operator.Properties[name].lexed, " " + Cpp.Operator.Properties[name].cpp + " ")));
+                            newExprs.Add(Tuple.Create(expr.Item1,
+                                                      expr.Item2.Replace(Cpp.Operator.Properties[name].lexed,
+                                                                                     " " + Cpp.Operator.Properties[name].cpp + " ")));
                             break;
                         default:
                             newExprs.Add(expr);
@@ -457,7 +538,11 @@ namespace Petri
                 return prep;
             }
 
-            private static Tuple<Scope, string, List<Expression>> ExtractScopeNameAndArgs(string invocation, Language language, IEnumerable<Cpp.Function> functions, Dictionary<string, string> macros) {
+            private static Tuple<Scope, string, List<Expression>> ExtractScopeNameAndArgs(string invocation,
+                                                                                          Language language,
+                                                                                          IEnumerable<Cpp.Function> functions,
+                                                                                          Dictionary<string, string> macros)
+            {
                 var func = Expand(invocation, macros);
                 func = Parser.RemoveParenthesis(func);
 
@@ -468,13 +553,19 @@ namespace Petri
                 var argsList = Parser.SyntacticSplit(args, ",");
                 var exprList = new List<Expression>();
                 foreach(var ss in argsList) {
-                    exprList.Add(Expression.CreateFromString<Expression>(Parser.RemoveParenthesis(ss), language, functions, macros));
+                    exprList.Add(Expression.CreateFromString<Expression>(Parser.RemoveParenthesis(ss),
+                                                                         language,
+                                                                         functions,
+                                                                         macros));
                 }
 
                 return Tuple.Create(tup.Item1, tup.Item2, exprList);
             }
 
-            private static FunctionInvocation CreateFunctionInvocation(string invocation, Language language, IEnumerable<Cpp.Function> functions, Dictionary<string, string> macros)
+            private static FunctionInvocation CreateFunctionInvocation(string invocation,
+                                                                       Language language,
+                                                                       IEnumerable<Cpp.Function> functions,
+                                                                       Dictionary<string, string> macros)
             {
                 var scopeNameAndArgs = ExtractScopeNameAndArgs(invocation, language, functions, macros);
 
@@ -499,7 +590,11 @@ namespace Petri
                 return new FunctionInvocation(language, f, scopeNameAndArgs.Item3.ToArray());
             }
 
-            private static MethodInvocation CreateMethodInvocation(bool indirection, List<string> invocation, Language language, IEnumerable<Cpp.Function> functions, Dictionary<string, string> macros)
+            private static MethodInvocation CreateMethodInvocation(bool indirection,
+                                                                   List<string> invocation,
+                                                                   Language language,
+                                                                   IEnumerable<Cpp.Function> functions,
+                                                                   Dictionary<string, string> macros)
             {
                 var scopeNameAndArgs = ExtractScopeNameAndArgs(invocation[1], language, functions, macros);
 
@@ -521,7 +616,14 @@ namespace Petri
                     }
                 }
 
-                return new MethodInvocation(language, m, Expression.CreateFromString<Expression>(invocation[0], language, functions, macros), indirection, scopeNameAndArgs.Item3.ToArray());
+                return new MethodInvocation(language,
+                                            m,
+                                            Expression.CreateFromString<Expression>(invocation[0],
+                                                                                                 language,
+                                                                                                 functions,
+                                                                                                 macros),
+                                            indirection,
+                                            scopeNameAndArgs.Item3.ToArray());
             }
 
             protected static string Parenthesize(Expression parent, Expression child, string representation)
@@ -599,7 +701,8 @@ namespace Petri
 
         public class BracketedExpression : Expression
         {
-            public BracketedExpression(Expression b, Expression expr, Expression a) : base(Language.None, Cpp.Operator.Name.None)
+            public BracketedExpression(Expression b, Expression expr, Expression a) : base(Language.None,
+                                                                                           Cpp.Operator.Name.None)
             {
                 Before = b;
                 Expression = expr;
@@ -664,9 +767,26 @@ namespace Petri
                         int lastIndex = tup.Item1.Substring(index + 1).IndexOf("@") + index + 1;
                         int expr = int.Parse(tup.Item1.Substring(index + 1, lastIndex - (index + 1)));
                         if(tup.Item2[expr].Item1 == ExprType.Brackets) {
-                            return new BracketedExpression(Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(0, index), language, null, null, tup.Item2, true),
-                                Cpp.Expression.CreateFromPreprocessedString(tup.Item2[expr].Item2.Substring(1, tup.Item2[expr].Item2.Length - 2), language, null, null, tup.Item2, true),
-                                Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(lastIndex + 1), language, null, null, tup.Item2, true));
+                            return new BracketedExpression(Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(0,
+                                                                                                                           index),
+                                                                                                       language,
+                                                                                                       null,
+                                                                                                       null,
+                                                                                                       tup.Item2,
+                                                                                                       true),
+                                                           Cpp.Expression.CreateFromPreprocessedString(tup.Item2[expr].Item2.Substring(1,
+                                                                                                            tup.Item2[expr].Item2.Length - 2),
+                                                                            language,
+                                                                            null,
+                                                                            null,
+                                                                            tup.Item2,
+                                                                            true),
+                                                           Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(lastIndex + 1),
+                                                                            language,
+                                                                            null,
+                                                                            null,
+                                                                            tup.Item2,
+                                                                            true));
                         }
                         else {
                             currentIndex = lastIndex + 1;
@@ -823,7 +943,9 @@ namespace Petri
 
             public override string MakeUserReadable()
             {
-                string parenthesized = Expression.Parenthesize(this, this.Expression, this.Expression.MakeUserReadable());
+                string parenthesized = Expression.Parenthesize(this,
+                                                               this.Expression,
+                                                               this.Expression.MakeUserReadable());
                 switch(this.Operator) {
                 case Cpp.Operator.Name.FunCall:
                     throw new Exception(Configuration.GetLocalized("Already managed in FunctionInvocation class!"));
@@ -860,7 +982,8 @@ namespace Petri
 
         public class BinaryExpression : Expression
         {
-            public BinaryExpression(Language language, Operator.Name o, Expression expr1, Expression expr2) : base(language, o)
+            public BinaryExpression(Language language, Operator.Name o, Expression expr1, Expression expr2) : base(language,
+                                                                                                                   o)
             {
                 this.Expression1 = expr1;
                 this.Expression2 = expr2;
@@ -1015,7 +1138,11 @@ namespace Petri
         // Could have been TernaryExpression, but there is only one ternary operator in C++, so we already specialize it.
         public abstract class TernaryConditionExpression : Expression
         {
-            protected TernaryConditionExpression(Language language, Expression expr1, Expression expr2, Expression expr3) : base(language, Cpp.Operator.Name.TernaryConditional)
+            protected TernaryConditionExpression(Language language,
+                                                 Expression expr1,
+                                                 Expression expr2,
+                                                 Expression expr3) : base(language,
+                                                                                                                                 Cpp.Operator.Name.TernaryConditional)
             {
                 this.Expression1 = expr1;
                 this.Expression2 = expr2;
@@ -1063,7 +1190,8 @@ namespace Petri
 
         public class ExpressionList : Expression
         {
-            public ExpressionList(Language language, IEnumerable<Expression> expressions) : base(language, Cpp.Operator.Name.None)
+            public ExpressionList(Language language, IEnumerable<Expression> expressions) : base(language,
+                                                                                                 Cpp.Operator.Name.None)
             {
                 Expressions = new List<Expression>(expressions);
             }

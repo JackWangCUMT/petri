@@ -165,7 +165,9 @@ namespace Petri
                         Console.WriteLine("Processing Petri net " + document.Settings.Name + "…");
                     }
 
-                    string cppPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, document.Settings.SourceOutputPath), document.Settings.Name) + ".cpp";
+                    string cppPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
+                                                                                   document.Settings.SourceOutputPath),
+                                                            document.Settings.Name) + ".cpp";
 
                     bool forceGeneration = false;
                     if(!generate && compile) {
@@ -190,7 +192,9 @@ namespace Petri
                         }
                     }
                     if(compile) {
-                        string dylibPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName, System.IO.Path.Combine(document.Settings.LibOutputPath, document.Settings.Name + ".so")));
+                        string dylibPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
+                                                                                             System.IO.Path.Combine(document.Settings.LibOutputPath,
+                                                                                                                                                                           document.Settings.Name + ".so")));
                         if(!System.IO.File.Exists(dylibPath) || System.IO.File.GetLastWriteTime(dylibPath) < System.IO.File.GetLastWriteTime(cppPath)) {
                             if(verbose) {
                                 Console.WriteLine("Compiling the C++ code…");
@@ -247,10 +251,10 @@ namespace Petri
         public static void OpenDocument()
         {
             var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Open Petri Net…"), null,
-                         FileChooserAction.Open,
-                         new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
-                    Configuration.GetLocalized("Open"), ResponseType.Accept
-                });
+                                               FileChooserAction.Open,
+                                               new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+                Configuration.GetLocalized("Open"), ResponseType.Accept
+            });
 
             var filter = new FileFilter();
             filter.AddPattern("*.petri");

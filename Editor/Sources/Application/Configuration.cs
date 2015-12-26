@@ -75,7 +75,7 @@ namespace Petri
                 catch(System.Xml.XmlException) {
                     string s = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
                     System.IO.File.Delete(s);
-                    System.Console.WriteLine("Corrupted settings file, deleting…");
+                    System.Console.Error.WriteLine("Corrupted settings file, deleting…");
                     return Configuration.Get();
                 }
 
@@ -89,7 +89,7 @@ namespace Petri
                     }
                     catch(System.Exception) {
                     }
-                    Console.WriteLine("CreateConfigurationFile: {0}", err.Message);
+                    Console.Error.WriteLine("CreateConfigurationFile: {0}", err.Message);
                     return Configuration.Get();
                 }
                 if(Configuration._instance == null) {
@@ -121,7 +121,7 @@ namespace Petri
                 Configuration.Get().LoadLanguage();
             }
             if(!Configuration._localizedStrings.ContainsKey(value)) {
-                Console.WriteLine("No localization found for locale \"" + Language + "\" and key \"" + value + "\"");
+                Console.Error.WriteLine("No localization found for locale \"" + Language + "\" and key \"" + value + "\"");
                 return value;
             }
             else {
@@ -241,7 +241,7 @@ namespace Petri
                 noloc = "<Localization unavailable>";
             }
             else {
-                Console.WriteLine("Language \"" + Language + "\" not supported, defaulting to English locale.");
+                Console.Error.WriteLine("Language \"" + Language + "\" not supported, defaulting to English locale.");
                 resource = "en.lang";
                 noloc = "<Localization unavailable>";
             }
@@ -259,7 +259,7 @@ namespace Petri
                 }
                 else {
                     if(_localizedStrings.ContainsKey(key)) {
-                        Console.WriteLine("Warning: the key \"" + key + "\" is already present for the locale \"" + Language + "\".");
+                        Console.Error.WriteLine("Warning: the key \"" + key + "\" is already present for the locale \"" + Language + "\".");
                     }
                     else {
                         _localizedStrings.Add(key, element.Value);

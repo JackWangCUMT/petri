@@ -620,7 +620,7 @@ namespace MonoDevelop.MacInterop
                 return args.HandledStatus;
             }
             catch(Exception ex) {
-                System.Console.WriteLine(ex);
+                System.Console.Error.WriteLine(ex);
                 return CarbonEventHandlerStatus.NotHandled;
             }
         }
