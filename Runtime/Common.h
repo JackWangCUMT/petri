@@ -71,14 +71,6 @@ namespace Petri {
 			return _vars;
 		}
 
-		/**
-		 * Returns a list of the associated Atomic variables' IDs.
-		 * @return The list of variabels of the entity.
-		 */
-		std::list<uint_fast32_t> &getVariables() {
-			return _vars;
-		}
-
 	private:
 		T _id;
 		std::list<std::uint_fast32_t> _vars;
