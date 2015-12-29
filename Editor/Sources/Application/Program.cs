@@ -34,8 +34,9 @@ namespace Petri
         public static bool OnExit()
         {
             while(_documents.Count > 0) {
-                if(!_documents[_documents.Count - 1].CloseAndConfirm())
+                if(!_documents[_documents.Count - 1].CloseAndConfirm()) {
                     return false;
+                }
             }
 
             return true;
@@ -44,8 +45,9 @@ namespace Petri
         public static void SaveAndQuit()
         {
             bool exit = OnExit();
-            if(!exit)
+            if(!exit) {
                 return;
+            }
 
             Configuration.Save();
             Application.Quit();
@@ -77,7 +79,7 @@ namespace Petri
 
         private static int PrintUsage(int returnCode = 1)
         {
-            string message = "Usage: mono Petri.exe [--generate] [--compile] [--arch (32|64)] [--verbose|-v] \"Path/To/Document.petri\"";
+            string message = "Usage: mono Petri.exe [--generate] [--compile] [--arch (32|64)] [--verbose|-v] [--] \"Path/To/Document.petri\"";
             if(returnCode == 0) {
                 Console.WriteLine(message);
             }
@@ -102,7 +104,12 @@ namespace Petri
                 }
 
                 for(int i = 0; i < args.Length; ++i) {
-                    if(args[i] == "--arch") {
+                    // A getopt-like options/file separator that allows the hypothetical processing of petri net files named "--arch" or "--compile" and so on.
+                    if(args[i] == "--") {
+                        used[i] = true;
+                        break;
+                    }
+                    else if(args[i] == "--arch") {
                         if(i < args.Length - 1) {
                             if(int.TryParse(args[i + 1], out arch)) {
                                 if(arch == 32 || arch == 64) {
@@ -138,18 +145,18 @@ namespace Petri
                         used[i] = true;
                     }
                 }
-                if(used[args.Length - 1]) {
-                    // Did not specify document path
-                    Console.Error.WriteLine("The path to the Petri document must be specified as the last program argument!");
-                    return PrintUsage();
-                }
-
                 for(int i = 0; i < args.Length - 1; ++i) {
                     if(!used[i]) {
                         Console.Error.WriteLine("Invalid argument \"" + args[i] + "\"");
                         return PrintUsage();
                     }
                 }
+                if(used[args.Length - 1]) {
+                    // Did not specify document path
+                    Console.Error.WriteLine("The path to the Petri document must be specified as the last program argument!");
+                    return PrintUsage();
+                }
+
 
                 string path = args[args.Length - 1];
 
