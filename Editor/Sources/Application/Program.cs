@@ -21,70 +21,38 @@
  */
 
 using System;
+using System.Runtime.CompilerServices;
 using Gtk;
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Linq;
 using System.Collections;
 
+[assembly: InternalsVisibleTo("Test")]
+
 namespace Petri
 {
     public class MainClass
     {
-        public static bool OnExit()
+        internal static readonly string HelpString = "Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--arch|-a (32|64)] [--verbose|-v] [--] \"Path/To/Document.petri\"";
+
+        internal static readonly string MissingPetriDocument = "The path to the Petri document must be specified as the last program argument!";
+        internal static readonly string MissingGenerateOrCompile = "Must specify \"--generate\" and/or \"--compile\"!";
+
+        internal static readonly string WrongArchitecture = "Wrong architecture specified!";
+        internal static readonly string MissingArchitecture = "Missing architecture value!";
+
+        internal static readonly int ArgumentError = 4;
+        internal static readonly int CompilationFailure = 64;
+        internal static readonly int UnexpectedError = 124;
+
+        private static int PrintUsage(int returnCode)
         {
-            while(_documents.Count > 0) {
-                if(!_documents[_documents.Count - 1].CloseAndConfirm()) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static void SaveAndQuit()
-        {
-            bool exit = OnExit();
-            if(!exit) {
-                return;
-            }
-
-            Configuration.Save();
-            Application.Quit();
-        }
-
-        public static String SafeMarkupFromString(string s)
-        {
-            return System.Web.HttpUtility.HtmlEncode(s).Replace("{", "{{").Replace("}", "}}");
-        }
-
-        public delegate void EntryValDel(Gtk.Entry e, params object[] args);
-
-        public static void RegisterValidation(Gtk.Entry e, bool change, EntryValDel a, params object[] p)
-        {
-            if(change) {
-                e.Changed += (obj, eventInfo) => {
-                    a(e, p);
-                };
-            }
-            else {
-                e.FocusOutEvent += (obj, eventInfo) => {
-                    a(e, p);
-                };
-                e.Activated += (o, args) => {
-                    a(e, p);
-                };
-            }
-        }
-
-        private static int PrintUsage(int returnCode = 1)
-        {
-            string message = "Usage: mono Petri.exe [--generate] [--compile] [--arch (32|64)] [--verbose|-v] [--] \"Path/To/Document.petri\"";
             if(returnCode == 0) {
-                Console.WriteLine(message);
+                Console.WriteLine(HelpString);
             }
             else {
-                Console.Error.WriteLine(message);
+                Console.Error.WriteLine(HelpString);
             }
             return returnCode;
         }
@@ -109,7 +77,7 @@ namespace Petri
                         used[i] = true;
                         break;
                     }
-                    else if(args[i] == "--arch") {
+                    else if(args[i] == "--arch" || args[i] == "-a") {
                         if(i < args.Length - 1) {
                             if(int.TryParse(args[i + 1], out arch)) {
                                 if(arch == 32 || arch == 64) {
@@ -117,30 +85,31 @@ namespace Petri
                                     Configuration.Save();
                                 }
                                 else {
-                                    return PrintUsage();
+                                    Console.Error.WriteLine(WrongArchitecture);
+                                    return PrintUsage(ArgumentError);
                                 }
                                 used[i] = used[i + 1] = true;
                                 ++i;
                             }
                             else {
-                                Console.Error.WriteLine("Wrong architecture specified!");
-                                return PrintUsage();
+                                Console.Error.WriteLine(WrongArchitecture);
+                                return PrintUsage(ArgumentError);
                             }
                         }
                         else {
-                            Console.Error.WriteLine("Missing architecture value!");
-                            return PrintUsage();
+                            Console.Error.WriteLine(MissingArchitecture);
+                            return PrintUsage(ArgumentError);
                         }
                     }
-                    else if(args[i] == "-v" || args[i] == "--verbose") {
+                    else if(args[i] == "--verbose" || args[i] == "-v") {
                         verbose = true;
                         used[i] = true;
                     }
-                    else if(args[i] == "--generate") {
+                    else if(args[i] == "--generate" || args[i] == "-g") {
                         generate = true;
                         used[i] = true;
                     }
-                    else if(args[i] == "--compile") {
+                    else if(args[i] == "--compile" || args[i] == "-c") {
                         compile = true;
                         used[i] = true;
                     }
@@ -148,21 +117,21 @@ namespace Petri
                 for(int i = 0; i < args.Length - 1; ++i) {
                     if(!used[i]) {
                         Console.Error.WriteLine("Invalid argument \"" + args[i] + "\"");
-                        return PrintUsage();
+                        return PrintUsage(ArgumentError);
                     }
                 }
                 if(used[args.Length - 1]) {
                     // Did not specify document path
-                    Console.Error.WriteLine("The path to the Petri document must be specified as the last program argument!");
-                    return PrintUsage();
+                    Console.Error.WriteLine(MissingPetriDocument);
+                    return PrintUsage(ArgumentError);
                 }
 
 
                 string path = args[args.Length - 1];
 
                 if(!compile && !generate) {
-                    Console.Error.WriteLine("Must specify \"--generate\" and/or \"--compile\"!");
-                    return PrintUsage();
+                    Console.Error.WriteLine(MissingGenerateOrCompile);
+                    return PrintUsage(ArgumentError);
                 }
 
                 try {
@@ -209,7 +178,7 @@ namespace Petri
                             bool res = document.Compile(false);
                             if(!res) {
                                 Console.Error.WriteLine("Compilation failed, aborting!");
-                                return 3;
+                                return CompilationFailure;
                             }
                             else if(verbose) {
                                 Console.WriteLine("Compilation successful!");
@@ -222,7 +191,7 @@ namespace Petri
                 }
                 catch(Exception e) {
                     Console.Error.WriteLine("An exception occurred: " + e.Message);
-                    return 2;
+                    return UnexpectedError;
                 }
 
                 return 0;
@@ -236,6 +205,52 @@ namespace Petri
                 Application.Run();
 
                 return 0;
+            }
+        }
+
+        public static bool OnExit()
+        {
+            while(_documents.Count > 0) {
+                if(!_documents[_documents.Count - 1].CloseAndConfirm()) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static void SaveAndQuit()
+        {
+            bool exit = OnExit();
+            if(!exit) {
+                return;
+            }
+
+            Configuration.Save();
+            Application.Quit();
+        }
+
+        public static String SafeMarkupFromString(string s)
+        {
+            return System.Web.HttpUtility.HtmlEncode(s).Replace("{", "{{").Replace("}", "}}");
+        }
+
+        public delegate void EntryValDel(Gtk.Entry e, params object[] args);
+
+        public static void RegisterValidation(Gtk.Entry e, bool change, EntryValDel a, params object[] p)
+        {
+            if(change) {
+                e.Changed += (obj, eventInfo) => {
+                    a(e, p);
+                };
+            }
+            else {
+                e.FocusOutEvent += (obj, eventInfo) => {
+                    a(e, p);
+                };
+                e.Activated += (o, args) => {
+                    a(e, p);
+                };
             }
         }
 
