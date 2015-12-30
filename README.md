@@ -50,7 +50,7 @@ On Linux, you can simply double click on the `Petri.exe` file, whereas on OS X s
 The compiler is the same executable as before, simply invoked with additional arguments.
 ```
 path/to/repo/petri/Editor $ mono bin/Petri.exe --help
-Usage: mono Petri.exe [--generate] [--compile] [--arch (32|64)] [--verbose|-v] "Path/To/Document.petri"
+Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--arch|-a (32|64)] [--verbose|-v] [--] "Path/To/Document.petri"
 ```
 
 ## Compilation of the runtime
