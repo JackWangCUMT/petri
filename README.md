@@ -23,7 +23,6 @@ First, download the binary release of Xamarin Studio for OS X, found here: http:
 
 The `mdtool` utility used for compiling a .csproj or .sln file is only bundled within the `Xamarin Studio` application. For some reason, adding the `/Application/Xamarin Studio.app/Contents/MacOS` path, where the tool is located, to the $PATH environment variable did not do the job for me, neither aliasses in my shell. So, the dumb solution I employed was to put the following script somewhere my $PATH points on:
 ```
-$ cat anywhere/but/referenced/in/$PATH/mdtool
 #!/bin/bash
 /Applications/Xamarin\ Studio.app/Contents/MacOS/mdtool "$@"
 ```
@@ -39,7 +38,7 @@ On OS X, you will find a `Petri.app` application in the Editor directory, which 
 
 #### Editor
 ```
-path/to/repo/petri/Editor $ mono bin/Petri.exe
+path_to_repo/petri/Editor $ mono bin/Petri.exe
 ```
 
 This command will spawn the GUI editor.
@@ -49,7 +48,7 @@ On Linux, you can simply double click on the `Petri.exe` file, whereas on OS X s
 #### Compiler
 The compiler is the same executable as before, simply invoked with additional arguments.
 ```
-path/to/repo/petri/Editor $ mono bin/Petri.exe --help
+path_to/_repo/petri/Editor $ mono bin/Petri.exe --help
 Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--arch|-a (32|64)] [--verbose|-v] [--] "Path/To/Document.petri"
 ```
 
