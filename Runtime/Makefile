@@ -1,14 +1,33 @@
-CXXSRC=$(wildcard Cpp/*.cpp) $(wildcard C/*.cpp) $(wildcard Cpp/jsoncpp/src/lib_json/*.cpp)
-CXXOBJ=$(CXXSRC:%.cpp=build/%.o)
+CXXSRC:=$(wildcard Cpp/*.cpp) $(wildcard C/*.cpp) $(wildcard Cpp/jsoncpp/src/lib_json/*.cpp)
+CXXOBJ:=$(CXXSRC:%.cpp=build/%.o)
 
-WARN=-Wall -Wunused-value -Wuninitialized -Werror=return-stack-address
+WARN:=-Wall -Wunused-value -Wuninitialized
 
-CXX=c++
-CXXFLAGS=$(WARN) -std=c++14 -arch i386 -arch x86_64 -I./Cpp/jsoncpp/include
+CXX:=c++
+CXXVERSION:=$(shell $(CXX) --version)
 
-LDFLAGS=-undefined dynamic_lookup -flat_namespace -arch i386 -arch x86_64
+CXXFLAGS:=-std=c++14 -I./Cpp/jsoncpp/include
+LDFLAGS:=-shared
 
-OUTPUT=libPetriRuntime.so
+ifneq (,$(findstring clang,$(CXXVERSION)))
+# if the compiler is clang++
+
+WARN:=$(WARN) -Werror=return-stack-address
+CXXFLAGS:=$(CXXFLAGS) -arch i386 -arch x86_64
+LDFLAGS:=$(LDFLAGS) -undefined dynamic_lookup -flat_namespace -arch i386 -arch x86_64
+
+else
+# else, we assume g++
+
+WARN:=$(WARN) -Werror=return-local-addr
+LDFLAGS:=$(LDFLAGS) -fPIC
+
+endif
+
+CXXFLAGS:=$(WARN) $(CXXFLAGS)
+
+OUTPUT:=libPetriRuntime.so
+
 
 .PHONY: builddir
 
