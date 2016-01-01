@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6DBF358B-A63A-4A5C-8853-C1C7017A5DC9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Petri.Runtime</RootNamespace>
+    <AssemblyName>CSRuntime</AssemblyName>
+    <BaseDirectory>..\..\Runtime\CSharp</BaseDirectory>
+    <ReleaseVersion>1.1</ReleaseVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Runtime\CSharp\Action.cs" />
+    <Compile Include="..\..\Runtime\CSharp\PetriNet.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Transition.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Interop\ActionInterop.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Interop\DebugServerInterop.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Interop\PetriDynamicLibInterop.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Interop\PetriInterop.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Interop\PetriNetInterop.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Interop\PetriUtilsInterop.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Interop\TransitionInterop.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Interop\TypesInterop.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Types.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Entity.cs" />
+    <Compile Include="..\..\Runtime\CSharp\PetriDebug.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Utility.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

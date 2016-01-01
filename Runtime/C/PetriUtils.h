@@ -31,29 +31,23 @@
 #define PetriUtils_c
 
 #include "Types.h"
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	enum ActionResult {
-		OK,
-		NOK
-	};
+enum ActionResult { OK, NOK };
 
-	Petri_actionResult_t PetriUtility_pause(uint64_t usdelay);
-	Petri_actionResult_t PetriUtility_printAction(char const *name, uint64_t id);
-	Petri_actionResult_t PetriUtility_doNothing();
-	Petri_actionResult_t PetriUtility_returnDefault();
+Petri_actionResult_t PetriUtility_pause(uint64_t usdelay);
+Petri_actionResult_t PetriUtility_printAction(char const *name, uint64_t id);
+Petri_actionResult_t PetriUtility_doNothing();
 
-	bool PetriUtility_returnTrue(Petri_actionResult_t res);
-
+bool PetriUtility_returnTrue(Petri_actionResult_t res);
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /* PetriUtils_c */

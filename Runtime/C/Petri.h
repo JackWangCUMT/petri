@@ -30,8 +30,8 @@
 #ifndef Petri_C_h
 #define Petri_C_h
 
+#include "Action.h"
 #include "PetriNet.h"
 #include "Transition.h"
-#include "Action.h"
 
 #endif /* Petri_h */

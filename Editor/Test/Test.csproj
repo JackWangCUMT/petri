@@ -53,6 +53,10 @@
       <Project>{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}</Project>
       <Name>Petri</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Projects\CSRuntime.csproj">
+      <Project>{6DBF358B-A63A-4A5C-8853-C1C7017A5DC9}</Project>
+      <Name>CSRuntime</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Cpp\" />

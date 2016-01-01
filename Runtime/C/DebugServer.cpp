@@ -27,39 +27,39 @@
 //  Created by Rémi on 04/07/2015.
 //
 
-#include "DebugServer.h"
 #include "../DebugServer.h"
+#include "DebugServer.h"
 #include "PetriDynamicLib.hpp"
 #include "Types.hpp"
 
 char const *PetriDebugServer_getVersion() {
-	return Petri::DebugServer::getVersion().c_str();
+    return Petri::DebugServer::getVersion().c_str();
 }
 
-time_t PetriDebugServer_getAPIdate() {
-	return Petri::DebugServer::getAPIdate().time_since_epoch().count();
+int64_t PetriDebugServer_getAPIdate() {
+    return Petri::DebugServer::getAPIdate().time_since_epoch().count();
 }
 
-time_t PetriDebugServer_getDateFromTimestamp(char const *timestamp) {
-	return Petri::DebugServer::getDateFromTimestamp(timestamp).time_since_epoch().count();
+int64_t PetriDebugServer_getDateFromTimestamp(char const *timestamp) {
+    return Petri::DebugServer::getDateFromTimestamp(timestamp).time_since_epoch().count();
 }
 
 PetriDebugServer *PetriDebugServer_create(PetriDynamicLib *petri) {
-	return new PetriDebugServer{std::make_unique<Petri::DebugServer>(*petri->lib)};
+    return new PetriDebugServer{std::make_unique<Petri::DebugServer>(*petri->lib)};
 }
 
 void PetriDebugServer_destroy(PetriDebugServer *server) {
-	delete server;
+    delete server;
 }
 
 void PetriDebugServer_start(PetriDebugServer *server) {
-	server->server->start();
+    server->server->start();
 }
 
 void PetriDebugServer_stop(PetriDebugServer *server) {
-	server->server->stop();
+    server->server->stop();
 }
 
 bool PetriDebugServer_isRunning(PetriDebugServer *server) {
-	return server->server->running();
+    return server->server->running();
 }

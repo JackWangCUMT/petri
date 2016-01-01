@@ -30,49 +30,56 @@
 #ifndef Petri_Types_hpp
 #define Petri_Types_hpp
 
-#include "../PetriNet.h"
 #include "../Action.h"
-#include "../Transition.h"
 #include "../DebugServer.h"
+#include "../PetriNet.h"
+#include "../Transition.h"
 
 struct CPetriDynamicLib;
 
 #include <memory>
 
 struct PetriNet {
-	std::unique_ptr<Petri::PetriNet> petriNet;
+    std::unique_ptr<Petri::PetriNet> petriNet;
 };
 
 struct PetriAction {
-	std::unique_ptr<Petri::Action> owned;
-	Petri::Action *notOwned;
+    std::unique_ptr<Petri::Action> owned;
+    Petri::Action *notOwned;
 };
 
 struct PetriTransition {
-	std::unique_ptr<Petri::Transition> owned;
-	Petri::Transition *notOwned;
+    std::unique_ptr<Petri::Transition> owned;
+    Petri::Transition *notOwned;
 };
 
+
 struct PetriDynamicLib {
-	std::unique_ptr<CPetriDynamicLib> lib;
+    std::unique_ptr<CPetriDynamicLib> lib;
 };
 
 struct PetriDebugServer {
-	std::unique_ptr<Petri::DebugServer> server;
+    std::unique_ptr<Petri::DebugServer> server;
 };
 
 
 #ifdef PETRI_NEEDS_GET_ACTION
 
 namespace {
-	Petri::Action &getAction(PetriAction *action) {
-		if(action->owned) {
-			return *action->owned;
-		}
-		else {
-			return *action->notOwned;
-		}
-	}
+    Petri::Action &getAction(PetriAction *action) {
+        if(action->owned) {
+            return *action->owned;
+        } else {
+            return *action->notOwned;
+        }
+    }
+    Petri::Transition &getTransition(PetriTransition *transition) {
+        if(transition->owned) {
+            return *transition->owned;
+        } else {
+            return *transition->notOwned;
+        }
+    }
 }
 
 #endif

@@ -27,26 +27,21 @@
 //  Created by Rémi on 01/07/2015.
 //
 
-#include "PetriUtils.h"
 #include "../PetriUtils.h"
+#include "PetriUtils.h"
 
 Petri_actionResult_t PetriUtility_pause(uint64_t usdelay) {
-	return Petri::Utility::pause(std::chrono::microseconds(usdelay));
+    return Petri::Utility::pause(std::chrono::microseconds(usdelay));
 }
 
 Petri_actionResult_t PetriUtility_printAction(char const *name, uint64_t id) {
-	return Petri::Utility::printAction(name, id);
+    return Petri::Utility::printAction(name, id);
 }
 
 Petri_actionResult_t PetriUtility_doNothing() {
-	return Petri::Utility::doNothing();
+    return Petri::Utility::doNothing();
 }
 
 bool PetriUtility_returnTrue() {
-	return true;
+    return true;
 }
-
-Petri_actionResult_t PetriUtility_returnDefault(Petri_actionResult_t res) {
-	return 0;
-}
-
