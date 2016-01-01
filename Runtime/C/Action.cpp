@@ -35,7 +35,7 @@
 #include <memory>
 
 namespace {
-    Petri::ParametrizedActionCallableBase getParametrizedCallable(parametrizedCallable_t action) {
+    auto getParametrizedCallable(parametrizedCallable_t action) {
         return Petri::make_param_action_callable([action](Petri::PetriNet &pn) {
             PetriNet petriNet{std::unique_ptr<Petri::PetriNet>(&pn)};
 
