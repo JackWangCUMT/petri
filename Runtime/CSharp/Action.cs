@@ -46,12 +46,13 @@ namespace Petri.Runtime
         {
             var c = WrapForNative.Wrap(action, name);
             _callback = c;
-            Handle = Interop.Action.PetriAction_createWithParam(id,
-                                                                name,
-                                                                c,
-                                                                requiredTokens);
-
+            Handle = Interop.Action.PetriAction_createWithParam(id, name, c, requiredTokens);
         }
+
+        ~Action() {
+            Interop.Action.PetriAction_destroy(Handle);
+        }
+
 
         /**
          * Adds a Transition to the Action.

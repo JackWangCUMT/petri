@@ -36,6 +36,10 @@ namespace Petri.Runtime
             Handle = Interop.Transition.PetriTransition_create(id, name, previous.Handle, next.Handle, c);
         }
 
+        ~Transition() {
+            Interop.Transition.PetriTransition_destroy(Handle);
+        }
+
         /**
          * Checks whether the Transition can be crossed
          * @param actionResult The result of the Action 'previous'. This is useful when the Transition's test uses this value.

@@ -14,6 +14,10 @@ namespace Petri.Runtime
             Handle = Interop.PetriNet.PetriNet_create(name);
         }
 
+        ~PetriNet() {
+            Interop.PetriNet.PetriNet_destroy(Handle);
+        }
+
         /**
          * Adds an Action to the PetriNet. The net must not be running yet.
          * @param action The action to add
