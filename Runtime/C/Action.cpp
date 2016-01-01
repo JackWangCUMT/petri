@@ -73,12 +73,14 @@ void PetriAction_setID(PetriAction *action, uint64_t id) {
 }
 
 void PetriAction_addTransition(PetriAction *action, PetriTransition *transition) {
-    getAction(action).addTransition(std::move(*transition->owned));
+    auto &t = getAction(action).addTransition(std::move(*transition->owned));
     transition->owned.reset();
+    transition->notOwned = &t;
 }
 
-void PetriAction_createAndAddTransition(PetriAction *action, uint64_t id, char const *name, PetriAction *next, transitionCallable_t cond) {
-    getAction(action).addTransition(id, name, getAction(next), Petri::make_transition_callable(cond));
+PetriTransition *PetriAction_createAndAddTransition(PetriAction *action, uint64_t id, char const *name, PetriAction *next, transitionCallable_t cond) {
+    auto &t = getAction(action).addTransition(id, name, getAction(next), Petri::make_transition_callable(cond));
+    return new PetriTransition{nullptr, &t};
 }
 
 void PetriAction_setAction(PetriAction *action, callable_t a) {

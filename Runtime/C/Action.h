@@ -95,7 +95,7 @@ uint64_t PetriAction_getID(struct PetriAction *action);
 void PetriAction_setID(struct PetriAction *action, uint64_t id);
 
 /**
- * Adds a PetriTransition to the PetriAction. The PetriTransition handle is invalidated after this
+ * Adds a PetriTransition to the PetriAction.
  * call.
  * @param action The PetriAction instance to add the Transition to.
  * @param transition The transition to be added
@@ -109,8 +109,9 @@ void PetriAction_addTransition(struct PetriAction *action, struct PetriTransitio
  * @param name The name of the transition to be added
  * @param next The Action following the transition to be added
  * @param cond The condition of the Transition to be added
+ * @return The transition newly created. Do not destroy this transition
  */
-void PetriAction_createAndAddTransition(struct PetriAction *action, uint64_t id, char const *name, struct PetriAction *next, transitionCallable_t cond);
+struct PetriTransition *PetriAction_createAndAddTransition(struct PetriAction *action, uint64_t id, char const *name, struct PetriAction *next, transitionCallable_t cond);
 
 /**
  * Changes the action associated to the PetriAction

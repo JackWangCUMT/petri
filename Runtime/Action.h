@@ -30,142 +30,149 @@
 #ifndef Petri_Action_h
 #define Petri_Action_h
 
-#include "Transition.h"
-#include <mutex>
-#include <list>
 #include "Callable.h"
+#include "Transition.h"
+#include <list>
+#include <mutex>
 
 namespace Petri {
 
-	using namespace std::chrono_literals;
+    using namespace std::chrono_literals;
 
-	struct PetriNet;
+    struct PetriNet;
 
-	using ActionCallableBase = CallableBase<actionResult_t>;
-	using ParametrizedActionCallableBase = CallableBase<actionResult_t, PetriNet &>;
+    using ActionCallableBase = CallableBase<actionResult_t>;
+    using ParametrizedActionCallableBase = CallableBase<actionResult_t, PetriNet &>;
 
-	template<typename CallableType>
-	auto make_action_callable(CallableType &&c) {
-		return Callable<CallableType, actionResult_t>(c);
-	}
+    template <typename CallableType>
+    auto make_action_callable(CallableType &&c) {
+        return Callable<CallableType, actionResult_t>(c);
+    }
 
-	template<typename CallableType>
-	auto make_param_action_callable(CallableType &&c) {
-		return Callable<CallableType, actionResult_t, PetriNet &>(c);
-	}
+    template <typename CallableType>
+    auto make_param_action_callable(CallableType &&c) {
+        return Callable<CallableType, actionResult_t, PetriNet &>(c);
+    }
 
-	/**
-	 * A state composing a PetriNet.
-	 */
-	class Action : public HasID<uint64_t> {
-		friend class PetriNet;
-	public:
-		/**
-		 * Creates an empty action, associated to a null CallablePtr.
-		 */
-		Action();
+    /**
+     * A state composing a PetriNet.
+     */
+    class Action : public HasID<uint64_t> {
+        friend class PetriNet;
 
-		/**
-		 * Creates an empty action, associated to a copy of the specified Callable.
-		 * @param id The ID of the new action.
-		 * @param name The name of the new action.
-		 * @param action The Callable which will be called when the action is run.
-		 * @param requiredTokens The number of tokens that must be inside the active action for it to execute.
-		 */
-		Action(uint64_t id, std::string const &name, ActionCallableBase const &action, size_t requiredTokens);
+    public:
+        /**
+         * Creates an empty action, associated to a null CallablePtr.
+         */
+        Action();
 
-		/**
-		 * Creates an empty action, associated to a copy of the specified Callable.
-		 * @param id The ID of the new action.
-		 * @param name The name of the new action.
-		 * @param action The Callable which will be called when the action is run.
-		 * @param requiredTokens The number of tokens that must be inside the active action for it to execute.
-		 */
-		Action(uint64_t id, std::string const &name, ParametrizedActionCallableBase const &action, size_t requiredTokens);
+        /**
+         * Creates an empty action, associated to a copy of the specified Callable.
+         * @param id The ID of the new action.
+         * @param name The name of the new action.
+         * @param action The Callable which will be called when the action is run.
+         * @param requiredTokens The number of tokens that must be inside the active action for it
+         * to execute.
+         */
+        Action(uint64_t id, std::string const &name, ActionCallableBase const &action, size_t requiredTokens);
 
-		Action(Action &&);
-		Action(Action const &) = delete;
+        /**
+         * Creates an empty action, associated to a copy of the specified Callable.
+         * @param id The ID of the new action.
+         * @param name The name of the new action.
+         * @param action The Callable which will be called when the action is run.
+         * @param requiredTokens The number of tokens that must be inside the active action for it
+         * to execute.
+         */
+        Action(uint64_t id, std::string const &name, ParametrizedActionCallableBase const &action, size_t requiredTokens);
 
-		~Action();
+        Action(Action &&);
+        Action(Action const &) = delete;
 
-		/**
-		 * Adds a Transition to the Action.
-		 * @param transition the transition to be added
-		 */
-		void addTransition(Transition transition);
+        ~Action();
 
-		/**
-		 * Adds a Transition to the Action.
-		 * @param id the id of the Transition
-		 * @param name the name of the transition to be added
-		 * @param next the Action following the transition to be added
-		 * @param cond the condition of the Transition to be added
-		 * @return The newly created transition.
-		 */
-		Transition &addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond);
+        /**
+         * Adds a Transition to the Action. The parameter is moved from.
+         * @param transition the transition to be added
+         * @return A reference to the added transition.
+         */
+        Transition &addTransition(Transition transition);
 
-		/**
-		 * Returns the Callable asociated to the action. An Action with a null Callable must not invoke this method!
-		 * @return The Callable of the Action
-		 */
-		ParametrizedActionCallableBase &action();
+        /**
+         * Adds a Transition to the Action.
+         * @param id the id of the Transition
+         * @param name the name of the transition to be added
+         * @param next the Action following the transition to be added
+         * @param cond the condition of the Transition to be added
+         * @return The newly created transition.
+         */
+        Transition &
+        addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond);
 
-		/**
-		 * Changes the Callable associated to the Action
-		 * @param action The Callable which will be copied and put in the Action
-		 */
-		void setAction(ActionCallableBase const &action);
+        /**
+         * Returns the Callable asociated to the action. An Action with a null Callable must not
+         * invoke this method!
+         * @return The Callable of the Action
+         */
+        ParametrizedActionCallableBase &action();
 
-		/**
-		 * Changes the Callable associated to the Action
-		 * @param action The Callable which will be copied and put in the Action
-		 */
-		void setAction(ParametrizedActionCallableBase const &action);
+        /**
+         * Changes the Callable associated to the Action
+         * @param action The Callable which will be copied and put in the Action
+         */
+        void setAction(ActionCallableBase const &action);
 
-		/**
-		 * Returns the required tokens of the Action to be activated, i.e. the count of Actions which must lead to *this and terminate for *this to activate.
-		 * @return The required tokens of the Action
-		 */
-		std::size_t requiredTokens() const;
+        /**
+         * Changes the Callable associated to the Action
+         * @param action The Callable which will be copied and put in the Action
+         */
+        void setAction(ParametrizedActionCallableBase const &action);
 
-		/**
-		 * Changes the required tokens of the Action to be activated.
-		 * @param requiredTokens The new required tokens count
-		 * @return The required tokens of the Action
-		 */
-		void setRequiredTokens(std::size_t requiredTokens);
+        /**
+         * Returns the required tokens of the Action to be activated, i.e. the count of Actions
+         * which must lead to *this and terminate for *this to activate.
+         * @return The required tokens of the Action
+         */
+        std::size_t requiredTokens() const;
 
-		/**
-		 * Gets the current tokens count given to the Action by its preceding Actions.
-		 * @return The current tokens count of the Action
-		 */
-		std::size_t currentTokens();
+        /**
+         * Changes the required tokens of the Action to be activated.
+         * @param requiredTokens The new required tokens count
+         * @return The required tokens of the Action
+         */
+        void setRequiredTokens(std::size_t requiredTokens);
 
-		/**
-		 * Returns the name of the Action.
-		 * @return The name of the Action
-		 */
-		std::string const &name() const;
+        /**
+         * Gets the current tokens count given to the Action by its preceding Actions.
+         * @return The current tokens count of the Action
+         */
+        std::size_t currentTokens();
 
-		/**
-		 * Sets the name of the Action
-		 * @param name The name of the Action
-		 */
-		void setName(std::string const &name);
+        /**
+         * Returns the name of the Action.
+         * @return The name of the Action
+         */
+        std::string const &name() const;
 
-		/**
-		 * Returns the transitions exiting the Action.
-		 * @param name The exiting transitions of the Action
-		 */
-		std::list<Transition> const &transitions() const;
+        /**
+         * Sets the name of the Action
+         * @param name The name of the Action
+         */
+        void setName(std::string const &name);
 
-	private:
-		std::size_t &currentTokensRef();
-		std::mutex &tokensMutex();
+        /**
+         * Returns the transitions exiting the Action.
+         * @param name The exiting transitions of the Action
+         */
+        std::list<Transition> const &transitions() const;
 
-		struct Internals;
-		std::unique_ptr<Internals> _internals;
-	};
+    private:
+        std::size_t &currentTokensRef();
+        std::mutex &tokensMutex();
+
+        struct Internals;
+        std::unique_ptr<Internals> _internals;
+    };
 }
 
 #endif
