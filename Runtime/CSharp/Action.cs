@@ -30,7 +30,9 @@ namespace Petri.Runtime
          */
         public Action(UInt64 id, string name, ActionCallable action, UInt64 requiredTokens)
         {
-            Handle = Interop.Action.PetriAction_create(id, name, action, requiredTokens);
+            var c = WrapForNative.Wrap(action, name);
+            _callback = c;
+            Handle = Interop.Action.PetriAction_create(id, name, c, requiredTokens);
         }
 
         /**
@@ -42,9 +44,15 @@ namespace Petri.Runtime
          */
         public Action(UInt64 id, string name, ParametrizedActionCallable action, UInt64 requiredTokens)
         {
-            Handle = Interop.Action.PetriAction_createWithParam(id, name, action, requiredTokens);
-
+            var c = WrapForNative.Wrap(action, name);
+            _callback = c;
+            Handle = Interop.Action.PetriAction_createWithParam(id, name, c, requiredTokens);
         }
+
+        ~Action() {
+            Interop.Action.PetriAction_destroy(Handle);
+        }
+
 
         /**
          * Adds a Transition to the Action.
@@ -53,8 +61,6 @@ namespace Petri.Runtime
         public void AddTransition(Transition transition)
         {
             Interop.Action.PetriAction_addTransition(Handle, transition.Handle);
-            // TODO: investigate whether this is needed in ordrder to avoid the native Transition to be deleted.
-            _transitions.Add(transition);
         }
 
         /**
@@ -67,10 +73,9 @@ namespace Petri.Runtime
          */
         public Transition AddTransition(UInt64 id, string name, Action next, TransitionCallable cond)
         {
-            var handle = Interop.Action.PetriAction_createAndAddTransition(Handle, id, name, next.Handle, cond);
+            var handle = Interop.Action.PetriAction_addNewTransition(Handle, id, name, next.Handle, cond);
 
             var t = new Transition(handle);
-            _transitions.Add(t);
 
             return t;
         }
@@ -81,7 +86,9 @@ namespace Petri.Runtime
          */
         public void SetAction(ActionCallable action)
         {
-            Interop.Action.PetriAction_setAction(Handle, action);
+            var c = WrapForNative.Wrap(action, Name);
+            _callback = c;
+            Interop.Action.PetriAction_setAction(Handle, c);
         }
 
         /**
@@ -90,7 +97,9 @@ namespace Petri.Runtime
          */
         public void SetAction(ParametrizedActionCallable action)
         {
-            Interop.Action.PetriAction_setActionParam(Handle, action);
+            var c = WrapForNative.Wrap(action, Name);
+            _callback = c;
+            Interop.Action.PetriAction_setActionParam(Handle, c);
         }
 
         /**
@@ -125,7 +134,17 @@ namespace Petri.Runtime
             }
         }
 
-        List<Transition> _transitions = new List<Transition>();
+        public UInt64 ID {
+            get {
+                return Interop.Action.PetriAction_getID(Handle);
+            }
+            set {
+                Interop.Action.PetriAction_setID(Handle, value);
+            }
+        }
+
+        // Ensures the callback's lifetime is the same as the instance's one to avoid unexpected GC during native code invocation.
+        private ManagedCallback _callback;
     }
 }
 

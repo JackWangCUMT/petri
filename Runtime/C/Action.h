@@ -111,7 +111,7 @@ void PetriAction_addTransition(struct PetriAction *action, struct PetriTransitio
  * @param cond The condition of the Transition to be added
  * @return The transition newly created. Do not destroy this transition
  */
-struct PetriTransition *PetriAction_createAndAddTransition(struct PetriAction *action, uint64_t id, char const *name, struct PetriAction *next, transitionCallable_t cond);
+struct PetriTransition *PetriAction_addNewTransition(struct PetriAction *action, uint64_t id, char const *name, struct PetriAction *next, transitionCallable_t cond);
 
 /**
  * Changes the action associated to the PetriAction

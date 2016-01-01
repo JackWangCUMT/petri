@@ -31,7 +31,13 @@ namespace Petri.Runtime
          */
         public Transition(UInt64 id, string name, Action previous, Action next, TransitionCallable cond)
         {
-            Handle = Interop.Transition.PetriTransition_create(id, name, previous.Handle, next.Handle, cond);
+            var c = WrapForNative.Wrap(cond, name);
+            _callback = c;
+            Handle = Interop.Transition.PetriTransition_create(id, name, previous.Handle, next.Handle, c);
+        }
+
+        ~Transition() {
+            Interop.Transition.PetriTransition_destroy(Handle);
         }
 
         /**
@@ -50,7 +56,9 @@ namespace Petri.Runtime
          */
         public void SetCondition(TransitionCallable condition)
         {
-            Interop.Transition.PetriTransition_setCondition(Handle, condition);
+            var c = WrapForNative.Wrap(condition, Name);
+            _callback = c;
+            Interop.Transition.PetriTransition_setCondition(Handle, c);
         }
 
         /**
@@ -84,6 +92,15 @@ namespace Petri.Runtime
             }
         }
 
+        public UInt64 ID {
+            get {
+                return Interop.Transition.PetriTransition_getID(Handle);
+            }
+            set {
+                Interop.Transition.PetriTransition_setID(Handle, value);
+            }
+        }
+
         /**
          * The delay between successive evaluations of the Transition. The runtime will not try to evaluate
          * the Transition with a delay smaller than this delay after a previous evaluation, but only for one execution of Action 'previous'
@@ -97,6 +114,9 @@ namespace Petri.Runtime
                 Interop.Transition.PetriTransition_setDelayBetweenEvaluation(Handle, (UInt64)(value * 1.0e6));
             }
         }
+
+        // Ensures the callback's lifetime is the same as the instance's one to avoid unexpected GC during native code invocation.
+        private ManagedCallback _callback;
     }
 }
 

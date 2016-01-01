@@ -14,6 +14,10 @@ namespace Petri.Runtime
             Handle = Interop.PetriNet.PetriNet_create(name);
         }
 
+        ~PetriNet() {
+            Interop.PetriNet.PetriNet_destroy(Handle);
+        }
+
         /**
          * Adds an Action to the PetriNet. The net must not be running yet.
          * @param action The action to add
@@ -21,7 +25,6 @@ namespace Petri.Runtime
          */
         public virtual void AddAction(Action action, bool active = false)
         {
-            _actions.Add(action);
             Interop.PetriNet.PetriNet_addAction(Handle, action.Handle, active);
         }
 
@@ -77,8 +80,6 @@ namespace Petri.Runtime
         {
             return Interop.PetriNet.PetriNet_getVariable(Handle, id);
         }
-
-        private List<Action> _actions = new List<Action>();
     }
 }
 
