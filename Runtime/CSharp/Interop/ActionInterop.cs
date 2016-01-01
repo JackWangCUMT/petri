@@ -28,7 +28,7 @@ public static extern void PetriAction_setID(IntPtr action, UInt64 id);
 public static extern void PetriAction_addTransition(IntPtr action, IntPtr transition);
 
 [DllImport("PetriRuntime")]
-public static extern IntPtr PetriAction_createAndAddTransition(IntPtr action, UInt64 id, [MarshalAs(UnmanagedType.LPTStr)] string name, IntPtr next, TransitionCallableDel cond);
+public static extern IntPtr PetriAction_addNewTransition(IntPtr action, UInt64 id, [MarshalAs(UnmanagedType.LPTStr)] string name, IntPtr next, TransitionCallableDel cond);
 
 [DllImport("PetriRuntime")]
 public static extern void PetriAction_setAction(IntPtr action, ActionCallableDel a);

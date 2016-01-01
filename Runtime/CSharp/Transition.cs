@@ -31,7 +31,7 @@ namespace Petri.Runtime
          */
         public Transition(UInt64 id, string name, Action previous, Action next, TransitionCallable cond)
         {
-            Handle = Interop.Transition.PetriTransition_create(id, name, previous.Handle, next.Handle, cond);
+            Handle = Interop.Transition.PetriTransition_create(id, name, previous.Handle, next.Handle, WrapForNative.Wrap(cond, name));
         }
 
         /**
@@ -50,7 +50,7 @@ namespace Petri.Runtime
          */
         public void SetCondition(TransitionCallable condition)
         {
-            Interop.Transition.PetriTransition_setCondition(Handle, condition);
+            Interop.Transition.PetriTransition_setCondition(Handle, WrapForNative.Wrap(condition, Name));
         }
 
         /**
@@ -81,6 +81,15 @@ namespace Petri.Runtime
             }
             set {
                 Interop.Transition.PetriTransition_setName(Handle, value);
+            }
+        }
+
+        public UInt64 ID {
+            get {
+                return Interop.Transition.PetriTransition_getID(Handle);
+            }
+            set {
+                Interop.Transition.PetriTransition_setID(Handle, value);
             }
         }
 

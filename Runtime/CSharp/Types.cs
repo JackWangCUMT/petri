@@ -2,13 +2,13 @@
 
 namespace Petri.Runtime
 {
-    public delegate ActionResult_t ActionCallableDel();
-    public delegate ActionResult_t ParametrizedActionCallableDel(PetriNet petriNet);
-    public delegate bool TransitionCallableDel(ActionResult_t result);
+    public delegate Int32 ActionCallableDel();
+    public delegate Int32 ParametrizedActionCallableDel(PetriNet petriNet);
+    public delegate bool TransitionCallableDel(Int32 result);
 
     public struct ActionResult_t
     {
-        Int32 _value;
+        public Int32 _value;
 
         public ActionResult_t(Int32 v)
         {
@@ -23,7 +23,7 @@ namespace Petri.Runtime
 
     public struct ActionCallable
     {
-        ActionCallableDel _value;
+        public ActionCallableDel _value;
 
         public ActionCallable(ActionCallableDel v)
         {
@@ -38,7 +38,7 @@ namespace Petri.Runtime
 
     public struct ParametrizedActionCallable
     {
-        ParametrizedActionCallableDel _value;
+        public ParametrizedActionCallableDel _value;
 
         public ParametrizedActionCallable(ParametrizedActionCallableDel v)
         {
@@ -53,7 +53,7 @@ namespace Petri.Runtime
 
     public struct TransitionCallable
     {
-        TransitionCallableDel _value;
+        public TransitionCallableDel _value;
 
         public TransitionCallable(TransitionCallableDel v)
         {
@@ -63,6 +63,44 @@ namespace Petri.Runtime
         public static implicit operator TransitionCallableDel(TransitionCallable result)
         {
             return result._value;
+        }
+    }
+
+    public class WrapForNative {
+        public static ActionCallable Wrap(ActionCallable callable, string actionName) {
+            return new ActionCallable(() => {
+                try {
+                    return callable._value();
+                }
+                catch (Exception e) {
+                    Console.Error.WriteLine("The execution of the action {0} failed with the exception \"{1}\"", actionName, e.Message);
+                    return new ActionResult_t(default(Int32));
+                }
+            });
+        }
+
+        public static ParametrizedActionCallable Wrap(ParametrizedActionCallable callable, string actionName) {
+            return new ParametrizedActionCallable((PetriNet pn) => {
+                try {
+                    return callable._value(pn);
+                }
+                catch (Exception e) {
+                    Console.Error.WriteLine("The execution of the action {0} failed with the exception \"{1}\"", actionName, e.Message);
+                    return new ActionResult_t(default(Int32));
+                }
+            });
+        }
+
+        public static TransitionCallable Wrap(TransitionCallable callable, string transitionName) {
+            return new TransitionCallable((Int32 result) => {
+                try {
+                    return callable._value(result);
+                }
+                catch (Exception e) {
+                    Console.Error.WriteLine("The condition testing of the condition {0} failed with the exception \"{1}\"", transitionName, e.Message);
+                    return default(bool);
+                }
+            });
         }
     }
 }
