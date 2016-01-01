@@ -33,205 +33,200 @@
 
 namespace Petri {
 
-	PetriNet::PetriNet(std::string const &name) : PetriNet(std::make_unique<Internals>(*this, name)) {}
-	PetriNet::PetriNet(std::unique_ptr<Internals> internals) : _internals(std::move(internals)) {}
+    PetriNet::PetriNet(std::string const &name)
+            : PetriNet(std::make_unique<Internals>(*this, name)) {}
+    PetriNet::PetriNet(std::unique_ptr<Internals> internals)
+            : _internals(std::move(internals)) {}
 
-	PetriNet::~PetriNet() {
-		this->stop();
-	}
+    PetriNet::~PetriNet() {
+        this->stop();
+    }
 
-	Action &PetriNet::addAction(Action action, bool active) {
-		if(this->running()) {
-			throw std::runtime_error("Cannot modify running state chart!");
-		}
+    Action &PetriNet::addAction(Action action, bool active) {
+        if(this->running()) {
+            throw std::runtime_error("Cannot modify running state chart!");
+        }
 
-		_internals->_states.emplace_back(std::move(action), active);
+        _internals->_states.emplace_back(std::move(action), active);
 
-		return _internals->_states.back().first;
-	}
+        return _internals->_states.back().first;
+    }
 
-	bool PetriNet::running() const {
-		return _internals->_running;
-	}
+    bool PetriNet::running() const {
+        return _internals->_running;
+    }
 
-	void PetriNet::addVariable(std::uint_fast32_t id) {
-		_internals->_variables.emplace(std::make_pair(id, std::make_unique<Atomic>()));
-	}
+    void PetriNet::addVariable(std::uint_fast32_t id) {
+        _internals->_variables.emplace(std::make_pair(id, std::make_unique<Atomic>()));
+    }
 
-	Atomic &PetriNet::getVariable(std::uint_fast32_t id) {
-		auto it = _internals->_variables.find(id);
-		if(it == _internals->_variables.end()) {
-			throw std::runtime_error("Non existing variable requested: " + std::to_string(id));
-		}
-		return *it->second;
-	}
+    Atomic &PetriNet::getVariable(std::uint_fast32_t id) {
+        auto it = _internals->_variables.find(id);
+        if(it == _internals->_variables.end()) {
+            throw std::runtime_error("Non existing variable requested: " + std::to_string(id));
+        }
+        return *it->second;
+    }
 
-	void PetriNet::run() {
-		if(this->running()) {
-			throw std::runtime_error("Already running!");
-		}
+    void PetriNet::run() {
+        if(this->running()) {
+            throw std::runtime_error("Already running!");
+        }
 
-		for(auto &p : _internals->_states) {
-			if(p.second) {
-				_internals->_running = true;
-				_internals->enableState(p.first);
-			}
-		}
-	}
+        for(auto &p : _internals->_states) {
+            if(p.second) {
+                _internals->_running = true;
+                _internals->enableState(p.first);
+            }
+        }
+    }
 
-	void PetriNet::stop() {
-		if(this->running()) {
-			_internals->_running = false;
-			_internals->_activationCondition.notify_all();
-		}
-		_internals->_actionsPool.cancel();
-	}
+    void PetriNet::stop() {
+        if(this->running()) {
+            _internals->_running = false;
+            _internals->_activationCondition.notify_all();
+        }
+        _internals->_actionsPool.cancel();
+    }
 
-	void PetriNet::join() {
-		// Quick and dirty…
-		while(this->running()) {
-			std::this_thread::sleep_for(std::chrono::nanoseconds(1'000'000));
-		}
-	}
+    void PetriNet::join() {
+        // Quick and dirty…
+        while(this->running()) {
+            std::this_thread::sleep_for(std::chrono::nanoseconds(1'000'000));
+        }
+    }
 
-	void PetriNet::Internals::executeState(Action &a) {
-		Action *nextState = nullptr;
+    void PetriNet::Internals::executeState(Action &a) {
+        Action *nextState = nullptr;
 
-		actionResult_t res;
+        actionResult_t res;
 
-		{
-			std::vector<std::unique_lock<std::mutex>> locks;
-			locks.reserve(a.getVariables().size());
-			for(auto &var : a.getVariables()) {
-				locks.emplace_back(_this.getVariable(var).getLock());
-			}
+        {
+            std::vector<std::unique_lock<std::mutex>> locks;
+            locks.reserve(a.getVariables().size());
+            for(auto &var : a.getVariables()) {
+                locks.emplace_back(_this.getVariable(var).getLock());
+            }
 
-			lock(locks.begin(), locks.end());
+            lock(locks.begin(), locks.end());
 
-			// Runs the Callable
-			res = a.action()(_this);
-		}
+            // Runs the Callable
+            res = a.action()(_this);
+        }
 
-		if(!a.transitions().empty()) {
-			std::list<Transition *> transitionsToTest;
-			for(auto &t : a.transitions()) {
-				transitionsToTest.push_back(const_cast<Transition *>(&t));
-			}
+        if(!a.transitions().empty()) {
+            std::list<Transition *> transitionsToTest;
+            for(auto &t : a.transitions()) {
+                transitionsToTest.push_back(const_cast<Transition *>(&t));
+            }
 
-			auto lastTest = ClockType::time_point();
+            auto lastTest = ClockType::time_point();
 
-			while(_running && transitionsToTest.size()) {
-				auto now = ClockType::now();
-				auto minDelay = ClockType::duration::max() / 2;
+            while(_running && transitionsToTest.size()) {
+                auto now = ClockType::now();
+                auto minDelay = ClockType::duration::max() / 2;
 
-				for(auto it = transitionsToTest.begin(); it != transitionsToTest.end();) {
-					bool isFulfilled = false;
+                for(auto it = transitionsToTest.begin(); it != transitionsToTest.end();) {
+                    bool isFulfilled = false;
 
-					if((now - lastTest) >= (*it)->delayBetweenEvaluation()) {
-						// Testing the transition
-						{
-							std::vector<std::unique_lock<std::mutex>> locks;
-							locks.reserve((*it)->getVariables().size());
-							for(auto &var : (*it)->getVariables()) {
-								locks.emplace_back(_this.getVariable(var).getLock());
-							}
+                    if((now - lastTest) >= (*it)->delayBetweenEvaluation()) {
+                        // Testing the transition
+                        {
+                            std::vector<std::unique_lock<std::mutex>> locks;
+                            locks.reserve((*it)->getVariables().size());
+                            for(auto &var : (*it)->getVariables()) {
+                                locks.emplace_back(_this.getVariable(var).getLock());
+                            }
 
-							lock(locks.begin(), locks.end());
+                            lock(locks.begin(), locks.end());
 
-							isFulfilled = (*it)->isFulfilled(res);
-						}
+                            isFulfilled = (*it)->isFulfilled(res);
+                        }
 
-						minDelay = std::min(minDelay, (*it)->delayBetweenEvaluation());
-					}
-					else {
-						minDelay = std::min(minDelay, (*it)->delayBetweenEvaluation() - (now - lastTest));
-					}
+                        minDelay = std::min(minDelay, (*it)->delayBetweenEvaluation());
+                    } else {
+                        minDelay = std::min(minDelay, (*it)->delayBetweenEvaluation() - (now - lastTest));
+                    }
 
-					if(isFulfilled) {
-						Action &a = (*it)->next();
-						std::lock_guard<std::mutex> tokensLock(a.tokensMutex());
-						if(++a.currentTokensRef() >= a.requiredTokens()) {
-							a.currentTokensRef() -= a.requiredTokens();
+                    if(isFulfilled) {
+                        Action &a = (*it)->next();
+                        std::lock_guard<std::mutex> tokensLock(a.tokensMutex());
+                        if(++a.currentTokensRef() >= a.requiredTokens()) {
+                            a.currentTokensRef() -= a.requiredTokens();
 
-							if(nextState == nullptr) {
-								nextState = &a;
-							}
-							else {
-								this->enableState(a);
-							}
-						}
+                            if(nextState == nullptr) {
+                                nextState = &a;
+                            } else {
+                                this->enableState(a);
+                            }
+                        }
 
-						it = transitionsToTest.erase(it);
-					}
-					else {
-						++it;
-					}
-				}
+                        it = transitionsToTest.erase(it);
+                    } else {
+                        ++it;
+                    }
+                }
 
-				if(nextState != nullptr) {
-					break;
-				}
-				else {
-					lastTest = now;
+                if(nextState != nullptr) {
+                    break;
+                } else {
+                    lastTest = now;
 
-					while(ClockType::now() - lastTest <= minDelay) {
-						std::this_thread::sleep_for(std::min(1000000ns, minDelay));
-					}
-				}
-			}
-		}
+                    while(ClockType::now() - lastTest <= minDelay) {
+                        std::this_thread::sleep_for(std::min(1000000ns, minDelay));
+                    }
+                }
+            }
+        }
 
-		if(nextState != nullptr) {
-			this->swapStates(a, *nextState);
-		}
-		else {
-			this->disableState(a);
-		}
-	}
+        if(nextState != nullptr) {
+            this->swapStates(a, *nextState);
+        } else {
+            this->disableState(a);
+        }
+    }
 
-	void PetriNet::Internals::swapStates(Action &oldAction, Action &newAction) {
-		{
-			std::lock_guard<std::mutex> lk(_activationMutex);
-			_activeStates.insert(&newAction);
+    void PetriNet::Internals::swapStates(Action &oldAction, Action &newAction) {
+        {
+            std::lock_guard<std::mutex> lk(_activationMutex);
+            _activeStates.insert(&newAction);
 
-			auto it = _activeStates.find(&oldAction);
-			assert(it != _activeStates.end());
-			_activeStates.erase(it);
-		}
+            auto it = _activeStates.find(&oldAction);
+            assert(it != _activeStates.end());
+            _activeStates.erase(it);
+        }
 
-		this->stateDisabled(oldAction);
-		this->stateEnabled(newAction);
+        this->stateDisabled(oldAction);
+        this->stateEnabled(newAction);
 
-		_actionsPool.addTask(make_callable([this, &newAction]() { this->executeState(newAction); }));
-	}
+        _actionsPool.addTask(make_callable([this, &newAction]() { this->executeState(newAction); }));
+    }
 
-	void PetriNet::Internals::enableState(Action &a) {
-		{
-			std::lock_guard<std::mutex> lk(_activationMutex);
-			_activeStates.insert(&a);
+    void PetriNet::Internals::enableState(Action &a) {
+        {
+            std::lock_guard<std::mutex> lk(_activationMutex);
+            _activeStates.insert(&a);
 
-			if(_actionsPool.threadCount() < _activeStates.size()) {
-				_actionsPool.addThread();
-			}
-		}
+            if(_actionsPool.threadCount() < _activeStates.size()) {
+                _actionsPool.addThread();
+            }
+        }
 
-		this->stateEnabled(a);
-		_actionsPool.addTask(make_callable([this, &a]() { this->executeState(a); }));
-	}
+        this->stateEnabled(a);
+        _actionsPool.addTask(make_callable([this, &a]() { this->executeState(a); }));
+    }
 
-	void PetriNet::Internals::disableState(Action &a) {
-		std::lock_guard<std::mutex> lk(_activationMutex);
+    void PetriNet::Internals::disableState(Action &a) {
+        std::lock_guard<std::mutex> lk(_activationMutex);
 
-		auto it = _activeStates.find(&a);
-		assert(it != _activeStates.end());
+        auto it = _activeStates.find(&a);
+        assert(it != _activeStates.end());
 
-		_activeStates.erase(it);
+        _activeStates.erase(it);
 
-		this->stateDisabled(a);
-		if(_activeStates.size() == 0 && _running) {
-			_this.stop();
-		}
-	}
-	
+        this->stateDisabled(a);
+        if(_activeStates.size() == 0 && _running) {
+            _this.stop();
+        }
+    }
 }
-

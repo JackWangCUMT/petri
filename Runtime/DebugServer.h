@@ -30,116 +30,119 @@
 #ifndef Petri_DebugServer_h
 #define Petri_DebugServer_h
 
-#include <string>
 #include "PetriNet.h"
-#include "jsoncpp/include/json.h"
-#include <set>
-#include <chrono>
-#include <mutex>
-#include <condition_variable>
-#include <thread>
 #include "Socket.h"
+#include "jsoncpp/include/json.h"
 #include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+#include <set>
+#include <string>
+#include <thread>
 
 namespace Petri {
-	
-	using namespace std::string_literals;
-	using namespace std::chrono_literals;
 
-	class PetriDynamicLib;
-	class PetriDebug;
+    using namespace std::string_literals;
+    using namespace std::chrono_literals;
 
-	class DebugServer {
-		friend class PetriDebug;
-	public:
-		/**
-		 * Returns the DebugServer API's version
-		 * @return The current version of the API.
-		 */
-		static std::string const &getVersion();
+    class PetriDynamicLib;
+    class PetriDebug;
 
-		/**
-		 * Returns the date on which the API was compiled.
-		 * @return The API compilation date.
-		 */
-		static std::chrono::system_clock::time_point getAPIdate();
-		
-		/*
-		 * Converts a timestamp string to a date.
-		 * @param timestamp The timestamp to convert.
-		 * @return The conversion result.
-		 */
-		static std::chrono::system_clock::time_point getDateFromTimestamp(char const *timestamp);
+    class DebugServer {
+        friend class PetriDebug;
 
-		/**
-		 * Creates the DebugServer and binds it to the provided dynamic library.
-		 * @param petri The dynamic lib from which the debug server operates.
-		 */
-		DebugServer(PetriDynamicLib &petri);
+    public:
+        /**
+         * Returns the DebugServer API's version
+         * @return The current version of the API.
+         */
+        static std::string const &getVersion();
 
-		/**
-		 * Destroys the debug server. If the server is running, a deleted or out of scope DebugServer
-		 * object will wait for the connected client to end the debug session to continue the program exectution.
-		 */
-		~DebugServer();
+        /**
+         * Returns the date on which the API was compiled.
+         * @return The API compilation date.
+         */
+        static std::chrono::system_clock::time_point getAPIdate();
 
-		DebugServer(DebugServer const &) = delete;
-		DebugServer &operator=(DebugServer const &) = delete;
+        /*
+         * Converts a timestamp string to a date.
+         * @param timestamp The timestamp to convert.
+         * @return The conversion result.
+         */
+        static std::chrono::system_clock::time_point getDateFromTimestamp(char const *timestamp);
 
-		/**
-		 * Starts the debug server by listening on the debug port of the bound dynamic library, making it ready to receive a debugger connection.
-		 */
-		void start();
+        /**
+         * Creates the DebugServer and binds it to the provided dynamic library.
+         * @param petri The dynamic lib from which the debug server operates.
+         */
+        DebugServer(PetriDynamicLib &petri);
 
-		/**
-		 * Stops the debug server. After that, the debugging port is unbound.
-		 */
-		void stop();
+        /**
+         * Destroys the debug server. If the server is running, a deleted or out of scope
+         * DebugServer
+         * object will wait for the connected client to end the debug session to continue the
+         * program exectution.
+         */
+        ~DebugServer();
 
-		/**
-		 * Checks whether the debug server is running or not.
-		 * @return true if the server is running, false otherwise.
-		 */
-		bool running() const;
+        DebugServer(DebugServer const &) = delete;
+        DebugServer &operator=(DebugServer const &) = delete;
 
-	protected:
-		void addActiveState(Action &a);
-		void removeActiveState(Action &a);
-		void notifyStop();
+        /**
+         * Starts the debug server by listening on the debug port of the bound dynamic library,
+         * making it ready to receive a debugger connection.
+         */
+        void start();
 
-		void serverCommunication();
-		void heartBeat();
+        /**
+         * Stops the debug server. After that, the debugging port is unbound.
+         */
+        void stop();
 
-		void clearPetri();
+        /**
+         * Checks whether the debug server is running or not.
+         * @return true if the server is running, false otherwise.
+         */
+        bool running() const;
 
-		void setPause(bool pause);
+    protected:
+        void addActiveState(Action &a);
+        void removeActiveState(Action &a);
+        void notifyStop();
 
-		void updateBreakpoints(Json::Value const &breakpoints);
+        void serverCommunication();
+        void heartBeat();
 
-		Json::Value receiveObject();
-		void sendObject(Json::Value const &o);
+        void clearPetri();
 
-		Json::Value json(std::string const &type, Json::Value const &payload);
-		Json::Value error(std::string const &error);
+        void setPause(bool pause);
 
-		std::map<Action *, std::size_t> _activeStates;
-		bool _stateChange = false;
-		std::condition_variable _stateChangeCondition;
-		std::mutex _stateChangeMutex;
+        void updateBreakpoints(Json::Value const &breakpoints);
 
-		std::thread _receptionThread;
-		std::thread _heartBeat;
-		Petri::Socket _socket;
-		Petri::Socket _client;
-		std::atomic_bool _running = {false};
+        Json::Value receiveObject();
+        void sendObject(Json::Value const &o);
 
-		PetriDynamicLib &_petriNetFactory;
-		std::unique_ptr<PetriDebug> _petri;
-		std::mutex _sendMutex;
-		std::mutex _breakpointsMutex;
-		std::set<Action *> _breakpoints;
-	};
+        Json::Value json(std::string const &type, Json::Value const &payload);
+        Json::Value error(std::string const &error);
 
+        std::map<Action *, std::size_t> _activeStates;
+        bool _stateChange = false;
+        std::condition_variable _stateChangeCondition;
+        std::mutex _stateChangeMutex;
+
+        std::thread _receptionThread;
+        std::thread _heartBeat;
+        Petri::Socket _socket;
+        Petri::Socket _client;
+        std::atomic_bool _running = {false};
+
+        PetriDynamicLib &_petriNetFactory;
+        std::unique_ptr<PetriDebug> _petri;
+        std::mutex _sendMutex;
+        std::mutex _breakpointsMutex;
+        std::set<Action *> _breakpoints;
+    };
 }
 
 #endif

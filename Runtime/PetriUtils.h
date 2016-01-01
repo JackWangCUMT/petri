@@ -35,19 +35,15 @@
 
 namespace Petri {
 
-	using namespace std::chrono_literals;
+    using namespace std::chrono_literals;
 
-	enum class ActionResult {
-		OK,
-		NOK
-	};
+    enum class ActionResult { OK, NOK };
 
-	namespace Utility {
-		actionResult_t pause(std::chrono::nanoseconds const &delay);
-		actionResult_t printAction(std::string const &name, std::uint64_t id);
-		actionResult_t doNothing();
-	}
-
+    namespace Utility {
+        actionResult_t pause(std::chrono::nanoseconds const &delay);
+        actionResult_t printAction(std::string const &name, std::uint64_t id);
+        actionResult_t doNothing();
+    }
 }
 
 #endif

@@ -31,6 +31,5 @@
 
 namespace Petri {
 
-	KillableThread::AmIAlive KillableThread::_amIAlive;
-
+    KillableThread::AmIAlive KillableThread::_amIAlive;
 }

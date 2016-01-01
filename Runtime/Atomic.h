@@ -30,34 +30,32 @@
 #ifndef Petri_Atomic_h
 #define Petri_Atomic_h
 
-#include <mutex>
 #include "PetriUtils.h"
+#include <mutex>
 
 namespace Petri {
 
-	class Atomic {
-	public:
-		Atomic() : _value(0) {
+    class Atomic {
+    public:
+        Atomic()
+                : _value(0) {}
 
-		}
+        auto &value() {
+            return _value;
+        }
 
-		auto &value() {
-			return _value;
-		}
+        auto getLock() {
+            return std::unique_lock<std::mutex>{_mutex, std::defer_lock};
+        }
 
-		auto getLock() {
-			return std::unique_lock<std::mutex>{_mutex, std::defer_lock};
-		}
+        auto &getMutex() {
+            return _mutex;
+        }
 
-		auto &getMutex() {
-			return _mutex;
-		}
-
-	private:
-		std::int64_t _value;
-		std::mutex _mutex;
-	};
-	
+    private:
+        std::int64_t _value;
+        std::mutex _mutex;
+    };
 }
 
 

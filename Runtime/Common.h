@@ -30,52 +30,52 @@
 #ifndef Petri_Common_h
 #define Petri_Common_h
 
-#include <string>
-#include <cstdint>
 #include "C/Types.h"
+#include <cstdint>
 #include <list>
+#include <string>
 
 namespace Petri {
-	
-	void setThreadName(char const *name);
-	void setThreadName(std::string const &name);
 
-	using actionResult_t = Petri_actionResult_t;
+    void setThreadName(char const *name);
+    void setThreadName(std::string const &name);
 
-	template<typename T>
-	struct HasID {
-	public:
-		HasID(T id) : _id(id) { }
+    using actionResult_t = Petri_actionResult_t;
 
-		T ID() const {
-			return _id;
-		}
+    template <typename T>
+    struct HasID {
+    public:
+        HasID(T id)
+                : _id(id) {}
 
-		void setID(T id) {
-			_id = id;
-		}
+        T ID() const {
+            return _id;
+        }
 
-		/**
-		 * Adds a variable to the entity's associated ones.
-		 * @param id The new variable to add.
-		 */
-		void addVariable(std::uint_fast32_t id) {
-			_vars.push_back(id);
-		}
+        void setID(T id) {
+            _id = id;
+        }
 
-		/**
-		 * Returns a list of the associated Atomic variables' IDs.
-		 * @return The list of variabels of the entity.
-		 */
-		std::list<uint_fast32_t> const &getVariables() const {
-			return _vars;
-		}
+        /**
+         * Adds a variable to the entity's associated ones.
+         * @param id The new variable to add.
+         */
+        void addVariable(std::uint_fast32_t id) {
+            _vars.push_back(id);
+        }
 
-	private:
-		T _id;
-		std::list<std::uint_fast32_t> _vars;
-	};
+        /**
+         * Returns a list of the associated Atomic variables' IDs.
+         * @return The list of variabels of the entity.
+         */
+        std::list<uint_fast32_t> const &getVariables() const {
+            return _vars;
+        }
 
+    private:
+        T _id;
+        std::list<std::uint_fast32_t> _vars;
+    };
 }
 
 

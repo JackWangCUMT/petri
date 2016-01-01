@@ -31,98 +31,98 @@ using lockIterator_t = std::vector<std::unique_lock<std::mutex>>::iterator;
 
 namespace {
 
-	/*
-	 * The following code is coming from the Boost version 1.58's "lock_algorithms.hpp" header file, and comes along the following copyright notices:
-	 * (C) Copyright 2007 Anthony Williams
-	 * (C) Copyright 2011-2012 Vicente J. Botet Escriba
-	 *
-	 * It has been modified to fit the project's needs, according to the Boost Software License Version 1.0's terms, quoted at the beginning of this file.
-	 */
+    /*
+     * The following code is coming from the Boost version 1.58's "lock_algorithms.hpp" header file,
+     * and comes along the following copyright notices:
+     * (C) Copyright 2007 Anthony Williams
+     * (C) Copyright 2011-2012 Vicente J. Botet Escriba
+     *
+     * It has been modified to fit the project's needs, according to the Boost Software License
+     * Version 1.0's terms, quoted at the beginning of this file.
+     */
 
-	void lock(lockIterator_t begin, lockIterator_t end);
+    void lock(lockIterator_t begin, lockIterator_t end);
 
-	struct range_lock_guard {
-		lockIterator_t begin;
-		lockIterator_t end;
+    struct range_lock_guard {
+        lockIterator_t begin;
+        lockIterator_t end;
 
-		range_lock_guard(lockIterator_t begin_, lockIterator_t end_) :
-		begin(begin_), end(end_) {
-			lock(begin, end);
-		}
+        range_lock_guard(lockIterator_t begin_, lockIterator_t end_)
+                : begin(begin_)
+                , end(end_) {
+            lock(begin, end);
+        }
 
-		void release() {
-			begin = end;
-		}
+        void release() {
+            begin = end;
+        }
 
-		~range_lock_guard() {
-			for (; begin != end; ++begin) {
-				begin->unlock();
-			}
-		}
-	};
+        ~range_lock_guard() {
+            for(; begin != end; ++begin) {
+                begin->unlock();
+            }
+        }
+    };
 
-	lockIterator_t try_lock(lockIterator_t begin, lockIterator_t end) {
-		if(begin == end) {
-			return end;
-		}
+    lockIterator_t try_lock(lockIterator_t begin, lockIterator_t end) {
+        if(begin == end) {
+            return end;
+        }
 
-		auto &guard = *begin;
-		guard.try_lock();
+        auto &guard = *begin;
+        guard.try_lock();
 
-		if(!guard.owns_lock()) {
-			return begin;
-		}
-		lockIterator_t const failed = try_lock(++begin, end);
-		if(failed == end) {
-			guard.release();
-		}
+        if(!guard.owns_lock()) {
+            return begin;
+        }
+        lockIterator_t const failed = try_lock(++begin, end);
+        if(failed == end) {
+            guard.release();
+        }
 
-		return failed;
-	}
+        return failed;
+    }
 
-	void lock(lockIterator_t begin, lockIterator_t end) {
-		if (begin == end) {
-			return;
-		}
+    void lock(lockIterator_t begin, lockIterator_t end) {
+        if(begin == end) {
+            return;
+        }
 
-		bool start_with_begin = true;
-		lockIterator_t second = begin;
-		++second;
-		lockIterator_t next = second;
+        bool start_with_begin = true;
+        lockIterator_t second = begin;
+        ++second;
+        lockIterator_t next = second;
 
-		for (;;) {
-			auto &begin_lock = *begin;
-			if (start_with_begin) {
-				begin_lock.lock();
-				lockIterator_t const failed_lock = try_lock(next, end);
-				if (failed_lock == end) {
-					begin_lock.release();
-					return;
-				}
-				start_with_begin = false;
-				next = failed_lock;
-			}
-			else {
-				range_lock_guard guard(next, end);
-				if (begin_lock.try_lock()) {
-					lockIterator_t const failed_lock = try_lock(second, next);
-					if (failed_lock == next) {
-						begin_lock.release();
-						guard.release();
-						return;
-					}
-					start_with_begin = false;
-					next = failed_lock;
-				}
-				else {
-					start_with_begin = true;
-					next = second;
-				}
-			}
-		}
-	}
-
+        for(;;) {
+            auto &begin_lock = *begin;
+            if(start_with_begin) {
+                begin_lock.lock();
+                lockIterator_t const failed_lock = try_lock(next, end);
+                if(failed_lock == end) {
+                    begin_lock.release();
+                    return;
+                }
+                start_with_begin = false;
+                next = failed_lock;
+            } else {
+                range_lock_guard guard(next, end);
+                if(begin_lock.try_lock()) {
+                    lockIterator_t const failed_lock = try_lock(second, next);
+                    if(failed_lock == next) {
+                        begin_lock.release();
+                        guard.release();
+                        return;
+                    }
+                    start_with_begin = false;
+                    next = failed_lock;
+                } else {
+                    start_with_begin = true;
+                    next = second;
+                }
+            }
+        }
+    }
 }
 
-	
+
 #endif /* lock_h */

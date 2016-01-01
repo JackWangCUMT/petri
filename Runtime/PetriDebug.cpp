@@ -27,71 +27,68 @@
 //  Created by Rémi on 27/11/2014.
 //
 
-#include "PetriDebug.h"
-#include "DebugServer.h"
 #include "Action.h"
+#include "DebugServer.h"
+#include "PetriDebug.h"
 #include "PetriNetImpl.h"
 
 namespace Petri {
 
-	struct PetriDebug::Internals : PetriNet::Internals {
-		Internals(PetriDebug &pn, std::string const &name) : PetriNet::Internals(pn, name) {
-			
-		}
+    struct PetriDebug::Internals : PetriNet::Internals {
+        Internals(PetriDebug &pn, std::string const &name)
+                : PetriNet::Internals(pn, name) {}
 
-		void stateEnabled(Action &a) override;
-		void stateDisabled(Action &a) override;
+        void stateEnabled(Action &a) override;
+        void stateDisabled(Action &a) override;
 
-		DebugServer *_observer = nullptr;
-		std::unordered_map<uint64_t, Action *> _statesMap;
-	};
+        DebugServer *_observer = nullptr;
+        std::unordered_map<uint64_t, Action *> _statesMap;
+    };
 
-	void PetriDebug::Internals::stateEnabled(Action &a) {
-		if(_observer) {
-			_observer->addActiveState(a);
-		}
-	}
+    void PetriDebug::Internals::stateEnabled(Action &a) {
+        if(_observer) {
+            _observer->addActiveState(a);
+        }
+    }
 
-	void PetriDebug::Internals::stateDisabled(Action &a) {
-		if(_observer) {
-			_observer->removeActiveState(a);
-		}
-	}
+    void PetriDebug::Internals::stateDisabled(Action &a) {
+        if(_observer) {
+            _observer->removeActiveState(a);
+        }
+    }
 
-	PetriDebug::PetriDebug(std::string const &name) : PetriNet(std::make_unique<PetriDebug::Internals>(*this, name)) {
+    PetriDebug::PetriDebug(std::string const &name)
+            : PetriNet(std::make_unique<PetriDebug::Internals>(*this, name)) {}
 
-	}
-
-	PetriDebug::~PetriDebug() = default;
+    PetriDebug::~PetriDebug() = default;
 
 
-	void PetriDebug::setObserver(DebugServer *session) {
-		static_cast<Internals &>(*_internals)._observer = session;
-	}
-	Action &PetriDebug::addAction(Action action, bool active) {
-		auto &a = this->PetriNet::addAction(std::move(action), active);
-		static_cast<Internals &>(*_internals)._statesMap[a.ID()] = &a;
+    void PetriDebug::setObserver(DebugServer *session) {
+        static_cast<Internals &>(*_internals)._observer = session;
+    }
+    Action &PetriDebug::addAction(Action action, bool active) {
+        auto &a = this->PetriNet::addAction(std::move(action), active);
+        static_cast<Internals &>(*_internals)._statesMap[a.ID()] = &a;
 
-		return a;
-	}
+        return a;
+    }
 
-	void PetriDebug::stop() {
-		if(static_cast<Internals &>(*_internals)._observer) {
-			static_cast<Internals &>(*_internals)._observer->notifyStop();
-		}
-		this->PetriNet::stop();
-	}
+    void PetriDebug::stop() {
+        if(static_cast<Internals &>(*_internals)._observer) {
+            static_cast<Internals &>(*_internals)._observer->notifyStop();
+        }
+        this->PetriNet::stop();
+    }
 
-	Action *PetriDebug::stateWithID(uint64_t id) const {
-		auto it = static_cast<Internals &>(*_internals)._statesMap.find(id);
-		if(it != static_cast<Internals &>(*_internals)._statesMap.end())
-			return it->second;
-		else
-			return nullptr;
-	}
+    Action *PetriDebug::stateWithID(uint64_t id) const {
+        auto it = static_cast<Internals &>(*_internals)._statesMap.find(id);
+        if(it != static_cast<Internals &>(*_internals)._statesMap.end())
+            return it->second;
+        else
+            return nullptr;
+    }
 
-	ThreadPool<void> &PetriDebug::actionsPool() {
-		return _internals->_actionsPool;
-	}
-
+    ThreadPool<void> &PetriDebug::actionsPool() {
+        return _internals->_actionsPool;
+    }
 }

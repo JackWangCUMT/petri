@@ -30,10 +30,10 @@
 #ifndef Petri_Petri_h
 #define Petri_Petri_h
 
-#include "PetriNet.h"
-#include "PetriDebug.h"
-#include "PetriUtils.h"
 #include "Action.h"
 #include "DebugServer.h"
+#include "PetriDebug.h"
+#include "PetriNet.h"
+#include "PetriUtils.h"
 
 #endif
