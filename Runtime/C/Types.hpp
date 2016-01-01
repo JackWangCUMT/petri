@@ -35,7 +35,7 @@
 #include "../Cpp/PetriNet.h"
 #include "../Cpp/Transition.h"
 
-struct CPetriDynamicLib;
+class CPetriDynamicLib;
 
 #include <memory>
 
@@ -63,9 +63,9 @@ struct PetriDebugServer {
 };
 
 
-#ifdef PETRI_NEEDS_GET_ACTION
-
 namespace {
+    // The following #ifdef prevent unused functions warning.
+#ifdef PETRI_NEEDS_GET_ACTION
     Petri::Action &getAction(PetriAction *action) {
         if(action->owned) {
             return *action->owned;
@@ -73,6 +73,8 @@ namespace {
             return *action->notOwned;
         }
     }
+#endif
+#ifdef PETRI_NEEDS_GET_TRANSITION
     Petri::Transition &getTransition(PetriTransition *transition) {
         if(transition->owned) {
             return *transition->owned;
@@ -80,8 +82,8 @@ namespace {
             return *transition->notOwned;
         }
     }
+#endif
 }
 
-#endif
 
 #endif /* Types_h */

@@ -5,6 +5,8 @@
 *~
 *.userprefs
 
+TestResult.xml
+
 /Editor/obj
 /Editor/bin
 /Editor/packages
@@ -17,4 +19,6 @@
 
 /Editor/Test/bin
 /Editor/Test/obj
-TestResult.xml
+
+/Runtime/build
+/Runtime/libPetriRuntime.so

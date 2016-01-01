@@ -131,10 +131,10 @@ namespace Petri {
         void setDelayBetweenEvaluation(std::chrono::nanoseconds delay);
 
     private:
-        std::unique_ptr<TransitionCallableBase> _test;
+        std::string _name;
         Action &_previous;
         Action &_next;
-        std::string _name;
+        std::unique_ptr<TransitionCallableBase> _test;
 
         // Default delay between evaluation
         std::chrono::nanoseconds _delayBetweenEvaluation = 10ms;

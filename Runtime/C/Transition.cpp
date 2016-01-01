@@ -28,6 +28,7 @@
 //
 
 #define PETRI_NEEDS_GET_ACTION
+#define PETRI_NEEDS_GET_TRANSITION
 
 #include "Transition.h"
 #include "Types.hpp"

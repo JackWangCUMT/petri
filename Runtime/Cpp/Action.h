@@ -39,7 +39,7 @@ namespace Petri {
 
     using namespace std::chrono_literals;
 
-    struct PetriNet;
+    class PetriNet;
 
     using ActionCallableBase = CallableBase<actionResult_t>;
     using ParametrizedActionCallableBase = CallableBase<actionResult_t, PetriNet &>;
