@@ -67,6 +67,9 @@ struct PetriTransition *PetriTransition_create(uint64_t id, char const *name, st
  */
 void PetriTransition_destroy(struct PetriTransition *transition);
 
+struct PetriAction *PetriTransition_getPrevious(struct PetriTransition *transition);
+struct PetriAction *PetriTransition_getNext(struct PetriTransition *transition);
+
 /**
  * Returns the ID of the PetriTransition.
  * @param transition The PetriTransition to query.

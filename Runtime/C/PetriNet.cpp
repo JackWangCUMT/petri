@@ -48,9 +48,13 @@ void PetriNet_destroy(PetriNet *pn) {
 }
 
 void PetriNet_addAction(PetriNet *pn, PetriAction *action, bool active) {
-    auto &a = pn->petriNet->addAction(std::move(*action->owned), active);
-    action->owned.reset();
-    action->notOwned = &a;
+    if(!action->owned) {
+        std::cerr << "The action has already been added to a petri net!" << std::endl;
+    } else {
+        auto &a = pn->petriNet->addAction(std::move(*action->owned), active);
+        action->owned.reset();
+        action->notOwned = &a;
+    }
 }
 
 bool PetriNet_isRunning(PetriNet *pn) {

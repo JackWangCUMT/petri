@@ -45,7 +45,3 @@ Petri_actionResult_t PetriUtility_doNothing() {
 bool PetriUtility_returnTrue() {
     return true;
 }
-
-Petri_actionResult_t PetriUtility_returnDefault(Petri_actionResult_t res) {
-    return 0;
-}

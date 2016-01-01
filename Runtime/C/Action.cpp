@@ -73,9 +73,13 @@ void PetriAction_setID(PetriAction *action, uint64_t id) {
 }
 
 void PetriAction_addTransition(PetriAction *action, PetriTransition *transition) {
-    auto &t = getAction(action).addTransition(std::move(*transition->owned));
-    transition->owned.reset();
-    transition->notOwned = &t;
+    if(!transition->owned) {
+        std::cerr << "The transition has already been added to an action!" << std::endl;
+    } else {
+        auto &t = getAction(action).addTransition(std::move(*transition->owned));
+        transition->owned.reset();
+        transition->notOwned = &t;
+    }
 }
 
 PetriTransition *PetriAction_createAndAddTransition(PetriAction *action, uint64_t id, char const *name, PetriAction *next, transitionCallable_t cond) {

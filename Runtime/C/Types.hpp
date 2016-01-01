@@ -53,6 +53,7 @@ struct PetriTransition {
     Petri::Transition *notOwned;
 };
 
+
 struct PetriDynamicLib {
     std::unique_ptr<CPetriDynamicLib> lib;
 };
@@ -70,6 +71,13 @@ namespace {
             return *action->owned;
         } else {
             return *action->notOwned;
+        }
+    }
+    Petri::Transition &getTransition(PetriTransition *transition) {
+        if(transition->owned) {
+            return *transition->owned;
+        } else {
+            return *transition->notOwned;
         }
     }
 }
