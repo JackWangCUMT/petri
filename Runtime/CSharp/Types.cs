@@ -21,7 +21,12 @@ namespace Petri.Runtime
         }
     }
 
-    public struct ActionCallable
+    public interface ManagedCallback
+    {
+
+    }
+
+    public struct ActionCallable : ManagedCallback
     {
         public ActionCallableDel _value;
 
@@ -36,7 +41,7 @@ namespace Petri.Runtime
         }
     }
 
-    public struct ParametrizedActionCallable
+    public struct ParametrizedActionCallable : ManagedCallback
     {
         public ParametrizedActionCallableDel _value;
 
@@ -51,7 +56,7 @@ namespace Petri.Runtime
         }
     }
 
-    public struct TransitionCallable
+    public struct TransitionCallable : ManagedCallback
     {
         public TransitionCallableDel _value;
 
@@ -66,38 +71,48 @@ namespace Petri.Runtime
         }
     }
 
-    public class WrapForNative {
-        public static ActionCallable Wrap(ActionCallable callable, string actionName) {
+    public class WrapForNative
+    {
+        public static ActionCallable Wrap(ActionCallable callable, string actionName)
+        {
             return new ActionCallable(() => {
                 try {
                     return callable._value();
                 }
-                catch (Exception e) {
-                    Console.Error.WriteLine("The execution of the action {0} failed with the exception \"{1}\"", actionName, e.Message);
+                catch(Exception e) {
+                    Console.Error.WriteLine("The execution of the action {0} failed with the exception \"{1}\"",
+                                            actionName,
+                                            e.Message);
                     return new ActionResult_t(default(Int32));
                 }
             });
         }
 
-        public static ParametrizedActionCallable Wrap(ParametrizedActionCallable callable, string actionName) {
+        public static ParametrizedActionCallable Wrap(ParametrizedActionCallable callable, string actionName)
+        {
             return new ParametrizedActionCallable((PetriNet pn) => {
                 try {
                     return callable._value(pn);
                 }
-                catch (Exception e) {
-                    Console.Error.WriteLine("The execution of the action {0} failed with the exception \"{1}\"", actionName, e.Message);
+                catch(Exception e) {
+                    Console.Error.WriteLine("The execution of the action {0} failed with the exception \"{1}\"",
+                                            actionName,
+                                            e.Message);
                     return new ActionResult_t(default(Int32));
                 }
             });
         }
 
-        public static TransitionCallable Wrap(TransitionCallable callable, string transitionName) {
+        public static TransitionCallable Wrap(TransitionCallable callable, string transitionName)
+        {
             return new TransitionCallable((Int32 result) => {
                 try {
                     return callable._value(result);
                 }
-                catch (Exception e) {
-                    Console.Error.WriteLine("The condition testing of the condition {0} failed with the exception \"{1}\"", transitionName, e.Message);
+                catch(Exception e) {
+                    Console.Error.WriteLine("The condition testing of the condition {0} failed with the exception \"{1}\"",
+                                            transitionName,
+                                            e.Message);
                     return default(bool);
                 }
             });

@@ -30,7 +30,9 @@ namespace Petri.Runtime
          */
         public Action(UInt64 id, string name, ActionCallable action, UInt64 requiredTokens)
         {
-            Handle = Interop.Action.PetriAction_create(id, name, WrapForNative.Wrap(action, name), requiredTokens);
+            var c = WrapForNative.Wrap(action, name);
+            _callback = c;
+            Handle = Interop.Action.PetriAction_create(id, name, c, requiredTokens);
         }
 
         /**
@@ -42,9 +44,11 @@ namespace Petri.Runtime
          */
         public Action(UInt64 id, string name, ParametrizedActionCallable action, UInt64 requiredTokens)
         {
+            var c = WrapForNative.Wrap(action, name);
+            _callback = c;
             Handle = Interop.Action.PetriAction_createWithParam(id,
                                                                 name,
-                                                                WrapForNative.Wrap(action, name),
+                                                                c,
                                                                 requiredTokens);
 
         }
@@ -81,7 +85,9 @@ namespace Petri.Runtime
          */
         public void SetAction(ActionCallable action)
         {
-            Interop.Action.PetriAction_setAction(Handle, WrapForNative.Wrap(action, Name));
+            var c = WrapForNative.Wrap(action, Name);
+            _callback = c;
+            Interop.Action.PetriAction_setAction(Handle, c);
         }
 
         /**
@@ -90,7 +96,9 @@ namespace Petri.Runtime
          */
         public void SetAction(ParametrizedActionCallable action)
         {
-            Interop.Action.PetriAction_setActionParam(Handle, WrapForNative.Wrap(action, Name));
+            var c = WrapForNative.Wrap(action, Name);
+            _callback = c;
+            Interop.Action.PetriAction_setActionParam(Handle, c);
         }
 
         /**
@@ -133,6 +141,9 @@ namespace Petri.Runtime
                 Interop.Action.PetriAction_setID(Handle, value);
             }
         }
+
+        // Ensures the callback's lifetime is the same as the instance's one to avoid unexpected GC during native code invocation.
+        private ManagedCallback _callback;
     }
 }
 
