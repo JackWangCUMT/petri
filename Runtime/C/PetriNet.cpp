@@ -88,3 +88,8 @@ void PetriNet_lockVariable(PetriNet *pn, uint32_t id) {
 void PetriNet_unlockVariable(PetriNet *pn, uint32_t id) {
     pn->petriNet->getVariable(id).getMutex().unlock();
 }
+
+char const *PetriNet_getName(PetriNet *pn) {
+    return pn->petriNet->name().c_str();
+}
+

@@ -128,6 +128,8 @@ void PetriNet_lockVariable(struct PetriNet *pn, uint32_t id);
  */
 void PetriNet_unlockVariable(struct PetriNet *pn, uint32_t id);
 
+char const *PetriNet_getName(struct PetriNet *pn);
+
 #ifdef __cplusplus
 }
 #endif

@@ -93,6 +93,8 @@ namespace Petri {
          */
         Atomic &getVariable(std::uint_fast32_t id);
 
+        std::string const &name() const;
+
     protected:
         struct Internals;
         PetriNet(std::unique_ptr<Internals> internals);

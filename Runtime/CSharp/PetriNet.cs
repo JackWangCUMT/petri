@@ -80,6 +80,12 @@ namespace Petri.Runtime
         {
             return Interop.PetriNet.PetriNet_getVariable(Handle, id);
         }
+
+        public string Name {
+            get {
+                return System.Runtime.InteropServices.Marshal.PtrToStringAuto(Interop.PetriNet.PetriNet_getName(Handle));
+            }
+        }
     }
 }
 

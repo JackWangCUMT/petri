@@ -52,6 +52,10 @@ namespace Petri {
         return _internals->_states.back().first;
     }
 
+    std::string const &PetriNet::name() const {
+        return _internals->_name;
+    }
+
     bool PetriNet::running() const {
         return _internals->_running;
     }

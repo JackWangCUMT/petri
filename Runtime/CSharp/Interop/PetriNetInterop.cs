@@ -42,6 +42,9 @@ public static extern void PetriNet_lockVariable(IntPtr pn, UInt32 id);
 [DllImport("PetriRuntime")]
 public static extern void PetriNet_unlockVariable(IntPtr pn, UInt32 id);
 
+[DllImport("PetriRuntime")]
+public static extern IntPtr PetriNet_getName(IntPtr pn);
+
 }
 }
 
