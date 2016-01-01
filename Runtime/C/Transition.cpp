@@ -34,45 +34,45 @@
 #include <chrono>
 
 PetriTransition *PetriTransition_createEmpty(PetriAction *previous, PetriAction *next) {
-	return new PetriTransition{std::make_unique<Petri::Transition>(getAction(previous), getAction(next))};
+    return new PetriTransition{std::make_unique<Petri::Transition>(getAction(previous), getAction(next))};
 }
 
 PetriTransition *PetriTransition_createAndAdd(uint64_t id, char const *name, PetriAction *previous, PetriAction *next, transitionCallable_t cond) {
-	return new PetriTransition{std::make_unique<Petri::Transition>(id, name, getAction(previous), getAction(next), Petri::make_transition_callable(cond))};
+    return new PetriTransition{std::make_unique<Petri::Transition>(id, name, getAction(previous), getAction(next), Petri::make_transition_callable(cond))};
 }
 
 void PetriTransition_destroy(PetriTransition *transition) {
-	delete transition;
+    delete transition;
 }
 
 uint64_t PetriTransition_getID(PetriTransition *transition) {
-	return transition->owned->ID();
+    return transition->owned->ID();
 }
 
 void PetriTransition_setID(PetriTransition *transition, uint64_t id) {
-	return transition->owned->setID(id);
+    return transition->owned->setID(id);
 }
 
 bool PetriTransition_isFulfilled(PetriTransition *transition, Petri_actionResult_t actionResult) {
-	return transition->owned->isFulfilled(actionResult);
+    return transition->owned->isFulfilled(actionResult);
 }
 
 void PetriTransition_setCondition(PetriTransition *transition, transitionCallable_t test) {
-	transition->owned->setCondition(Petri::make_transition_callable(test));
+    transition->owned->setCondition(Petri::make_transition_callable(test));
 }
 
 char const *PetriTransition_getName(PetriTransition *transition) {
-	return transition->owned->name().c_str();
+    return transition->owned->name().c_str();
 }
 
 void PetriTransition_setName(PetriTransition *transition, char const *name) {
-	transition->owned->setName(name);
+    transition->owned->setName(name);
 }
 
 uint64_t PetriTransition_getDelayBetweenEvaluation(PetriTransition *transition) {
-	return std::chrono::duration_cast<std::chrono::microseconds>(transition->owned->delayBetweenEvaluation()).count();
+    return std::chrono::duration_cast<std::chrono::microseconds>(transition->owned->delayBetweenEvaluation()).count();
 }
 
 void PetriTransition_setDelayBetweenEvaluation(PetriTransition *transition, uint64_t usDelay) {
-	transition->owned->setDelayBetweenEvaluation(std::chrono::microseconds(usDelay));
+    transition->owned->setDelayBetweenEvaluation(std::chrono::microseconds(usDelay));
 }

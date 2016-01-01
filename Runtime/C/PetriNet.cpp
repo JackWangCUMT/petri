@@ -27,61 +27,60 @@
 //  Created by Rémi on 25/06/2015.
 //
 
-#include "PetriNet.h"
-#include "Action.h"
-#include "../PetriNet.h"
-#include "../PetriDebug.h"
 #include "../Action.h"
-#include "Types.hpp"
 #include "../Atomic.h"
+#include "../PetriDebug.h"
+#include "../PetriNet.h"
+#include "Action.h"
+#include "PetriNet.h"
+#include "Types.hpp"
 
 PetriNet *PetriNet_create(char const *name) {
-	return new PetriNet{std::make_unique<Petri::PetriNet>(name ? name : "")};
+    return new PetriNet{std::make_unique<Petri::PetriNet>(name ? name : "")};
 }
 
 PetriNet *PetriNet_createDebug(char const *name) {
-	return new PetriNet{std::make_unique<Petri::PetriDebug>(name ? name : "")};
+    return new PetriNet{std::make_unique<Petri::PetriDebug>(name ? name : "")};
 }
 
 void PetriNet_destroy(PetriNet *pn) {
-	delete pn;
+    delete pn;
 }
 
 void PetriNet_addAction(PetriNet *pn, PetriAction *action, bool active) {
-	auto &a = pn->petriNet->addAction(std::move(*action->owned), active);
-	action->owned.reset();
-	action->notOwned = &a;
+    auto &a = pn->petriNet->addAction(std::move(*action->owned), active);
+    action->owned.reset();
+    action->notOwned = &a;
 }
 
 bool PetriNet_isRunning(PetriNet *pn) {
-	return pn->petriNet->running();
+    return pn->petriNet->running();
 }
 
 void PetriNet_run(PetriNet *pn) {
-	pn->petriNet->run();
+    pn->petriNet->run();
 }
 
 void PetriNet_stop(PetriNet *pn) {
-	pn->petriNet->stop();
+    pn->petriNet->stop();
 }
 
 void PetriNet_join(PetriNet *pn) {
-	pn->petriNet->join();
+    pn->petriNet->join();
 }
 
-void PetriNet_addVariable(PetriNet *pn, uint_fast32_t id) {
-	pn->petriNet->addVariable(id);
+void PetriNet_addVariable(PetriNet *pn, uint32_t id) {
+    pn->petriNet->addVariable(id);
 }
 
-int64_t PetriNet_getVariable(PetriNet *pn, uint_fast32_t id) {
-	return pn->petriNet->getVariable(id).value();
+int64_t PetriNet_getVariable(PetriNet *pn, uint32_t id) {
+    return pn->petriNet->getVariable(id).value();
 }
 
-void PetriNet_lockVariable(PetriNet *pn, uint_fast32_t id) {
-	pn->petriNet->getVariable(id).getMutex().lock();
+void PetriNet_lockVariable(PetriNet *pn, uint32_t id) {
+    pn->petriNet->getVariable(id).getMutex().lock();
 }
 
-void PetriNet_unlockVariable(PetriNet *pn, uint_fast32_t id) {
-	pn->petriNet->getVariable(id).getMutex().unlock();
+void PetriNet_unlockVariable(PetriNet *pn, uint32_t id) {
+    pn->petriNet->getVariable(id).getMutex().unlock();
 }
-

@@ -29,84 +29,82 @@
 
 #define PETRI_NEEDS_GET_ACTION
 
-#include "Action.h"
 #include "../Action.h"
+#include "Action.h"
 #include "Types.hpp"
 #include <memory>
 
 namespace {
-	Petri::ParametrizedActionCallableBase getParametrizedCallable(parametrizedCallable_t action) {
-		return Petri::make_param_action_callable([action](Petri::PetriNet &pn) {
-			PetriNet petriNet{std::unique_ptr<Petri::PetriNet>(&pn)};
+    Petri::ParametrizedActionCallableBase getParametrizedCallable(parametrizedCallable_t action) {
+        return Petri::make_param_action_callable([action](Petri::PetriNet &pn) {
+            PetriNet petriNet{std::unique_ptr<Petri::PetriNet>(&pn)};
 
-			auto result = action(&petriNet);
+            auto result = action(&petriNet);
 
-			petriNet.petriNet.release();
+            petriNet.petriNet.release();
 
-			return result;
-		});
-	}
+            return result;
+        });
+    }
 }
 
 PetriAction *PetriAction_createEmpty() {
-	return new PetriAction{std::make_unique<Petri::Action>(), nullptr};
+    return new PetriAction{std::make_unique<Petri::Action>(), nullptr};
 }
 
-PetriAction *PetriAction_create(uint64_t id, char const *name, callable_t action, size_t requiredTokens) {
-	return new PetriAction{std::make_unique<Petri::Action>(id, name, Petri::make_action_callable(action), requiredTokens), nullptr};
+PetriAction *PetriAction_create(uint64_t id, char const *name, callable_t action, uint64_t requiredTokens) {
+    return new PetriAction{std::make_unique<Petri::Action>(id, name, Petri::make_action_callable(action), requiredTokens), nullptr};
 }
 
-PetriAction *PetriAction_createWithParam(uint64_t id, char const *name, parametrizedCallable_t action, size_t requiredTokens) {
-	return new PetriAction{std::make_unique<Petri::Action>(id, name, getParametrizedCallable(action), requiredTokens), nullptr};
+PetriAction *PetriAction_createWithParam(uint64_t id, char const *name, parametrizedCallable_t action, uint64_t requiredTokens) {
+    return new PetriAction{std::make_unique<Petri::Action>(id, name, getParametrizedCallable(action), requiredTokens), nullptr};
 }
 
 void PetriAction_destroy(PetriAction *action) {
-	delete action;
+    delete action;
 }
 
 uint64_t PetriAction_getID(PetriAction *action) {
-	return getAction(action).ID();
+    return getAction(action).ID();
 }
 
 void PetriAction_setID(PetriAction *action, uint64_t id) {
-	return getAction(action).setID(id);
+    return getAction(action).setID(id);
 }
 
 void PetriAction_addTransition(PetriAction *action, PetriTransition *transition) {
-	getAction(action).addTransition(std::move(*transition->owned));
-	transition->owned.reset();
+    getAction(action).addTransition(std::move(*transition->owned));
+    transition->owned.reset();
 }
 
 void PetriAction_createAndAddTransition(PetriAction *action, uint64_t id, char const *name, PetriAction *next, transitionCallable_t cond) {
-	getAction(action).addTransition(id, name, getAction(next), Petri::make_transition_callable(cond));
+    getAction(action).addTransition(id, name, getAction(next), Petri::make_transition_callable(cond));
 }
 
 void PetriAction_setAction(PetriAction *action, callable_t a) {
-	getAction(action).setAction(Petri::make_action_callable([a]() {
-		return a();
-	}));
+    getAction(action).setAction(Petri::make_action_callable([a]() { return a(); }));
 }
 
 void PetriAction_setActionParam(PetriAction *action, parametrizedCallable_t a) {
-	getAction(action).setAction(getParametrizedCallable(a));
+    getAction(action).setAction(getParametrizedCallable(a));
 }
 
-size_t PetriAction_getRequiredTokens(PetriAction *action) {
-	return getAction(action).requiredTokens();
+uint64_t PetriAction_getRequiredTokens(PetriAction *action) {
+    return getAction(action).requiredTokens();
 }
 
 void PetriAction_setRequiredTokens(PetriAction *action, size_t requiredTokens) {
-	getAction(action).setRequiredTokens(requiredTokens);
+    getAction(action).setRequiredTokens(requiredTokens);
 }
 
-size_t PetriAction_getCurrentTokens(PetriAction *action) {
-	return getAction(action).currentTokens();
+uint64_t PetriAction_getCurrentTokens(PetriAction *action) {
+    return getAction(action).currentTokens();
 }
 
 char const *PetriAction_getName(PetriAction *action) {
-	return getAction(action).name().c_str();
+    return getAction(action).name().c_str();
 }
 
 void PetriAction_setName(PetriAction *action, char const *name) {
-	getAction(action).setName(name);
+    getAction(action).setName(name);
 }

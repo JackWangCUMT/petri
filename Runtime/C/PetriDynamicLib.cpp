@@ -32,61 +32,58 @@
 #include "Types.hpp"
 
 PetriDynamicLib *PetriDynamicLib_create(char const *name, char const *prefix, uint16_t port) {
-	return new PetriDynamicLib{std::make_unique<CPetriDynamicLib>(name, prefix, port)};
+    return new PetriDynamicLib{std::make_unique<CPetriDynamicLib>(name, prefix, port)};
 }
 
 void PetriDynamicLib_destroy(PetriDynamicLib *lib) {
-	delete lib;
+    delete lib;
 }
 
 PetriNet *PetriDynamicLib_createPetriNet(PetriDynamicLib *lib) {
-	try {
-		return new PetriNet{lib->lib->create()};
-	}
-	catch(std::exception &e) {
-		std::cerr << e.what() << std::endl;
-		return nullptr;
-	}
+    try {
+        return new PetriNet{lib->lib->create()};
+    } catch(std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return nullptr;
+    }
 }
 
 PetriNet *PetriDynamicLib_createDebugPetriNet(PetriDynamicLib *lib) {
-	try {
-		return new PetriNet{lib->lib->createDebug()};
-	}
-	catch(std::exception &e) {
-		std::cerr << e.what() << std::endl;
-		return nullptr;
-	}
+    try {
+        return new PetriNet{lib->lib->createDebug()};
+    } catch(std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return nullptr;
+    }
 }
 
 char const *PetriDynamicLib_getHash(PetriDynamicLib *lib) {
-	return lib->lib->hash().c_str();
+    return lib->lib->hash().c_str();
 }
 
 char const *PetriDynamicLib_getName(PetriDynamicLib *lib) {
-	return lib->lib->name().c_str();
+    return lib->lib->name().c_str();
 }
 
 uint16_t PetriDynamicLib_getPort(PetriDynamicLib *lib) {
-	return lib->lib->port();
+    return lib->lib->port();
 }
 
 bool PetriDynamicLib_load(PetriDynamicLib *lib) {
-	try {
-		lib->lib->load();
+    try {
+        lib->lib->load();
 
-		return true;
-	}
-	catch(std::exception &e) {
-		std::cerr << e.what() << std::endl;
-		return false;
-	}
+        return true;
+    } catch(std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return false;
+    }
 }
 
 char const *PetriDynamicLib_getPath(PetriDynamicLib *lib) {
-	return lib->lib->path().c_str();
+    return lib->lib->path().c_str();
 }
 
 char const *PetriDynamicLib_getPrefix(PetriDynamicLib *lib) {
-	return lib->lib->prefix();
+    return lib->lib->prefix();
 }

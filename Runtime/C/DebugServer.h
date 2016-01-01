@@ -30,67 +30,67 @@
 #ifndef DebugServer_c
 #define DebugServer_c
 
+#include "PetriDynamicLib.h"
 #include <stdbool.h>
 #include <time.h>
-#include "PetriDynamicLib.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	typedef struct PetriDebugServer PetriDebugServer;
+// typedef struct PetriDebugServer PetriDebugServer;
 
-	/**
-	 * Returns the DebugServer API's version
-	 * @return The current version of the API.
-	 */
-	char const *PetriDebugServer_getVersion();
+/**
+ * Returns the DebugServer API's version
+ * @return The current version of the API.
+ */
+char const *PetriDebugServer_getVersion();
 
-	/**
-	 * Returns the date on which the API was compiled.
-	 * @return The API compilation date.
-	 */
-	time_t PetriDebugServer_getAPIdate();
+/**
+ * Returns the date on which the API was compiled.
+ * @return The API compilation date, expressed in seconds since the UNIX epoch.
+ */
+int64_t PetriDebugServer_getAPIdate();
 
-	/*
-	 * Converts a timestamp string to a date.
-	 * @param timestamp The timestamp to convert.
-	 * @return The conversion result.
-	 */
-	time_t PetriDebugServer_getDateFromTimestamp(char const *timestamp);
+/*
+ * Converts a timestamp string to a number of seconds since the UNIX epoch..
+ * @param timestamp The timestamp to convert.
+ * @return The conversion result, expressed in seconds since the UNIX epoch.
+ */
+int64_t PetriDebugServer_getDateFromTimestamp(char const *timestamp);
 
-	/**
-	 * Creates the DebugServer and binds it to the provided dynamic library.
-	 * @param petri The dynamic lib from which the debug server operates.
-	 */
-	PetriDebugServer *PetriDebugServer_create(PetriDynamicLib *petri);
+/**
+ * Creates the DebugServer and binds it to the provided dynamic library.
+ * @param petri The dynamic lib from which the debug server operates.
+ */
+struct PetriDebugServer *PetriDebugServer_create(struct PetriDynamicLib *petri);
 
-	/**
-	 * Destroys the debug server. If the server is running, this call will wait for the connected client
-	 * to end the debug session to continue the program exectution.
-	 * @param server The debug server to operate on.
-	 */
-	void PetriDebugServer_destroy(PetriDebugServer *server);
+/**
+ * Destroys the debug server. If the server is running, this call will wait for the connected client
+ * to end the debug session to continue the program exectution.
+ * @param server The debug server to operate on.
+ */
+void PetriDebugServer_destroy(struct PetriDebugServer *server);
 
-	/**
-	 * Starts the debug server by listening on the debug port of the bound dynamic library, making it ready to receive a debugger connection.
-	 * @param server The debug server to operate on.
-	 */
-	void PetriDebugServer_start(PetriDebugServer *server);
+/**
+ * Starts the debug server by listening on the debug port of the bound dynamic library, making it
+ * ready to receive a debugger connection.
+ * @param server The debug server to operate on.
+ */
+void PetriDebugServer_start(struct PetriDebugServer *server);
 
-	/**
-	 * Stops the debug server. After that, the debugging port is unbound.
-	 * @param server The debug server to operate on.
-	 */
-	void PetriDebugServer_stop(PetriDebugServer *server);
+/**
+ * Stops the debug server. After that, the debugging port is unbound.
+ * @param server The debug server to operate on.
+ */
+void PetriDebugServer_stop(struct PetriDebugServer *server);
 
-	/**
-	 * Checks whether the debug server is running or not.
-	 * @param server The debug server to operate on.
-	 * @return true if the server is running, false otherwise.
-	 */
-	bool PetriDebugServer_isRunning(PetriDebugServer *server);
-
+/**
+ * Checks whether the debug server is running or not.
+ * @param server The debug server to operate on.
+ * @return true if the server is running, false otherwise.
+ */
+bool PetriDebugServer_isRunning(struct PetriDebugServer *server);
 
 #ifdef __cplusplus
 }

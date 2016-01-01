@@ -31,98 +31,106 @@
 #define Petri_Transition_C
 
 #include "Types.h"
+#include <stdbool.h>
 #include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-	struct PetriAction;
+struct PetriAction;
 
-	typedef struct PetriTransition PetriTransition;
+// typedef struct PetriTransition PetriTransition;
 
-	typedef bool (*transitionCallable_t)(Petri_actionResult_t);
+typedef bool (*transitionCallable_t)(Petri_actionResult_t);
 
-	/**
-	 * Creates a Transition object, containing a nullptr test, allowing the end of execution of PetriAction 'previous' to provoke
-	 * the execution of PetriAction 'next', if the test is fulfilled.
-	 * @param previous The starting point of the PetriTransition
-	 * @param next The arrival point of the Transition
-	 */
-	PetriTransition *PetriTransition_createEmpty(struct PetriAction *previous, struct PetriAction *next);
+/**
+ * Creates a Transition object, containing a nullptr test, allowing the end of execution of
+ * PetriAction 'previous' to provoke
+ * the execution of PetriAction 'next', if the test is fulfilled.
+ * @param previous The starting point of the PetriTransition
+ * @param next The arrival point of the Transition
+ */
+struct PetriTransition *PetriTransition_createEmpty(struct PetriAction *previous, struct PetriAction *next);
 
-	/**
-	 * Creates a Transition object, containing a nullptr test, allowing the end of execution of PetriAction 'previous' to provoke
-	 * the execution of PetriAction 'next', if the test is fulfilled.
-	 * @param previous The starting point of the PetriTransition
-	 * @param next The arrival point of the Transition
-	 */
-	PetriTransition *PetriTransition_create(uint64_t id, char const *name, struct PetriAction *previous, struct PetriAction *next, transitionCallable_t cond);
+/**
+ * Creates a Transition object, containing a nullptr test, allowing the end of execution of
+ * PetriAction 'previous' to provoke
+ * the execution of PetriAction 'next', if the test is fulfilled.
+ * @param previous The starting point of the PetriTransition
+ * @param next The arrival point of the Transition
+ */
+struct PetriTransition *PetriTransition_create(uint64_t id, char const *name, struct PetriAction *previous, struct PetriAction *next, transitionCallable_t cond);
 
-	/**
-	 * Destroys a PetriAction instance created by one of the PetriAction_create functions.
-	 * @param transition The PetriTransition instance to destroy.
-	 */
-	void PetriTransition_destroy(PetriTransition *transition);
+/**
+ * Destroys a PetriAction instance created by one of the PetriAction_create functions.
+ * @param transition The PetriTransition instance to destroy.
+ */
+void PetriTransition_destroy(struct PetriTransition *transition);
 
-	/**
-	 * Returns the ID of the PetriTransition.
-	 * @param transition The PetriTransition to query.
-	 */
-	uint64_t PetriTransition_getID(PetriTransition *transition);
+/**
+ * Returns the ID of the PetriTransition.
+ * @param transition The PetriTransition to query.
+ */
+uint64_t PetriTransition_getID(struct PetriTransition *transition);
 
-	/**
-	 * Changes the ID of the PetriTransition.
-	 * @param transition The PetriTransition to change.
-	 * @param id The new ID.
-	 */
-	void PetriTransition_setID(PetriTransition *transition, uint64_t id);
+/**
+ * Changes the ID of the PetriTransition.
+ * @param transition The PetriTransition to change.
+ * @param id The new ID.
+ */
+void PetriTransition_setID(struct PetriTransition *transition, uint64_t id);
 
-	/**
-	 * Checks whether the PetriTransition can be crossed
-	 * @param transition The PetriTransition instance to test against.
-	 * @param actionResult The result of the Action 'previous'. This is useful when the PetriTransition's test uses this value.
-	 * @return The result of the test, true meaning that the PetriTransition can be crossed to enable the action 'next'
-	 */
-	bool PetriTransition_isFulfilled(PetriTransition *transition, Petri_actionResult_t actionResult);
+/**
+ * Checks whether the PetriTransition can be crossed
+ * @param transition The PetriTransition instance to test against.
+ * @param actionResult The result of the Action 'previous'. This is useful when the
+ * PetriTransition's test uses this value.
+ * @return The result of the test, true meaning that the PetriTransition can be crossed to enable
+ * the action 'next'
+ */
+bool PetriTransition_isFulfilled(struct PetriTransition *transition, Petri_actionResult_t actionResult);
 
-	/**
-	 * Changes the condition associated to the PetriTransition
-	 * @param transition The PetriTransition instance to change.
-	 * @param test The new condition to associate to the PetriTransition
-	 */
-	void PetriTransition_setCondition(PetriTransition *transition, transitionCallable_t test);
+/**
+ * Changes the condition associated to the PetriTransition
+ * @param transition The PetriTransition instance to change.
+ * @param test The new condition to associate to the PetriTransition
+ */
+void PetriTransition_setCondition(struct PetriTransition *transition, transitionCallable_t test);
 
-	/**
-	 * Gets the name of the PetriTransition.
-	 * @param transition The PetriTransition instance to query.
-	 * @return The name of the PetriTransition.
-	 */
-	char const *PetriTransition_getName(PetriTransition *transition);
+/**
+ * Gets the name of the PetriTransition.
+ * @param transition The PetriTransition instance to query.
+ * @return The name of the PetriTransition.
+ */
+char const *PetriTransition_getName(struct PetriTransition *transition);
 
-	/**
-	 * Changes the name of the PetriTransition.
-	 * @param transition The PetriTransition instance to change.
-	 * @param The new name of the PetriTransition.
-	 */
-	void PetriTransition_setName(PetriTransition *transition, char const *name);
+/**
+ * Changes the name of the PetriTransition.
+ * @param transition The PetriTransition instance to change.
+ * @param The new name of the PetriTransition.
+ */
+void PetriTransition_setName(struct PetriTransition *transition, char const *name);
 
-	/**
-	 * The delay in microseconds between successive evaluations of the PetriTransition. The runtime will not try to evaluate
-	 * the PetriTransition with a delay smaller than this delay after a previous evaluation, but only for one execution of PetriAction 'previous'
-	 * @param transition The PetriTransition instance to query.
-	 * @return The minimal delay between two evaluations of the PetriTransition.
-	 */
-	 uint64_t PetriTransition_getDelayBetweenEvaluation(PetriTransition *transition);
+/**
+ * The delay in microseconds between successive evaluations of the PetriTransition. The runtime will
+ * not try to evaluate
+ * the PetriTransition with a delay smaller than this delay after a previous evaluation, but only
+ * for one execution of PetriAction 'previous'
+ * @param transition The PetriTransition instance to query.
+ * @return The minimal delay between two evaluations of the PetriTransition.
+ */
+uint64_t PetriTransition_getDelayBetweenEvaluation(struct PetriTransition *transition);
 
-	/**
-	 * Changes the delay between successive evaluations of the PetriTransition.
-	 * @param transition The PetriTransition instance to change.
-	 * @param delay The new minimal delay in microseconds between two evaluations of the PetriTransition.
-	 */
-	void PetriTransition_setDelayBetweenEvaluation(PetriTransition *transition, uint64_t usDelay);
+/**
+ * Changes the delay between successive evaluations of the PetriTransition.
+ * @param transition The PetriTransition instance to change.
+ * @param delay The new minimal delay in microseconds between two evaluations of the
+ * PetriTransition.
+ */
+void PetriTransition_setDelayBetweenEvaluation(struct PetriTransition *transition, uint64_t usDelay);
 
 #ifdef __cplusplus
-	}
+}
 #endif
 
 #endif /* Transition_c */
