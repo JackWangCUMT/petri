@@ -20,6 +20,7 @@ else
 # else, we assume g++
 
 WARN:=$(WARN) -Werror=return-local-addr
+CXXFLAGS:=$(CXXFLAGS) -fPIC
 LDFLAGS:=$(LDFLAGS) -fPIC
 
 endif
@@ -43,6 +44,7 @@ builddir:
 
 lib: $(CXXOBJ)
 	$(CXX) -o $(OUTPUT) $^ $(LDFLAGS)
+	ln -s $(OUTPUT) ../Editor/Test/bin/$(OUTPUT)
 
 build/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
