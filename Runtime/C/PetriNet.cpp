@@ -27,10 +27,10 @@
 //  Created by Rémi on 25/06/2015.
 //
 
-#include "../Action.h"
-#include "../Atomic.h"
-#include "../PetriDebug.h"
-#include "../PetriNet.h"
+#include "../Cpp/Action.h"
+#include "../Cpp/Atomic.h"
+#include "../Cpp/PetriDebug.h"
+#include "../Cpp/PetriNet.h"
 #include "Action.h"
 #include "PetriNet.h"
 #include "Types.hpp"

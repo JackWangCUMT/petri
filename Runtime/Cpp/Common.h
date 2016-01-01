@@ -30,7 +30,7 @@
 #ifndef Petri_Common_h
 #define Petri_Common_h
 
-#include "C/Types.h"
+#include "../C/Types.h"
 #include <cstdint>
 #include <list>
 #include <string>

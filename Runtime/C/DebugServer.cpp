@@ -27,7 +27,7 @@
 //  Created by Rémi on 04/07/2015.
 //
 
-#include "../DebugServer.h"
+#include "../Cpp/DebugServer.h"
 #include "DebugServer.h"
 #include "PetriDynamicLib.hpp"
 #include "Types.hpp"

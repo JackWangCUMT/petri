@@ -32,7 +32,7 @@
 
 #include "PetriNet.h"
 #include "Socket.h"
-#include "jsoncpp/include/json.h"
+#include <json/json.h>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>

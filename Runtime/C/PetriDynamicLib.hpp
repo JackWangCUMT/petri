@@ -9,7 +9,7 @@
 #ifndef PetriDynamicLib_hpp
 #define PetriDynamicLib_hpp
 
-#include "../PetriDynamicLib.h"
+#include "../Cpp/PetriDynamicLib.h"
 #include "Types.hpp"
 
 class CPetriDynamicLib : public Petri::PetriDynamicLib {

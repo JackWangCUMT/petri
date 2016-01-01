@@ -29,7 +29,7 @@
 
 #define PETRI_NEEDS_GET_ACTION
 
-#include "../Action.h"
+#include "../Cpp/Action.h"
 #include "Action.h"
 #include "Types.hpp"
 #include <memory>

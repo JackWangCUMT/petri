@@ -27,7 +27,7 @@
 //  Created by Rémi on 01/07/2015.
 //
 
-#include "../PetriUtils.h"
+#include "../Cpp/PetriUtils.h"
 #include "PetriUtils.h"
 
 Petri_actionResult_t PetriUtility_pause(uint64_t usdelay) {
