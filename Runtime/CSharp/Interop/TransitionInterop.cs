@@ -16,6 +16,12 @@ public static extern IntPtr PetriTransition_create(UInt64 id, [MarshalAs(Unmanag
 public static extern void PetriTransition_destroy(IntPtr transition);
 
 [DllImport("PetriRuntime")]
+public static extern IntPtr PetriTransition_getPrevious(IntPtr transition);
+
+[DllImport("PetriRuntime")]
+public static extern IntPtr PetriTransition_getNext(IntPtr transition);
+
+[DllImport("PetriRuntime")]
 public static extern UInt64 PetriTransition_getID(IntPtr transition);
 
 [DllImport("PetriRuntime")]

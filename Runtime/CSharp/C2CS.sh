@@ -7,7 +7,6 @@ mkdir -p "$dir/Interop"
 for h in "$dir"/../C/*.h; do
     filename=$(basename "$h")
     filename="${filename%.*}"
-    echo "$filename"
     echo "// This source file has been generated automatically. Do not edit by hand.
 
 using System;
@@ -39,3 +38,5 @@ public static extern \1\
 " > "$dir/Interop/$filename"Interop.cs
 
 done
+
+echo "Code generation done."

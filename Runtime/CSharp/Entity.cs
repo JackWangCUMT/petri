@@ -1,11 +1,16 @@
 ﻿using System;
 
-namespace CSRuntime
+namespace Petri.Runtime
 {
     public class Entity
     {
-        public Entity()
+        protected Entity()
         {
+        }
+
+        public IntPtr Handle {
+            get;
+            set;
         }
     }
 }

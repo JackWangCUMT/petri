@@ -275,4 +275,10 @@
       <Link>Sources\Cpp\Scope.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="CSRuntime.csproj">
+      <Project>{6DBF358B-A63A-4A5C-8853-C1C7017A5DC9}</Project>
+      <Name>CSRuntime</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
