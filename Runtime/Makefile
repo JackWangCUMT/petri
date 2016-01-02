@@ -44,7 +44,10 @@ builddir:
 
 lib: $(CXXOBJ)
 	$(CXX) -o $(OUTPUT) $^ $(LDFLAGS)
+	mkdir -p ../Editor/Test/bin
+	mkdir -p ../Editor/bin
 	ln -sf $(abspath $(OUTPUT)) ../Editor/Test/bin/$(OUTPUT)
+	ln -sf $(abspath $(OUTPUT)) ../Editor/bin/$(OUTPUT)
 
 build/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
