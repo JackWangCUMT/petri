@@ -10,22 +10,22 @@ namespace Petri.Runtime
 
     public class Utility
     {
-        public static ActionResult_t Pause(double delay)
+        public static Int32 Pause(double delay)
         {
-            return new ActionResult_t(Interop.PetriUtils.PetriUtility_pause((UInt64)(delay * 1.0e6)));
+            return Interop.PetriUtils.PetriUtility_pause((UInt64)(delay * 1.0e6));
         }
 
-        public static ActionResult_t PrintAction(string name, UInt64 id)
+        public static Int32 PrintAction(string name, UInt64 id)
         {
-            return new ActionResult_t(Interop.PetriUtils.PetriUtility_printAction(name, id));
+            return Interop.PetriUtils.PetriUtility_printAction(name, id);
         }
 
-        public static ActionResult_t DoNothing()
+        public static Int32 DoNothing()
         {
-            return new ActionResult_t(Interop.PetriUtils.PetriUtility_doNothing());
+            return Interop.PetriUtils.PetriUtility_doNothing();
         }
 
-        bool ReturnTrue(ActionResult_t res)
+        bool ReturnTrue(Int32 res)
         {
             return true;
         }

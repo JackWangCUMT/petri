@@ -10,19 +10,9 @@ namespace TestPetri
     {
         int Invoke(string[] args, out string stdout, out string stderr)
         {
-            int result;
-
-            using(StringWriter sout = new StringWriter(), serr = new StringWriter()) {
-                Console.SetOut(sout);
-                Console.SetError(serr);
-
-                result = Petri.MainClass.Main(args);
-
-                stdout = sout.ToString();
-                stderr = serr.ToString();
-            }
-
-            return result;
+            return Utility.InvokeAndRedirectOutput(() => {
+                return Petri.MainClass.Main(args);
+            }, out stdout, out stderr);
         }
 
         [Test()]
