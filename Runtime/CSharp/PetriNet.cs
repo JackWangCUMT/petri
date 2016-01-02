@@ -14,7 +14,8 @@ namespace Petri.Runtime
             Handle = Interop.PetriNet.PetriNet_create(name);
         }
 
-        ~PetriNet() {
+        ~PetriNet()
+        {
             Interop.PetriNet.PetriNet_destroy(Handle);
         }
 

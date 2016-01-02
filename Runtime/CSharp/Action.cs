@@ -28,7 +28,7 @@ namespace Petri.Runtime
          * @param action The Callable which will be called when the action is run.
          * @param requiredTokens The number of tokens that must be inside the active action for it to execute.
          */
-        public Action(UInt64 id, string name, ActionCallable action, UInt64 requiredTokens)
+        public Action(UInt64 id, string name, ActionCallableDel action, UInt64 requiredTokens)
         {
             var c = WrapForNative.Wrap(action, name);
             _callback = c;
@@ -42,10 +42,10 @@ namespace Petri.Runtime
          * @param action The Callable which will be called when the action is run.
          * @param requiredTokens The number of tokens that must be inside the active action for it to execute.
          */
-        public Action(UInt64 id, string name, ParametrizedActionCallable action, UInt64 requiredTokens)
+        public Action(UInt64 id, string name, ParametrizedActionCallableDel action, UInt64 requiredTokens)
         {
             var c = WrapForNative.Wrap(action, name);
-            _callback = c;
+            _parametrizedCallback = c;
             Handle = Interop.Action.PetriAction_createWithParam(id, name, c, requiredTokens);
         }
 
@@ -71,7 +71,7 @@ namespace Petri.Runtime
          * @param cond the condition of the Transition to be added
          * @return The newly created transition.
          */
-        public Transition AddTransition(UInt64 id, string name, Action next, TransitionCallable cond)
+        public Transition AddTransition(UInt64 id, string name, Action next, TransitionCallableDel cond)
         {
             var handle = Interop.Action.PetriAction_addNewTransition(Handle, id, name, next.Handle, cond);
 
@@ -84,7 +84,7 @@ namespace Petri.Runtime
          * Changes the Callable associated to the Action
          * @param action The Callable which will be copied and put in the Action
          */
-        public void SetAction(ActionCallable action)
+        public void SetAction(ActionCallableDel action)
         {
             var c = WrapForNative.Wrap(action, Name);
             _callback = c;
@@ -95,10 +95,10 @@ namespace Petri.Runtime
          * Changes the Callable associated to the Action
          * @param action The Callable which will be copied and put in the Action
          */
-        public void SetAction(ParametrizedActionCallable action)
+        public void SetAction(ParametrizedActionCallableDel action)
         {
             var c = WrapForNative.Wrap(action, Name);
-            _callback = c;
+            _parametrizedCallback = c;
             Interop.Action.PetriAction_setActionParam(Handle, c);
         }
 
@@ -144,7 +144,8 @@ namespace Petri.Runtime
         }
 
         // Ensures the callback's lifetime is the same as the instance's one to avoid unexpected GC during native code invocation.
-        private ManagedCallback _callback;
+        private ActionCallableDel _callback;
+        private ParametrizedActionCallableDel _parametrizedCallback;
     }
 }
 

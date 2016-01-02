@@ -70,6 +70,8 @@ namespace Petri {
          */
         Transition(uint64_t id, std::string const &name, Action &previous, Action &next, TransitionCallableBase const &cond);
 
+        Transition(Transition &&) = default;
+        ~Transition() = default;
         /**
          * Checks whether the Transition can be crossed
          * @param actionResult The result of the Action 'previous'. This is useful when the

@@ -44,6 +44,7 @@
     <Compile Include="Cpp\TestExpressionToString.cs" />
     <Compile Include="Invocation\TestInvocation.cs" />
     <Compile Include="Runtime\TestRuntime.cs" />
+    <Compile Include="Utility.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

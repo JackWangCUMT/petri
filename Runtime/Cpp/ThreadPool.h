@@ -32,7 +32,6 @@
 
 #include "Callable.h"
 #include "Common.h"
-#include "KillableThread.h"
 #include <atomic>
 #include <future>
 #include <memory>
