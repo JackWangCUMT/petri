@@ -25,7 +25,7 @@ using Gtk;
 using System.Text.RegularExpressions;
 using System.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class DocumentSettingsEditor
     {
@@ -61,7 +61,7 @@ namespace Petri
             {
                 ComboBox combo = ComboBox.NewText();
 
-                foreach(Petri.Language l in Enum.GetValues(typeof(Petri.Language))) {
+                foreach(Petri.Editor.Language l in Enum.GetValues(typeof(Petri.Editor.Language))) {
                     if(l == Language.None)
                         continue;
                     combo.AppendText(DocumentSettings.LanguageName(l));
@@ -83,7 +83,7 @@ namespace Petri
                     TreeIter it;
 
                     if(combo.GetActiveIter(out it)) {
-                        _document.Settings.Language = (Petri.Language)int.Parse(combo.Model.GetStringFromIter(it));
+                        _document.Settings.Language = (Petri.Editor.Language)int.Parse(combo.Model.GetStringFromIter(it));
                         _document.Settings.Modified = true;
                     }
                 };

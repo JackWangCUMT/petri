@@ -25,7 +25,7 @@ using System.Resources;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public sealed class ExitPoint : NonRootState
     {

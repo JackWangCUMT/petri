@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public abstract class State : Entity
     {

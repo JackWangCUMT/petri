@@ -23,7 +23,7 @@
 using System;
 using Gtk;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class MacrosManager
     {

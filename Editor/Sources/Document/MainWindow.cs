@@ -24,7 +24,7 @@ using System;
 using Gtk;
 using IgeMacIntegration;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class MainWindow : Gtk.Window
     {

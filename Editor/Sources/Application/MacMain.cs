@@ -22,9 +22,9 @@
 
 using Petri;
 
-namespace PetriMac
+namespace Petri.Editor.OSX
 {
-    public class MacMain
+    public class OSXMain
     {
         public static int Main(string[] args)
         {

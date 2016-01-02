@@ -26,7 +26,7 @@ using System.Xml;
 using System.Collections;
 using System.Xml.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public abstract class PetriNet : NonRootState
     {

@@ -28,7 +28,7 @@ using Newtonsoft.Json.Linq;
 using System.Linq;
 using Gtk;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class DebugClient
     {

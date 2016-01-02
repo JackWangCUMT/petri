@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class Transition : Entity
     {

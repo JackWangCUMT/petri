@@ -6,8 +6,8 @@
     <ProjectTypeGuids>{948B3504-5B70-4649-8FE4-BDE1FB46EC69};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <ProjectGuid>{B36436E7-0E17-4C0E-A664-E9E4B4D77942}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Petri</RootNamespace>
-    <StartupObject>PetriMac.MacMain</StartupObject>
+    <RootNamespace>Petri.Editor</RootNamespace>
+    <StartupObject>Petri.Editor.OSX.OSXMain</StartupObject>
     <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
     <AssemblyName>Petri</AssemblyName>
     <SuppressXamMacUpsell>True</SuppressXamMacUpsell>

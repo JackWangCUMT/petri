@@ -26,7 +26,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public sealed class Action : NonRootState
     {
@@ -87,7 +87,7 @@ namespace Petri
 
         public Cpp.FunctionInvocation PrintAction()
         {
-            return new Petri.Cpp.FunctionInvocation(Document.Settings.Language, PrintFunction(Document), Cpp.LiteralExpression.CreateFromStringAndEntity("$Name", this), Cpp.LiteralExpression.CreateFromStringAndEntity("$ID", this));
+            return new Petri.Editor.Cpp.FunctionInvocation(Document.Settings.Language, PrintFunction(Document), Cpp.LiteralExpression.CreateFromStringAndEntity("$Name", this), Cpp.LiteralExpression.CreateFromStringAndEntity("$ID", this));
         }
 
         public static Cpp.Function PrintFunction(HeadlessDocument doc)

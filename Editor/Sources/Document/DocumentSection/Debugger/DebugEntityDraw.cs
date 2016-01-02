@@ -23,7 +23,7 @@
 using System;
 using Cairo;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class DebugEntityDraw : EntityDraw
     {

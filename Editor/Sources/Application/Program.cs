@@ -30,7 +30,7 @@ using System.Collections;
 
 [assembly: InternalsVisibleTo("Test")]
 
-namespace Petri
+namespace Petri.Editor
 {
     public class MainClass
     {

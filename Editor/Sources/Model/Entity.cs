@@ -25,7 +25,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Collections.Generic;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class IDManager
     {

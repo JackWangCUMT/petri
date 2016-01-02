@@ -24,7 +24,7 @@ using System;
 using Gtk;
 using Gdk;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class DebugGui : Gui
     {

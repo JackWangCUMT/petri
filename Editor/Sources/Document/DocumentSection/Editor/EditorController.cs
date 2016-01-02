@@ -25,7 +25,7 @@ using Gtk;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class EditorController : Controller
     {

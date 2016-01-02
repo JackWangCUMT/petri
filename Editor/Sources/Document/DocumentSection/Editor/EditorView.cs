@@ -26,7 +26,7 @@ using Gtk;
 using Cairo;
 using System.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class EditorView : PetriView
     {

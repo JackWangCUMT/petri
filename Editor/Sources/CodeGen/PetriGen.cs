@@ -22,7 +22,7 @@
 
 using System;
 
-namespace Petri
+namespace Petri.Editor
 {
     public abstract class PetriGen
     {

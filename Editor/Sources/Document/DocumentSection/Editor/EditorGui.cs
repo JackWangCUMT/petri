@@ -25,7 +25,7 @@ using Gtk;
 using Gdk;
 using System.Collections.Generic;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class EditorGui : Gui
     {
@@ -318,21 +318,21 @@ namespace Petri
 
             var list = _document.PetriNet.BuildEntitiesList();
             foreach(var ee in list) {
-                if(ee is Action && (type == Petri.Find.FindType.All || type == Petri.Find.FindType.Action)) {
+                if(ee is Action && (type == Petri.Editor.Find.FindType.All || type == Petri.Editor.Find.FindType.Action)) {
                     var e = (Action)ee;
                     if(e.Function.MakeUserReadable().Contains(what)) {
                         _findResults.Add(e);
                         _findStore.AppendValues(e.ID.ToString(), Configuration.GetLocalized("State"), e.Name, e.Function.MakeUserReadable());
                     }
                 }
-                else if(ee is Transition && (type == Petri.Find.FindType.All || type == Petri.Find.FindType.Transition)) {
+                else if(ee is Transition && (type == Petri.Editor.Find.FindType.All || type == Petri.Editor.Find.FindType.Transition)) {
                     var e = (Transition)ee;
                     if(e.Condition.MakeUserReadable().Contains(what)) {
                         _findResults.Add(e);
                         _findStore.AppendValues(e.ID.ToString(), Configuration.GetLocalized("Transition"), e.Name, e.Condition.MakeUserReadable());
                     }
                 }
-                else if(ee is Comment && (type == Petri.Find.FindType.All || type == Petri.Find.FindType.Comment)) {
+                else if(ee is Comment && (type == Petri.Editor.Find.FindType.All || type == Petri.Editor.Find.FindType.Comment)) {
                     var e = (Comment)ee;
                     if(e.Name.Contains(what)) {
                         _findResults.Add(e);

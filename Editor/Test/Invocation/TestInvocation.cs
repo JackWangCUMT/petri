@@ -1,9 +1,31 @@
-﻿using NUnit.Framework;
+﻿/*
+ * Copyright (c) 2016 Rémi Saurel
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+using NUnit.Framework;
 using System;
 using Petri;
 using System.IO;
 
-namespace TestPetri
+namespace Petri.Test
 {
     [TestFixture()]
     public class TestInvocation
@@ -11,7 +33,7 @@ namespace TestPetri
         int Invoke(string[] args, out string stdout, out string stderr)
         {
             return Utility.InvokeAndRedirectOutput(() => {
-                return Petri.MainClass.Main(args);
+                return Petri.Editor.MainClass.Main(args);
             }, out stdout, out stderr);
         }
 
@@ -28,7 +50,7 @@ namespace TestPetri
             // THEN an error is returned and the expected error string is output
             Assert.AreNotEqual(0, result);
             Assert.AreEqual("", stdout);
-            Assert.IsTrue(stderr.EndsWith("\n" + MainClass.HelpString + "\n"));
+            Assert.IsTrue(stderr.EndsWith("\n" + Editor.MainClass.HelpString + "\n"));
             Assert.IsTrue(stderr.Contains("Invalid argument"));
             Assert.IsTrue(stderr.Contains(args[0]));
         }
@@ -45,7 +67,7 @@ namespace TestPetri
 
             // THEN no error is returned and the expected string is output
             Assert.AreEqual(0, result);
-            Assert.AreEqual(MainClass.HelpString + "\n", stdout);
+            Assert.AreEqual(Editor.MainClass.HelpString + "\n", stdout);
             Assert.AreEqual("", stderr);
         }
 
@@ -61,7 +83,7 @@ namespace TestPetri
 
             // THEN no error is returned and the expected string is output
             Assert.AreEqual(0, result);
-            Assert.AreEqual(MainClass.HelpString + "\n", stdout);
+            Assert.AreEqual(Editor.MainClass.HelpString + "\n", stdout);
             Assert.AreEqual("", stderr);
         }
 
@@ -76,9 +98,9 @@ namespace TestPetri
             int result = Invoke(args, out stdout, out stderr);
 
             // THEN an error is returned and the expected error string is output
-            Assert.AreEqual(MainClass.ArgumentError, result);
+            Assert.AreEqual(Editor.MainClass.ArgumentError, result);
             Assert.AreEqual("", stdout);
-            Assert.AreEqual(MainClass.MissingPetriDocument + "\n" + MainClass.HelpString + "\n", stderr);
+            Assert.AreEqual(Editor.MainClass.MissingPetriDocument + "\n" + Editor.MainClass.HelpString + "\n", stderr);
         }
 
         [Test()]
@@ -92,9 +114,9 @@ namespace TestPetri
             int result = Invoke(args, out stdout, out stderr);
 
             // THEN an error is returned and the expected error string is output
-            Assert.AreEqual(MainClass.ArgumentError, result);
+            Assert.AreEqual(Editor.MainClass.ArgumentError, result);
             Assert.AreEqual("", stdout);
-            Assert.AreEqual(MainClass.MissingPetriDocument + "\n" + MainClass.HelpString + "\n", stderr);
+            Assert.AreEqual(Editor.MainClass.MissingPetriDocument + "\n" + Editor.MainClass.HelpString + "\n", stderr);
         }
 
         [Test()]
@@ -108,9 +130,9 @@ namespace TestPetri
             int result = Invoke(args, out stdout, out stderr);
 
             // THEN an error is returned and the expected error string is output
-            Assert.AreEqual(MainClass.ArgumentError, result);
+            Assert.AreEqual(Editor.MainClass.ArgumentError, result);
             Assert.AreEqual("", stdout);
-            Assert.AreEqual(MainClass.MissingPetriDocument + "\n" + MainClass.HelpString + "\n", stderr);
+            Assert.AreEqual(Editor.MainClass.MissingPetriDocument + "\n" + Editor.MainClass.HelpString + "\n", stderr);
         }
 
         [Test()]
@@ -124,7 +146,7 @@ namespace TestPetri
             int result = Invoke(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(MainClass.UnexpectedError, result);
+            Assert.AreEqual(Editor.MainClass.UnexpectedError, result);
             Assert.AreEqual("", stdout);
             Assert.IsTrue(stderr.StartsWith("An exception occurred: "));
         }
@@ -140,7 +162,7 @@ namespace TestPetri
             int result = Invoke(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(MainClass.UnexpectedError, result);
+            Assert.AreEqual(Editor.MainClass.UnexpectedError, result);
             Assert.AreEqual("", stdout);
             Assert.IsTrue(stderr.StartsWith("An exception occurred: "));
         }
@@ -156,7 +178,7 @@ namespace TestPetri
             int result = Invoke(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(MainClass.UnexpectedError, result);
+            Assert.AreEqual(Editor.MainClass.UnexpectedError, result);
             Assert.AreEqual("", stdout);
             Assert.IsTrue(stderr.StartsWith("An exception occurred: "));
         }
@@ -172,7 +194,7 @@ namespace TestPetri
             int result = Invoke(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(MainClass.UnexpectedError, result);
+            Assert.AreEqual(Editor.MainClass.UnexpectedError, result);
             Assert.AreEqual("", stdout);
             Assert.IsTrue(stderr.StartsWith("An exception occurred: "));
         }
@@ -188,7 +210,7 @@ namespace TestPetri
             int result = Invoke(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(MainClass.UnexpectedError, result);
+            Assert.AreEqual(Editor.MainClass.UnexpectedError, result);
             Assert.AreEqual("", stdout);
             Assert.IsTrue(stderr.StartsWith("An exception occurred: "));
         }
@@ -204,9 +226,9 @@ namespace TestPetri
             int result = Invoke(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(MainClass.ArgumentError, result);
+            Assert.AreEqual(Editor.MainClass.ArgumentError, result);
             Assert.AreEqual("", stdout);
-            Assert.AreEqual(MainClass.WrongArchitecture + "\n" + MainClass.HelpString + "\n", stderr);
+            Assert.AreEqual(Editor.MainClass.WrongArchitecture + "\n" + Editor.MainClass.HelpString + "\n", stderr);
         }
     }
 }

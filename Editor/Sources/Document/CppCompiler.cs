@@ -25,7 +25,7 @@ using System.Diagnostics;
 using Gtk;
 using System.Text;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class CppCompiler
     {

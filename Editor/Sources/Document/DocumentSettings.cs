@@ -25,7 +25,7 @@ using System.Xml.Linq;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class DocumentSettings
     {

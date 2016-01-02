@@ -26,7 +26,7 @@ using System.Xml;
 using System.Collections.Generic;
 using Cairo;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class Comment : Entity
     {

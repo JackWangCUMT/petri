@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using Regex = System.Text.RegularExpressions.Regex;
 using System.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     namespace Cpp
     {

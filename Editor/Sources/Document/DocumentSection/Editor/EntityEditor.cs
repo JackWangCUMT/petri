@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using Gtk;
 using System.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public abstract class EntityEditor : PaneEditor
     {

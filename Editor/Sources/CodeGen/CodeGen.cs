@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Petri
+namespace Petri.Editor
 {
     public enum Language
     {

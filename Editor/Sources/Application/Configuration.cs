@@ -29,7 +29,7 @@ using System.Xml.Linq;
 using System.Reflection;
 using System.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public enum Platform
     {

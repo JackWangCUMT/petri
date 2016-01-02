@@ -26,7 +26,7 @@ using Cairo;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     [System.ComponentModel.ToolboxItem(true)]
     public abstract class PetriView : Gtk.DrawingArea

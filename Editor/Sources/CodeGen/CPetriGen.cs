@@ -22,10 +22,10 @@
 
 using System;
 using System.Collections.Generic;
-using Petri.Cpp;
+using Petri.Editor.Cpp;
 using System.Linq;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class CPetriGen : PetriGen
     {

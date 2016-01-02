@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B8412830-6539-4240-91E6-E9E3CA1E160E}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>TestPetri</RootNamespace>
+    <RootNamespace>Petri.Test</RootNamespace>
     <AssemblyName>Test</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <ReleaseVersion>1.1</ReleaseVersion>

@@ -22,9 +22,9 @@
 
 using System;
 using System.Collections.Generic;
-using ExprType = Petri.Cpp.Expression.ExprType;
+using ExprType = Petri.Editor.Cpp.Expression.ExprType;
 
-namespace Petri
+namespace Petri.Editor
 {
     public class CFamilyCodeGen : CodeGen
     {

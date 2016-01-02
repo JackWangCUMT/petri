@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{72A6B727-2F7E-4E2C-81AC-570D8EE03B0F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Petri</RootNamespace>
+    <RootNamespace>Petri.Editor</RootNamespace>
     <AssemblyName>Petri</AssemblyName>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>

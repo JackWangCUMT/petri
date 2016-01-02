@@ -11,6 +11,11 @@ if [[ $# = 1 ]]; then
     configuration="Debug"
 fi
 
+oldpwd=$(pwd)
+cd "$dir"/../Runtime
+make clean
+cd "$oldpwd"
+
 mdtool build -t:Clean -c:"$configuration" "$dir"/Petri.sln
 ' > "$dir"/clean.sh
 
