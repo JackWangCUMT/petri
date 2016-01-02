@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestPetri
+namespace TestPetri.Cpp
 {
     public class Utility
     {

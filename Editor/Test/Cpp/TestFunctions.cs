@@ -2,7 +2,7 @@
 using System;
 using Petri.Cpp;
 
-namespace TestPetri
+namespace TestPetri.Cpp
 {
     [TestFixture()]
     public class TestFunctions

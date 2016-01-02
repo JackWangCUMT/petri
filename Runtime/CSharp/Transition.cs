@@ -29,7 +29,7 @@ namespace Petri.Runtime
          * @param previous The starting point of the Transition
          * @param next The arrival point of the Transition
          */
-        public Transition(UInt64 id, string name, Action previous, Action next, TransitionCallable cond)
+        public Transition(UInt64 id, string name, Action previous, Action next, TransitionCallableDel cond)
         {
             var c = WrapForNative.Wrap(cond, name);
             _callback = c;
@@ -45,7 +45,7 @@ namespace Petri.Runtime
          * @param actionResult The result of the Action 'previous'. This is useful when the Transition's test uses this value.
          * @return The result of the test, true meaning that the Transition can be crossed to enable the action 'next'
          */
-        public bool IsFulfilled(ActionResult_t actionResult)
+        public bool IsFulfilled(Int32 actionResult)
         {
             return Interop.Transition.PetriTransition_isFulfilled(Handle, actionResult);
         }
@@ -54,7 +54,7 @@ namespace Petri.Runtime
          * Returns the condition associated to the Transition
          * @return The condition associated to the Transition
          */
-        public void SetCondition(TransitionCallable condition)
+        public void SetCondition(TransitionCallableDel condition)
         {
             var c = WrapForNative.Wrap(condition, Name);
             _callback = c;
@@ -116,7 +116,7 @@ namespace Petri.Runtime
         }
 
         // Ensures the callback's lifetime is the same as the instance's one to avoid unexpected GC during native code invocation.
-        private ManagedCallback _callback;
+        private TransitionCallableDel _callback;
     }
 }
 
