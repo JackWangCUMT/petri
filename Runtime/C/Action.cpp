@@ -72,23 +72,18 @@ void PetriAction_setID(PetriAction *action, uint64_t id) {
     return getAction(action).setID(id);
 }
 
-void PetriAction_addTransition(PetriAction *action, PetriTransition *transition) {
-    if(!transition->owned) {
-        std::cerr << "The transition has already been added to an action!" << std::endl;
-    } else {
-        auto &t = getAction(action).addTransition(std::move(*transition->owned));
-        transition->owned.reset();
-        transition->notOwned = &t;
-    }
+PetriTransition *PetriAction_addTransition(PetriAction *action, uint64_t id, char const *name, PetriAction *next, transitionCallable_t cond) {
+    auto &t = getAction(action).addTransition(id, name, getAction(next), cond);
+    return new PetriTransition{nullptr, &t};
 }
 
-PetriTransition *PetriAction_createAndAddTransition(PetriAction *action, uint64_t id, char const *name, PetriAction *next, transitionCallable_t cond) {
-    auto &t = getAction(action).addTransition(id, name, getAction(next), Petri::make_transition_callable(cond));
+PetriTransition *PetriAction_addEmptyTransition(struct PetriAction *action, struct PetriAction *next) {
+    auto &t = getAction(action).addTransition(getAction(next));
     return new PetriTransition{nullptr, &t};
 }
 
 void PetriAction_setAction(PetriAction *action, callable_t a) {
-    getAction(action).setAction(Petri::make_action_callable([a]() { return a(); }));
+    getAction(action).setAction(a);
 }
 
 void PetriAction_setActionParam(PetriAction *action, parametrizedCallable_t a) {

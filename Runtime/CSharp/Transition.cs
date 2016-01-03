@@ -34,31 +34,8 @@ namespace Petri.Runtime
             Handle = handle;
         }
 
-        /**
-         * Creates an Transition object, containing a nullptr test, allowing the end of execution of Action 'previous' to provoke
-         * the execution of Action 'next', if the test is fulfilled.
-         * @param previous The starting point of the Transition
-         * @param next The arrival point of the Transition
-         */
-        public Transition(Action previous, Action next)
+        ~Transition()
         {
-            Handle = Interop.Transition.PetriTransition_createEmpty(previous.Handle, next.Handle);
-        }
-
-        /**
-         * Creates an Transition object, containing a nullptr test, allowing the end of execution of Action 'previous' to provoke
-         * the execution of Action 'next', if the test is fulfilled.
-         * @param previous The starting point of the Transition
-         * @param next The arrival point of the Transition
-         */
-        public Transition(UInt64 id, string name, Action previous, Action next, TransitionCallableDel cond)
-        {
-            var c = WrapForNative.Wrap(cond, name);
-            _callback = c;
-            Handle = Interop.Transition.PetriTransition_create(id, name, previous.Handle, next.Handle, c);
-        }
-
-        ~Transition() {
             Interop.Transition.PetriTransition_destroy(Handle);
         }
 

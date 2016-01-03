@@ -32,51 +32,77 @@
 
 namespace Petri {
 
+    struct Transition::Internals {
+        Internals(Action &previous, Action &next)
+                : _previous(&previous)
+                , _next(&next) {}
+
+        Internals(std::string const &name, Action &previous, Action &next, TransitionCallableBase const &cond)
+                : _name(name)
+                , _previous(&previous)
+                , _next(&next)
+                , _test(cond.copy_ptr()) {}
+
+        std::string _name;
+        Action *_previous;
+        Action *_next;
+        std::unique_ptr<TransitionCallableBase> _test;
+
+        // Default delay between evaluation
+        std::chrono::nanoseconds _delayBetweenEvaluation = 10ms;
+    };
+
     Transition::Transition(Action &previous, Action &next)
             : HasID(0)
-            , _previous(previous)
-            , _next(next) {}
+            , _internals(std::make_unique<Internals>(previous, next)) {}
 
     Transition::Transition(uint64_t id, std::string const &name, Action &previous, Action &next, TransitionCallableBase const &cond)
             : HasID(id)
-            , _name(name)
-            , _previous(previous)
-            , _next(next)
-            , _test(cond.copy_ptr()) {}
+            , _internals(std::make_unique<Internals>(name, previous, next, cond)) {}
+
+    Transition::~Transition() = default;
+    Transition::Transition(Transition &&) = default;
+
+    void Transition::setPrevious(Action &previous) {
+        _internals->_previous = &previous;
+    }
+    void Transition::setNext(Action &next) {
+        _internals->_next = &next;
+    }
 
     bool Transition::isFulfilled(actionResult_t actionResult) const {
-        return (*_test)(actionResult);
+        return (*_internals->_test)(actionResult);
     }
 
     TransitionCallableBase const &Transition::condition() const {
-        return *_test;
+        return *_internals->_test;
     }
 
     void Transition::setCondition(TransitionCallableBase const &test) {
-        _test = test.copy_ptr();
+        _internals->_test = test.copy_ptr();
     }
 
     Action &Transition::previous() {
-        return _previous;
+        return *_internals->_previous;
     }
 
     Action &Transition::next() {
-        return _next;
+        return *_internals->_next;
     }
 
     std::string const &Transition::name() const {
-        return _name;
+        return _internals->_name;
     }
 
     void Transition::setName(std::string const &name) {
-        _name = name;
+        _internals->_name = name;
     }
 
     std::chrono::nanoseconds Transition::delayBetweenEvaluation() const {
-        return _delayBetweenEvaluation;
+        return _internals->_delayBetweenEvaluation;
     }
 
     void Transition::setDelayBetweenEvaluation(std::chrono::nanoseconds delay) {
-        _delayBetweenEvaluation = delay;
+        _internals->_delayBetweenEvaluation = delay;
     }
 }

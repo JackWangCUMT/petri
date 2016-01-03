@@ -61,6 +61,7 @@ namespace Petri {
         friend class PetriNet;
 
     public:
+        friend class Petri::Transition;
         /**
          * Creates an empty action, associated to a null CallablePtr.
          */
@@ -75,6 +76,7 @@ namespace Petri {
          * to execute.
          */
         Action(uint64_t id, std::string const &name, ActionCallableBase const &action, size_t requiredTokens);
+        Action(uint64_t id, std::string const &name, actionResult_t (*action)(), size_t requiredTokens);
 
         /**
          * Creates an empty action, associated to a copy of the specified Callable.
@@ -85,18 +87,12 @@ namespace Petri {
          * to execute.
          */
         Action(uint64_t id, std::string const &name, ParametrizedActionCallableBase const &action, size_t requiredTokens);
+        Action(uint64_t id, std::string const &name, actionResult_t (*action)(PetriNet &), size_t requiredTokens);
 
         Action(Action &&);
         Action(Action const &) = delete;
 
         ~Action();
-
-        /**
-         * Adds a Transition to the Action. The parameter is moved from.
-         * @param transition the transition to be added
-         * @return A reference to the added transition.
-         */
-        Transition &addTransition(Transition transition);
 
         /**
          * Adds a Transition to the Action.
@@ -108,6 +104,14 @@ namespace Petri {
          */
         Transition &
         addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond);
+        Transition &addTransition(uint64_t id, std::string const &name, Action &next, bool (*cond)(actionResult_t));
+
+        /**
+         * Adds a Transition to the Action.
+         * @param next the Action following the transition to be added
+         * @return The newly created transition.
+         */
+        Transition &addTransition(Action &next);
 
         /**
          * Returns the Callable asociated to the action. An Action with a null Callable must not
@@ -121,12 +125,14 @@ namespace Petri {
          * @param action The Callable which will be copied and put in the Action
          */
         void setAction(ActionCallableBase const &action);
+        void setAction(actionResult_t (*action)());
 
         /**
          * Changes the Callable associated to the Action
          * @param action The Callable which will be copied and put in the Action
          */
         void setAction(ParametrizedActionCallableBase const &action);
+        void setAction(actionResult_t (*action)(PetriNet &));
 
         /**
          * Returns the required tokens of the Action to be activated, i.e. the count of Actions
@@ -169,6 +175,8 @@ namespace Petri {
     private:
         std::size_t &currentTokensRef();
         std::mutex &tokensMutex();
+
+        Transition &addTransition(Transition t);
 
         struct Internals;
         std::unique_ptr<Internals> _internals;

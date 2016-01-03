@@ -46,7 +46,7 @@ namespace Petri.Runtime
          * @param action The action to add
          * @param active Controls whether the action is active as soon as the net is started or not
          */
-        public virtual void AddAction(Action action, bool active = false)
+        public virtual void AddAction(ref Action action, bool active = false)
         {
             Interop.PetriNet.PetriNet_addAction(Handle, action.Handle, active);
         }

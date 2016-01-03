@@ -71,18 +71,15 @@ namespace Petri.Runtime
             Handle = Interop.Action.PetriAction_createWithParam(id, name, c, requiredTokens);
         }
 
-        ~Action() {
+        ~Action()
+        {
             Interop.Action.PetriAction_destroy(Handle);
         }
 
-
-        /**
-         * Adds a Transition to the Action.
-         * @param transition the transition to be added
-         */
-        public void AddTransition(Transition transition)
+        Transition AddTransition(Action next)
         {
-            Interop.Action.PetriAction_addTransition(Handle, transition.Handle);
+            IntPtr handle = Interop.Action.PetriAction_addEmptyTransition(Handle, next.Handle);
+            return new Transition(handle);
         }
 
         /**
@@ -95,11 +92,8 @@ namespace Petri.Runtime
          */
         public Transition AddTransition(UInt64 id, string name, Action next, TransitionCallableDel cond)
         {
-            var handle = Interop.Action.PetriAction_addNewTransition(Handle, id, name, next.Handle, cond);
-
-            var t = new Transition(handle);
-
-            return t;
+            var handle = Interop.Action.PetriAction_addTransition(Handle, id, name, next.Handle, cond);
+            return new Transition(handle);
         }
 
         /**

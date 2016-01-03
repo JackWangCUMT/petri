@@ -39,6 +39,7 @@ namespace Petri {
                 : _name(name)
                 , _requiredTokens(requiredTokens) {}
         std::list<Transition> _transitions;
+        std::list<std::reference_wrapper<Transition>> _transitionsLeadingToMe;
         std::unique_ptr<ParametrizedActionCallableBase> _action;
         std::string _name;
         std::size_t _requiredTokens = 1;
@@ -60,6 +61,8 @@ namespace Petri {
             , _internals(std::make_unique<Internals>(name, requiredTokens)) {
         this->setAction(action);
     }
+    Action::Action(uint64_t id, std::string const &name, actionResult_t (*action)(), size_t requiredTokens)
+            : Action(id, name, make_action_callable(action), requiredTokens) {}
 
     /**
      * Creates an empty action, associated to a copy of the specified Callable.
@@ -70,26 +73,43 @@ namespace Petri {
             , _internals(std::make_unique<Internals>(name, requiredTokens)) {
         this->setAction(action);
     }
+    Action::Action(uint64_t id, std::string const &name, actionResult_t (*action)(PetriNet &), size_t requiredTokens)
+            : Action(id, name, make_param_action_callable(action), requiredTokens) {}
 
-    Action::Action(Action &&) = default;
+    Action::Action(Action &&a)
+            : HasID<uint64_t>(a.ID())
+            , _internals(std::move(a._internals)) {
+        for(auto &t : _internals->_transitions) {
+            t.setPrevious(*this);
+        }
+        for(Transition &t : _internals->_transitionsLeadingToMe) {
+            t.setNext(*this);
+        }
+    }
+
     Action::~Action() = default;
 
-    /**
-     * Adds a Transition to the Action.
-     * @param transition the transition to be added
-     */
-    Transition &Action::addTransition(Transition transition) {
-        _internals->_transitions.push_back(std::move(transition));
+    Transition &Action::addTransition(Transition t) {
+        _internals->_transitions.push_back(std::move(t));
 
-        return _internals->_transitions.back();
+        Transition &returnValue = _internals->_transitions.back();
+        returnValue.next()._internals->_transitionsLeadingToMe.push_back(returnValue);
+
+        return returnValue;
+    }
+
+    Transition &Action::addTransition(Action &next) {
+        return this->addTransition(Transition(*this, next));
     }
 
     Transition &
     Action::addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond) {
-        _internals->_transitions.emplace_back(id, name, *this, next, cond);
-
-        return _internals->_transitions.back();
+        return this->addTransition(Transition(id, name, *this, next, cond));
     }
+    Transition &Action::addTransition(uint64_t id, std::string const &name, Action &next, bool (*cond)(actionResult_t)) {
+        return addTransition(id, name, next, make_transition_callable(cond));
+    }
+
     /**
      * Returns the Callable asociated to the action. An Action with a null Callable must not invoke
      * this method!
@@ -109,6 +129,9 @@ namespace Petri {
         this->setAction(
         make_param_action_callable([shared_copy](PetriNet &) { return shared_copy->operator()(); }));
     }
+    void Action::setAction(actionResult_t (*action)()) {
+        this->setAction(make_action_callable(action));
+    }
 
     /**
      * Changes the Callable associated to the Action
@@ -116,6 +139,9 @@ namespace Petri {
      */
     void Action::setAction(ParametrizedActionCallableBase const &action) {
         _internals->_action = action.copy_ptr();
+    }
+    void Action::setAction(actionResult_t (*action)(PetriNet &)) {
+        this->setAction(make_param_action_callable(action));
     }
 
     /**

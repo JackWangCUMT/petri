@@ -34,7 +34,7 @@ namespace Petri.Test
         {
             // GIVEN a petri net created with a custom name
             string name = "Test12345";
-            PetriNet pn = new PetriNet(name);
+            PetriNet pn =       new PetriNet(name);
 
             // WHEN we read the name of the petri net
             string actual = pn.Name;
@@ -81,23 +81,19 @@ namespace Petri.Test
         [Test()]
         public void TestRuntime2()
         {
-            Petri.Runtime.PetriNet pn = new Petri.Runtime.PetriNet("Test");
+            PetriNet pn = new PetriNet("Test");
 
-            Petri.Runtime.Action a1 = new Petri.Runtime.Action(1, "action1", Action1, 1);
-            Petri.Runtime.Action a2 = new Petri.Runtime.Action(2, "action2", Action2, 1);
-            Petri.Runtime.Action a3 = new Petri.Runtime.Action(3, "action3", Action3, 1);
+            Action a1 = new Action(1, "action1", Action1, 1);
+            Action a2 = new Action(2, "action2", Action2, 1);
+            Action a3 = new Action(3, "action3", Action3, 1);
 
-            // TODO: allow AddTransition after AddAction
-            pn.AddAction(a1, true);
-            pn.AddAction(a2, false);
-            pn.AddAction(a3, false);
+            a1.AddTransition(4, "transition1", a2, Transition1);
+            a2.AddTransition(5, "transition2", a1, Transition2);
+            a1.AddTransition(6, "transition3", a3, Transition3);
 
-            Petri.Runtime.Transition t1 = new Petri.Runtime.Transition(4, "transition1", a1, a2, Transition1);
-            Petri.Runtime.Transition t2 = new Petri.Runtime.Transition(5, "transition2", a2, a1, Transition2);
-            Petri.Runtime.Transition t3 = new Petri.Runtime.Transition(6, "transition3", a1, a3, Transition3);
-            a1.AddTransition(t1);
-            a2.AddTransition(t2);
-            a1.AddTransition(t3);
+            pn.AddAction(ref a1, true);
+            pn.AddAction(ref a2, false);
+            pn.AddAction(ref a3, false);
 
             counter = 2;
 

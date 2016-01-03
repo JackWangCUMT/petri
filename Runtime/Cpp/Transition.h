@@ -51,27 +51,11 @@ namespace Petri {
      * A transition linking 2 Action, composing a PetriNet.
      */
     class Transition : public HasID<uint64_t> {
+        friend class Petri::Action;
+
     public:
-        /**
-         * Creates an Transition object, containing a nullptr test, allowing the end of execution of
-         * Action 'previous' to provoke
-         * the execution of Action 'next', if the test is fulfilled.
-         * @param previous The starting point of the Transition
-         * @param next The arrival point of the Transition
-         */
-        Transition(Action &previous, Action &next);
-
-        /**
-         * Creates an Transition object, containing a nullptr test, allowing the end of execution of
-         * Action 'previous' to provoke
-         * the execution of Action 'next', if the test is fulfilled.
-         * @param previous The starting point of the Transition
-         * @param next The arrival point of the Transition
-         */
-        Transition(uint64_t id, std::string const &name, Action &previous, Action &next, TransitionCallableBase const &cond);
-
-        Transition(Transition &&) = default;
-        ~Transition() = default;
+        Transition(Transition &&);
+        ~Transition();
         /**
          * Checks whether the Transition can be crossed
          * @param actionResult The result of the Action 'previous'. This is useful when the
@@ -133,13 +117,14 @@ namespace Petri {
         void setDelayBetweenEvaluation(std::chrono::nanoseconds delay);
 
     private:
-        std::string _name;
-        Action &_previous;
-        Action &_next;
-        std::unique_ptr<TransitionCallableBase> _test;
+        Transition(Action &previous, Action &next);
+        Transition(uint64_t id, std::string const &name, Action &previous, Action &next, TransitionCallableBase const &cond);
 
-        // Default delay between evaluation
-        std::chrono::nanoseconds _delayBetweenEvaluation = 10ms;
+        void setPrevious(Action &previous);
+        void setNext(Action &next);
+
+        struct Internals;
+        std::unique_ptr<Internals> _internals;
     };
 }
 

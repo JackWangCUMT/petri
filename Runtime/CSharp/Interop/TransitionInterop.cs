@@ -7,12 +7,6 @@ namespace Petri.Runtime.Interop {
 
 public class Transition {
 [DllImport("PetriRuntime")]
-public static extern IntPtr PetriTransition_createEmpty(IntPtr previous, IntPtr next);
-
-[DllImport("PetriRuntime")]
-public static extern IntPtr PetriTransition_create(UInt64 id, [MarshalAs(UnmanagedType.LPTStr)] string name, IntPtr previous, IntPtr next, TransitionCallableDel cond);
-
-[DllImport("PetriRuntime")]
 public static extern void PetriTransition_destroy(IntPtr transition);
 
 [DllImport("PetriRuntime")]

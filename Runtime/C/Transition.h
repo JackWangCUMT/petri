@@ -44,24 +44,6 @@ struct PetriAction;
 typedef bool (*transitionCallable_t)(Petri_actionResult_t);
 
 /**
- * Creates a Transition object, containing a nullptr test, allowing the end of execution of
- * PetriAction 'previous' to provoke
- * the execution of PetriAction 'next', if the test is fulfilled.
- * @param previous The starting point of the PetriTransition
- * @param next The arrival point of the Transition
- */
-struct PetriTransition *PetriTransition_createEmpty(struct PetriAction *previous, struct PetriAction *next);
-
-/**
- * Creates a Transition object, containing a nullptr test, allowing the end of execution of
- * PetriAction 'previous' to provoke
- * the execution of PetriAction 'next', if the test is fulfilled.
- * @param previous The starting point of the PetriTransition
- * @param next The arrival point of the Transition
- */
-struct PetriTransition *PetriTransition_create(uint64_t id, char const *name, struct PetriAction *previous, struct PetriAction *next, transitionCallable_t cond);
-
-/**
  * Destroys a PetriAction instance created by one of the PetriAction_create functions.
  * @param transition The PetriTransition instance to destroy.
  */

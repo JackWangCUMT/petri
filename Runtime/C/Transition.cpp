@@ -34,14 +34,6 @@
 #include "Types.hpp"
 #include <chrono>
 
-PetriTransition *PetriTransition_createEmpty(PetriAction *previous, PetriAction *next) {
-    return new PetriTransition{std::make_unique<Petri::Transition>(getAction(previous), getAction(next))};
-}
-
-PetriTransition *PetriTransition_create(uint64_t id, char const *name, PetriAction *previous, PetriAction *next, transitionCallable_t cond) {
-    return new PetriTransition{std::make_unique<Petri::Transition>(id, name, getAction(previous), getAction(next), Petri::make_transition_callable(cond))};
-}
-
 void PetriTransition_destroy(PetriTransition *transition) {
     delete transition;
 }
