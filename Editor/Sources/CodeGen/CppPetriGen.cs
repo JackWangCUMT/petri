@@ -56,8 +56,8 @@ namespace Petri.Editor
                 generator += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
             }
 
-            generator += "#include \"Runtime/Petri.h\"";
-            generator += "#include \"Runtime/Atomic.h\"";
+            generator += "#include \"Runtime/Cpp/Petri.h\"";
+            generator += "#include \"Runtime/Cpp/Atomic.h\"";
             generator += "#include <string>";
             generator += "#include <sstream>";
 
@@ -80,10 +80,10 @@ namespace Petri.Editor
         protected override void Begin()
         {
             CodeGen += "#include <cstdint>";
-            CodeGen += "#include \"Runtime/PetriDebug.h\"";
-            CodeGen += "#include \"Runtime/PetriUtils.h\"";
-            CodeGen += "#include \"Runtime/Action.h\"";
-            CodeGen += "#include \"Runtime/Atomic.h\"";
+            CodeGen += "#include \"Runtime/Cpp/PetriDebug.h\"";
+            CodeGen += "#include \"Runtime/Cpp/PetriUtils.h\"";
+            CodeGen += "#include \"Runtime/Cpp/Action.h\"";
+            CodeGen += "#include \"Runtime/Cpp/Atomic.h\"";
             foreach(var s in Document.Headers) {
                 var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, s);
                 var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath));
@@ -160,7 +160,7 @@ namespace Petri.Editor
             _headerGen += "#define PETRI_" + Document.Settings.Name + "_H\n";
 
             _headerGen += "";
-            _headerGen += "#include \"Runtime/PetriDynamicLib.h\"";
+            _headerGen += "#include \"Runtime/Cpp/PetriDynamicLib.h\"";
             _headerGen += "";
             _headerGen += "class " + Document.Settings.Name + " : public Petri::PetriDynamicLib {";
             _headerGen += "public:";
@@ -241,11 +241,10 @@ namespace Petri.Editor
             _functionPrototypes += "Petri_actionResult_t " + a.CppName + "_invocation(PetriNet &);\n";
             _functionBodies += "Petri_actionResult_t " + a.CppName + "_invocation(PetriNet &petriNet) {\nreturn " + cpp + ";\n}\n";
 
-            //string action = "make_action_callable([&petriNet]() { return " + cpp + "; })";
             string action = "&" + a.CppName + "_invocation";
 
             CodeGen += "auto &" + a.CppName + " = " + "petriNet.addAction("
-            + "Action(" + a.ID.ToString() + ", \"" + a.Parent.Name + "_" + a.Name + "\", make_param_action_callable(" + action + "), " + a.RequiredTokens.ToString() + "), " + ((a.Active && (a.Parent is RootPetriNet)) ? "true" : "false") + ");";
+            + "Action(" + a.ID.ToString() + ", \"" + a.Parent.Name + "_" + a.Name + "\", " + action + ", " + a.RequiredTokens.ToString() + "), " + ((a.Active && (a.Parent is RootPetriNet)) ? "true" : "false") + ");";
 
             foreach(var v in cppVar) {
                 CodeGen += a.CppName + ".addVariable(" + "static_cast<std::uint_fast32_t>(" + v.Prefix + v.Expression + "));";
@@ -331,10 +330,9 @@ namespace Petri.Editor
             _functionPrototypes += "bool " + t.CppName + "_invocation(Petri_actionResult_t);\n";
             _functionBodies += "bool " + t.CppName + "_invocation(Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
 
-            //cpp = "[&petriNet](actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) -> bool { " + cpp + " }";
             cpp = "&" + t.CppName + "_invocation";
 
-            CodeGen += "auto &" + t.CppName + " = " + bName + ".addTransition(" + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", make_transition_callable(" + cpp + "));";
+            CodeGen += "auto &" + t.CppName + " = " + bName + ".addTransition(" + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", " + cpp + ");";
             foreach(var v in cppVar) {
                 CodeGen += t.CppName + ".addVariable(" + "static_cast<std::uint_fast32_t>(" + v.Prefix + v.Expression + "));";
             }

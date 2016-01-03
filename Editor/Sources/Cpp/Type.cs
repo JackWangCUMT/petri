@@ -114,7 +114,7 @@ namespace Petri.Editor
 
             public override string ToString()
             {
-                string val = Enclosing.ToString() + Name;
+                string val = (Enclosing?.ToString() ?? "") + Name;
                 if(Template.Length > 0) {
                     /*string v = "";
 					foreach(var e in Template) {
