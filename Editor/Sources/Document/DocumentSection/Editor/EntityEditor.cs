@@ -177,7 +177,7 @@ namespace Petri.Editor
                             actionType = ActionType.Print;
                         }
                         else if(val == pauseFunction) {
-                            _document.PostAction(new InvocationChangeAction(a, new Cpp.FunctionInvocation(a.Document.Settings.Language, Action.PauseFunction(a.Document), Cpp.LiteralExpression.CreateFromStringAndEntity("1s", a))));
+                            _document.PostAction(new InvocationChangeAction(a, new Cpp.FunctionInvocation(a.Document.Settings.Language, Action.PauseFunction(a.Document), Cpp.LiteralExpression.CreateFromString("1s", a.Document.Settings.Language))));
                             actionType = ActionType.Pause;
                         }
                         else if(val == manual) {

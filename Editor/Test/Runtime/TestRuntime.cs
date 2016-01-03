@@ -91,9 +91,9 @@ namespace Petri.Test
             a2.AddTransition(5, "transition2", a1, Transition2);
             a1.AddTransition(6, "transition3", a3, Transition3);
 
-            pn.AddAction(ref a1, true);
-            pn.AddAction(ref a2, false);
-            pn.AddAction(ref a3, false);
+            pn.AddAction(a1, true);
+            pn.AddAction(a2, false);
+            pn.AddAction(a3, false);
 
             counter = 2;
 

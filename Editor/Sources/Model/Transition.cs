@@ -77,9 +77,9 @@ namespace Petri.Editor
             try {
                 Condition = Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>(s, this);
             }
-            catch(Exception) {
+            catch(Exception e) {
                 Document.Conflicting.Add(this);
-                Condition = Cpp.LiteralExpression.CreateFromStringAndEntity(s, this);
+                Condition = Cpp.LiteralExpression.CreateFromString(s, Document.Settings.Language);
             }
         }
 

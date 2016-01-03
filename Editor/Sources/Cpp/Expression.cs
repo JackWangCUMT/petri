@@ -530,7 +530,7 @@ namespace Petri.Editor
                         prep = prep.Remove(index, lastIndex - index + 1).Insert(index, subexprs[expr].Item2);
                         break;
                     case ExprType.Invocation:
-                        prep = prep.Remove(index, lastIndex - index + 4).Insert(index, subexprs[expr].Item2);
+                        prep = prep.Remove(index, lastIndex - index + 5).Insert(index, subexprs[expr].Item2);
                         break;
                     }
                 }
@@ -559,7 +559,7 @@ namespace Petri.Editor
                                                                          macros));
                 }
 
-                return Tuple.Create(tup.Item1, tup.Item2, exprList);
+                return Tuple.Create(tup.Item1, tup.Item2.Trim(), exprList);
             }
 
             private static FunctionInvocation CreateFunctionInvocation(string invocation,
@@ -579,7 +579,7 @@ namespace Petri.Editor
                 }
                 else {
                     f = (functions.FirstOrDefault(delegate(Cpp.Function ff) {
-                        return !(ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && scopeNameAndArgs.Item1.Equals(ff.Enclosing);
+                        return !(ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && ((scopeNameAndArgs.Item1 == null && ff.Enclosing == null) || scopeNameAndArgs.Item1.Equals(ff.Enclosing));
                     })) as Function;
 
                     if(f == null) {

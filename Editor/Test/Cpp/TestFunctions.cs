@@ -23,6 +23,7 @@
 using NUnit.Framework;
 using System;
 using Petri.Editor.Cpp;
+using System.Collections.Generic;
 
 namespace Petri.Test.Cpp
 {
@@ -33,6 +34,7 @@ namespace Petri.Test.Cpp
         public void TestFreeFunction1()
         {
             // GIVEN a function invocation string
+            // WHEN an invocation is created from the string
             var e = Expression.CreateFromString<FunctionInvocation>("f()");
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
@@ -46,6 +48,7 @@ namespace Petri.Test.Cpp
         public void TestFreeFunction2()
         {
             // GIVEN a function invocation string
+            // WHEN an invocation is created from the string
             var e = Expression.CreateFromString<FunctionInvocation>("f(3)");
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
@@ -61,6 +64,7 @@ namespace Petri.Test.Cpp
         public void TestFreeFunction3()
         {
             // GIVEN a function invocation string
+            // WHEN an invocation is created from the string
             var e = Expression.CreateFromString<FunctionInvocation>("f(   3 )");
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
@@ -76,6 +80,7 @@ namespace Petri.Test.Cpp
         public void TestFreeFunction4()
         {
             // GIVEN a function invocation string
+            // WHEN an invocation is created from the string
             var e = Expression.CreateFromString<FunctionInvocation>("f(1 ,  2  )");
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
@@ -92,12 +97,50 @@ namespace Petri.Test.Cpp
         public void TestFreeFunction5()
         {
             // GIVEN a function invocation string
+            // WHEN an invocation is created from the string
             var e = Expression.CreateFromString<FunctionInvocation>("f ()");
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
             Assert.IsInstanceOf<FunctionInvocation>(e);
             Assert.AreEqual("f", e.Function.Name);
             Assert.AreEqual(0, e.Function.Parameters.Count);
+        }
+
+        [Test()]
+        public void TestFreeFunction6()
+        {
+            // GIVEN a function invocation string
+            // WHEN an invocation is created from the string
+            var e = Expression.CreateFromString<UnaryExpression>("!f()");
+
+            // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
+
+            Assert.IsInstanceOf<UnaryExpression>(e);
+            Assert.AreEqual(Operator.Name.LogicalNot, e.Operator);
+
+            FunctionInvocation invocation = e.Expression as FunctionInvocation;
+            Assert.AreEqual("f", invocation.Function.Name);
+            Assert.AreEqual(0, invocation.Function.Parameters.Count);
+        }
+
+        [Test()]
+        public void TestFreeFunction7()
+        {
+
+            // GIVEN a function list
+            var functions = new List<Editor.Cpp.Function>();
+            var f = new Editor.Cpp.Function(new Editor.Cpp.Type("void"), null, "f", false);
+            functions.Add(f);
+
+            // AND a function invocation string
+            // WHEN an invocation is created from the string and uses the functions list
+            var e = Expression.CreateFromString<FunctionInvocation>("f()", Editor.Language.Cpp, functions);
+
+            // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
+            Assert.IsInstanceOf<FunctionInvocation>(e);
+            Assert.AreEqual("f", e.Function.Name);
+            Assert.AreEqual(0, e.Function.Parameters.Count);
+            Assert.AreEqual(0, e.Arguments.Count);
         }
     }
 }

@@ -87,7 +87,7 @@ namespace Petri.Editor
 
         public Cpp.FunctionInvocation PrintAction()
         {
-            return new Petri.Editor.Cpp.FunctionInvocation(Document.Settings.Language, PrintFunction(Document), Cpp.LiteralExpression.CreateFromStringAndEntity("$Name", this), Cpp.LiteralExpression.CreateFromStringAndEntity("$ID", this));
+            return new Petri.Editor.Cpp.FunctionInvocation(Document.Settings.Language, PrintFunction(Document), Cpp.LiteralExpression.CreateFromString("$Name", Document.Settings.Language), Cpp.LiteralExpression.CreateFromString("$ID", Document.Settings.Language));
         }
 
         public static Cpp.Function PrintFunction(HeadlessDocument doc)

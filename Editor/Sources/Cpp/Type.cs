@@ -182,8 +182,14 @@ namespace Petri.Editor
                         return false;
                 }
 
-                if(!Enclosing.Equals(type.Enclosing))
+                bool enclosingNull = Enclosing == null || type.Enclosing == null;
+                if(enclosingNull && Enclosing != type.Enclosing) {
                     return false;
+                }
+                if(!enclosingNull && !Enclosing.Equals(type.Enclosing)) {
+                    return false;
+                }
+                    
 
                 return true;
             }
@@ -242,7 +248,8 @@ namespace Petri.Editor
                 s = s.TrimEnd(new char[]{ ' ' });
 
                 if(s.EndsWith(" * const volatile") || s.EndsWith(" * volatile const")) {
-                    s = ParseLeftAssociativeQualifiers(s.Substring(0, s.Length - " * const volatile".Length), qualifiers);
+                    s = ParseLeftAssociativeQualifiers(s.Substring(0, s.Length - " * const volatile".Length),
+                                                       qualifiers);
                     qualifiers.Add(CVQualifier.Const | CVQualifier.Volatile);
                 }
                 else if(s.EndsWith(" * const")) {
