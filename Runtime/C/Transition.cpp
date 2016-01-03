@@ -27,7 +27,6 @@
 //  Created by Rémi on 25/06/2015.
 //
 
-#define PETRI_NEEDS_GET_ACTION
 #define PETRI_NEEDS_GET_TRANSITION
 
 #include "Transition.h"
