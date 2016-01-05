@@ -1,20 +1,20 @@
 #!/bin/bash
 
-dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+dir="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 mkdir -p "$dir/Interop"
 
 for h in "$dir"/../C/*.h; do
     filename=$(basename "$h")
     filename="${filename%.*}"
-    echo "// This source file has been generated automatically. Do not edit by hand.
+    echo "// This source file has been generated automatically from ../../C/$filename.h by C2CS.sh. Do not edit by hand.
 
 using System;
 using System.Runtime.InteropServices;
 
 namespace Petri.Runtime.Interop {
 
-public class $filename {
+    public class $filename {
 $(sed -n 's/[ 	]*\(.*(.*)\)[ 	]*;/\1;/p' <"$h" \
     | grep -v "\<typedef\>" \
     | sed 's/uint\([0-9]\{1,\}\)_t/UInt\1/g' \
@@ -26,14 +26,13 @@ $(sed -n 's/[ 	]*\(.*(.*)\)[ 	]*;/\1;/p' <"$h" \
     | sed 's/char const \*/[MarshalAs(UnmanagedType.LPTStr)] string /g' \
     | sed 's/struct[ 	]\{1,\}[^ 	]\{1,\}[ 	]*\*/IntPtr /g' \
     \
-    | sed 's/\(.*\)/[DllImport("PetriRuntime")]\
-public static extern \1\
+    | sed 's/\(.*\)/        [DllImport("PetriRuntime")]\
+        public static extern \1\
 /' \
-    | sed 's/public static extern \[MarshalAs(UnmanagedType\.LPTStr)\] string/public static extern IntPtr/'
+    | sed 's/\(.*\)public static extern \[MarshalAs(UnmanagedType\.LPTStr)\] string/\1public static extern IntPtr/'
 
 )
-
-}
+    }
 }
 " > "$dir/Interop/$filename"Interop.cs
 
