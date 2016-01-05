@@ -71,13 +71,13 @@ namespace Petri.Editor
 
             this.Position = this.Position;
         }
-
+        
         private void TrySetCondition(string s)
         {
             try {
                 Condition = Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>(s, this);
             }
-            catch(Exception e) {
+            catch(Exception) {
                 Document.Conflicting.Add(this);
                 Condition = Cpp.LiteralExpression.CreateFromString(s, Document.Settings.Language);
             }

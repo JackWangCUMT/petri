@@ -29,7 +29,10 @@ namespace Petri.Editor
     {
         public class FunctionInvocation : Expression
         {
-            public FunctionInvocation(Language language, Function function, params Expression[] arguments) : base(language, Cpp.Operator.Name.FunCall)
+            public FunctionInvocation(Language language,
+                                      Function function,
+                                      params Expression[] arguments) : base(language,
+                                                                            Cpp.Operator.Name.FunCall)
             {
                 if(arguments.Length != function.Parameters.Count) {
                     throw new Exception(Configuration.GetLocalized("Invalid arguments count."));
@@ -122,7 +125,13 @@ namespace Petri.Editor
 
         public class MethodInvocation : FunctionInvocation
         {
-            public MethodInvocation(Language language, Method function, Expression that, bool indirection, params Expression[] arguments) : base(language, function, arguments)
+            public MethodInvocation(Language language,
+                                    Method function,
+                                    Expression that,
+                                    bool indirection,
+                                    params Expression[] arguments) : base(language,
+                                                                          function,
+                                                                          arguments)
             {
                 this.This = that;
                 this.Indirection = indirection;
@@ -189,9 +198,16 @@ namespace Petri.Editor
             static Cpp.Function _dummy;
         }
 
+        /// <summary>
+        /// This class wraps an expression into a function. For instance, an Action can have the expression ++$i attached to it, wrapped into a function for the runtime.
+        /// </summary>
         public class WrapperFunctionInvocation : FunctionInvocation
         {
-            public WrapperFunctionInvocation(Language language, Cpp.Type returnType, Expression expr) : base(language, GetWrapperFunction(returnType), expr)
+            public WrapperFunctionInvocation(Language language,
+                                             Cpp.Type returnType,
+                                             Expression expr) : base(language,
+                                                                     GetWrapperFunction(returnType),
+                                                                     expr)
             {
 				
             }

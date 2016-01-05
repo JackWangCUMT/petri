@@ -10,7 +10,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <ReleaseVersion>1.1</ReleaseVersion>
+    <ReleaseVersion>1.2</ReleaseVersion>
     <BaseDirectory>..</BaseDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -274,6 +274,9 @@
     <Compile Include="..\Sources\Cpp\Scope.cs">
       <Link>Sources\Cpp\Scope.cs</Link>
     </Compile>
+    <Compile Include="..\Sources\Cpp\UnaryExpression.cs" />
+    <Compile Include="..\Sources\Cpp\BinaryExpression.cs" />
+    <Compile Include="..\Sources\Cpp\MiscExpression.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="CSRuntime.csproj">
