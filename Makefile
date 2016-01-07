@@ -45,12 +45,18 @@ clean:
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/PetriMac.csproj
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Test/Test.csproj
 
-editor: builddir
+editor: builddir mac
 	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/Petri.csproj
-	$(MSBUILD) /nologo /verbosity:normal /property:Configuration=$(CSCONF) Editor/Projects/PetriMac.csproj
+ifeq (, $(shell which mdtool))
+mac:
+	;
+else
+mac: builddir
+	mdtool build -c:$(CSCONF) Editor/Petri.sln
+endif
 
 test: all
-	mdtool build -c:$(CSCONF) Editor/Test/Test.csproj
+	mdtool build -c:$(CSCONF) Editor/Petri.sln
 	nunit-console Editor/Test/Test.csproj
 
 builddir:
