@@ -42,15 +42,15 @@ clean:
 	rm -f Editor/Test/bin/$(OUTPUT)
 	rm -f Editor/bin/$(OUTPUT)
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/Petri.csproj
-	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/Petri.csproj
-	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/Petri.csproj
+	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/PetriMac.csproj
+	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Test/Test.csproj
 
 editor: builddir
 	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/Petri.csproj
-	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/PetriMac.csproj
+	$(MSBUILD) /nologo /verbosity:normal /property:Configuration=$(CSCONF) Editor/Projects/PetriMac.csproj
 
 test: all
-	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Test/Test.csproj
+	mdtool build -t:Clean -c:$(CSCONF) Editor/Test/Test.csproj
 	nunit-console Editor/Test/Test.csproj
 
 builddir:
