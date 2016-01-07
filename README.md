@@ -32,8 +32,15 @@ The `mdtool` utility used for compiling a .csproj or .sln file is only bundled w
 
 
 ### The compilation process
-Some scripts are available in the Editor directory: `build.sh` and `test.sh`. When you run the former, the projects will be compiled and the binaries generated. A script called `clean.sh` will be generated as well, allowing to remove the bianries and intermediate build products.
-You can the run the `test.sh` executable to run the unit tests.
+``` bash
+make editor
+```
+This command will compile the editor.
+
+``` bash
+make test
+```
+This command will run the unit tests.
 
 ### Running the editor/compiler
 Once compiled, the editor is available in the Editor/bin directory, for command-line invocation and GUI on Linux.
@@ -60,7 +67,6 @@ The compilation of the C++ runtime requires a C++14-compliant compiler (g++, tes
 
 Run the following commands:
 ``` bash
-cd Runtime
-make
+make lib
 ```
 They will give you a shared library, libPetriRuntime.so, that contains both the C and C++ runtimes.
