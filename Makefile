@@ -50,7 +50,7 @@ editor: builddir
 	$(MSBUILD) /nologo /verbosity:normal /property:Configuration=$(CSCONF) Editor/Projects/PetriMac.csproj
 
 test: all
-	mdtool build -t:Clean -c:$(CSCONF) Editor/Test/Test.csproj
+	mdtool build -c:$(CSCONF) Editor/Test/Test.csproj
 	nunit-console Editor/Test/Test.csproj
 
 builddir:
