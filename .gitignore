@@ -20,5 +20,5 @@ TestResult.xml
 /Editor/Test/bin
 /Editor/Test/obj
 
-/Runtime/build
+/build
 /Runtime/libPetriRuntime.so
