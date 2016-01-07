@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-using Petri;
+using Petri.Editor;
 
 namespace Petri.Editor.OSX
 {
@@ -28,7 +28,7 @@ namespace Petri.Editor.OSX
     {
         public static int Main(string[] args)
         {
-            return MainClass.Main(args);
+            return Petri.Editor.MainClass.Main(args);
         }
      }
 }

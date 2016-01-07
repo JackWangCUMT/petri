@@ -15,7 +15,6 @@ TestResult.xml
 /Editor/*.dll
 /Editor/Projects/obj
 /Editor/Todo.txt
-/Editor/clean.sh
 
 /Editor/Test/bin
 /Editor/Test/obj

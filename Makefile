@@ -4,10 +4,13 @@ CXXOBJ:=$(CXXSRC:%.cpp=build/%.o)
 WARN:=-Wall -Wunused-value -Wuninitialized
 
 CXX:=c++
+MSBUILD:=xbuild
 CXXVERSION:=$(shell $(CXX) --version)
 
 CXXFLAGS:=-std=c++14 -I./Runtime/Cpp/jsoncpp/include
 LDFLAGS:=-shared
+
+CSCONF:=Release
 
 ifneq (,$(findstring clang,$(CXXVERSION)))
 # if the compiler is clang++
@@ -29,14 +32,26 @@ CXXFLAGS:=$(WARN) $(CXXFLAGS)
 
 OUTPUT:=libPetriRuntime.so
 
+.PHONY: builddir editor all clean test
 
-.PHONY: builddir
-
-all: builddir lib
+all: lib editor
 
 clean:
 	rm -rf build
 	rm -f Runtime/$(OUTPUT)
+	rm -f Editor/Test/bin/$(OUTPUT)
+	rm -f Editor/bin/$(OUTPUT)
+	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/Petri.csproj
+	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/Petri.csproj
+	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/Petri.csproj
+
+editor: builddir
+	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/Petri.csproj
+	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/PetriMac.csproj
+
+test: all
+	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Test/Test.csproj
+	nunit-console Editor/Test/Test.csproj
 
 builddir:
 	mkdir -p build/Runtime/Cpp/jsoncpp/src/lib_json
@@ -44,7 +59,9 @@ builddir:
 	mkdir -p Editor/Test/bin
 	mkdir -p Editor/bin
 
-lib: $(CXXOBJ)
+lib: builddir buildlib
+
+buildlib: $(CXXOBJ)
 	$(CXX) -o Runtime/$(OUTPUT) $^ $(LDFLAGS)
 	ln -sf $(abspath Runtime/$(OUTPUT)) Editor/Test/bin/$(OUTPUT)
 	ln -sf $(abspath Runtime/$(OUTPUT)) Editor/bin/$(OUTPUT)
