@@ -40,15 +40,15 @@ namespace Petri {
         Atomic()
                 : _value(0) {}
 
-        auto &value() {
+        auto &value() noexcept {
             return _value;
         }
 
-        auto getLock() {
+        auto getLock() noexcept(std::is_nothrow_constructible<std::unique_lock<std::mutex>, std::mutex &, std::defer_lock_t>::value) {
             return std::unique_lock<std::mutex>{_mutex, std::defer_lock};
         }
 
-        auto &getMutex() {
+        auto &getMutex() noexcept {
             return _mutex;
         }
 

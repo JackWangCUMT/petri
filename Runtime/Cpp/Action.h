@@ -57,7 +57,7 @@ namespace Petri {
     /**
      * A state composing a PetriNet.
      */
-    class Action : public HasID<uint64_t> {
+    class Action : public Entity {
         friend class PetriNet;
 
     public:
@@ -89,7 +89,7 @@ namespace Petri {
         Action(uint64_t id, std::string const &name, ParametrizedActionCallableBase const &action, size_t requiredTokens);
         Action(uint64_t id, std::string const &name, actionResult_t (*action)(PetriNet &), size_t requiredTokens);
 
-        Action(Action &&);
+        Action(Action &&) noexcept;
         Action(Action const &) = delete;
 
         ~Action();
@@ -118,7 +118,7 @@ namespace Petri {
          * invoke this method!
          * @return The Callable of the Action
          */
-        ParametrizedActionCallableBase &action();
+        ParametrizedActionCallableBase &action() noexcept;
 
         /**
          * Changes the Callable associated to the Action
@@ -139,42 +139,42 @@ namespace Petri {
          * which must lead to *this and terminate for *this to activate.
          * @return The required tokens of the Action
          */
-        std::size_t requiredTokens() const;
+        std::size_t requiredTokens() const noexcept;
 
         /**
          * Changes the required tokens of the Action to be activated.
          * @param requiredTokens The new required tokens count
          * @return The required tokens of the Action
          */
-        void setRequiredTokens(std::size_t requiredTokens);
+        void setRequiredTokens(std::size_t requiredTokens) noexcept;
 
         /**
          * Gets the current tokens count given to the Action by its preceding Actions.
          * @return The current tokens count of the Action
          */
-        std::size_t currentTokens();
+        std::size_t currentTokens() noexcept;
 
         /**
          * Returns the name of the Action.
          * @return The name of the Action
          */
-        std::string const &name() const;
+        std::string const &name() const noexcept;
 
         /**
          * Sets the name of the Action
          * @param name The name of the Action
          */
-        void setName(std::string const &name);
+        void setName(std::string const &name) noexcept(std::is_nothrow_move_constructible<std::string>::value);
 
         /**
          * Returns the transitions exiting the Action.
          * @param name The exiting transitions of the Action
          */
-        std::list<Transition> const &transitions() const;
+        std::list<Transition> const &transitions() const noexcept;
 
     private:
-        std::size_t &currentTokensRef();
-        std::mutex &tokensMutex();
+        std::size_t &currentTokensRef() noexcept;
+        std::mutex &tokensMutex() noexcept;
 
         Transition &addTransition(Transition t);
 

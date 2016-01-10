@@ -42,17 +42,16 @@ namespace Petri {
 
     using actionResult_t = Petri_actionResult_t;
 
-    template <typename T>
-    struct HasID {
+    struct Entity {
     public:
-        HasID(T id)
+        Entity(uint64_t id)
                 : _id(id) {}
 
-        T ID() const {
+        auto ID() const {
             return _id;
         }
 
-        void setID(T id) {
+        void setID(uint64_t id) {
             _id = id;
         }
 
@@ -73,7 +72,7 @@ namespace Petri {
         }
 
     private:
-        T _id;
+        std::uint64_t _id;
         std::list<std::uint_fast32_t> _vars;
     };
 }

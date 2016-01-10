@@ -53,20 +53,20 @@ namespace Petri {
     };
 
     Transition::Transition(Action &previous, Action &next)
-            : HasID(0)
+            : Entity(0)
             , _internals(std::make_unique<Internals>(previous, next)) {}
 
     Transition::Transition(uint64_t id, std::string const &name, Action &previous, Action &next, TransitionCallableBase const &cond)
-            : HasID(id)
+            : Entity(id)
             , _internals(std::make_unique<Internals>(name, previous, next, cond)) {}
 
     Transition::~Transition() = default;
-    Transition::Transition(Transition &&) = default;
+    Transition::Transition(Transition &&) noexcept = default;
 
-    void Transition::setPrevious(Action &previous) {
+    void Transition::setPrevious(Action &previous) noexcept {
         _internals->_previous = &previous;
     }
-    void Transition::setNext(Action &next) {
+    void Transition::setNext(Action &next) noexcept {
         _internals->_next = &next;
     }
 
@@ -74,7 +74,7 @@ namespace Petri {
         return (*_internals->_test)(actionResult);
     }
 
-    TransitionCallableBase const &Transition::condition() const {
+    TransitionCallableBase const &Transition::condition() const noexcept {
         return *_internals->_test;
     }
 
@@ -82,15 +82,15 @@ namespace Petri {
         _internals->_test = test.copy_ptr();
     }
 
-    Action &Transition::previous() {
+    Action &Transition::previous() noexcept {
         return *_internals->_previous;
     }
 
-    Action &Transition::next() {
+    Action &Transition::next() noexcept {
         return *_internals->_next;
     }
 
-    std::string const &Transition::name() const {
+    std::string const &Transition::name() const noexcept {
         return _internals->_name;
     }
 

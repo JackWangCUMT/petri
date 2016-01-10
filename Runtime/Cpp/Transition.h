@@ -50,11 +50,11 @@ namespace Petri {
     /**
      * A transition linking 2 Action, composing a PetriNet.
      */
-    class Transition : public HasID<uint64_t> {
+    class Transition : public Entity {
         friend class Petri::Action;
 
     public:
-        Transition(Transition &&);
+        Transition(Transition &&) noexcept;
         ~Transition();
         /**
          * Checks whether the Transition can be crossed
@@ -69,7 +69,7 @@ namespace Petri {
          * Returns the condition associated to the Transition
          * @return The condition associated to the Transition
          */
-        TransitionCallableBase const &condition() const;
+        TransitionCallableBase const &condition() const noexcept;
 
         /**
          * Changes the condition associated to the Transition
@@ -81,19 +81,19 @@ namespace Petri {
          * Gets the Action 'previous', the starting point of the Transition.
          * @return The Action 'previous', the starting point of the Transition.
          */
-        Action &previous();
+        Action &previous() noexcept;
 
         /**
          * Gets the Action 'next', the arrival point of the Transition.
          * @return The Action 'next', the arrival point of the Transition.
          */
-        Action &next();
+        Action &next() noexcept;
 
         /**
          * Gets the name of the Transition.
          * @return The name of the Transition.
          */
-        std::string const &name() const;
+        std::string const &name() const noexcept;
 
         /**
          * Changes the name of the Transition.
@@ -120,8 +120,8 @@ namespace Petri {
         Transition(Action &previous, Action &next);
         Transition(uint64_t id, std::string const &name, Action &previous, Action &next, TransitionCallableBase const &cond);
 
-        void setPrevious(Action &previous);
-        void setNext(Action &next);
+        void setPrevious(Action &previous) noexcept;
+        void setNext(Action &next) noexcept;
 
         struct Internals;
         std::unique_ptr<Internals> _internals;

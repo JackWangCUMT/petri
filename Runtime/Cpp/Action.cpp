@@ -49,7 +49,7 @@ namespace Petri {
     };
 
     Action::Action()
-            : HasID(0)
+            : Entity(0)
             , _internals(std::make_unique<Internals>()) {}
 
     /**
@@ -57,7 +57,7 @@ namespace Petri {
      * @param action The Callable which will be copied
      */
     Action::Action(uint64_t id, std::string const &name, ActionCallableBase const &action, size_t requiredTokens)
-            : HasID(id)
+            : Entity(id)
             , _internals(std::make_unique<Internals>(name, requiredTokens)) {
         this->setAction(action);
     }
@@ -69,15 +69,15 @@ namespace Petri {
      * @param action The Callable which will be copied
      */
     Action::Action(uint64_t id, std::string const &name, ParametrizedActionCallableBase const &action, size_t requiredTokens)
-            : HasID(id)
+            : Entity(id)
             , _internals(std::make_unique<Internals>(name, requiredTokens)) {
         this->setAction(action);
     }
     Action::Action(uint64_t id, std::string const &name, actionResult_t (*action)(PetriNet &), size_t requiredTokens)
             : Action(id, name, make_param_action_callable(action), requiredTokens) {}
 
-    Action::Action(Action &&a)
-            : HasID<uint64_t>(a.ID())
+    Action::Action(Action &&a) noexcept
+            : Entity(a.ID())
             , _internals(std::move(a._internals)) {
         for(auto &t : _internals->_transitions) {
             t.setPrevious(*this);
@@ -115,7 +115,7 @@ namespace Petri {
      * this method!
      * @return The Callable of the Action
      */
-    ParametrizedActionCallableBase &Action::action() {
+    ParametrizedActionCallableBase &Action::action() noexcept {
         return *_internals->_action;
     }
 
@@ -149,7 +149,7 @@ namespace Petri {
      * must lead to *this and terminate for *this to activate.
      * @return The required tokens of the Action
      */
-    std::size_t Action::requiredTokens() const {
+    std::size_t Action::requiredTokens() const noexcept {
         return _internals->_requiredTokens;
     }
 
@@ -158,7 +158,7 @@ namespace Petri {
      * @param requiredTokens The new required tokens count
      * @return The required tokens of the Action
      */
-    void Action::setRequiredTokens(std::size_t requiredTokens) {
+    void Action::setRequiredTokens(std::size_t requiredTokens) noexcept {
         _internals->_requiredTokens = requiredTokens;
     }
 
@@ -166,15 +166,15 @@ namespace Petri {
      * Gets the current tokens count given to the Action by its preceding Actions.
      * @return The current tokens count of the Action
      */
-    std::size_t Action::currentTokens() {
+    std::size_t Action::currentTokens() noexcept {
         return _internals->_currentTokens;
     }
 
-    std::size_t &Action::currentTokensRef() {
+    std::size_t &Action::currentTokensRef() noexcept {
         return _internals->_currentTokens;
     }
 
-    std::mutex &Action::tokensMutex() {
+    std::mutex &Action::tokensMutex() noexcept {
         return _internals->_tokensMutex;
     }
 
@@ -182,7 +182,7 @@ namespace Petri {
      * Returns the name of the Action.
      * @return The name of the Action
      */
-    std::string const &Action::name() const {
+    std::string const &Action::name() const noexcept {
         return _internals->_name;
     }
 
@@ -190,7 +190,7 @@ namespace Petri {
      * Sets the name of the Action
      * @param name The name of the Action
      */
-    void Action::setName(std::string const &name) {
+    void Action::setName(std::string const &name) noexcept(std::is_nothrow_move_constructible<std::string>::value) {
         _internals->_name = name;
     }
 
@@ -198,7 +198,7 @@ namespace Petri {
      * Returns the transitions exiting the Action.
      * @param name The exiting transitions of the Action
      */
-    std::list<Transition> const &Action::transitions() const {
+    std::list<Transition> const &Action::transitions() const noexcept {
         return _internals->_transitions;
     }
 }
