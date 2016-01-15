@@ -21,9 +21,14 @@
  */
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace Petri.Runtime
 {
+    [return: MarshalAs(UnmanagedType.LPTStr)] public delegate string StringCallableDel();
+    public delegate IntPtr PtrCallableDel();
+    public delegate UInt16 UInt16CallableDel();
+
     public delegate Int32 ActionCallableDel();
     public delegate Int32 ParametrizedActionCallableDel(PetriNet petriNet);
     public delegate bool TransitionCallableDel(Int32 result);
@@ -45,7 +50,8 @@ namespace Petri.Runtime
             };
         }
 
-        public static ParametrizedActionCallableDel Wrap(ParametrizedActionCallableDel callable, string actionName)
+        public static ParametrizedActionCallableDel Wrap(ParametrizedActionCallableDel callable,
+                                                         string actionName)
         {
             return (PetriNet pn) => {
                 try {
@@ -60,7 +66,8 @@ namespace Petri.Runtime
             };
         }
 
-        public static TransitionCallableDel Wrap(TransitionCallableDel callable, string transitionName)
+        public static TransitionCallableDel Wrap(TransitionCallableDel callable,
+                                                 string transitionName)
         {
             return (Int32 result) => {
                 try {

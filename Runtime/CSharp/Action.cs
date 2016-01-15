@@ -28,7 +28,7 @@ namespace Petri.Runtime
     /**
      * A state composing a PetriNet.
      */
-    public class Action : Entity
+    public class Action : CInterop
     {
         public Action(IntPtr handle)
         {
@@ -160,8 +160,12 @@ namespace Petri.Runtime
         }
 
         // Ensures the callback's lifetime is the same as the instance's one to avoid unexpected GC during native code invocation.
+        // The warning CS0414 states that the value is never read from, and that's true.
+        // But the rationale here is to always keep a reference to the callback so that it is not GC'ed.
+        #pragma warning disable 0414
         private ActionCallableDel _callback;
         private ParametrizedActionCallableDel _parametrizedCallback;
+        #pragma warning restore 0414
     }
 }
 

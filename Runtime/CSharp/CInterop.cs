@@ -24,9 +24,9 @@ using System;
 
 namespace Petri.Runtime
 {
-    public class Entity
+    public class CInterop
     {
-        protected Entity()
+        protected CInterop()
         {
         }
 

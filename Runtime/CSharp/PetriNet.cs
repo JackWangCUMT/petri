@@ -25,8 +25,13 @@ using System.Collections.Generic;
 
 namespace Petri.Runtime
 {
-    public class PetriNet : Entity
+    public class PetriNet : CInterop
     {
+        public PetriNet(IntPtr handle)
+        {
+            Handle = handle;
+        }
+
         /**
          * Creates the PetriNet, assigning it a name which serves debug purposes (see ThreadPool constructor).
          * @param name the name to assign to the PetriNet or a designated one if left empty

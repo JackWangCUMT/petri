@@ -46,10 +46,12 @@
     <Compile Include="..\..\Runtime\CSharp\Interop\PetriUtilsInterop.cs" />
     <Compile Include="..\..\Runtime\CSharp\Interop\TransitionInterop.cs" />
     <Compile Include="..\..\Runtime\CSharp\Interop\TypesInterop.cs" />
-    <Compile Include="..\..\Runtime\CSharp\Entity.cs" />
     <Compile Include="..\..\Runtime\CSharp\PetriDebug.cs" />
     <Compile Include="..\..\Runtime\CSharp\Utility.cs" />
     <Compile Include="..\..\Runtime\CSharp\Types.cs" />
+    <Compile Include="..\..\Runtime\CSharp\DebugServer.cs" />
+    <Compile Include="..\..\Runtime\CSharp\CInterop.cs" />
+    <Compile Include="..\..\Runtime\CSharp\DynamicLib.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

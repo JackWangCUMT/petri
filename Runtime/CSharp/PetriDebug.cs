@@ -26,6 +26,11 @@ namespace Petri.Runtime
 {
     public class PetriDebug : PetriNet
     {
+        public PetriDebug(IntPtr handle)
+        {
+            Handle = handle;
+        }
+
         public PetriDebug(string name)
         {
             Handle = Interop.PetriNet.PetriNet_createDebug(name);

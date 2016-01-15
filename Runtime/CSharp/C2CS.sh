@@ -23,6 +23,9 @@ $(sed -n 's/[ 	]*\(.*(.*)\)[ 	]*;/\1;/p' <"$h" \
     | sed 's/parametrizedCallable_t/ParametrizedActionCallableDel/g' \
     | sed 's/transitionCallable_t/TransitionCallableDel/g' \
     | sed 's/Petri_actionResult_t/Int32/g' \
+    | sed 's/char const \*(\*\([^)]*\))()/StringCallableDel \1/g' \
+    | sed 's/void \*(\*\([^)]*\))()/PtrCallableDel \1/g' \
+    | sed 's/UInt16 (\*\([^)]*\))()/UInt16CallableDel \1/g' \
     | sed 's/char const \*/[MarshalAs(UnmanagedType.LPTStr)] string /g' \
     | sed 's/struct[ 	]\{1,\}[^ 	]\{1,\}[ 	]*\*/IntPtr /g' \
     \
