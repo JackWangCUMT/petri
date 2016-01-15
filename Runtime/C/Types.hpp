@@ -55,7 +55,7 @@ struct PetriTransition {
 
 
 struct PetriDynamicLib {
-    std::unique_ptr<CPetriDynamicLib> lib;
+    std::unique_ptr<Petri::PetriDynamicLib> lib;
 };
 
 struct PetriDebugServer {
@@ -64,7 +64,7 @@ struct PetriDebugServer {
 
 
 namespace {
-    // The following #ifdef prevent unused functions warning.
+// The following #ifdef prevent unused functions warning.
 #ifdef PETRI_NEEDS_GET_ACTION
     Petri::Action &getAction(PetriAction *action) {
         if(action->owned) {

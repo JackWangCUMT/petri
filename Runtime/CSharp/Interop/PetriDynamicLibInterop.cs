@@ -10,6 +10,9 @@ namespace Petri.Runtime.Interop {
         public static extern IntPtr PetriDynamicLib_create([MarshalAs(UnmanagedType.LPTStr)] string name, [MarshalAs(UnmanagedType.LPTStr)] string prefix, UInt16 port);
 
         [DllImport("PetriRuntime")]
+        public static extern IntPtr PetriDynamicLib_createWithPtr(void *(*createPtr)(), void *(*createDebugPtr)(), [MarshalAs(UnmanagedType.LPTStr)] string (*hashPtr)(), [MarshalAs(UnmanagedType.LPTStr)] string (*namePtr)(), UInt16 (*portPtr)(), [MarshalAs(UnmanagedType.LPTStr)] string (*prefixPtr)());
+
+        [DllImport("PetriRuntime")]
         public static extern void PetriDynamicLib_destroy(IntPtr lib);
 
         [DllImport("PetriRuntime")]

@@ -46,14 +46,22 @@ extern "C" {
 
 /**
  * Creates a dynamic library handle to the specified name, prefix and port.
+ * The wrapped library must contain the externally visible symbols <prefix>_create(), <prefix>_createDebug() and <prefix>_getHash() symbols,
+ * returning respectively a PetriNet *, a PetriNet * and a char const *.
  * @return The newly created handle.
  */
 struct PetriDynamicLib *PetriDynamicLib_create(char const *name, char const *prefix, uint16_t port);
 
 /**
- * Destroys the specified dynamic library handle.
- * @param lib The dynamic library handle to destroy.
+ * Create a dynamic library handle with the specified function ptr.
+ * No dynamic library is actually loaded, but this provides a convenient interface for being used by the DebugServer API.
  */
+struct PetriDynamicLib *PetriDynamicLib_createWithPtr(void *(*createPtr)(), void *(*createDebugPtr)(), char const *(*hashPtr)(), char const *(*namePtr)(), uint16_t (*portPtr)(), char const *(*prefixPtr)());
+
+/**
+* Destroys the specified dynamic library handle.
+* @param lib The dynamic library handle to destroy.
+*/
 void PetriDynamicLib_destroy(struct PetriDynamicLib *lib);
 
 /**

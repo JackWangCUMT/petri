@@ -56,7 +56,7 @@ namespace Petri {
          * Returns whether the dylib code resides in memory or not
          * @return The loaded state of the dynamic library
          */
-        bool loaded() const {
+        virtual bool loaded() const {
             return _libHandle != nullptr;
         }
 

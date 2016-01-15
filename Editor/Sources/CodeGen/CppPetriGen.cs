@@ -168,11 +168,11 @@ namespace Petri.Editor
             _headerGen += "\t * Creates the dynamic library wrapper. It still needs to be loaded to make it possible to create the PetriNet objects.";
             _headerGen += "\t */";
             _headerGen += "\t" + Document.Settings.Name + "() = default;";
-            _headerGen += "\t" + Document.Settings.Name + "(" + Document.Settings.Name + " const &pn) = delete;";
-            _headerGen += "\t" + Document.Settings.Name + " &operator=(" + Document.Settings.Name + " const &pn) = delete;";
+            _headerGen += "\t" + Document.Settings.Name + "(" + Document.Settings.Name + " const &) = delete;";
+            _headerGen += "\t" + Document.Settings.Name + " &operator=(" + Document.Settings.Name + " const &) = delete;";
             _headerGen += "";
-            _headerGen += "\t" + Document.Settings.Name + "(" + Document.Settings.Name + " &&pn) = default;";
-            _headerGen += "\t" + Document.Settings.Name + " &operator=(" + Document.Settings.Name + " &&pn) = default;";
+            _headerGen += "\t" + Document.Settings.Name + "(" + Document.Settings.Name + " &&) = default;";
+            _headerGen += "\t" + Document.Settings.Name + " &operator=(" + Document.Settings.Name + " &&) = default;";
             _headerGen += "\tvirtual ~" + Document.Settings.Name + "() = default;";
             _headerGen += "";
             _headerGen += "\t/**";
