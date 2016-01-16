@@ -60,10 +60,14 @@ namespace Petri.Editor
             this.Path = path;
             this.Blank = true;
             this.Restore();
-            Window.PresentWindow();
+            Window.ShowAll();
             Window.EditorGui.Paned.Position = Window.Allocation.Width - 260;
             Window.DebugGui.Paned.Position = Window.Allocation.Width - 200;
             AssociatedWindows = new HashSet<Window>();
+
+            if(path == "") {
+                Window.UpdateRecentDocuments();
+            }
         }
 
         public event LanguageChangeEventHandler LanguageChanged;

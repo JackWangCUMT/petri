@@ -146,6 +146,18 @@ namespace Petri.Editor
             }
         }
 
+        [ConfigurationProperty("recentDocuments",
+                               DefaultValue = "",
+                               IsRequired = false)]
+        public static string RecentDocuments {
+            get {
+                return (string)Get()["recentDocuments"];
+            }
+            set {
+                Get()["recentDocuments"] = value;
+            }
+        }
+
         [ConfigurationProperty("windowWidth",
             DefaultValue = 800,
             IsRequired = true)]

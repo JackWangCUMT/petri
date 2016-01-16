@@ -23,6 +23,7 @@
 using System;
 using Gtk;
 using IgeMacIntegration;
+using System.Collections.Generic;
 
 namespace Petri.Editor
 {
@@ -72,17 +73,10 @@ namespace Petri.Editor
             };
         }
 
-        public void PresentWindow()
-        {
-            if(Configuration.RunningPlatform == Platform.Mac) {
-                _vbox.Show();
-                this.Show();
-            }
-            else {
-                this.ShowAll();
-            }
-        }
-
+        /// <summary>
+        /// Gets or sets the currently installed main view of the window (debugger, editor…).
+        /// </summary>
+        /// <value>The GUI.</value>
         public Gui Gui {
             get {
                 return _gui;
@@ -104,73 +98,167 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets the editor GUI.
+        /// </summary>
+        /// <value>The editor GUI.</value>
         public EditorGui EditorGui {
             get {
                 return _editorGui;
             }
         }
 
+        /// <summary>
+        /// Gets the debug GUI.
+        /// </summary>
+        /// <value>The debug GUI.</value>
         public DebugGui DebugGui {
             get {
                 return _debugGui;
             }
         }
 
+        /// <summary>
+        /// Gets the "Undo" menu item of the menu bar.
+        /// </summary>
+        /// <value>The undo item.</value>
         public MenuItem UndoItem {
             get {
                 return _undoItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Redo" menu item of the menu bar.
+        /// </summary>
+        /// <value>The redo item.</value>
         public MenuItem RedoItem {
             get {
                 return _redoItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Cut" menu item of the menu bar.
+        /// </summary>
+        /// <value>The cut item.</value>
         public MenuItem CutItem {
             get {
                 return _cutItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Copy" menu item of the menu bar.
+        /// </summary>
+        /// <value>The copy item.</value>
         public MenuItem CopyItem {
             get {
                 return _copyItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Paste" menu item of the menu bar.
+        /// </summary>
+        /// <value>The paste item.</value>
         public MenuItem PasteItem {
             get {
                 return _pasteItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Find" menu item of the menu bar.
+        /// </summary>
+        /// <value>The find item.</value>
         public MenuItem FindItem {
             get {
                 return _findItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Embed in macro" menu item of the menu bar.
+        /// </summary>
+        /// <value>The embed item.</value>
         public MenuItem EmbedItem {
             get {
                 return _embedInMacro;
             }
         }
 
+        /// <summary>
+        /// Gets the "Revert to last save" menu item of the menu bar.
+        /// </summary>
+        /// <value>The revert item.</value>
         public MenuItem RevertItem {
             get {
                 return _revertItem;
             }
         }
 
-        protected void OnDeleteEvent(object sender, DeleteEventArgs a)
+        /// <summary>
+        /// Updates the recent documents menu items.
+        /// </summary>
+        public void UpdateRecentDocuments()
         {
-            bool result = _document.CloseAndConfirm();
-            a.RetVal = !result;
+            _openRecentItem.Submenu = null;
+            if(_openRecentMenu != null) {
+                _openRecentMenu.Destroy();
+            }
+
+            _openRecentMenu = new Menu();
+            _openRecentItem.Submenu = _openRecentMenu;
+
+            var recentItems = MainClass.RecentDocuments;
+
+            foreach(var pair in recentItems) {
+                MenuItem item = new MenuItem(pair.Value);
+                item.Activated += OnClickRecentMenu;
+                _openRecentMenu.Append(item);
+                item.Show();
+            }
+
+            if(recentItems.Count > 0) {
+                _openRecentMenu.Append(new SeparatorMenuItem());
+            }
+            _clearRecentItems = new MenuItem(Configuration.GetLocalized("Clear Recent"));
+            _clearRecentItems.Activated += OnClickMenu;
+            _openRecentMenu.Append(_clearRecentItems);
+            _clearRecentItems.Sensitive = recentItems.Count > 0;
+
+            _openRecentItem.ShowAll();
         }
 
-        protected void OnClickMenu(object sender, EventArgs e)
+        /// <summary>
+        /// Called when the window is closed by its close button.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="args">Arguments.</param>
+        protected void OnDeleteEvent(object sender, DeleteEventArgs args)
+        {
+            bool result = _document.CloseAndConfirm();
+            args.RetVal = !result;
+        }
+
+        /// <summary>
+        /// Called when a recent item menu is clicked.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="args">Arguments.</param>
+        protected void OnClickRecentMenu(object sender, EventArgs args)
+        {
+            var item = (Label)((MenuItem)sender).Child;
+            MainClass.OpenDocument(item.Text);
+        }
+
+        /// <summary>
+        /// Called when any of the non-static menu item is selected from the menu bar.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="args">Arguments.</param>
+        protected void OnClickMenu(object sender, EventArgs args)
         {
             if(sender == _quitItem) {
                 bool shouldExit = MainClass.OnExit();
@@ -251,6 +339,10 @@ namespace Petri.Editor
             else if(sender == _openItem) {
                 MainClass.OpenDocument();
             }
+            else if(sender == _clearRecentItems) {
+                MainClass.RecentDocuments.Clear();
+                MainClass.UpdateRecentDocuments();
+            }
             else if(sender == _newItem) {
                 var doc = new Document("");
                 MainClass.AddDocument(doc);
@@ -297,6 +389,11 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Called when a static menu item is selected.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="args">Arguments.</param>
         protected static void OnClickMenuStatic(object sender, EventArgs args)
         {
             if(sender == _staticQuitItem) {
@@ -307,6 +404,9 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Builds the menus and the menu bar.
+        /// </summary>
         protected void BuildMenus()
         {
             _accelGroup = new AccelGroup();
@@ -341,7 +441,13 @@ namespace Petri.Editor
 
             _openItem = new MenuItem(Configuration.GetLocalized("Open…"));
             _openItem.Activated += OnClickMenu;
-            _openItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.o, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _openItem.AddAccelerator("activate",
+                                     _accelGroup,
+                                     new AccelKey(Gdk.Key.o,
+                                                  Gdk.ModifierType.ControlMask,
+                                                  AccelFlags.Visible));
+
+            _openRecentItem = new MenuItem(Configuration.GetLocalized("Open Recent"));
 
             _closeItem = new MenuItem(Configuration.GetLocalized("Close"));
             _closeItem.Activated += OnClickMenu;
@@ -381,6 +487,7 @@ namespace Petri.Editor
 
             fileMenu.Append(_newItem);
             fileMenu.Append(_openItem);
+            fileMenu.Append(_openRecentItem);
             fileMenu.Append(new SeparatorMenuItem());
             fileMenu.Append(_closeItem);
             fileMenu.Append(_saveItem);
@@ -573,6 +680,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Inits the static components of GUI. At the moment, it initializes the OS X menu bar and document association stuff.
+        /// To be called once at application startup.
+        /// </summary>
         public static void InitGUI()
         {
             _staticAccelGroup = new AccelGroup();
@@ -602,6 +713,27 @@ namespace Petri.Editor
             prefsGroup.AddMenuItem(_staticPreferencesItem, null);
 
             IgeMacMenu.QuitMenuItem = _staticQuitItem;
+
+            if(Configuration.RunningPlatform == Platform.Mac) {
+                MonoDevelop.MacInterop.ApplicationEvents.Quit += delegate (object sender,
+                                                                           MonoDevelop.MacInterop.ApplicationQuitEventArgs e) {
+                    MainClass.SaveAndQuit();
+                    // If we get here, the user has cancelled the action
+                    e.UserCancelled = true;
+                    e.Handled = true;
+                };
+
+                MonoDevelop.MacInterop.ApplicationEvents.OpenDocument += delegate (object sender,
+                                                                                   MonoDevelop.MacInterop.ApplicationDocumentEventArgs e) {
+                    foreach(var pair in e.Documents) {
+                        MainClass.OpenDocument(pair.Key);
+                    }
+
+                    e.Handled = true;
+                };
+
+                IgeMacMenu.GlobalKeyHandlerEnabled = true;
+            }
         }
 
         Document _document;
@@ -619,6 +751,10 @@ namespace Petri.Editor
 
         MenuItem _newItem;
         MenuItem _openItem;
+        MenuItem _openRecentItem;
+        Menu _openRecentMenu;
+        MenuItem _clearRecentItems;
+        
         MenuItem _closeItem;
         MenuItem _saveItem;
         MenuItem _saveAsItem;

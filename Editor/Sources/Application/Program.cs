@@ -24,11 +24,7 @@ using System;
 using System.Runtime.CompilerServices;
 using Gtk;
 using System.Collections.Generic;
-using System.Xml;
-using System.Xml.Linq;
-using System.Collections;
 using Newtonsoft.Json;
-using IgeMacIntegration;
 
 [assembly: InternalsVisibleTo("Test")]
 
@@ -47,6 +43,8 @@ namespace Petri.Editor
         internal static readonly int ArgumentError = 4;
         internal static readonly int CompilationFailure = 64;
         internal static readonly int UnexpectedError = 124;
+
+        public static readonly int MaxRecentElements = 10;
 
         private static int PrintUsage(int returnCode)
         {
@@ -203,26 +201,18 @@ namespace Petri.Editor
 
                 MainWindow.InitGUI();
 
-                if(Configuration.RunningPlatform == Platform.Mac) {
-                    MonoDevelop.MacInterop.ApplicationEvents.Quit += delegate (object sender,
-                                                                               MonoDevelop.MacInterop.ApplicationQuitEventArgs e) {
-                        MainClass.SaveAndQuit();
-                        // If we get here, the user has cancelled the action
-                        e.UserCancelled = true;
-                        e.Handled = true;
-                    };
-
-                    MonoDevelop.MacInterop.ApplicationEvents.OpenDocument += delegate (object sender,
-                                                                                       MonoDevelop.MacInterop.ApplicationDocumentEventArgs e) {
-                        foreach(var pair in e.Documents) {
-                            MainClass.OpenDocument(pair.Key);
+                RecentDocumentEntry[] entries = JsonConvert.DeserializeObject<RecentDocumentEntry[]>(Configuration.RecentDocuments);
+                var result = new SortedList<DateTime, string>(Comparer<DateTime>.Create((date1,
+                                                                                         date2) => date2.CompareTo(date1)));
+                if(entries != null) {
+                    foreach(var entry in entries) {
+                        if(entry != null) {
+                            result.Add(DateTime.Parse(entry.date), entry.path);
                         }
-
-                        e.Handled = true;
-                    };
-
-                    IgeMacMenu.GlobalKeyHandlerEnabled = true;
+                    }
                 }
+                RecentDocuments = result;
+                TrimRecentDocuments();
 
                 var document = new Document("");
                 AddDocument(document);
@@ -325,8 +315,15 @@ namespace Petri.Editor
 
         public static void OpenDocument(string filename)
         {
+            int index = RecentDocuments.IndexOfValue(filename);
+            if(index != -1) {
+                RecentDocuments.RemoveAt(index);
+            }
+
             foreach(var d in _documents) {
                 if(d.Path == filename) {
+                    RecentDocuments.Add(DateTime.UtcNow, filename);
+                    UpdateRecentDocuments();
                     d.Window.Present();
                     return;
                 }
@@ -342,6 +339,9 @@ namespace Petri.Editor
                 var doc = new Document(filename);
                 MainClass.AddDocument(doc);
             }
+
+            RecentDocuments.Add(DateTime.UtcNow, filename);
+            UpdateRecentDocuments();
         }
 
         public static HashSet<Entity> Clipboard {
@@ -356,6 +356,51 @@ namespace Petri.Editor
         public static int PasteCount {
             get;
             set;
+        }
+
+        private class RecentDocumentEntry
+        {
+            public string date { get; set; }
+
+            public string path { get; set; }
+        }
+
+        public static void TrimRecentDocuments()
+        {
+            var recentDocuments = RecentDocuments;
+            var dict = new SortedList<DateTime, string>(recentDocuments);
+
+            foreach(var doc in dict) {
+                if(!System.IO.File.Exists(doc.Value)) {
+                    recentDocuments.Remove(doc.Key);
+                }
+            }
+        }
+
+        public static void UpdateRecentDocuments()
+        {
+            while(RecentDocuments.Count > MaxRecentElements) {
+                RecentDocuments.Remove(RecentDocuments.Keys[RecentDocuments.Keys.Count - 1]);
+            }
+            var entries = new RecentDocumentEntry[RecentDocuments.Count];
+            int i = 0;
+            foreach(var v in RecentDocuments) {
+                var entry = new RecentDocumentEntry();
+                entry.date = v.Key.ToString();
+                entry.path = v.Value;
+                entries[i++] = entry;
+            }
+
+            Configuration.RecentDocuments = JsonConvert.SerializeObject(entries);
+
+            foreach(var doc in Documents) {
+                doc.Window.UpdateRecentDocuments();
+            }
+        }
+
+        public static SortedList<DateTime, string> RecentDocuments {
+            get;
+            private set;
         }
 
         static List<Document> _documents = new List<Document>();
