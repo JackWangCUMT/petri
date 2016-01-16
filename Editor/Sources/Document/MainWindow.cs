@@ -23,6 +23,7 @@
 using System;
 using Gtk;
 using IgeMacIntegration;
+using System.Collections.Generic;
 
 namespace Petri.Editor
 {
@@ -32,7 +33,6 @@ namespace Petri.Editor
         {
             _document = doc;
 
-            this.Name = "IA_Robot.MainWindow";
             this.WindowPosition = ((global::Gtk.WindowPosition)(4));
             this.AllowShrink = true;
             this.DefaultWidth = 920;
@@ -65,7 +65,6 @@ namespace Petri.Editor
                 _gui.FocusIn();
                 if(Configuration.RunningPlatform == Platform.Mac) {
                     _menuBar.ShowAll();
-                    _menuBar.Hide();
                     IgeMacMenu.MenuBar = _menuBar;
                 }
             };
@@ -74,40 +73,10 @@ namespace Petri.Editor
             };
         }
 
-        public void PresentWindow()
-        {
-            if(Configuration.RunningPlatform == Platform.Mac) {
-                MonoDevelop.MacInterop.ApplicationEvents.Quit += delegate (object sender, MonoDevelop.MacInterop.ApplicationQuitEventArgs e) {
-                    MainClass.SaveAndQuit();
-                    // If we get here, the user has cancelled the action
-                    e.UserCancelled = true;
-                    e.Handled = true;
-                };
-
-                MonoDevelop.MacInterop.ApplicationEvents.OpenDocument += delegate (object sender, MonoDevelop.MacInterop.ApplicationDocumentEventArgs e) {
-                    foreach(var pair in e.Documents) {
-                        MainClass.OpenDocument(pair.Key);
-                    }
-
-                    e.Handled = true;
-                };
-
-                IgeMacMenu.GlobalKeyHandlerEnabled = true;
-
-                IgeMacMenu.QuitMenuItem = _quitItem;
-
-                var appGroup = IgeMacMenu.AddAppMenuGroup();
-                appGroup.AddMenuItem(_aboutItem, Configuration.GetLocalized("About Petri…"));
-                appGroup.AddMenuItem(_preferencesItem, Configuration.GetLocalized("Preferences…"));
-
-                _vbox.Show();
-                this.Show();
-            }
-            else {
-                this.ShowAll();
-            }
-        }
-
+        /// <summary>
+        /// Gets or sets the currently installed main view of the window (debugger, editor…).
+        /// </summary>
+        /// <value>The GUI.</value>
         public Gui Gui {
             get {
                 return _gui;
@@ -129,73 +98,167 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets the editor GUI.
+        /// </summary>
+        /// <value>The editor GUI.</value>
         public EditorGui EditorGui {
             get {
                 return _editorGui;
             }
         }
 
+        /// <summary>
+        /// Gets the debug GUI.
+        /// </summary>
+        /// <value>The debug GUI.</value>
         public DebugGui DebugGui {
             get {
                 return _debugGui;
             }
         }
 
+        /// <summary>
+        /// Gets the "Undo" menu item of the menu bar.
+        /// </summary>
+        /// <value>The undo item.</value>
         public MenuItem UndoItem {
             get {
                 return _undoItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Redo" menu item of the menu bar.
+        /// </summary>
+        /// <value>The redo item.</value>
         public MenuItem RedoItem {
             get {
                 return _redoItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Cut" menu item of the menu bar.
+        /// </summary>
+        /// <value>The cut item.</value>
         public MenuItem CutItem {
             get {
                 return _cutItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Copy" menu item of the menu bar.
+        /// </summary>
+        /// <value>The copy item.</value>
         public MenuItem CopyItem {
             get {
                 return _copyItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Paste" menu item of the menu bar.
+        /// </summary>
+        /// <value>The paste item.</value>
         public MenuItem PasteItem {
             get {
                 return _pasteItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Find" menu item of the menu bar.
+        /// </summary>
+        /// <value>The find item.</value>
         public MenuItem FindItem {
             get {
                 return _findItem;
             }
         }
 
+        /// <summary>
+        /// Gets the "Embed in macro" menu item of the menu bar.
+        /// </summary>
+        /// <value>The embed item.</value>
         public MenuItem EmbedItem {
             get {
                 return _embedInMacro;
             }
         }
 
+        /// <summary>
+        /// Gets the "Revert to last save" menu item of the menu bar.
+        /// </summary>
+        /// <value>The revert item.</value>
         public MenuItem RevertItem {
             get {
                 return _revertItem;
             }
         }
 
-        protected void OnDeleteEvent(object sender, DeleteEventArgs a)
+        /// <summary>
+        /// Updates the recent documents menu items.
+        /// </summary>
+        public void UpdateRecentDocuments()
         {
-            bool result = _document.CloseAndConfirm();
-            a.RetVal = !result;
+            _openRecentItem.Submenu = null;
+            if(_openRecentMenu != null) {
+                _openRecentMenu.Destroy();
+            }
+
+            _openRecentMenu = new Menu();
+            _openRecentItem.Submenu = _openRecentMenu;
+
+            var recentItems = MainClass.RecentDocuments;
+
+            foreach(var pair in recentItems) {
+                MenuItem item = new MenuItem(pair.Value);
+                item.Activated += OnClickRecentMenu;
+                _openRecentMenu.Append(item);
+                item.Show();
+            }
+
+            if(recentItems.Count > 0) {
+                _openRecentMenu.Append(new SeparatorMenuItem());
+            }
+            _clearRecentItems = new MenuItem(Configuration.GetLocalized("Clear Recent"));
+            _clearRecentItems.Activated += OnClickMenu;
+            _openRecentMenu.Append(_clearRecentItems);
+            _clearRecentItems.Sensitive = recentItems.Count > 0;
+
+            _openRecentItem.ShowAll();
         }
 
-        protected void OnClickMenu(object sender, EventArgs e)
+        /// <summary>
+        /// Called when the window is closed by its close button.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="args">Arguments.</param>
+        protected void OnDeleteEvent(object sender, DeleteEventArgs args)
+        {
+            bool result = _document.CloseAndConfirm();
+            args.RetVal = !result;
+        }
+
+        /// <summary>
+        /// Called when a recent item menu is clicked.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="args">Arguments.</param>
+        protected void OnClickRecentMenu(object sender, EventArgs args)
+        {
+            var item = (Label)((MenuItem)sender).Child;
+            MainClass.OpenDocument(item.Text);
+        }
+
+        /// <summary>
+        /// Called when any of the non-static menu item is selected from the menu bar.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="args">Arguments.</param>
+        protected void OnClickMenu(object sender, EventArgs args)
         {
             if(sender == _quitItem) {
                 bool shouldExit = MainClass.OnExit();
@@ -276,6 +339,10 @@ namespace Petri.Editor
             else if(sender == _openItem) {
                 MainClass.OpenDocument();
             }
+            else if(sender == _clearRecentItems) {
+                MainClass.RecentDocuments.Clear();
+                MainClass.UpdateRecentDocuments();
+            }
             else if(sender == _newItem) {
                 var doc = new Document("");
                 MainClass.AddDocument(doc);
@@ -322,10 +389,29 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Called when a static menu item is selected.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="args">Arguments.</param>
+        protected static void OnClickMenuStatic(object sender, EventArgs args)
+        {
+            if(sender == _staticQuitItem) {
+                bool shouldExit = MainClass.OnExit();
+                if(shouldExit) {
+                    MainClass.SaveAndQuit();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Builds the menus and the menu bar.
+        /// </summary>
         protected void BuildMenus()
         {
             _accelGroup = new AccelGroup();
             this.AddAccelGroup(_accelGroup);
+            this.AddAccelGroup(_staticAccelGroup);
 
             _menuBar = new MenuBar();
 
@@ -345,33 +431,55 @@ namespace Petri.Editor
             document.Submenu = documentMenu;
             help.Submenu = helpMenu;
 
-            _quitItem = new MenuItem(Configuration.GetLocalized("Quit"));
-            _quitItem.Activated += OnClickMenu;
-            _quitItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.q, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
-
             _newItem = new MenuItem(Configuration.GetLocalized("New"));
             _newItem.Activated += OnClickMenu;
-            _newItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.n, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _newItem.AddAccelerator("activate",
+                                    _accelGroup,
+                                    new AccelKey(Gdk.Key.n,
+                                                 Gdk.ModifierType.ControlMask,
+                                                 AccelFlags.Visible));
 
             _openItem = new MenuItem(Configuration.GetLocalized("Open…"));
             _openItem.Activated += OnClickMenu;
-            _openItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.o, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _openItem.AddAccelerator("activate",
+                                     _accelGroup,
+                                     new AccelKey(Gdk.Key.o,
+                                                  Gdk.ModifierType.ControlMask,
+                                                  AccelFlags.Visible));
+
+            _openRecentItem = new MenuItem(Configuration.GetLocalized("Open Recent"));
 
             _closeItem = new MenuItem(Configuration.GetLocalized("Close"));
             _closeItem.Activated += OnClickMenu;
-            _closeItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.w, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _closeItem.AddAccelerator("activate",
+                                      _accelGroup,
+                                      new AccelKey(Gdk.Key.w,
+                                                   Gdk.ModifierType.ControlMask,
+                                                   AccelFlags.Visible));
 
             _saveItem = new MenuItem(Configuration.GetLocalized("Save"));
             _saveItem.Activated += OnClickMenu;
-            _saveItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.s, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _saveItem.AddAccelerator("activate",
+                                     _accelGroup,
+                                     new AccelKey(Gdk.Key.s,
+                                                  Gdk.ModifierType.ControlMask,
+                                                  AccelFlags.Visible));
 
             _saveAsItem = new MenuItem(Configuration.GetLocalized("Save As…"));
             _saveAsItem.Activated += OnClickMenu;
-            _saveAsItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.s, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
+            _saveAsItem.AddAccelerator("activate",
+                                       _accelGroup,
+                                       new AccelKey(Gdk.Key.s,
+                                                    Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask,
+                                                    AccelFlags.Visible));
 
             _exportItem = new MenuItem(Configuration.GetLocalized("Export as PDF…"));
             _exportItem.Activated += OnClickMenu;
-            _exportItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _exportItem.AddAccelerator("activate",
+                                       _accelGroup,
+                                       new AccelKey(Gdk.Key.e,
+                                                    Gdk.ModifierType.ControlMask,
+                                                    AccelFlags.Visible));
 
             _revertItem = new MenuItem(Configuration.GetLocalized("Revert…"));
             _revertItem.Activated += OnClickMenu;
@@ -379,6 +487,7 @@ namespace Petri.Editor
 
             fileMenu.Append(_newItem);
             fileMenu.Append(_openItem);
+            fileMenu.Append(_openRecentItem);
             fileMenu.Append(new SeparatorMenuItem());
             fileMenu.Append(_closeItem);
             fileMenu.Append(_saveItem);
@@ -388,39 +497,67 @@ namespace Petri.Editor
 
             _undoItem = new MenuItem(Configuration.GetLocalized("Undo"));
             _undoItem.Activated += OnClickMenu;
-            _undoItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.z, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _undoItem.AddAccelerator("activate",
+                                     _accelGroup,
+                                     new AccelKey(Gdk.Key.z,
+                                                  Gdk.ModifierType.ControlMask,
+                                                  AccelFlags.Visible));
 
             _redoItem = new MenuItem(Configuration.GetLocalized("Redo"));
             _redoItem.Activated += OnClickMenu;
-            _redoItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.z, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
+            _redoItem.AddAccelerator("activate",
+                                     _accelGroup,
+                                     new AccelKey(Gdk.Key.z,
+                                                  Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask,
+                                                  AccelFlags.Visible));
 
             _cutItem = new MenuItem(Configuration.GetLocalized("Cut"));
             _cutItem.Activated += OnClickMenu;
-            _cutItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.x, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _cutItem.AddAccelerator("activate",
+                                    _accelGroup,
+                                    new AccelKey(Gdk.Key.x,
+                                                 Gdk.ModifierType.ControlMask,
+                                                 AccelFlags.Visible));
 
             _copyItem = new MenuItem(Configuration.GetLocalized("Copy"));
             _copyItem.Activated += OnClickMenu;
-            _copyItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.c, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _copyItem.AddAccelerator("activate",
+                                     _accelGroup,
+                                     new AccelKey(Gdk.Key.c,
+                                                  Gdk.ModifierType.ControlMask,
+                                                  AccelFlags.Visible));
 
             _selectAllItem = new MenuItem(Configuration.GetLocalized("Select All"));
             _selectAllItem.Activated += OnClickMenu;
-            _selectAllItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.a, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _selectAllItem.AddAccelerator("activate",
+                                          _accelGroup,
+                                          new AccelKey(Gdk.Key.a,
+                                                       Gdk.ModifierType.ControlMask,
+                                                       AccelFlags.Visible));
 
             _pasteItem = new MenuItem(Configuration.GetLocalized("Paste"));
             _pasteItem.Activated += OnClickMenu;
-            _pasteItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.v, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _pasteItem.AddAccelerator("activate",
+                                      _accelGroup,
+                                      new AccelKey(Gdk.Key.v,
+                                                   Gdk.ModifierType.ControlMask,
+                                                   AccelFlags.Visible));
 
             _findItem = new MenuItem(Configuration.GetLocalized("Find…"));
             _findItem.Activated += OnClickMenu;
-            _findItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.f, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _findItem.AddAccelerator("activate",
+                                     _accelGroup,
+                                     new AccelKey(Gdk.Key.f,
+                                                  Gdk.ModifierType.ControlMask,
+                                                  AccelFlags.Visible));
 
             _embedInMacro = new MenuItem(Configuration.GetLocalized("Group in a Macro"));
             _embedInMacro.Activated += OnClickMenu;
-            _embedInMacro.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
-
-            _preferencesItem = new MenuItem(Configuration.GetLocalized("Preferences…"));
-            _preferencesItem.Activated += OnClickMenu;
-            _preferencesItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.comma, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _embedInMacro.AddAccelerator("activate",
+                                         _accelGroup,
+                                         new AccelKey(Gdk.Key.e,
+                                                      Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask,
+                                                      AccelFlags.Visible));
 
             editMenu.Append(_undoItem);
             editMenu.Append(_redoItem);
@@ -443,13 +580,25 @@ namespace Petri.Editor
 
             _actualSizeItem = new MenuItem(Configuration.GetLocalized("Actual Size"));
             _actualSizeItem.Activated += OnClickMenu;
-            _actualSizeItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.Key_0, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
+            _actualSizeItem.AddAccelerator("activate",
+                                           _accelGroup,
+                                           new AccelKey(Gdk.Key.Key_0,
+                                                        Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask,
+                                                        AccelFlags.Visible));
             _zoomInItem = new MenuItem(Configuration.GetLocalized("Zoom In"));
             _zoomInItem.Activated += OnClickMenu;
-            _zoomInItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.plus, Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask, AccelFlags.Visible));
+            _zoomInItem.AddAccelerator("activate",
+                                       _accelGroup,
+                                       new AccelKey(Gdk.Key.plus,
+                                                    Gdk.ModifierType.ControlMask | Gdk.ModifierType.ShiftMask,
+                                                    AccelFlags.Visible));
             _zoomOutItem = new MenuItem(Configuration.GetLocalized("Zoom Out"));
             _zoomOutItem.Activated += OnClickMenu;
-            _zoomOutItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.minus, Gdk.ModifierType.ControlMask, AccelFlags.Visible));
+            _zoomOutItem.AddAccelerator("activate",
+                                        _accelGroup,
+                                        new AccelKey(Gdk.Key.minus,
+                                                     Gdk.ModifierType.ControlMask,
+                                                     AccelFlags.Visible));
 
             viewMenu.Append(_actualSizeItem);
             viewMenu.Append(_zoomInItem);
@@ -457,17 +606,29 @@ namespace Petri.Editor
 
             _showEditorItem = new MenuItem(Configuration.GetLocalized("Show Editor"));
             _showEditorItem.Activated += OnClickMenu;
-            _showEditorItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.e, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
+            _showEditorItem.AddAccelerator("activate",
+                                           _accelGroup,
+                                           new AccelKey(Gdk.Key.e,
+                                                        Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask,
+                                                        AccelFlags.Visible));
             _showDebuggerItem = new MenuItem(Configuration.GetLocalized("Show Debugger"));
             _showDebuggerItem.Activated += OnClickMenu;
-            _showDebuggerItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.d, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
+            _showDebuggerItem.AddAccelerator("activate",
+                                             _accelGroup,
+                                             new AccelKey(Gdk.Key.d,
+                                                          Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask,
+                                                          AccelFlags.Visible));
             _manageHeadersItem = new MenuItem(Configuration.GetLocalized("Manage Headers…"));
             _manageHeadersItem.Activated += OnClickMenu;
             _manageMacrosItem = new MenuItem(Configuration.GetLocalized("Manage Macros…"));
             _manageMacrosItem.Activated += OnClickMenu;
             _documentSettingsItem = new MenuItem(Configuration.GetLocalized("Settings…"));
             _documentSettingsItem.Activated += OnClickMenu;
-            _documentSettingsItem.AddAccelerator("activate", _accelGroup, new AccelKey(Gdk.Key.comma, Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask, AccelFlags.Visible));
+            _documentSettingsItem.AddAccelerator("activate",
+                                                 _accelGroup,
+                                                 new AccelKey(Gdk.Key.comma,
+                                                              Gdk.ModifierType.ControlMask | Gdk.ModifierType.Mod1Mask,
+                                                              AccelFlags.Visible));
 
             documentMenu.Append(_showEditorItem);
             documentMenu.Append(_showDebuggerItem);
@@ -479,13 +640,29 @@ namespace Petri.Editor
 
             _showHelpItem = new MenuItem(Configuration.GetLocalized("Help…"));
             _showHelpItem.Activated += OnClickMenu;
-            _aboutItem = new MenuItem(Configuration.GetLocalized("About…"));
-            _aboutItem.Activated += OnClickMenu;
 
             helpMenu.Append(_showHelpItem);
-            helpMenu.Append(_aboutItem);
 
             if(Configuration.RunningPlatform != Platform.Mac) {
+                _quitItem = new MenuItem(Configuration.GetLocalized("Quit"));
+                _quitItem.Activated += OnClickMenu;
+                _quitItem.AddAccelerator("activate",
+                                         _accelGroup,
+                                         new AccelKey(Gdk.Key.q,
+                                                      Gdk.ModifierType.ControlMask,
+                                                      AccelFlags.Visible));
+
+                _preferencesItem = new MenuItem(Configuration.GetLocalized("Preferences…"));
+                _preferencesItem.Activated += OnClickMenu;
+                _preferencesItem.AddAccelerator("activate",
+                                                _accelGroup,
+                                                new AccelKey(Gdk.Key.comma,
+                                                             Gdk.ModifierType.ControlMask,
+                                                             AccelFlags.Visible));
+
+                _aboutItem = new MenuItem(Configuration.GetLocalized("About…"));
+                _aboutItem.Activated += OnClickMenu;
+
                 fileMenu.Append(_quitItem);
                 editMenu.Append(new SeparatorMenuItem());
                 editMenu.Append(_preferencesItem);
@@ -498,7 +675,65 @@ namespace Petri.Editor
             _menuBar.Append(document);
             _menuBar.Append(help);
 
-            _vbox.PackStart(_menuBar, false, false, 0);
+            if(Configuration.RunningPlatform != Platform.Mac) {
+                _vbox.PackStart(_menuBar, false, false, 0);
+            }
+        }
+
+        /// <summary>
+        /// Inits the static components of GUI. At the moment, it initializes the OS X menu bar and document association stuff.
+        /// To be called once at application startup.
+        /// </summary>
+        public static void InitGUI()
+        {
+            _staticAccelGroup = new AccelGroup();
+
+            _staticQuitItem = new MenuItem(Configuration.GetLocalized("Quit"));
+            _staticQuitItem.Activated += OnClickMenuStatic;
+            _staticQuitItem.AddAccelerator("activate",
+                                           _staticAccelGroup,
+                                           new AccelKey(Gdk.Key.q,
+                                                        Gdk.ModifierType.ControlMask,
+                                                        AccelFlags.Visible));
+
+            _staticPreferencesItem = new MenuItem(Configuration.GetLocalized("Preferences…"));
+            _staticPreferencesItem.Activated += OnClickMenuStatic;
+            _staticPreferencesItem.AddAccelerator("activate",
+                                                  _staticAccelGroup,
+                                                  new AccelKey(Gdk.Key.comma,
+                                                               Gdk.ModifierType.ControlMask,
+                                                               AccelFlags.Visible));
+
+            _staticAboutItem = new MenuItem(Configuration.GetLocalized("About…"));
+            _staticAboutItem.Activated += OnClickMenuStatic;
+
+            var aboutGroup = IgeMacMenu.AddAppMenuGroup();
+            aboutGroup.AddMenuItem(_staticAboutItem, null);
+            var prefsGroup = IgeMacMenu.AddAppMenuGroup();
+            prefsGroup.AddMenuItem(_staticPreferencesItem, null);
+
+            IgeMacMenu.QuitMenuItem = _staticQuitItem;
+
+            if(Configuration.RunningPlatform == Platform.Mac) {
+                MonoDevelop.MacInterop.ApplicationEvents.Quit += delegate (object sender,
+                                                                           MonoDevelop.MacInterop.ApplicationQuitEventArgs e) {
+                    MainClass.SaveAndQuit();
+                    // If we get here, the user has cancelled the action
+                    e.UserCancelled = true;
+                    e.Handled = true;
+                };
+
+                MonoDevelop.MacInterop.ApplicationEvents.OpenDocument += delegate (object sender,
+                                                                                   MonoDevelop.MacInterop.ApplicationDocumentEventArgs e) {
+                    foreach(var pair in e.Documents) {
+                        MainClass.OpenDocument(pair.Key);
+                    }
+
+                    e.Handled = true;
+                };
+
+                IgeMacMenu.GlobalKeyHandlerEnabled = true;
+            }
         }
 
         Document _document;
@@ -510,9 +745,16 @@ namespace Petri.Editor
         MenuItem _quitItem;
         MenuItem _aboutItem;
         MenuItem _preferencesItem;
+        static MenuItem _staticQuitItem;
+        static MenuItem _staticAboutItem;
+        static MenuItem _staticPreferencesItem;
 
         MenuItem _newItem;
         MenuItem _openItem;
+        MenuItem _openRecentItem;
+        Menu _openRecentMenu;
+        MenuItem _clearRecentItems;
+        
         MenuItem _closeItem;
         MenuItem _saveItem;
         MenuItem _saveAsItem;
@@ -541,6 +783,7 @@ namespace Petri.Editor
         MenuItem _showHelpItem;
 
         AccelGroup _accelGroup;
+        static AccelGroup _staticAccelGroup;
 
         EditorGui _editorGui;
         DebugGui _debugGui;

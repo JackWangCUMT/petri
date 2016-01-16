@@ -37,6 +37,12 @@
 <Key>Open…</Key>
 <Value>Ouvrir…</Value>
 
+<Key>Open Recent</Key>
+<Value>Ouvrir l'élément récent</Value>
+
+<Key>Clear Recent</Key>
+<Value>Effacer le menu</Value>
+
 <Key>Close</Key>
 <Value>Fermer</Value>
 
@@ -44,7 +50,7 @@
 <Value>Enregistrer</Value>
 
 <Key>Save As…</Key>
-<Value>Enregistrer Sous…</Value>
+<Value>Enregistrer sous…</Value>
 
 <Key>Export as PDF…</Key>
 <Value>Exporter en PDF…</Value>

@@ -60,10 +60,14 @@ namespace Petri.Editor
             this.Path = path;
             this.Blank = true;
             this.Restore();
-            Window.PresentWindow();
+            Window.ShowAll();
             Window.EditorGui.Paned.Position = Window.Allocation.Width - 260;
             Window.DebugGui.Paned.Position = Window.Allocation.Width - 200;
             AssociatedWindows = new HashSet<Window>();
+
+            if(path == "") {
+                Window.UpdateRecentDocuments();
+            }
         }
 
         public event LanguageChangeEventHandler LanguageChanged;
@@ -275,6 +279,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Closes the document and confirm.
+        /// </summary>
+        /// <returns><c>true</c>, if the document was allowed to be closed, <c>false</c> otherwise.</returns>
         public bool CloseAndConfirm()
         {
             if(this.DebugController.Client.SessionRunning) {
@@ -321,12 +329,10 @@ namespace Petri.Editor
             }
 
             foreach(Window w in AssociatedWindows) {
-                w.Hide();
+                w.Destroy();
             }
 
             MainClass.RemoveDocument(this);
-            if(MainClass.Documents.Count == 0)
-                MainClass.SaveAndQuit();
 
             return true;
         }
