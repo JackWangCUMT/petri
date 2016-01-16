@@ -57,7 +57,7 @@ namespace Petri.Editor
             Add(line + '\n');
         }
 
-        public static CodeGen operator +(CodeGen gen, string s)
+        public static CodeGen operator+(CodeGen gen, string s)
         {
             gen.AddLine(s);
             return gen;

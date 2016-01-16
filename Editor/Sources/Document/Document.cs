@@ -275,6 +275,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Closes the document and confirm.
+        /// </summary>
+        /// <returns><c>true</c>, if the document was allowed to be closed, <c>false</c> otherwise.</returns>
         public bool CloseAndConfirm()
         {
             if(this.DebugController.Client.SessionRunning) {
@@ -321,12 +325,10 @@ namespace Petri.Editor
             }
 
             foreach(Window w in AssociatedWindows) {
-                w.Hide();
+                w.Destroy();
             }
 
             MainClass.RemoveDocument(this);
-            if(MainClass.Documents.Count == 0)
-                MainClass.SaveAndQuit();
 
             return true;
         }

@@ -27,6 +27,8 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Linq;
 using System.Collections;
+using Newtonsoft.Json;
+using IgeMacIntegration;
 
 [assembly: InternalsVisibleTo("Test")]
 
@@ -170,7 +172,7 @@ namespace Petri.Editor
                     if(compile) {
                         string dylibPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
                                                                                              System.IO.Path.Combine(document.Settings.LibOutputPath,
-                                                                                                                                                                           document.Settings.Name + ".so")));
+                                                                                                                    document.Settings.Name + ".so")));
                         if(!System.IO.File.Exists(dylibPath) || System.IO.File.GetLastWriteTime(dylibPath) < System.IO.File.GetLastWriteTime(cppPath)) {
                             if(verbose) {
                                 Console.WriteLine("Compiling the C++ code…");
@@ -198,6 +200,29 @@ namespace Petri.Editor
             }
             else {
                 Application.Init();
+
+                MainWindow.InitGUI();
+
+                if(Configuration.RunningPlatform == Platform.Mac) {
+                    MonoDevelop.MacInterop.ApplicationEvents.Quit += delegate (object sender,
+                                                                               MonoDevelop.MacInterop.ApplicationQuitEventArgs e) {
+                        MainClass.SaveAndQuit();
+                        // If we get here, the user has cancelled the action
+                        e.UserCancelled = true;
+                        e.Handled = true;
+                    };
+
+                    MonoDevelop.MacInterop.ApplicationEvents.OpenDocument += delegate (object sender,
+                                                                                       MonoDevelop.MacInterop.ApplicationDocumentEventArgs e) {
+                        foreach(var pair in e.Documents) {
+                            MainClass.OpenDocument(pair.Key);
+                        }
+
+                        e.Handled = true;
+                    };
+
+                    IgeMacMenu.GlobalKeyHandlerEnabled = true;
+                }
 
                 var document = new Document("");
                 AddDocument(document);
@@ -237,7 +262,10 @@ namespace Petri.Editor
 
         public delegate void EntryValDel(Gtk.Entry e, params object[] args);
 
-        public static void RegisterValidation(Gtk.Entry e, bool change, EntryValDel a, params object[] p)
+        public static void RegisterValidation(Gtk.Entry e,
+                                              bool change,
+                                              EntryValDel a,
+                                              params object[] p)
         {
             if(change) {
                 e.Changed += (obj, eventInfo) => {
@@ -262,9 +290,12 @@ namespace Petri.Editor
         public static void RemoveDocument(Document doc)
         {
             _documents.Remove(doc);
+            if(_documents.Count == 0) {
+                MainClass.SaveAndQuit();
+            }
         }
 
-        public static List<Document> Documents {
+        public static IReadOnlyList<Document> Documents {
             get {
                 return _documents;
             }
