@@ -32,6 +32,10 @@ namespace Petri.Editor
 {
     public class MainClass
     {
+        /*
+         * The following string constants are the possible console output when invoked in compiler mode.
+         * The string are used in the units tests as well.
+         */
         internal static readonly string HelpString = "Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--arch|-a (32|64)] [--verbose|-v] [--] \"Path/To/Document.petri\"";
 
         internal static readonly string MissingPetriDocument = "The path to the Petri document must be specified as the last program argument!";
@@ -46,6 +50,11 @@ namespace Petri.Editor
 
         public static readonly int MaxRecentElements = 10;
 
+        /// <summary>
+        /// Prints the application's usage when invoked from a terminal, whether requested by the user with a help flag, or when a wrong flag is passed as an argument.
+        /// </summary>
+        /// <returns>The expected return code for the application</returns>
+        /// <param name="returnCode">The return code that the function must return. If ≠ 0, then the output is done on stderr. Otherwise, the output is made on stdout.</param>
         private static int PrintUsage(int returnCode)
         {
             if(returnCode == 0) {
@@ -57,6 +66,11 @@ namespace Petri.Editor
             return returnCode;
         }
 
+        /// <summary>
+        /// The entry point of the program. Manages boths CLI and GUI, depending on whether arguments were given or not.
+        /// </summary>
+        /// <param name="args">The command-line arguments.</param>
+        /// <returns>The exit code that is given to the operating system after the program ends.</returns>
         public static int Main(string[] args)
         {
             if(args.Length > 0) {
@@ -223,6 +237,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Closes and asks for save for each unsaved document. If one of the save dialog is cancelled, then the exit is cancelled.
+        /// </summary>
+        /// <returns>Whether the app termination should continue.</returns>
         public static bool OnExit()
         {
             while(_documents.Count > 0) {
@@ -234,6 +252,9 @@ namespace Petri.Editor
             return true;
         }
 
+        /// <summary>
+        /// Closes every open document (asks saving if necessary), saves the app's configuration and exits the program.
+        /// </summary>
         public static void SaveAndQuit()
         {
             bool exit = OnExit();
@@ -245,38 +266,62 @@ namespace Petri.Editor
             Application.Quit();
         }
 
+        /// <summary>
+        /// Takes a string and escapes it appropriately for usage in different GTK widgets that parses markup language.
+        /// </summary>
+        /// <returns>The escaped string.</returns>
+        /// <param name="s">The string to escape.</param>
         public static String SafeMarkupFromString(string s)
         {
             return System.Web.HttpUtility.HtmlEncode(s).Replace("{", "{{").Replace("}", "}}");
         }
 
-        public delegate void EntryValDel(Gtk.Entry e, params object[] args);
+        /// <summary>
+        /// Entry validation delegate.
+        /// </summary>
+        public delegate void EntryValidationDel(Gtk.Entry e, params object[] args);
 
+        /// <summary>
+        /// Registers the specified delegate to be triggered when the Entry is changed (if <c>change == true</c>)
+        /// or validated (if <c>change == false</c>; the validation is when the widget loses its focus or the Enter key is pressed).
+        /// </summary>
+        /// <param name="e">The Entry widget.</param>
+        /// <param name="change">If set to <c>true</c> then the delegate will be invoked on each text change in the entry. Otherwise, only on end of input.</param>
+        /// <param name="del">The delegate that will be invoked.</param>
+        /// <param name="p">The arguments list that will be passed to the delegate upon invocation.</param>
         public static void RegisterValidation(Gtk.Entry e,
                                               bool change,
-                                              EntryValDel a,
+                                              EntryValidationDel del,
                                               params object[] p)
         {
             if(change) {
                 e.Changed += (obj, eventInfo) => {
-                    a(e, p);
+                    del(e, p);
                 };
             }
             else {
                 e.FocusOutEvent += (obj, eventInfo) => {
-                    a(e, p);
+                    del(e, p);
                 };
                 e.Activated += (o, args) => {
-                    a(e, p);
+                    del(e, p);
                 };
             }
         }
 
+        /// <summary>
+        /// Adds a document to the list of opened documents.
+        /// </summary>
+        /// <param name="doc">The document to register.</param>
         public static void AddDocument(Document doc)
         {
             _documents.Add(doc);
         }
 
+        /// <summary>
+        /// Removes a document from the list of opened documents.
+        /// </summary>
+        /// <param name="doc">The document to unregister.</param>
         public static void RemoveDocument(Document doc)
         {
             _documents.Remove(doc);
@@ -285,12 +330,19 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// The list of opened documents
+        /// </summary>
+        /// <value>The documents.</value>
         public static IReadOnlyList<Document> Documents {
             get {
                 return _documents;
             }
         }
 
+        /// <summary>
+        /// Opens a document through the file chooser dialog.
+        /// </summary>
         public static void OpenDocument()
         {
             var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Open Petri Net…"), null,
@@ -313,6 +365,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Opens a document by its path. If the document is already opened, then its window is brought to front.
+        /// </summary>
+        /// <param name="filename">Filename.</param>
         public static void OpenDocument(string filename)
         {
             int index = RecentDocuments.IndexOfValue(filename);
@@ -344,6 +400,10 @@ namespace Petri.Editor
             UpdateRecentDocuments();
         }
 
+        /// <summary>
+        /// Gets or sets the application's clipboard's content.
+        /// </summary>
+        /// <value>The clipboard.</value>
         public static HashSet<Entity> Clipboard {
             get {
                 return _clipboard;
@@ -353,11 +413,18 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// The number of times a group of entity which have been copied have been pasted. This is intended to suffix new the entities with an increasing number.
+        /// </summary>
+        /// <value>The paste count.</value>
         public static int PasteCount {
             get;
             set;
         }
 
+        /// <summary>
+        /// Recent document entry.
+        /// </summary>
         private class RecentDocumentEntry
         {
             public string date { get; set; }
@@ -365,6 +432,9 @@ namespace Petri.Editor
             public string path { get; set; }
         }
 
+        /// <summary>
+        /// Remove the documents that do not exist anymore on the filesystem.
+        /// </summary>
         public static void TrimRecentDocuments()
         {
             var recentDocuments = RecentDocuments;
@@ -377,6 +447,9 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Updates the recent documents menu items in the opened documents.
+        /// </summary>
         public static void UpdateRecentDocuments()
         {
             while(RecentDocuments.Count > MaxRecentElements) {
@@ -398,6 +471,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets the list of recent documents, indexed by their last opening date (UTC).
+        /// </summary>
+        /// <value>The recent documents.</value>
         public static SortedList<DateTime, string> RecentDocuments {
             get;
             private set;
