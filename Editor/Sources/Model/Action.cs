@@ -106,6 +106,13 @@ namespace Petri.Editor
 
                 return f;
             }
+            else if(doc.Settings.Language == Language.CSharp) {
+                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Petri.Runtime.Utility"), "PrintAction", false);
+                f.AddParam(new Cpp.Param(new Cpp.Type("string"), "name"));
+                f.AddParam(new Cpp.Param(new Cpp.Type("UInt64"), "id"));
+
+                return f;
+            }
 
             throw new Exception("Should not get there !");
         }
@@ -118,6 +125,10 @@ namespace Petri.Editor
             }
             else if(doc.Settings.Language == Language.C) {
                 var f = new Cpp.Function(doc.Settings.Enum.Type, null, "PetriUtility_doNothing", false);
+                return f;
+            }
+            else if(doc.Settings.Language == Language.CSharp) {
+                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Petri.Runtime.Utility"), "DoNothing", false);
                 return f;
             }
 
@@ -134,6 +145,11 @@ namespace Petri.Editor
             else if(doc.Settings.Language == Language.C) {
                 var f = new Cpp.Function(doc.Settings.Enum.Type, null, "PetriUtility_pause", false);
                 f.AddParam(new Cpp.Param(new Cpp.Type("time_t"), "delay"));
+                return f;
+            }
+            else if(doc.Settings.Language == Language.CSharp) {
+                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Petri.Runtime.Utility"), "Pause", false);
+                f.AddParam(new Cpp.Param(new Cpp.Type("double"), "delay"));
                 return f;
             }
 

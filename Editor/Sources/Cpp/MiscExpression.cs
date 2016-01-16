@@ -63,7 +63,7 @@ namespace Petri.Editor.Cpp
     public class BracketedExpression : Expression
     {
         public BracketedExpression(Expression b, Expression expr, Expression a) : base(Language.None,
-                                                                                           Cpp.Operator.Name.None)
+                                                                                       Cpp.Operator.Name.None)
         {
             Before = b;
             Expression = expr;
@@ -117,23 +117,23 @@ namespace Petri.Editor.Cpp
                         break;
                     int lastIndex = tup.Item1.Substring(index + 1).IndexOf("@") + index + 1;
                     int expr = int.Parse(tup.Item1.Substring(index + 1,
-                                                                 lastIndex - (index + 1)));
+                                                             lastIndex - (index + 1)));
                     if(tup.Item2[expr].Item1 == ExprType.Brackets) {
                         return new BracketedExpression(Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(0,
-                                                                                                                           index),
-                                                                                                       language,
-                                                                                                       null,
-                                                                                                       null,
-                                                                                                       tup.Item2,
-                                                                                                       true),
-                                                           Cpp.Expression.CreateFromPreprocessedString(tup.Item2[expr].Item2.Substring(1,
+                                                                                                                       index),
+                                                                                                   language,
+                                                                                                   null,
+                                                                                                   null,
+                                                                                                   tup.Item2,
+                                                                                                   true),
+                                                       Cpp.Expression.CreateFromPreprocessedString(tup.Item2[expr].Item2.Substring(1,
                                                                                                                                        tup.Item2[expr].Item2.Length - 2),
                                                                                                        language,
                                                                                                        null,
                                                                                                        null,
                                                                                                        tup.Item2,
                                                                                                        true),
-                                                           Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(lastIndex + 1),
+                                                       Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(lastIndex + 1),
                                                                                                        language,
                                                                                                        null,
                                                                                                        null,
@@ -154,7 +154,7 @@ namespace Petri.Editor.Cpp
         }
 
         protected LiteralExpression(Language language, string expr) : base(language,
-                                                                               Cpp.Operator.Name.None)
+                                                                           Cpp.Operator.Name.None)
         {
             Expression = expr.Trim();
         }
@@ -188,7 +188,7 @@ namespace Petri.Editor.Cpp
     public class VariableExpression : LiteralExpression
     {
         public VariableExpression(string expr, Language language = Language.None) : base(language,
-                                                                                             expr)
+                                                                                         expr)
         {
             Regex name = new Regex(Cpp.Parser.NamePattern);
             Match nameMatch = name.Match(expr);
@@ -204,6 +204,9 @@ namespace Petri.Editor.Cpp
             }
             else if(Language == Language.Cpp) {
                 return "petriNet.getVariable(static_cast<std::uint_fast32_t>(" + Prefix + Expression + ")).value()";
+            }
+            else if(Language == Language.CSharp) {
+                return "PetriNet.GetVariable((UInt32)(" + Prefix + Expression + "))";
             }
             throw new Exception("Should not get here!");
         }
@@ -231,6 +234,9 @@ namespace Petri.Editor.Cpp
                 else if(Language == Language.Cpp) {
                     return EnumName + "::";
                 }
+                else if(Language == Language.CSharp) {
+                    return EnumName + ".";
+                }
                 throw new Exception("Should not get here!");
             }
         }
@@ -243,9 +249,9 @@ namespace Petri.Editor.Cpp
     public abstract class TernaryConditionExpression : Expression
     {
         protected TernaryConditionExpression(Language language,
-                                                 Expression expr1,
-                                                 Expression expr2,
-                                                 Expression expr3) : base(language,
+                                             Expression expr1,
+                                             Expression expr2,
+                                             Expression expr3) : base(language,
                                                                           Cpp.Operator.Name.TernaryConditional)
         {
             this.Expression1 = expr1;
@@ -284,7 +290,7 @@ namespace Petri.Editor.Cpp
     public class ExpressionList : Expression
     {
         public ExpressionList(Language language, IEnumerable<Expression> expressions) : base(language,
-                                                                                                 Cpp.Operator.Name.None)
+                                                                                             Cpp.Operator.Name.None)
         {
             Expressions = new List<Expression>(expressions);
         }
@@ -303,15 +309,15 @@ namespace Petri.Editor.Cpp
         public override string MakeCpp()
         {
             return String.Join(";\n",
-                                   from e in Expressions
-                                   select e.MakeCpp());
+                               from e in Expressions
+                                            select e.MakeCpp());
         }
 
         public override string MakeUserReadable()
         {
             return String.Join("; ",
-                                   from e in Expressions
-                                   select e.MakeUserReadable());
+                               from e in Expressions
+                                            select e.MakeUserReadable());
         }
 
         public override List<LiteralExpression> GetLiterals()

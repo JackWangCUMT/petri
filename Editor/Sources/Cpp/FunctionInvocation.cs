@@ -237,6 +237,9 @@ namespace Petri.Editor
                 else if(Language == Language.Cpp) {
                     return "([&petriNet]() -> " + Function.ReturnType.Name + " { " + Arguments[0].MakeCpp() + "; return {}; })()";
                 }
+                else if(Language == Language.CSharp) {
+                    return "(() => { " + Arguments[0].MakeCpp() + "; return default(" + Function.ReturnType.Name + "})()";
+                }
 
                 throw new Exception("Should not get there!");
             }

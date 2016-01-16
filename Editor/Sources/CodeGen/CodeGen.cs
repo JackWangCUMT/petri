@@ -29,6 +29,7 @@ namespace Petri.Editor
     {
         C,
         Cpp,
+        CSharp,
         None
     }
 

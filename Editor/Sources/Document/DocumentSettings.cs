@@ -260,9 +260,11 @@ namespace Petri.Editor
                 return "C++";
             case Language.C:
                 return "C";
+            case Language.CSharp:
+                return "C#";
             }
 
-            throw new Exception("Unsupported");
+            throw new Exception("Unsupported language!");
         }
 
         public string LanguageName()

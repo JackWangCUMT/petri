@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Document>
+  <Settings Name="C#" Enum="ActionResult,OK,NOK" SourceOutputPath="" LibOutputPath="" Hostname="localhost" Port="12345" Language="Cpp">
+    <Compiler Invocation="/usr/bin/c++">
+      <Flag Value="-std=c++1y" />
+      <Flag Value="-g" />
+    </Compiler>
+    <IncludePaths />
+    <LibPaths />
+    <Libs />
+  </Settings>
+  <Window X="240" Y="72" W="920" H="640" />
+  <Headers />
+  <Macros />
+  <PetriNet ID="0" Name="Root" X="0" Y="0" Active="true" RequiredTokens="0" Radius="30">
+    <Comments />
+    <States />
+    <Transitions />
+  </PetriNet>
+</Document>
