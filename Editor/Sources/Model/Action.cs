@@ -92,24 +92,26 @@ namespace Petri.Editor
 
         public static Cpp.Function PrintFunction(HeadlessDocument doc)
         {
-            if(doc.Settings.Language == Language.Cpp) {
+            var lang = doc.Settings.Language;
+
+            if(lang == Language.Cpp) {
                 var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Utility"), "printAction", false);
-                f.AddParam(new Cpp.Param(new Cpp.Type("std::string const &"), "name"));
-                f.AddParam(new Cpp.Param(new Cpp.Type("std::uint64_t"), "id"));
+                f.AddParam(new Cpp.Param(new Cpp.Type(lang, "std::string const &"), "name"));
+                f.AddParam(new Cpp.Param(new Cpp.Type(lang, "std::uint64_t"), "id"));
 
                 return f;
             }
-            else if(doc.Settings.Language == Language.C) {
+            else if(lang == Language.C) {
                 var f = new Cpp.Function(doc.Settings.Enum.Type, null, "PetriUtility_printAction", false);
-                f.AddParam(new Cpp.Param(new Cpp.Type("char const *"), "name"));
-                f.AddParam(new Cpp.Param(new Cpp.Type("uint64_t"), "id"));
+                f.AddParam(new Cpp.Param(new Cpp.Type(lang, "char const *"), "name"));
+                f.AddParam(new Cpp.Param(new Cpp.Type(lang, "uint64_t"), "id"));
 
                 return f;
             }
-            else if(doc.Settings.Language == Language.CSharp) {
+            else if(lang == Language.CSharp) {
                 var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Petri.Runtime.Utility"), "PrintAction", false);
-                f.AddParam(new Cpp.Param(new Cpp.Type("string"), "name"));
-                f.AddParam(new Cpp.Param(new Cpp.Type("UInt64"), "id"));
+                f.AddParam(new Cpp.Param(new Cpp.Type(lang, "string"), "name"));
+                f.AddParam(new Cpp.Param(new Cpp.Type(lang, "UInt64"), "id"));
 
                 return f;
             }
@@ -137,19 +139,21 @@ namespace Petri.Editor
 
         public static Cpp.Function PauseFunction(HeadlessDocument doc)
         {
-            if(doc.Settings.Language == Language.Cpp) {
+            var lang = doc.Settings.Language;
+
+            if(lang == Language.Cpp) {
                 var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Utility"), "pause", false);
-                f.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::nanoseconds"), "delay"));
+                f.AddParam(new Cpp.Param(new Cpp.Type(lang, "std::chrono::nanoseconds"), "delay"));
                 return f;
             }
-            else if(doc.Settings.Language == Language.C) {
+            else if(lang == Language.C) {
                 var f = new Cpp.Function(doc.Settings.Enum.Type, null, "PetriUtility_pause", false);
-                f.AddParam(new Cpp.Param(new Cpp.Type("time_t"), "delay"));
+                f.AddParam(new Cpp.Param(new Cpp.Type(lang, "time_t"), "delay"));
                 return f;
             }
-            else if(doc.Settings.Language == Language.CSharp) {
+            else if(lang == Language.CSharp) {
                 var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Petri.Runtime.Utility"), "Pause", false);
-                f.AddParam(new Cpp.Param(new Cpp.Type("double"), "delay"));
+                f.AddParam(new Cpp.Param(new Cpp.Type(lang, "double"), "delay"));
                 return f;
             }
 

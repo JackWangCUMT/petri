@@ -40,12 +40,14 @@ namespace Petri.Editor
         {
             public static Type UnknownType {
                 get {
-                    return _unknownType ?? (_unknownType = new Type("UnknownType", Scope.MakeFromNamespace("Petri")));
+                    return _unknownType ?? (_unknownType = new Type(Language.None, "UnknownType", Scope.MakeFromNamespace("Petri")));
                 }
             }
 
-            public Type(string name, Scope enclosing = null)
+            public Type(Language language, string name, Scope enclosing = null)
             {
+                Language = language;
+
                 String s = name.Clone() as string;
                 s.Replace("*", " * ");
                 s = s.TrimSpaces();
@@ -105,7 +107,7 @@ namespace Petri.Editor
                     index = s.Length;
                 }
 
-                var tup = Parser.ExtractScope(s.Substring(0, index).Trim());
+                var tup = Parser.ExtractScope(language, s.Substring(0, index).Trim());
                 _name = tup.Item2;
                 Enclosing = Scope.MakeFromScopes(enclosing, tup.Item1);
 
@@ -144,6 +146,11 @@ namespace Petri.Editor
                 get {
                     return _name;
                 }
+            }
+
+            public Language Language {
+                get;
+                private set;
             }
 
             public Scope Enclosing {
@@ -196,7 +203,7 @@ namespace Petri.Editor
 
             public bool Equals(string type)
             {
-                return this.Equals(new Type(type, Enclosing));
+                return this.Equals(new Type(Language, type, Enclosing));
             }
 
             // Is var1 = var2 a valid expression, where var1's type is 'type' and var2's type is 'this' ?

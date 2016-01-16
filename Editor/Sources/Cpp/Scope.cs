@@ -91,6 +91,11 @@ namespace Petri.Editor
                 private set;
             }
 
+            public Language Language {
+                get;
+                private set;
+            }
+
             public override string ToString()
             {
                 string enclosing = "";
@@ -98,9 +103,26 @@ namespace Petri.Editor
                     enclosing = Enclosing.ToString();
 
                 if(IsNamespace)
-                    return enclosing + (Namespace.Length > 0 ? Namespace + "::" : "");
+                    return enclosing + (Namespace.Length > 0 ? Namespace + Separator : "");
                 else
-                    return enclosing + Class.ToString() + "::";
+                    return enclosing + Class.ToString() + Separator;
+            }
+
+            public string Separator {
+                get {
+                    return Scope.GetSeparator(Language);
+                }
+            }
+
+            public static string GetSeparator(Language lang) {
+                switch(lang) {
+                case Language.Cpp:
+                    return "::";
+                case Language.CSharp:
+                    return ".";
+                }
+
+                throw new Exception("Should not get there!");
             }
 
             public Scope Enclosing {

@@ -188,7 +188,7 @@ namespace Petri.Editor
             static Function Dummy {
                 get {
                     if(_dummy == null) {
-                        _dummy = new Cpp.Function(new Type("void"), null, "dummy", false);
+                        _dummy = new Cpp.Function(new Type(Language.None, "void"), null, "dummy", false);
                     }
                     return _dummy;
                 }
@@ -215,7 +215,7 @@ namespace Petri.Editor
             public static Cpp.Function GetWrapperFunction(Cpp.Type returnType)
             {
                 var f = new Function(returnType, Scope.MakeFromNamespace("Utility"), "", false);
-                f.AddParam(new Param(new Type("void"), "param"));
+                f.AddParam(new Param(new Type(Language.None, "void"), "param"));
                 return f;
             }
 

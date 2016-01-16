@@ -129,7 +129,7 @@ namespace Petri.Test.Cpp
 
             // GIVEN a function list
             var functions = new List<Editor.Cpp.Function>();
-            var f = new Editor.Cpp.Function(new Editor.Cpp.Type("void"), null, "f", false);
+            var f = new Editor.Cpp.Function(new Editor.Cpp.Type(Petri.Editor.Language.None, "void"), null, "f", false);
             functions.Add(f);
 
             // AND a function invocation string

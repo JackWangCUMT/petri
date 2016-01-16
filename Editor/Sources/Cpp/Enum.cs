@@ -73,9 +73,14 @@ namespace Petri.Editor
                 private set;
             }
 
+            public Language Language {
+                get;
+                private set;
+            }
+
             public Cpp.Type Type {
                 get {
-                    return new Cpp.Type(Name);
+                    return new Cpp.Type(Language, Name);
                 }
             }
 

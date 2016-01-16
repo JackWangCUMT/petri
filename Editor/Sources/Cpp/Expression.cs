@@ -503,7 +503,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
             int index = func.IndexOf("(");
             var args = Parser.RemoveParenthesis(func.Substring(index));
             func = func.Substring(0, index);
-            var tup = Parser.ExtractScope(func);
+            var tup = Parser.ExtractScope(language, func);
             var argsList = Parser.SyntacticSplit(args, ",");
             var exprList = new List<Expression>();
             foreach(var ss in argsList) {

@@ -42,10 +42,6 @@ namespace Petri.Editor
 
             Conflicting = new HashSet<Entity>();
 
-            var timeout = new Cpp.Function(new Cpp.Type("Timeout"), null, "Timeout", false);
-            timeout.AddParam(new Cpp.Param(new Cpp.Type("std::chrono::duration<Rep, Period>"), "timeout"));
-            CppConditions.Add(timeout);
-
             Path = path;
         }
 
@@ -78,7 +74,7 @@ namespace Petri.Editor
                     filename = System.IO.Path.Combine(System.IO.Directory.GetParent(this.Path).FullName, filename);
                 }
 
-                var functions = Cpp.Parser.Parse(filename);
+                var functions = Cpp.Parser.Parse(Settings.Language, filename);
                 foreach(var func in functions) {
                     AllFunctionsList.Add(func);
                 }
@@ -125,7 +121,7 @@ namespace Petri.Editor
         {
             CppActions.Clear();
             CppConditions.Clear();
-            Cpp.Type e = Settings.Enum.Type, b = new Cpp.Type("bool");
+            Cpp.Type e = Settings.Enum.Type, b = new Cpp.Type(Language.None, "bool");
 
             foreach(Cpp.Function f in AllFunctions) {
                 if(f.ReturnType.Equals(e)) {
