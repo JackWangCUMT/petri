@@ -327,7 +327,7 @@ namespace Petri.Editor
                     tup = ExtractScope(language, name.Substring(0, index));
 
                 return Tuple.Create(Scope.MakeFromNamespace(language, tup.Item2, tup.Item1),
-                                    name.Substring(index + 2));
+                                    name.Substring(index + Scope.GetSeparator(language).Length));
             }
 
             public static List<string> SyntacticSplit(string s, string separator)

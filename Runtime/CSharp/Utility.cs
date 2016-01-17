@@ -24,7 +24,7 @@ using System;
 
 namespace Petri.Runtime
 {
-    public enum ActionResultEnum
+    public enum ActionResult
     {
         OK,
         NOK

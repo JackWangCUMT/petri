@@ -408,8 +408,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                                                                             true));
                     }
                     else if(prop.type == Petri.Editor.Cpp.Operator.Type.PrefixUnary) {
-                        return new UnaryExpression(language,
-                                                   foundOperator,
+                        return new UnaryExpression(language, foundOperator,
                                                    Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length),
                                                                                            language,
                                                                                            functions,
@@ -419,8 +418,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                     }
                     else if(prop.type == Petri.Editor.Cpp.Operator.Type.SuffixUnary) {
                         if(foundOperator == Petri.Editor.Cpp.Operator.Name.FunCall) {
-                            return CreateFunctionInvocation(GetStringFromPreprocessed(s,
-                                                                                      subexprs),
+                            return CreateFunctionInvocation(GetStringFromPreprocessed(s, subexprs),
                                                             language,
                                                             functions,
                                                             macros);
@@ -546,17 +544,32 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
             return new FunctionInvocation(language, f, scopeNameAndArgs.Item3.ToArray());
         }
 
-        private static MethodInvocation CreateMethodInvocation(bool indirection,
-                                                               string that,
-                                                               string invocation,
-                                                               Language language,
-                                                               IEnumerable<Cpp.Function> functions,
-                                                               Dictionary<string, string> macros)
+        private static FunctionInvocation CreateMethodInvocation(bool indirection,
+                                                                 string that,
+                                                                 string invocation,
+                                                                 Language language,
+                                                                 IEnumerable<Cpp.Function> functions,
+                                                                 Dictionary<string, string> macros)
         {
             var scopeNameAndArgs = ExtractScopeNameAndArgs(invocation,
                                                            language,
                                                            functions,
                                                            macros);
+            if(Scope.GetSeparator(language) == Cpp.Operator.Properties[Cpp.Operator.Name.SelectionRef].cpp && Regex.Match(that,
+                                                                                                                          "(" + Parser.NamePattern + Scope.GetSeparator(language) + ")*" + Parser.NamePattern).Success) {
+                var scopes = that.Split(new string[]{ Scope.GetSeparator(language) },
+                                        StringSplitOptions.None);
+                Scope outerScope = null;
+                foreach(var s in scopes) {
+                    outerScope = Scope.MakeFromNamespace(language, s.Trim(), outerScope);
+                }
+                var scope = Scope.MakeFromScopes(scopeNameAndArgs.Item1, outerScope);
+
+                return CreateFunctionInvocation(scope.ToString() + invocation,
+                                                language,
+                                                functions,
+                                                macros);
+            }
             Cpp.Method m;
             if(functions == null) {
                 m = new Cpp.Method(Type.UnknownType,
