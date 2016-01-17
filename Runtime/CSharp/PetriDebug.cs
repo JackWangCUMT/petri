@@ -26,7 +26,7 @@ namespace Petri.Runtime
 {
     public class PetriDebug : PetriNet
     {
-        public PetriDebug(IntPtr handle)
+        internal PetriDebug(IntPtr handle)
         {
             Handle = handle;
         }

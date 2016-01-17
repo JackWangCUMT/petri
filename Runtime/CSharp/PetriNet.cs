@@ -27,7 +27,7 @@ namespace Petri.Runtime
 {
     public class PetriNet : CInterop
     {
-        public PetriNet(IntPtr handle)
+        internal PetriNet(IntPtr handle)
         {
             Handle = handle;
         }

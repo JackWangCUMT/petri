@@ -21,18 +21,31 @@
  */
 
 using System;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Petri.Generated")]
 
 namespace Petri.Runtime
 {
     public class CInterop
     {
-        protected CInterop()
+        internal CInterop()
         {
         }
 
-        public IntPtr Handle {
+        internal IntPtr Handle {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Release this instance. Call at your own risk, as accessing one of the object's methods afterwards will probably segfault.
+        /// The destructor however will be invoked without risk.
+        /// </summary>
+        internal IntPtr Release() {
+            var h = Handle;
+            Handle = IntPtr.Zero;
+            return h;
         }
     }
 }

@@ -277,6 +277,7 @@
     <Compile Include="..\Sources\Cpp\UnaryExpression.cs" />
     <Compile Include="..\Sources\Cpp\BinaryExpression.cs" />
     <Compile Include="..\Sources\Cpp\MiscExpression.cs" />
+    <Compile Include="..\Sources\CodeGen\CSharpPetriGen.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="CSRuntime.csproj">

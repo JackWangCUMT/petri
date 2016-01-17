@@ -29,7 +29,7 @@ namespace Petri.Runtime
      */
     public class Transition : CInterop
     {
-        public Transition(IntPtr handle)
+        internal Transition(IntPtr handle)
         {
             Handle = handle;
         }

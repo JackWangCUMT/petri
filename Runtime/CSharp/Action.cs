@@ -30,7 +30,7 @@ namespace Petri.Runtime
      */
     public class Action : CInterop
     {
-        public Action(IntPtr handle)
+        internal Action(IntPtr handle)
         {
             Handle = handle;
         }
