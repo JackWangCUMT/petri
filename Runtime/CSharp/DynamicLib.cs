@@ -32,18 +32,14 @@ namespace Petri.Runtime
          * create the PetriNet objects.
          */
         public DynamicLib(PtrCallableDel create,
-                        PtrCallableDel createDebug,
-                        StringCallableDel hash,
-                        StringCallableDel name,
-                        StringCallableDel prefix,
-                        UInt16CallableDel port)
+                          PtrCallableDel createDebug,
+                          StringCallableDel hash,
+                          StringCallableDel name,
+                          StringCallableDel prefix,
+                          UInt16CallableDel port)
         {
-            Handle = Interop.PetriDynamicLib.PetriDynamicLib_createWithPtr(create,
-                                                                           createDebug,
-                                                                           hash,
-                                                                           name,
-                                                                           port,
-                                                                           prefix);
+            Handle = Interop.PetriDynamicLib.PetriDynamicLib_createWithPtr(create, createDebug, hash,
+                                                                           name, port, prefix);
         }
 
         ~DynamicLib()

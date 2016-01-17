@@ -31,14 +31,17 @@ namespace Petri.Editor
     {
         public class Enum : IEquatable<Enum>
         {
-            public Enum(String name, IEnumerable<string> members)
+            public Enum(Language language, String name, IEnumerable<string> members)
             {
+                Language = language;
                 Name = name;
                 Members = members.ToArray();
             }
 
-            public Enum(string commaSeparatedList)
+            public Enum(Language language, string commaSeparatedList)
             {
+                Language = language;
+
                 commaSeparatedList = commaSeparatedList.Replace(" ", "");
                 commaSeparatedList = commaSeparatedList.Replace("\t", "");
                 var lst = commaSeparatedList.Split(new char[]{ ',' }, StringSplitOptions.None);

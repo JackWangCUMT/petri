@@ -115,8 +115,17 @@ namespace Petri.Editor
                 if(elem.Attribute("Name") != null)
                     Name = elem.Attribute("Name").Value;
 
+                if(elem.Attribute("Language") != null) {
+                    try {
+                        Language = (Language)Language.Parse(Language.GetType(), elem.Attribute("Language").Value);
+                    }
+                    catch(Exception) {
+
+                    }
+                }
+
                 if(elem.Attribute("Enum") != null) {
-                    Enum = new Cpp.Enum(elem.Attribute("Enum").Value);
+                    Enum = new Cpp.Enum(Language, elem.Attribute("Enum").Value);
                 }
 				
                 if(elem.Attribute("SourceOutputPath") != null)
@@ -130,15 +139,6 @@ namespace Petri.Editor
                 if(elem.Attribute("Port") != null)
                     Port = UInt16.Parse(elem.Attribute("Port").Value);
 
-                if(elem.Attribute("Language") != null) {
-                    try {
-                        Language = (Language)Language.Parse(Language.GetType(), elem.Attribute("Language").Value);
-                    }
-                    catch(Exception) {
-						
-                    }
-                }
-
                 var node = elem.Element("Compiler");
                 if(node != null) {
                     Compiler = node.Attribute("Invocation").Value;
@@ -151,14 +151,16 @@ namespace Petri.Editor
                 node = elem.Element("IncludePaths");
                 if(node != null) {
                     foreach(var e in node.Elements()) {
-                        IncludePaths.Add(Tuple.Create(e.Attribute("Path").Value, bool.Parse(e.Attribute("Recursive").Value)));
+                        IncludePaths.Add(Tuple.Create(e.Attribute("Path").Value,
+                                                      bool.Parse(e.Attribute("Recursive").Value)));
                     }
                 }
 
                 node = elem.Element("LibPaths");
                 if(node != null) {
                     foreach(var e in node.Elements()) {
-                        LibPaths.Add(Tuple.Create(e.Attribute("Path").Value, bool.Parse(e.Attribute("Recursive").Value)));
+                        LibPaths.Add(Tuple.Create(e.Attribute("Path").Value,
+                                                  bool.Parse(e.Attribute("Recursive").Value)));
                     }
                 }
 
@@ -190,7 +192,7 @@ namespace Petri.Editor
 
         public Cpp.Enum DefaultEnum {
             get {
-                return new Cpp.Enum("ActionResult", new string[]{ "OK", "NOK" });
+                return new Cpp.Enum(Language, "ActionResult", new string[]{ "OK", "NOK" });
             }
         }
 
@@ -274,7 +276,8 @@ namespace Petri.Editor
 
         public string SourcePath {
             get {
-                return System.IO.Path.Combine(SourceOutputPath, this.Name + "." + PetriGen.SourceExtensionFromLanguage(Language));
+                return System.IO.Path.Combine(SourceOutputPath,
+                                              this.Name + "." + PetriGen.SourceExtensionFromLanguage(Language));
             }
         }
 
@@ -305,7 +308,9 @@ namespace Petri.Editor
                     // Recursive?
                     if(System.IO.Directory.Exists(i.Item1)) {
                         if(i.Item2) {
-                            var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
+                            var directories = System.IO.Directory.EnumerateDirectories(i.Item1,
+                                                                                       "*",
+                                                                                       System.IO.SearchOption.AllDirectories);
                             foreach(var dir in directories) {
                                 // Do not add dotted files
                                 if(!dir.StartsWith(".")) {
@@ -326,7 +331,9 @@ namespace Petri.Editor
                 foreach(var i in LibPaths) {
                     // Recursive?
                     if(i.Item2) {
-                        var directories = System.IO.Directory.EnumerateDirectories(i.Item1, "*", System.IO.SearchOption.AllDirectories);
+                        var directories = System.IO.Directory.EnumerateDirectories(i.Item1,
+                                                                                   "*",
+                                                                                   System.IO.SearchOption.AllDirectories);
                         foreach(var dir in directories) {
                             val += "-L'" + dir + "' ";
                         }

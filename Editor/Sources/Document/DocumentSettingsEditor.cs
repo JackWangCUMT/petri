@@ -123,7 +123,7 @@ namespace Petri.Editor
                 MainClass.RegisterValidation(_customEnumEditor, false, (obj, p) => {
                     Cpp.Enum e = null;
                     try {
-                        e = new Cpp.Enum((obj as Entry).Text);
+                        e = new Cpp.Enum(_document.Settings.Language, (obj as Entry).Text);
                         _document.Settings.Enum = e;
                         _document.Settings.Modified = true;
                     }

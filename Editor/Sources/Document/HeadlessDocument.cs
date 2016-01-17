@@ -121,7 +121,7 @@ namespace Petri.Editor
         {
             CppActions.Clear();
             CppConditions.Clear();
-            Cpp.Type e = Settings.Enum.Type, b = new Cpp.Type(Language.None, "bool");
+            Cpp.Type e = Settings.Enum.Type, b = new Cpp.Type(Settings.Language, "bool");
 
             foreach(Cpp.Function f in AllFunctions) {
                 if(f.ReturnType.Equals(e)) {
