@@ -85,9 +85,12 @@ namespace Petri.Editor
                         args += "static_cast<" + Function.Parameters[i].Type.ToString() + ">(" + Arguments[i].MakeCpp() + ")";
                         continue;
                     case Language.C:
+                    case Language.CSharp:
                     case Language.None:
                         args += "(" + Function.Parameters[i].Type.ToString() + ")(" + Arguments[i].MakeCpp() + ")";
                         continue;
+                    default:
+                        throw new Exception("FunctionInvoction.MakeCpp: Should not get there!");
                     }
                 }
 
@@ -170,7 +173,7 @@ namespace Petri.Editor
 
         public class ConflictFunctionInvocation : FunctionInvocation
         {
-            public ConflictFunctionInvocation(string value) : base(Language.None, Dummy)
+            public ConflictFunctionInvocation(Language language, string value) : base(language, GetDummy(language))
             {
                 _value = value;
             }
@@ -185,13 +188,12 @@ namespace Petri.Editor
                 return _value;
             }
 
-            static Function Dummy {
-                get {
-                    if(_dummy == null) {
-                        _dummy = new Cpp.Function(new Type(Language.None, "void"), null, "dummy", false);
-                    }
-                    return _dummy;
+            static Function GetDummy(Language language)
+            {
+                if(_dummy == null) {
+                    _dummy = new Cpp.Function(new Type(language, "void"), null, "dummy", false);
                 }
+                return _dummy;
             }
 
             string _value;
@@ -206,16 +208,20 @@ namespace Petri.Editor
             public WrapperFunctionInvocation(Language language,
                                              Cpp.Type returnType,
                                              Expression expr) : base(language,
-                                                                     GetWrapperFunction(returnType),
+                                                                     GetWrapperFunction(language,
+                                                                                        returnType),
                                                                      expr)
             {
 				
             }
 
-            public static Cpp.Function GetWrapperFunction(Cpp.Type returnType)
+            public static Cpp.Function GetWrapperFunction(Language language, Cpp.Type returnType)
             {
-                var f = new Function(returnType, Scope.MakeFromNamespace("Utility"), "", false);
-                f.AddParam(new Param(new Type(Language.None, "void"), "param"));
+                var f = new Function(returnType,
+                                     Scope.MakeFromNamespace(language, "Utility"),
+                                     "",
+                                     false);
+                f.AddParam(new Param(new Type(language, "void"), "param"));
                 return f;
             }
 
@@ -241,7 +247,7 @@ namespace Petri.Editor
                     return "(() => { " + Arguments[0].MakeCpp() + "; return default(" + Function.ReturnType.Name + "})()";
                 }
 
-                throw new Exception("Should not get there!");
+                throw new Exception("WrapperFunctionInvocation.MakeCpp: Should not get there!");
             }
 
             public override string MakeUserReadable()

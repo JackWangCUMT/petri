@@ -208,7 +208,7 @@ namespace Petri.Editor.Cpp
             else if(Language == Language.CSharp) {
                 return "PetriNet.GetVariable((UInt32)(" + Prefix + Expression + "))";
             }
-            throw new Exception("Should not get here!");
+            throw new Exception("VariableExpression.MakeCpp: Should not get there!");
         }
 
         public override string MakeUserReadable()
@@ -237,7 +237,7 @@ namespace Petri.Editor.Cpp
                 else if(Language == Language.CSharp) {
                     return EnumName + ".";
                 }
-                throw new Exception("Should not get here!");
+                throw new Exception("VariableExpression.Prefix: Should not get there!");
             }
         }
 

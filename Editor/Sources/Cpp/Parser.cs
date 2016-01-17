@@ -124,10 +124,9 @@ namespace Petri.Editor
 
             enum Visibility
             {
-Public,
+                Public,
                 Protected,
                 Private}
-
             ;
 
             public static List<Function> Parse(Language language, string filename)
@@ -144,6 +143,11 @@ Public,
                 var currentScope = new Stack<Tuple<Scope, int, Visibility>>();
                 currentScope.Push(new Tuple<Scope, int, Visibility>(null, 0, Visibility.Public));
                 int braces = 0;
+
+                var classRegex = new Regex(ClassDeclaration);
+                var namespaceRegex = new Regex(NamespaceDeclaration);
+                var functionRegex = Function.Regex;
+
                 foreach(string l in lines) {
                     if(l == "{")
                         ++braces;
@@ -153,17 +157,26 @@ Public,
                         --braces;
                     }
 
-                    var match = Regex.Match(l, ClassDeclaration);
-                    if(!l.EndsWith(";") && match.Success) {
+                    var lmatch = classRegex.Match(l);
+                    if(!l.EndsWith(";") && lmatch.Success) {
                         Visibility vis = Visibility.Public;
                         if(l.StartsWith("class"))
                             vis = Visibility.Private;
-                        currentScope.Push(Tuple.Create(Scope.MakeFromClass(new Type(language, match.Groups["name"].Value, currentScope.Peek().Item1)), braces + 1, vis));
+                        currentScope.Push(Tuple.Create(Scope.MakeFromClass(new Type(language,
+                                                                                    lmatch.Groups["name"].Value,
+                                                                                    currentScope.Peek().Item1)),
+                                                       braces + 1,
+                                                       vis));
                     }
 
-                    match = Regex.Match(l, NamespaceDeclaration);
-                    if(match.Success) {
-                        currentScope.Push(Tuple.Create(Scope.MakeFromScopes(currentScope.Peek().Item1, Scope.MakeFromNamespace(match.Groups["name"].Value, currentScope.Peek().Item1)), braces + 1, Visibility.Public));
+                    lmatch = namespaceRegex.Match(l);
+                    if(lmatch.Success) {
+                        currentScope.Push(Tuple.Create(Scope.MakeFromScopes(currentScope.Peek().Item1,
+                                                                            Scope.MakeFromNamespace(language,
+                                                                                                    lmatch.Groups["name"].Value,
+                                                                                                    currentScope.Peek().Item1)),
+                                                       braces + 1,
+                                                       Visibility.Public));
                     }
 
                     // If we are in a class, change the visibility of its members according to their visibility specifiers
@@ -184,16 +197,26 @@ Public,
 
                     // Make sure that we don't go inside a function or method body
                     if(braces == currentScope.Peek().Item2) {
-                        if(currentScope.Count == 1 || currentScope.Peek().Item1.IsNamespace || (l.Contains("static") && currentScope.Peek().Item3 == Visibility.Public)) {
-                            var function = ParseFunction(language, l, currentScope.Peek().Item1, filename);
-                            if(function != null) {
-                                functions.Add(function);
+                        Match fmatch = functionRegex.Match(l);
+                        if(fmatch.Success) {
+                            if(currentScope.Count == 1 || currentScope.Peek().Item1.IsNamespace || (fmatch.Groups["static"].Success && (currentScope.Peek().Item3 == Visibility.Public || fmatch.Groups["visibility"].Value == "public"))) {
+                                var function = ParseFunction(language,
+                                                             fmatch,
+                                                             currentScope.Peek().Item1,
+                                                             filename);
+                                if(function != null) {
+                                    functions.Add(function);
+                                }
                             }
-                        }
-                        else if(currentScope.Peek().Item3 == Visibility.Public) {
-                            var m = ParseMethod(language, l, filename, currentScope.Peek().Item1.Class);
-                            if(m != null)
-                                functions.Add(m);
+                            else if(currentScope.Peek().Item3 == Visibility.Public) {
+                                var m = ParseMethod(language,
+                                                    fmatch,
+                                                    filename,
+                                                    currentScope.Peek().Item1.Class);
+                                if(m != null) {
+                                    functions.Add(m);
+                                }
+                            }
                         }
                     }
                 }
@@ -239,56 +262,59 @@ Public,
                 }
             }
 
-            public static Function ParseFunction(Language language, string l, Scope enclosing, string filename)
+            public static Function ParseFunction(Language language,
+                                                 Match match,
+                                                 Scope enclosing,
+                                                 string filename)
             {
-                System.Text.RegularExpressions.Match match = Function.Regex.Match(l);
+                Function function = new Function(new Type(language, match.Groups["type"].Value),
+                                                 enclosing,
+                                                 match.Groups["name"].Value,
+                                                 match.Groups["template"].Value != "");
 
-                if(match.Success) {
-                    Function function = new Function(new Type(language, match.Groups["type"].Value), enclosing, match.Groups["name"].Value, match.Groups["template"].Value != "");
+                Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + NamePattern + ")?");
+                string[] parameters = match.Groups["parameters"].Value.Split(',');
 
-                    Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + NamePattern + ")?");
-                    string[] parameters = match.Groups["parameters"].Value.Split(',');
-
-                    foreach(string parameter in parameters) {
-                        System.Text.RegularExpressions.Match paramMatch = param.Match(parameter);
-                        if(paramMatch.Success) {
-                            Param p = new Param(new Type(language, paramMatch.Groups["type"].Value), paramMatch.Groups["name"].Value);
-                            function.AddParam(p);
-                        }
+                foreach(string parameter in parameters) {
+                    System.Text.RegularExpressions.Match paramMatch = param.Match(parameter);
+                    if(paramMatch.Success) {
+                        Param p = new Param(new Type(language, paramMatch.Groups["type"].Value),
+                                            paramMatch.Groups["name"].Value);
+                        function.AddParam(p);
                     }
-
-                    function.Header = filename;
-
-                    return function;
                 }
 
-                return null;
+                function.Header = filename;
+
+                return function;
             }
 
-            public static Function ParseMethod(Language language, string l, string filename, Type classType)
+            public static Function ParseMethod(Language language,
+                                               Match match,
+                                               string filename,
+                                               Type classType)
             {
-                var match = Method.Regex.Match(l);
+                var meth = new Method(classType,
+                                      new Type(language, match.Groups["type"].Value),
+                                      match.Groups["name"].Value,
+                                      match.Groups["attributes"].Value,
+                                      match.Groups["template"].Value != "");
 
-                if(match.Success) {
-                    var meth = new Method(classType, new Type(language, match.Groups["type"].Value), match.Groups["name"].Value, match.Groups["attributes"].Value, match.Groups["template"].Value != "");
+                Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + NamePattern + ")?");
+                string[] parameters = match.Groups["parameters"].Value.Split(',');
 
-                    Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + NamePattern + ")?");
-                    string[] parameters = match.Groups["parameters"].Value.Split(',');
-
-                    foreach(string parameter in parameters) {
-                        System.Text.RegularExpressions.Match paramMatch = param.Match(parameter);
-                        if(paramMatch.Success) {
-                            Param p = new Param(new Type(language, paramMatch.Groups["type"].Value), paramMatch.Groups["name"].Value);
-                            meth.AddParam(p);
-                        }
+                foreach(string parameter in parameters) {
+                    System.Text.RegularExpressions.Match paramMatch = param.Match(parameter);
+                    if(paramMatch.Success) {
+                        Param p = new Param(new Type(language, paramMatch.Groups["type"].Value),
+                                            paramMatch.Groups["name"].Value);
+                        meth.AddParam(p);
                     }
-
-                    meth.Header = filename;
-
-                    return meth;
                 }
 
-                return null;
+                meth.Header = filename;
+
+                return meth;
             }
 
             public static Tuple<Scope, string> ExtractScope(Language language, string name)
@@ -300,7 +326,8 @@ Public,
                 else
                     tup = ExtractScope(language, name.Substring(0, index));
 
-                return Tuple.Create(Scope.MakeFromNamespace(tup.Item2, tup.Item1), name.Substring(index + 2));
+                return Tuple.Create(Scope.MakeFromNamespace(language, tup.Item2, tup.Item1),
+                                    name.Substring(index + 2));
             }
 
             public static List<string> SyntacticSplit(string s, string separator)
@@ -334,7 +361,8 @@ Public,
                             quote = !quote;
                         break;
                     default:
-                        if(s[i] == separator[0] && (i + separator.Length <= s.Length) && (s.Substring(i, separator.Length) == separator) && !quote && !apostrophe && paren == 0) {
+                        if(s[i] == separator[0] && (i + separator.Length <= s.Length) && (s.Substring(i,
+                                                                                                      separator.Length) == separator) && !quote && !apostrophe && paren == 0) {
                             result.Add(s.Substring(lastIndex, i - lastIndex));
                             lastIndex = i + separator.Length;
                         }

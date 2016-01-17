@@ -28,9 +28,10 @@ namespace Petri.Editor
     {
         public class Scope : IEquatable<Scope>
         {
-            public static Scope MakeFromNamespace(string ns, Scope enclosing = null)
+            public static Scope MakeFromNamespace(Language language, string ns, Scope enclosing = null)
             {
                 Scope s = new Scope();
+                s.Language = language;
                 s.Class = null;
                 s.Namespace = ns;
                 s.Enclosing = enclosing; 
@@ -41,6 +42,7 @@ namespace Petri.Editor
             public static Scope MakeFromClass(Type classType)
             {
                 Scope s = new Scope();
+                s.Language = classType.Language;
                 s.Class = classType;
                 s.Namespace = null;
                 s.Enclosing = classType.Enclosing; 
@@ -122,7 +124,7 @@ namespace Petri.Editor
                     return ".";
                 }
 
-                throw new Exception("Should not get there!");
+                throw new Exception("Scope.GetSeparator: Should not get there!");
             }
 
             public Scope Enclosing {

@@ -34,6 +34,9 @@ namespace Petri.Editor
             else if(language == Language.C) {
                 return new CPetriGen(document);
             }
+            else if(language == Language.CSharp) {
+                return new CSharpPetriGen(document);
+            }
 
             throw new Exception("Unsupported language: " + language);
         }
@@ -45,6 +48,9 @@ namespace Petri.Editor
             }
             else if(language == Language.C) {
                 return "c";
+            }
+            else if(language == Language.CSharp) {
+                return "cs";
             }
 
             throw new Exception("Unsupported language: " + language);
@@ -93,7 +99,7 @@ namespace Petri.Editor
                 GenerateTransition((Transition)entity);
             }
             else {
-                throw new Exception("Should not get there…");
+                throw new Exception("Imbossibru!");
             }
         }
 

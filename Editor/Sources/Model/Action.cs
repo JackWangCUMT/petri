@@ -63,7 +63,7 @@ namespace Petri.Editor
             }
             catch(Exception) {
                 Document.Conflicting.Add(this);
-                Function = new Cpp.ConflictFunctionInvocation(s);
+                Function = new Cpp.ConflictFunctionInvocation(Document.Settings.Language, s);
             }
         }
 
@@ -95,7 +95,7 @@ namespace Petri.Editor
             var lang = doc.Settings.Language;
 
             if(lang == Language.Cpp) {
-                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Utility"), "printAction", false);
+                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace(lang, "Utility"), "printAction", false);
                 f.AddParam(new Cpp.Param(new Cpp.Type(lang, "std::string const &"), "name"));
                 f.AddParam(new Cpp.Param(new Cpp.Type(lang, "std::uint64_t"), "id"));
 
@@ -109,32 +109,33 @@ namespace Petri.Editor
                 return f;
             }
             else if(lang == Language.CSharp) {
-                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Petri.Runtime.Utility"), "PrintAction", false);
+                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace(lang, "Petri.Runtime.Utility"), "PrintAction", false);
                 f.AddParam(new Cpp.Param(new Cpp.Type(lang, "string"), "name"));
                 f.AddParam(new Cpp.Param(new Cpp.Type(lang, "UInt64"), "id"));
 
                 return f;
             }
 
-            throw new Exception("Should not get there !");
+            throw new Exception("Action.PrintFunction: Should not get there !");
         }
 
         public static Cpp.Function DoNothingFunction(HeadlessDocument doc)
         {
-            if(doc.Settings.Language == Language.Cpp) {
-                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Utility"), "doNothing", false);
+            var lang = doc.Settings.Language;
+            if(lang == Language.Cpp) {
+                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace(lang, "Utility"), "doNothing", false);
                 return f;
             }
-            else if(doc.Settings.Language == Language.C) {
+            else if(lang == Language.C) {
                 var f = new Cpp.Function(doc.Settings.Enum.Type, null, "PetriUtility_doNothing", false);
                 return f;
             }
-            else if(doc.Settings.Language == Language.CSharp) {
-                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Petri.Runtime.Utility"), "DoNothing", false);
+            else if(lang == Language.CSharp) {
+                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace(lang, "Petri.Runtime.Utility"), "DoNothing", false);
                 return f;
             }
 
-            throw new Exception("Should not get there !");
+            throw new Exception("Action.DoNothingFunction: Should not get there !");
         }
 
         public static Cpp.Function PauseFunction(HeadlessDocument doc)
@@ -142,7 +143,7 @@ namespace Petri.Editor
             var lang = doc.Settings.Language;
 
             if(lang == Language.Cpp) {
-                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Utility"), "pause", false);
+                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace(lang, "Utility"), "pause", false);
                 f.AddParam(new Cpp.Param(new Cpp.Type(lang, "std::chrono::nanoseconds"), "delay"));
                 return f;
             }
@@ -152,12 +153,12 @@ namespace Petri.Editor
                 return f;
             }
             else if(lang == Language.CSharp) {
-                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace("Petri.Runtime.Utility"), "Pause", false);
+                var f = new Cpp.Function(doc.Settings.Enum.Type, Cpp.Scope.MakeFromNamespace(lang, "Petri.Runtime.Utility"), "Pause", false);
                 f.AddParam(new Cpp.Param(new Cpp.Type(lang, "double"), "delay"));
                 return f;
             }
 
-            throw new Exception("Should not get there !");
+            throw new Exception("Action.PauseFunction: Should not get there !");
         }
 
         public Cpp.FunctionInvocation Function {

@@ -40,7 +40,7 @@ namespace Petri.Editor
         {
             public static Type UnknownType {
                 get {
-                    return _unknownType ?? (_unknownType = new Type(Language.None, "UnknownType", Scope.MakeFromNamespace("Petri")));
+                    return _unknownType ?? (_unknownType = new Type(Language.None, "UnknownType", Scope.MakeFromNamespace(Language.None, "Petri")));
                 }
             }
 

@@ -136,15 +136,39 @@ namespace Petri.Editor
                 }
             }
 
+            public static string StaticPattern {
+                get {
+                    return "((?<static>(static))?)";
+                }
+            }
+
+            public static string InlinePattern {
+                get {
+                    return "((inline)?)";
+                }
+            }
+
             public static string StaticInlinePattern {
                 get {
-                    return "((?<static>((static)?)) ?(inline)?) ";
+                    return "(((" + StaticPattern + " ?" + InlinePattern + ")|(" + InlinePattern + " ?" + StaticPattern + "))?)";
+                }
+            }
+
+            public static string VisibilityPattern {
+                get {
+                    return "((?<visibility>(public|protected|private|internal))?)";
+                }
+            }
+
+            public static string QualifiersPattern {
+                get {
+                    return "(?<attributes>(const|volatile|override|final|nothrow|= ?(default|0|delete)| )*)";
                 }
             }
 
             public static string FunctionPattern {
                 get {
-                    return @"^(" + Function.StaticInlinePattern + " )?" + Type.RegexPattern + @" ?" + Parser.NamePattern + " ?" + Function.ParameterPattern;// + Parser.DeclarationEndPattern;
+                    return @"^" + VisibilityPattern + " ?" + Function.StaticInlinePattern + " ?" + Type.RegexPattern + @" ?" + Parser.NamePattern + " ?" + Function.ParameterPattern + " ?" + Function.QualifiersPattern;// + Parser.DeclarationEndPattern;
                 }
             }
 
@@ -157,7 +181,14 @@ namespace Petri.Editor
 
         public class Method : Function
         {
-            public Method(Type classType, Type returnType, string name, string qualifiers, bool template) : base(returnType, Scope.MakeFromClass(classType), name, template)
+            public Method(Type classType,
+                          Type returnType,
+                          string name,
+                          string qualifiers,
+                          bool template) : base(returnType,
+                                                Scope.MakeFromClass(classType),
+                                                name,
+                                                template)
             {
                 Qualifiers = qualifiers;
                 Class = classType;
@@ -177,24 +208,6 @@ namespace Petri.Editor
                 get {
                     string sig = base.Signature;
                     return sig + (this.Qualifiers.Length > 0 ? " " + this.Qualifiers : "");
-                }
-            }
-
-            public static string QualifiersPattern {
-                get {
-                    return "(?<attributes>(const|volatile|override|final|nothrow|= ?(default|0|delete)| )*)";
-                }
-            }
-
-            public static string MethodPattern {
-                get {
-                    return @"^(" + Function.StaticInlinePattern + " )?" + Type.RegexPattern + @" " + Parser.NamePattern + " ?" + Function.ParameterPattern + " ?" + QualifiersPattern + " ?";// + Parser.DeclarationEndPattern;
-                }
-            }
-
-            public new static System.Text.RegularExpressions.Regex Regex {
-                get {
-                    return new System.Text.RegularExpressions.Regex(MethodPattern);
                 }
             }
         }
