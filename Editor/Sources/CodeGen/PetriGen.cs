@@ -157,10 +157,15 @@ namespace Petri.Editor
             return System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath), filename);
         }
 
-
         protected string Hash {
             get;
             set;
+        }
+
+        protected string CompilableClassName {
+            get {
+                return Document.Settings.Name.Replace(" ", "_").Replace("+", "Plus").Replace("#", "Sharp");
+            }
         }
     }
 }

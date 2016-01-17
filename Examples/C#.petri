@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Document>
-  <Settings Name="C#" Enum="ActionResult,OK,NOK" SourceOutputPath="" LibOutputPath="" Hostname="localhost" Port="12345" Language="CSharp">
+  <Settings Name="C#" Enum="ActionResult,OK,NOK" SourceOutputPath="../Examples" LibOutputPath="" Hostname="localhost" Port="12345" Language="CSharp">
     <Compiler Invocation="/usr/bin/c++">
       <Flag Value="-std=c++1y" />
       <Flag Value="-g" />
@@ -9,12 +9,21 @@
     <LibPaths />
     <Libs />
   </Settings>
-  <Window X="240" Y="50" W="920" H="640" />
-  <Headers />
+  <Window X="240" Y="23" W="920" H="640" />
+  <Headers>
+    <Header File="Test.cs" />
+  </Headers>
   <Macros />
   <PetriNet ID="0" Name="Root" X="0" Y="0" Active="true" RequiredTokens="0" Radius="30">
     <Comments />
-    <States />
-    <Transitions />
+    <States>
+      <Action ID="1" Name="1" X="180" Y="100" Active="false" RequiredTokens="0" Radius="20" Function="TestNS.Action1()" />
+      <Action ID="2" Name="2" X="400" Y="230" Active="false" RequiredTokens="1" Radius="20" Function="Petri.Runtime.Utility.DoNothing()" />
+      <Action ID="3" Name="3" X="130" Y="270" Active="false" RequiredTokens="1" Radius="20" Function="Petri.Runtime.Utility.DoNothing()" />
+    </States>
+    <Transitions>
+      <Transition ID="4" Name="4" X="290" Y="165" BeforeID="1" AfterID="2" Condition="true" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="255.53864678361276" />
+      <Transition ID="5" Name="5" X="265" Y="250" BeforeID="2" AfterID="3" Condition="true" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="272.9468812791236" />
+    </Transitions>
   </PetriNet>
 </Document>

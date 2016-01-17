@@ -78,7 +78,7 @@ namespace Petri.Editor
         protected override void Begin()
         {
             CodeGen += "using System;";
-            CodeGen += "using Petri.Runtime";
+            CodeGen += "using Petri.Runtime;";
             CodeGen += "using PNAction = Petri.Runtime.Action;";
             /*foreach(var s in Document.Headers) {
                 var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
@@ -101,7 +101,7 @@ namespace Petri.Editor
             CodeGen += GenerateVarEnum();
 
             CodeGen += "namespace Petri.Generated\n{";
-            CodeGen += "public class " + Document.Settings.Name + "\n{";
+            CodeGen += "public class " + CompilableClassName + "\n{";
 
             CodeGen += "public static DynamicLib Lib {\nget;\nprivate set;\n}";
 
@@ -127,7 +127,7 @@ namespace Petri.Editor
             CodeGen += "";
 
             CodeGen += "static IntPtr Create() {";
-            CodeGen += "var petriNet = new PetriNet(" + Document.Settings.Name + ");";
+            CodeGen += "var petriNet = new PetriNet(\"" + Document.Settings.Name + "\");";
             CodeGen += "Populate(petriNet);";
             CodeGen += "return petriNet.Release();";
             CodeGen += "}"; // create()
@@ -135,7 +135,7 @@ namespace Petri.Editor
             CodeGen += "";
 
             CodeGen += "static IntPtr CreateDebug() {";
-            CodeGen += "var petriNet = new PetriNet(" + Document.Settings.Name + ");";
+            CodeGen += "var petriNet = new PetriDebug(\"" + Document.Settings.Name + "\");";
             CodeGen += "Populate(petriNet);";
             CodeGen += "return petriNet.Release();";
             CodeGen += "}"; // create()
@@ -161,7 +161,7 @@ namespace Petri.Editor
             CodeGen += "";
 
             CodeGen += "static UInt16 Port() {";
-            CodeGen += "return \"" + Document.Settings.Port + "\";";
+            CodeGen += "return " + Document.Settings.Port + ";";
             CodeGen += "}";
 
             CodeGen += "";
@@ -203,7 +203,7 @@ namespace Petri.Editor
             var cppVar = new HashSet<Cpp.VariableExpression>();
             a.GetVariables(cppVar);
 
-            _functionBodies += "Int32 " + a.CppName + "_invocation(PetriNet petriNet) {\nreturn " + cpp + ";\n}\n";
+            _functionBodies += "static Int32 " + a.CppName + "_invocation(PetriNet petriNet) {\nreturn " + cpp + ";\n}\n";
 
             string action = a.CppName + "_invocation";
 
@@ -288,7 +288,7 @@ namespace Petri.Editor
             var cppVar = new HashSet<Cpp.VariableExpression>();
             t.GetVariables(cppVar);
 
-            _functionBodies += "bool " + t.CppName + "_invocation(Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
+            _functionBodies += "static bool " + t.CppName + "_invocation(Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
 
             cpp = t.CppName + "_invocation";
 
