@@ -30,13 +30,6 @@ namespace Petri.Test
     [TestFixture()]
     public class TestInvocation
     {
-        int Invoke(string[] args, out string stdout, out string stderr)
-        {
-            return Utility.InvokeAndRedirectOutput(() => {
-                return Petri.Editor.MainClass.Main(args);
-            }, out stdout, out stderr);
-        }
-
         [Test()]
         public void TestInvalidArgument()
         {
@@ -45,7 +38,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN an error is returned and the expected error string is output
             Assert.AreNotEqual(0, result);
@@ -63,7 +56,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned and the expected string is output
             Assert.AreEqual(0, result);
@@ -79,7 +72,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned and the expected string is output
             Assert.AreEqual(0, result);
@@ -95,7 +88,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN an error is returned and the expected error string is output
             Assert.AreEqual(Editor.MainClass.ArgumentError, result);
@@ -111,7 +104,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN an error is returned and the expected error string is output
             Assert.AreEqual(Editor.MainClass.ArgumentError, result);
@@ -127,7 +120,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN an error is returned and the expected error string is output
             Assert.AreEqual(Editor.MainClass.ArgumentError, result);
@@ -143,7 +136,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
             Assert.AreEqual(Editor.MainClass.UnexpectedError, result);
@@ -159,7 +152,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
             Assert.AreEqual(Editor.MainClass.UnexpectedError, result);
@@ -175,7 +168,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
             Assert.AreEqual(Editor.MainClass.UnexpectedError, result);
@@ -191,7 +184,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
             Assert.AreEqual(Editor.MainClass.UnexpectedError, result);
@@ -207,7 +200,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
             Assert.AreEqual(Editor.MainClass.UnexpectedError, result);
@@ -223,7 +216,7 @@ namespace Petri.Test
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Invoke(args, out stdout, out stderr);
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
             Assert.AreEqual(Editor.MainClass.ArgumentError, result);

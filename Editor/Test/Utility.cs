@@ -59,6 +59,14 @@ namespace Petri.Test
                 return 0;
             }, out stdout, out stderr);
         }
+
+        public static int InvokeCompiler(string[] args, out string stdout, out string stderr)
+        {
+            return Utility.InvokeAndRedirectOutput(() => {
+                return Petri.Editor.MainClass.Main(args);
+            }, out stdout, out stderr);
+        }
+
     }
 }
 
