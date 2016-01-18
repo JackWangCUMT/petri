@@ -155,39 +155,39 @@ namespace Petri.Editor
                         Console.WriteLine("Processing Petri net " + document.Settings.Name + "…");
                     }
 
-                    string cppPath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
+                    string sourcePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
                                                                                    document.Settings.SourceOutputPath),
-                                                            document.Settings.Name) + ".cpp";
+                                                               document.Settings.Name) + "." + PetriGen.SourceExtensionFromLanguage(document.Settings.Language);
 
                     bool forceGeneration = false;
                     if(!generate && compile) {
-                        if(!System.IO.File.Exists(cppPath)
-                           || System.IO.File.GetLastWriteTime(cppPath) < System.IO.File.GetLastWriteTime(document.Path)) {
+                        if(!System.IO.File.Exists(sourcePath)
+                           || System.IO.File.GetLastWriteTime(sourcePath) < System.IO.File.GetLastWriteTime(document.Path)) {
                             generate = true;
                             forceGeneration = true;
                         }
                         else if(verbose) {
-                            Console.WriteLine("Previously generated C++ code is up to date, no need for code generation");
+                            Console.WriteLine("The previously generated " + document.Settings.LanguageName() + " code is up to date, no need for code generation");
                         }
                     }
 
                     if(generate) {
                         if(forceGeneration && verbose) {
-                            Console.WriteLine("Previously generated C++ code is outdated or nonexistent, generating new code…");
+                            Console.WriteLine("The previously generated " + document.Settings.LanguageName() + " code is outdated or nonexistent, generating new code…");
                         }
                         document.SaveCppDontAsk();
                         document.Save();
                         if(verbose) {
-                            Console.WriteLine("Successfully generated C++ code");
+                            Console.WriteLine("Successfully generated the " + document.Settings.LanguageName() + " code");
                         }
                     }
                     if(compile) {
                         string dylibPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
                                                                                              System.IO.Path.Combine(document.Settings.LibOutputPath,
                                                                                                                     document.Settings.Name + ".so")));
-                        if(!System.IO.File.Exists(dylibPath) || System.IO.File.GetLastWriteTime(dylibPath) < System.IO.File.GetLastWriteTime(cppPath)) {
+                        if(!System.IO.File.Exists(dylibPath) || System.IO.File.GetLastWriteTime(dylibPath) < System.IO.File.GetLastWriteTime(sourcePath)) {
                             if(verbose) {
-                                Console.WriteLine("Compiling the C++ code…");
+                                Console.WriteLine("Compiling the " + document.Settings.LanguageName() + " code…");
                             }
                             bool res = document.Compile(false);
                             if(!res) {

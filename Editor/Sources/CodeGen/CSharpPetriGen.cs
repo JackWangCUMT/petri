@@ -80,23 +80,8 @@ namespace Petri.Editor
             CodeGen += "using System;";
             CodeGen += "using Petri.Runtime;";
             CodeGen += "using PNAction = Petri.Runtime.Action;";
-            /*foreach(var s in Document.Headers) {
-                var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
-                                                s);
-                var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
-                                                                           Document.Settings.SourceOutputPath));
-                CodeGen += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
-            }*/
 
             CodeGen.AddLine();
-
-            //CodeGen += "#include \"" + Document.Settings.Name + ".h\"";
-            CodeGen += "";
-
-            //CodeGen += "#define EXPORT extern \"C\"";
-            //CodeGen += "#define PETRI_PREFIX \"" + Document.Settings.Name + "\"\n";
-
-            //CodeGen += "\nusing namespace Petri;\n";
 
             CodeGen += GenerateVarEnum();
 

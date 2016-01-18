@@ -293,9 +293,11 @@ namespace Petri.Editor
                 if(Language == Cpp.Language.CSharp) {
                     return ".dll";
                 }
-                else {
+                else if(Language == Cpp.Language.Cpp || Language == Cpp.Language.C) {
                     return ".so";
                 }
+
+                throw new Exception("DocumentSettings.LibExtension: Should not get there!");
             }
         }
 
@@ -354,6 +356,9 @@ namespace Petri.Editor
                 }
 
                 val += "-out:'" + lib + "' ";
+            }
+            else {
+                throw new Exception("DocumentSettings.CompilerArguments: Should not get there!");
             }
 
             return val;
