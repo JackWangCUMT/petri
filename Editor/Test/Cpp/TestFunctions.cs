@@ -35,7 +35,7 @@ namespace Petri.Test.Cpp
         {
             // GIVEN a function invocation string
             // WHEN an invocation is created from the string
-            var e = Expression.CreateFromString<FunctionInvocation>("f()");
+            var e = Expression.CreateFromString<FunctionInvocation>("f()", Language.CSharp);
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
             Assert.IsInstanceOf<FunctionInvocation>(e);
@@ -49,7 +49,7 @@ namespace Petri.Test.Cpp
         {
             // GIVEN a function invocation string
             // WHEN an invocation is created from the string
-            var e = Expression.CreateFromString<FunctionInvocation>("f(3)");
+            var e = Expression.CreateFromString<FunctionInvocation>("f(3)", Language.CSharp);
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
             Assert.IsInstanceOf<FunctionInvocation>(e);
@@ -65,7 +65,7 @@ namespace Petri.Test.Cpp
         {
             // GIVEN a function invocation string
             // WHEN an invocation is created from the string
-            var e = Expression.CreateFromString<FunctionInvocation>("f(   3 )");
+            var e = Expression.CreateFromString<FunctionInvocation>("f(   3 )", Language.CSharp);
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
             Assert.IsInstanceOf<FunctionInvocation>(e);
@@ -81,7 +81,7 @@ namespace Petri.Test.Cpp
         {
             // GIVEN a function invocation string
             // WHEN an invocation is created from the string
-            var e = Expression.CreateFromString<FunctionInvocation>("f(1 ,  2  )");
+            var e = Expression.CreateFromString<FunctionInvocation>("f(1 ,  2  )", Language.CSharp);
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
             Assert.IsInstanceOf<FunctionInvocation>(e);
@@ -98,7 +98,7 @@ namespace Petri.Test.Cpp
         {
             // GIVEN a function invocation string
             // WHEN an invocation is created from the string
-            var e = Expression.CreateFromString<FunctionInvocation>("f ()");
+            var e = Expression.CreateFromString<FunctionInvocation>("f ()", Language.CSharp);
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
             Assert.IsInstanceOf<FunctionInvocation>(e);
@@ -111,7 +111,7 @@ namespace Petri.Test.Cpp
         {
             // GIVEN a function invocation string
             // WHEN an invocation is created from the string
-            var e = Expression.CreateFromString<UnaryExpression>("!f()");
+            var e = Expression.CreateFromString<UnaryExpression>("!f()", Language.CSharp);
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
 
@@ -129,12 +129,12 @@ namespace Petri.Test.Cpp
 
             // GIVEN a function list
             var functions = new List<Editor.Cpp.Function>();
-            var f = new Editor.Cpp.Function(new Editor.Cpp.Type(Petri.Editor.Language.None, "void"), null, "f", false);
+            var f = new Editor.Cpp.Function(new Editor.Cpp.Type(Language.CSharp, "void"), null, "f", false);
             functions.Add(f);
 
             // AND a function invocation string
             // WHEN an invocation is created from the string and uses the functions list
-            var e = Expression.CreateFromString<FunctionInvocation>("f()", Editor.Language.Cpp, functions);
+            var e = Expression.CreateFromString<FunctionInvocation>("f()", Language.CSharp, functions);
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
             Assert.IsInstanceOf<FunctionInvocation>(e);

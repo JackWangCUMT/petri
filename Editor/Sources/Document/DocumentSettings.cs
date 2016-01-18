@@ -102,7 +102,7 @@ namespace Petri.Editor
             this.LibOutputPath = "";
             this.Hostname = "localhost";
             this.Port = 12345;
-            this.Language = Language.Cpp;
+            this.Language = Cpp.Language.Cpp;
 
             Name = "MyPetriNet";
             Enum = DefaultEnum;
@@ -117,10 +117,10 @@ namespace Petri.Editor
 
                 if(elem.Attribute("Language") != null) {
                     try {
-                        Language = (Language)Language.Parse(Language.GetType(), elem.Attribute("Language").Value);
+                        Language = (Cpp.Language)Cpp.Language.Parse(Language.GetType(), elem.Attribute("Language").Value);
                     }
                     catch(Exception) {
-
+                        Console.Error.WriteLine("Invalid language value: " + elem.Attribute("Language").Value);
                     }
                 }
 
@@ -242,7 +242,7 @@ namespace Petri.Editor
             set;
         }
 
-        public Language Language {
+        public Cpp.Language Language {
             get {
                 return _language;
             }
@@ -255,14 +255,14 @@ namespace Petri.Editor
             }
         }
 
-        public static string LanguageName(Language language)
+        public static string LanguageName(Cpp.Language language)
         {
             switch(language) {
-            case Language.Cpp:
+            case Cpp.Language.Cpp:
                 return "C++";
-            case Language.C:
+            case Cpp.Language.C:
                 return "C";
-            case Language.CSharp:
+            case Cpp.Language.CSharp:
                 return "C#";
             }
 
@@ -291,7 +291,7 @@ namespace Petri.Editor
         {
             string val = "";
 
-            if(Language == Language.C || Language == Language.Cpp) {
+            if(Language == Cpp.Language.C || Language == Cpp.Language.Cpp) {
                 val += "-shared ";
                 if(Configuration.RunningPlatform == Platform.Mac) {
                     val += "-undefined dynamic_lookup -flat_namespace ";
@@ -345,7 +345,7 @@ namespace Petri.Editor
                     val += "-l'" + l + "' ";
                 }
 
-                if(Language == Language.Cpp) {
+                if(Language == Cpp.Language.Cpp) {
                     val += "-std=c++14 ";
                 }
 
@@ -358,7 +358,7 @@ namespace Petri.Editor
 
                 val += "-o '" + lib + "' ";
 
-                if(Language == Language.Cpp) {
+                if(Language == Cpp.Language.Cpp) {
                     val += "-x c++ '" + source + "'";
                 }
                 else {
@@ -369,7 +369,7 @@ namespace Petri.Editor
             return val;
         }
 
-        private Language _language;
+        private Cpp.Language _language;
         private HeadlessDocument _document;
     }
 }

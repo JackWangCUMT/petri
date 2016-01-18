@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Xml;
 using System.Linq;
+using Petri.Editor.Cpp;
 
 namespace Petri.Editor
 {
@@ -34,9 +35,9 @@ namespace Petri.Editor
         {
             LastHeadersUpdate = DateTime.MinValue;
             Headers = new List<string>();
-            CppActions = new List<Cpp.Function>();
-            AllFunctionsList = new List<Cpp.Function>();
-            CppConditions = new List<Cpp.Function>();
+            CppActions = new List<Function>();
+            AllFunctionsList = new List<Function>();
+            CppConditions = new List<Function>();
 
             CppMacros = new Dictionary<string, string>();
 
@@ -74,7 +75,7 @@ namespace Petri.Editor
                     filename = System.IO.Path.Combine(System.IO.Directory.GetParent(this.Path).FullName, filename);
                 }
 
-                var functions = Cpp.Parser.Parse(Settings.Language, filename);
+                var functions = Parser.Parse(Settings.Language, filename);
                 foreach(var func in functions) {
                     AllFunctionsList.Add(func);
                 }
@@ -88,19 +89,19 @@ namespace Petri.Editor
             private set;
         }
 
-        public List<Cpp.Function> CppConditions {
+        public List<Function> CppConditions {
             get;
             private set;
         }
 
-        public List<Cpp.Function> AllFunctionsList {
+        public List<Function> AllFunctionsList {
             get;
             private set;
         }
 
-        public IEnumerable<Cpp.Function> AllFunctions {
+        public IEnumerable<Function> AllFunctions {
             get {
-                Cpp.Function[] ff = new Cpp.Function[AllFunctionsList.Count + 3];
+                Function[] ff = new Function[AllFunctionsList.Count + 3];
                 ff[0] = Action.DoNothingFunction(this);
                 ff[1] = Action.PrintFunction(this);
                 ff[2] = Action.PauseFunction(this);
@@ -112,7 +113,7 @@ namespace Petri.Editor
             }
         }
 
-        public List<Cpp.Function> CppActions {
+        public List<Function> CppActions {
             get;
             private set;
         }
@@ -123,7 +124,7 @@ namespace Petri.Editor
             CppConditions.Clear();
             Cpp.Type e = Settings.Enum.Type, b = new Cpp.Type(Settings.Language, "bool");
 
-            foreach(Cpp.Function f in AllFunctions) {
+            foreach(Function f in AllFunctions) {
                 if(f.ReturnType.Equals(e)) {
                     CppActions.Add(f);
                 }

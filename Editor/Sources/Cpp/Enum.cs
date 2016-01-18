@@ -81,9 +81,9 @@ namespace Petri.Editor
                 private set;
             }
 
-            public Cpp.Type Type {
+            public Type Type {
                 get {
-                    return new Cpp.Type(Language, Name);
+                    return new Type(Language, Name);
                 }
             }
 
@@ -92,7 +92,7 @@ namespace Petri.Editor
                 private set;
             }
 
-            public bool Equals(Cpp.Enum e)
+            public bool Equals(Enum e)
             {
                 if(Name != e.Name || Members.Length != e.Members.Length)
                     return false;

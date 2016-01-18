@@ -21,3 +21,5 @@ TestResult.xml
 
 /build
 /Runtime/libPetriRuntime.so
+
+/Examples/*.cs

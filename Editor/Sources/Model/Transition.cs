@@ -26,6 +26,7 @@ using System.Xml;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Linq;
+using Petri.Editor.Cpp;
 
 namespace Petri.Editor
 {
@@ -51,7 +52,7 @@ namespace Petri.Editor
             base.Position = new PointD(0, 0);
             this.ShiftAmplitude = PetriView.Norm(Direction);
 
-            this.Condition = Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>("true", this);
+            this.Condition = Expression.CreateFromStringAndEntity<Expression>("true", this);
 
             UpdatePrivate();
         }
@@ -75,11 +76,11 @@ namespace Petri.Editor
         private void TrySetCondition(string s)
         {
             try {
-                Condition = Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>(s, this);
+                Condition = Expression.CreateFromStringAndEntity<Expression>(s, this);
             }
             catch(Exception) {
                 Document.Conflicting.Add(this);
-                Condition = Cpp.LiteralExpression.CreateFromString(s, Document.Settings.Language);
+                Condition = LiteralExpression.CreateFromString(s, Document.Settings.Language);
             }
         }
 
@@ -111,7 +112,7 @@ namespace Petri.Editor
             elem.SetAttributeValue("ShiftAmplitude", this.ShiftAmplitude);
         }
 
-        public override bool UsesFunction(Cpp.Function f)
+        public override bool UsesFunction(Function f)
         {
             return Condition.UsesFunction(f);
         }
@@ -189,7 +190,7 @@ namespace Petri.Editor
             set;
         }
 
-        public Cpp.Expression Condition {
+        public Expression Condition {
             get;
             set;
         }
@@ -206,12 +207,12 @@ namespace Petri.Editor
             }
         }
 
-        public void GetVariables(HashSet<Cpp.VariableExpression> res)
+        public void GetVariables(HashSet<VariableExpression> res)
         {				
             var l = Condition.GetLiterals();
             foreach(var ll in l) {
-                if(ll is Cpp.VariableExpression) {
-                    res.Add(ll as Cpp.VariableExpression);
+                if(ll is VariableExpression) {
+                    res.Add(ll as VariableExpression);
                 }
             }
         }

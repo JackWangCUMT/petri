@@ -34,7 +34,7 @@ namespace Petri.Test.Cpp
         {
             // GIVEN a composition of an addition and multiplication
             // WHEN we create an expression from it
-            var e = Expression.CreateFromString("3+4*5");
+            var e = Expression.CreateFromString("3+4*5", Language.CSharp);
 
             // THEN we get a binary expression representing the addition
             Assert.IsInstanceOf<BinaryExpression>(e);

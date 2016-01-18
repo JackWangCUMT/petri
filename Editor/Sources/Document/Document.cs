@@ -31,12 +31,12 @@ namespace Petri.Editor
 {
     public class LanguageChangeEventArgs : EventArgs
     {
-        public LanguageChangeEventArgs(Language l)
+        public LanguageChangeEventArgs(Cpp.Language l)
         {
             NewLanguage = l;
         }
 
-        public Language NewLanguage {
+        public Cpp.Language NewLanguage {
             get;
             private set;
         }

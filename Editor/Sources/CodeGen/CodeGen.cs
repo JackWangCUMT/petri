@@ -25,14 +25,6 @@ using System.Collections.Generic;
 
 namespace Petri.Editor
 {
-    public enum Language
-    {
-        C,
-        Cpp,
-        CSharp,
-        None
-    }
-
     public abstract class CodeGen
     {
         public CodeGen()
@@ -40,7 +32,7 @@ namespace Petri.Editor
 			
         }
 
-        public abstract Language Language {
+        public abstract Cpp.Language Language {
             get;
         }
 

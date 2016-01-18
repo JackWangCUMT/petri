@@ -21,6 +21,7 @@
  */
 
 using System;
+using Petri.Editor.Cpp;
 
 namespace Petri.Editor
 {
@@ -150,7 +151,7 @@ namespace Petri.Editor
             System.IO.File.WriteAllText(PathToFile(Document.Settings.Name + "." + PetriGen.SourceExtensionFromLanguage(Language)), CodeGen.Value);
         }
 
-        public abstract void WriteExpressionEvaluator(Cpp.Expression expression, string path);
+        public abstract void WriteExpressionEvaluator(Expression expression, string path);
 
         protected string PathToFile(string filename)
         {

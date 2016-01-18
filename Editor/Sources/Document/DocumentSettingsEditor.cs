@@ -61,9 +61,7 @@ namespace Petri.Editor
             {
                 ComboBox combo = ComboBox.NewText();
 
-                foreach(Petri.Editor.Language l in Enum.GetValues(typeof(Petri.Editor.Language))) {
-                    if(l == Language.None)
-                        continue;
+                foreach(Cpp.Language l in Enum.GetValues(typeof(Cpp.Language))) {
                     combo.AppendText(DocumentSettings.LanguageName(l));
                 }
 
@@ -83,7 +81,7 @@ namespace Petri.Editor
                     TreeIter it;
 
                     if(combo.GetActiveIter(out it)) {
-                        _document.Settings.Language = (Petri.Editor.Language)int.Parse(combo.Model.GetStringFromIter(it));
+                        _document.Settings.Language = (Cpp.Language)int.Parse(combo.Model.GetStringFromIter(it));
                         _document.Settings.Modified = true;
                     }
                 };

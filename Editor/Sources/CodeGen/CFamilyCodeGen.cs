@@ -28,12 +28,12 @@ namespace Petri.Editor
 {
     public class CFamilyCodeGen : CodeGen
     {
-        public CFamilyCodeGen(Language language)
+        public CFamilyCodeGen(Cpp.Language language)
         {
             _lang = language;
         }
 
-        public override Language Language {
+        public override Cpp.Language Language {
             get {
                 return _lang;
             }
@@ -167,7 +167,7 @@ namespace Petri.Editor
             return s;
         }
 
-        private Language _lang;
+        private Cpp.Language _lang;
         private string _value = "";
     }
 }

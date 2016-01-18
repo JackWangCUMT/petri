@@ -38,10 +38,12 @@ namespace Petri.Editor
 
         public class Type : IEquatable<Type>, IEquatable<string>
         {
-            public static Type UnknownType {
-                get {
-                    return _unknownType ?? (_unknownType = new Type(Language.None, "UnknownType", Scope.MakeFromNamespace(Language.None, "Petri")));
-                }
+            public static Type UnknownType(Language language)
+            {
+                return _unknownType ?? (_unknownType = new Type(language,
+                                                                "UnknownType",
+                                                                Scope.MakeFromNamespace(language,
+                                                                                        "Petri")));
             }
 
             public Type(Language language, string name, Scope enclosing = null)
@@ -255,20 +257,25 @@ namespace Petri.Editor
                 s = s.TrimEnd(new char[]{ ' ' });
 
                 if(s.EndsWith(" * const volatile") || s.EndsWith(" * volatile const")) {
-                    s = ParseLeftAssociativeQualifiers(s.Substring(0, s.Length - " * const volatile".Length),
+                    s = ParseLeftAssociativeQualifiers(s.Substring(0,
+                                                                   s.Length - " * const volatile".Length),
                                                        qualifiers);
                     qualifiers.Add(CVQualifier.Const | CVQualifier.Volatile);
                 }
                 else if(s.EndsWith(" * const")) {
-                    s = ParseLeftAssociativeQualifiers(s.Substring(0, s.Length - " * const".Length), qualifiers);
+                    s = ParseLeftAssociativeQualifiers(s.Substring(0, s.Length - " * const".Length),
+                                                       qualifiers);
                     qualifiers.Add(CVQualifier.Const);
                 }
                 else if(s.EndsWith(" * volatile")) {
-                    s = ParseLeftAssociativeQualifiers(s.Substring(0, s.Length - " * volatile".Length), qualifiers);
+                    s = ParseLeftAssociativeQualifiers(s.Substring(0,
+                                                                   s.Length - " * volatile".Length),
+                                                       qualifiers);
                     qualifiers.Add(CVQualifier.Volatile);
                 }
                 else if(s.EndsWith(" *")) {
-                    s = ParseLeftAssociativeQualifiers(s.Substring(0, s.Length - " *".Length), qualifiers);
+                    s = ParseLeftAssociativeQualifiers(s.Substring(0, s.Length - " *".Length),
+                                                       qualifiers);
                     qualifiers.Add(CVQualifier.None);
                 }
 

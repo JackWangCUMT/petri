@@ -42,7 +42,7 @@ namespace Petri.Editor
                 foreach(var arg in arguments) {
                     var a = arg;
                     if(a.MakeUserReadable() == "")
-                        a = LiteralExpression.CreateFromString("void");
+                        a = LiteralExpression.CreateFromString("void", language);
 
                     this.Arguments.Add(a);
                 }
@@ -56,7 +56,7 @@ namespace Petri.Editor
                 private set;
             }
 
-            public Cpp.Function Function {
+            public Function Function {
                 get;
                 private set;
             }
@@ -86,7 +86,6 @@ namespace Petri.Editor
                         continue;
                     case Language.C:
                     case Language.CSharp:
-                    case Language.None:
                         args += "(" + Function.Parameters[i].Type.ToString() + ")(" + Arguments[i].MakeCpp() + ")";
                         continue;
                     default:
@@ -191,13 +190,13 @@ namespace Petri.Editor
             static Function GetDummy(Language language)
             {
                 if(_dummy == null) {
-                    _dummy = new Cpp.Function(new Type(language, "void"), null, "dummy", false);
+                    _dummy = new Function(new Type(language, "void"), null, "dummy", false);
                 }
                 return _dummy;
             }
 
             string _value;
-            static Cpp.Function _dummy;
+            static Function _dummy;
         }
 
         /// <summary>
@@ -206,7 +205,7 @@ namespace Petri.Editor
         public class WrapperFunctionInvocation : FunctionInvocation
         {
             public WrapperFunctionInvocation(Language language,
-                                             Cpp.Type returnType,
+                                             Type returnType,
                                              Expression expr) : base(language,
                                                                      GetWrapperFunction(language,
                                                                                         returnType),
@@ -215,7 +214,7 @@ namespace Petri.Editor
 				
             }
 
-            public static Cpp.Function GetWrapperFunction(Language language, Cpp.Type returnType)
+            public static Function GetWrapperFunction(Language language, Type returnType)
             {
                 var f = new Function(returnType,
                                      Scope.MakeFromNamespace(language, "Utility"),

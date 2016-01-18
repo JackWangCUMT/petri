@@ -29,7 +29,7 @@ namespace Petri.Editor.Cpp
 {
     public class EmptyExpression : Expression
     {
-        public EmptyExpression(bool doWeCare) : base(Language.None, Cpp.Operator.Name.None)
+        public EmptyExpression(Language language, bool doWeCare) : base(language, Cpp.Operator.Name.None)
         {
         }
 
@@ -62,7 +62,7 @@ namespace Petri.Editor.Cpp
 
     public class BracketedExpression : Expression
     {
-        public BracketedExpression(Expression b, Expression expr, Expression a) : base(Language.None,
+        public BracketedExpression(Expression b, Expression expr, Expression a) : base(b.Language,
                                                                                        Cpp.Operator.Name.None)
         {
             Before = b;
@@ -145,12 +145,7 @@ namespace Petri.Editor.Cpp
                     }
                 }
             }
-            return new LiteralExpression(s);
-        }
-
-        protected LiteralExpression(string expr) : base(Language.None, Cpp.Operator.Name.None)
-        {
-            Expression = expr.Trim();
+            return new LiteralExpression(language, s);
         }
 
         protected LiteralExpression(Language language, string expr) : base(language,
@@ -187,10 +182,10 @@ namespace Petri.Editor.Cpp
 
     public class VariableExpression : LiteralExpression
     {
-        public VariableExpression(string expr, Language language = Language.None) : base(language,
+        public VariableExpression(string expr, Language language) : base(language,
                                                                                          expr)
         {
-            Regex name = new Regex(Cpp.Parser.NamePattern);
+            Regex name = new Regex(Parser.NamePattern);
             Match nameMatch = name.Match(expr);
             if(!nameMatch.Success) {
                 throw new Exception(Configuration.GetLocalized("Invalid variable name specified!"));
@@ -252,7 +247,7 @@ namespace Petri.Editor.Cpp
                                              Expression expr1,
                                              Expression expr2,
                                              Expression expr3) : base(language,
-                                                                          Cpp.Operator.Name.TernaryConditional)
+                                                                      Cpp.Operator.Name.TernaryConditional)
         {
             this.Expression1 = expr1;
             this.Expression2 = expr2;

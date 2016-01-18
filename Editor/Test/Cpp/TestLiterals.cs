@@ -36,7 +36,7 @@ namespace Petri.Test.Cpp
             var literal = Utility.RandomLiteral();
 
             // WHEN we create an expression from it
-            var e = Expression.CreateFromString(literal);
+            var e = Expression.CreateFromString(literal, Language.CSharp);
 
             // THEN it is a LiteralExpression
             Assert.IsInstanceOf<LiteralExpression>(e);
@@ -55,7 +55,7 @@ namespace Petri.Test.Cpp
             var literal = Utility.RandomLiteral();
 
             // WHEN we create an expression from it
-            var e = Expression.CreateFromString(literal);
+            var e = Expression.CreateFromString(literal, Language.CSharp);
 
             var literals = e.GetLiterals();
 
@@ -71,7 +71,7 @@ namespace Petri.Test.Cpp
             var addition = "3+4";
 
             // WHEN we create an expression from it
-            var e = Expression.CreateFromString(addition);
+            var e = Expression.CreateFromString(addition, Language.CSharp);
 
             // THEN the resulting expression is a BinaryExpression, consisting of the right operator and the right literal subexpressions.
             Assert.IsInstanceOf<BinaryExpression>(e);

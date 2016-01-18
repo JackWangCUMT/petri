@@ -27,6 +27,13 @@ using System.Text.RegularExpressions;
 
 namespace Petri.Editor.Cpp
 {
+    public enum Language
+    {
+        C,
+        Cpp,
+        CSharp,
+    }
+
     public abstract class Expression
     {
         public enum ExprType
@@ -68,8 +75,8 @@ namespace Petri.Editor.Cpp
         }
 
         public static Expression CreateFromString(string s,
-                                                  Language language = Language.None,
-                                                  IEnumerable<Cpp.Function> functions = null,
+                                                  Language language,
+                                                  IEnumerable<Function> functions = null,
                                                   Dictionary<string, string> macros = null,
                                                   bool allowComma = true)
         {
@@ -81,15 +88,15 @@ namespace Petri.Editor.Cpp
                                                                                bool allowComma = true) where ExpressionType : Expression
         {
             return CreateFromString<ExpressionType>(s,
-                                                    entity?.Document.Settings.Language ?? Language.None,
-                                                    entity?.Document.AllFunctions,
-                                                    entity?.Document.CppMacros,
+                                                    entity.Document.Settings.Language,
+                                                    entity.Document.AllFunctions,
+                                                    entity.Document.CppMacros,
                                                     allowComma);
         }
 
         public static ExpressionType CreateFromString<ExpressionType>(string s,
-                                                                      Language language = Language.None,
-                                                                      IEnumerable<Cpp.Function> functions = null,
+                                                                      Language language,
+                                                                      IEnumerable<Function> functions = null,
                                                                       Dictionary<string, string> macros = null,
                                                                       bool allowComma = true) where ExpressionType : Expression
         {
@@ -301,7 +308,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
             return Tuple.Create(s, subexprs);
         }
 
-        protected static bool Match(int opIndex, string s, Cpp.Operator.Op prop)
+        protected static bool Match(int opIndex, string s, Operator.Op prop)
         {
             if(prop.type == Cpp.Operator.Type.Binary) {
                 if(opIndex == 0 || (s[opIndex - 1] != '@' && s[opIndex - 1] != '#') || opIndex + prop.lexed.Length == s.Length || (s[opIndex + prop.lexed.Length] != '@' && s[opIndex + prop.lexed.Length] != '#')) {
@@ -323,7 +330,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
 
         protected static Expression CreateFromPreprocessedString(string s,
                                                                  Language language,
-                                                                 IEnumerable<Cpp.Function> functions,
+                                                                 IEnumerable<Function> functions,
                                                                  Dictionary<string, string> macros,
                                                                  List<Tuple<ExprType, string>> subexprs,
                                                                  bool allowComma)
@@ -345,7 +352,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
             for(int i = allowComma ? 17 : 16; i >= 0; --i) {
                 int bound;
                 int direction;
-                if(Cpp.Operator.Properties[Cpp.Operator.ByPrecedence[i][0]].associativity == Petri.Editor.Cpp.Operator.Associativity.RightToLeft) {
+                if(Cpp.Operator.Properties[Cpp.Operator.ByPrecedence[i][0]].associativity == Cpp.Operator.Associativity.RightToLeft) {
                     bound = s.Length;
                     direction = -1;
                 }
@@ -354,7 +361,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                     direction = 1;
                 }
                 int index = bound;
-                var foundOperator = Petri.Editor.Cpp.Operator.Name.None;
+                var foundOperator = Cpp.Operator.Name.None;
                 foreach(var op in Cpp.Operator.ByPrecedence[i]) {
                     var prop = Cpp.Operator.Properties[op];
                     if(prop.implemented) {
@@ -378,10 +385,10 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                 }
                 if(index != bound) {
                     var prop = Cpp.Operator.Properties[foundOperator];
-                    if(prop.type == Petri.Editor.Cpp.Operator.Type.Binary) {
+                    if(prop.type == Cpp.Operator.Type.Binary) {
                         string e1 = s.Substring(0, index);
                         string e2 = s.Substring(index + prop.lexed.Length);// Method call
-                        if(foundOperator == Petri.Editor.Cpp.Operator.Name.SelectionRef || foundOperator == Petri.Editor.Cpp.Operator.Name.SelectionPtr) {
+                        if(foundOperator == Cpp.Operator.Name.SelectionRef || foundOperator == Cpp.Operator.Name.SelectionPtr) {
                             string that = Expression.GetStringFromPreprocessed(e1, subexprs);
                             string invocation = Expression.GetStringFromPreprocessed(e2,
                                                                                      subexprs);
@@ -407,7 +414,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                                                                             subexprs,
                                                                                             true));
                     }
-                    else if(prop.type == Petri.Editor.Cpp.Operator.Type.PrefixUnary) {
+                    else if(prop.type == Cpp.Operator.Type.PrefixUnary) {
                         return new UnaryExpression(language, foundOperator,
                                                    Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length),
                                                                                            language,
@@ -416,8 +423,8 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                                                                            subexprs,
                                                                                            true));
                     }
-                    else if(prop.type == Petri.Editor.Cpp.Operator.Type.SuffixUnary) {
-                        if(foundOperator == Petri.Editor.Cpp.Operator.Name.FunCall) {
+                    else if(prop.type == Cpp.Operator.Type.SuffixUnary) {
+                        if(foundOperator == Cpp.Operator.Name.FunCall) {
                             return CreateFunctionInvocation(GetStringFromPreprocessed(s, subexprs),
                                                             language,
                                                             functions,
@@ -493,7 +500,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
 
         private static Tuple<Scope, string, List<Expression>> ExtractScopeNameAndArgs(string invocation,
                                                                                       Language language,
-                                                                                      IEnumerable<Cpp.Function> functions,
+                                                                                      IEnumerable<Function> functions,
                                                                                       Dictionary<string, string> macros)
         {
             var func = Expand(invocation, macros);
@@ -515,26 +522,26 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
 
         private static FunctionInvocation CreateFunctionInvocation(string invocation,
                                                                    Language language,
-                                                                   IEnumerable<Cpp.Function> functions,
+                                                                   IEnumerable<Function> functions,
                                                                    Dictionary<string, string> macros)
         {
             var scopeNameAndArgs = ExtractScopeNameAndArgs(invocation,
                                                            language,
                                                            functions,
                                                            macros);
-            Cpp.Function f;
+            Function f;
             if(functions == null) {
-                f = new Cpp.Function(Type.UnknownType,
+                f = new Function(Type.UnknownType(language),
                                      scopeNameAndArgs.Item1,
                                      scopeNameAndArgs.Item2,
                                      false);
                 int i = 0;
                 foreach(Expression e in scopeNameAndArgs.Item3) {
-                    f.Parameters.Add(new Param(Type.UnknownType, "param" + (i++).ToString()));
+                    f.Parameters.Add(new Param(Type.UnknownType(language), "param" + (i++).ToString()));
                 }
             }
             else {
-                f = (functions.FirstOrDefault(delegate(Cpp.Function ff) {
+                f = (functions.FirstOrDefault(delegate(Function ff) {
                     return !(ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && ((scopeNameAndArgs.Item1 == null && ff.Enclosing == null) || scopeNameAndArgs.Item1.Equals(ff.Enclosing));
                 })) as Function;
                 if(f == null) {
@@ -548,7 +555,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                                                  string that,
                                                                  string invocation,
                                                                  Language language,
-                                                                 IEnumerable<Cpp.Function> functions,
+                                                                 IEnumerable<Function> functions,
                                                                  Dictionary<string, string> macros)
         {
             var scopeNameAndArgs = ExtractScopeNameAndArgs(invocation,
@@ -570,20 +577,20 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                                 functions,
                                                 macros);
             }
-            Cpp.Method m;
+            Method m;
             if(functions == null) {
-                m = new Cpp.Method(Type.UnknownType,
-                                   Type.UnknownType,
+                m = new Method(Type.UnknownType(language),
+                                   Type.UnknownType(language),
                                    scopeNameAndArgs.Item2,
                                    "",
                                    false);
                 int i = 0;
                 foreach(Expression e in scopeNameAndArgs.Item3) {
-                    m.Parameters.Add(new Param(Type.UnknownType, "param" + (i++).ToString()));
+                    m.Parameters.Add(new Param(Type.UnknownType(language), "param" + (i++).ToString()));
                 }
             }
             else {
-                m = (functions.FirstOrDefault(delegate(Cpp.Function ff) {
+                m = (functions.FirstOrDefault(delegate(Function ff) {
                     return (ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && scopeNameAndArgs.Item1.Equals(ff.Enclosing);
                 })) as Method;
                 if(m == null) {
@@ -613,16 +620,16 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                 }
                 else if(parentProperties.precedence == childProperties.precedence) {// No need to manage unary operators
                     // We assume the ternary conditional operator does not need to be parenthesized either
-                    if(parentProperties.type == Petri.Editor.Cpp.Operator.Type.Binary) {
+                    if(parentProperties.type == Cpp.Operator.Type.Binary) {
                         var castedParent = (BinaryExpression)parent;// We can assume the associativity is the same for both operators as they have the same precedence
                         // If the operator is left-associative, but the expression was parenthesized from right to left
                         // eg. a + (b + c) (do not forget that IEEE floating point values are not communtative with regards to addition, among others).
                         // So we need to preserve the associativity the user gave at first.
-                        if(parentProperties.associativity == Petri.Editor.Cpp.Operator.Associativity.LeftToRight && castedParent.Expression2 == child) {
+                        if(parentProperties.associativity == Cpp.Operator.Associativity.LeftToRight && castedParent.Expression2 == child) {
                             parenthesize = true;
                         }
                             // If the operator is right-associative, but the expression was parenthesize from left to right
-                            else if(parentProperties.associativity == Petri.Editor.Cpp.Operator.Associativity.RightToLeft && castedParent.Expression1 == child) {
+                        else if(parentProperties.associativity == Cpp.Operator.Associativity.RightToLeft && castedParent.Expression1 == child) {
                             parenthesize = true;
                         }
                     }

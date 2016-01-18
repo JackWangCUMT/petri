@@ -41,7 +41,7 @@ namespace Petri.Editor
             base.WritePetriNet();
         }
 
-        public override void WriteExpressionEvaluator(Cpp.Expression expression, string path)
+        public override void WriteExpressionEvaluator(Expression expression, string path)
         {
             string cppExpr = expression.MakeCpp();
 
@@ -174,11 +174,11 @@ namespace Petri.Editor
 
         protected override void GenerateAction(Action a, IDManager lastID)
         {
-            var old = new Dictionary<Cpp.LiteralExpression, string>();
+            var old = new Dictionary<LiteralExpression, string>();
             string enumName = Document.Settings.Enum.Name;
 
             var litterals = a.Function.GetLiterals();
-            foreach(Cpp.LiteralExpression le in litterals) {
+            foreach(LiteralExpression le in litterals) {
                 if(le.Expression == "$Name") {
                     old.Add(le, le.Expression);
                     le.Expression = "\"" + a.Name + "\"";
@@ -200,7 +200,7 @@ namespace Petri.Editor
 
             var cpp = "(Int32)(" + a.Function.MakeCpp() + ")";
 
-            var cppVar = new HashSet<Cpp.VariableExpression>();
+            var cppVar = new HashSet<VariableExpression>();
             a.GetVariables(cppVar);
 
             _functionBodies += "static Int32 " + a.CppName + "_invocation(PetriNet petriNet) {\nreturn " + cpp + ";\n}\n";
@@ -244,10 +244,10 @@ namespace Petri.Editor
 
         protected override void GenerateTransition(Transition t)
         {
-            var old = new Dictionary<Cpp.LiteralExpression, string>();
+            var old = new Dictionary<LiteralExpression, string>();
             string enumName = Document.Settings.Enum.Name;
 
-            foreach(Cpp.LiteralExpression le in t.Condition.GetLiterals()) {
+            foreach(LiteralExpression le in t.Condition.GetLiterals()) {
                 if(le.Expression == "$Res") {
                     old.Add(le, le.Expression);
                     le.Expression = "_PETRI_PRIVATE_GET_ACTION_RESULT_";
@@ -285,7 +285,7 @@ namespace Petri.Editor
 
             string cpp = "return " + t.Condition.MakeCpp() + ";";
 
-            var cppVar = new HashSet<Cpp.VariableExpression>();
+            var cppVar = new HashSet<VariableExpression>();
             t.GetVariables(cppVar);
 
             _functionBodies += "static bool " + t.CppName + "_invocation(Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
@@ -308,7 +308,7 @@ namespace Petri.Editor
             var cppVar = from v in variables
                                   select v.Expression;
             if(variables.Count > 0) {
-                return "enum " + Cpp.VariableExpression.EnumName + " {" + String.Join(", ", cppVar) + "};\n";
+                return "enum " + VariableExpression.EnumName + " {" + String.Join(", ", cppVar) + "};\n";
             }
 
             return "";
