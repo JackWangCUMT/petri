@@ -458,6 +458,7 @@ namespace Petri.Editor
                 filter.AddPattern("*.lib");
                 filter.AddPattern("*.so");
                 filter.AddPattern("*.dylib");
+                filter.AddPattern("*.dll");
             }
             else if(sender == _selectSourceOutputPath) {
                 title = Configuration.GetLocalized("Select the directory where to generate the <language> source code…", _document.Settings.LanguageName());

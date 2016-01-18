@@ -292,7 +292,7 @@ namespace Petri.Editor
 
             cpp = t.CppName + "_invocation";
 
-            CodeGen += "var " + t.CppName + " = " + bName + ".AddTransition(" + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", " + cpp + ");";
+            CodeGen += bName + ".AddTransition(" + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", " + cpp + ");";
             foreach(var v in cppVar) {
                 CodeGen += t.CppName + ".AddVariable(" + "(UInt32)(" + v.Prefix + v.Expression + "));";
             }

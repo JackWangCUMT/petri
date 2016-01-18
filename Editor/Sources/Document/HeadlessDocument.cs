@@ -305,7 +305,7 @@ namespace Petri.Editor
 
         public virtual bool Compile(bool wait)
         {
-            var c = new CppCompiler(this);
+            var c = new Compiler(this);
             var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
             if(o != "") {
                 Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.") + "\n" + Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath, Settings.LibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o);

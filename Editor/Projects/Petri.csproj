@@ -160,9 +160,6 @@
     <Compile Include="..\Sources\Cpp\Type.cs">
       <Link>Sources\Cpp\Type.cs</Link>
     </Compile>
-    <Compile Include="..\Sources\Document\CppCompiler.cs">
-      <Link>Sources\Document\CppCompiler.cs</Link>
-    </Compile>
     <Compile Include="..\Sources\Document\Document.cs">
       <Link>Sources\Document\Document.cs</Link>
     </Compile>
@@ -278,6 +275,9 @@
     <Compile Include="..\Sources\Cpp\BinaryExpression.cs" />
     <Compile Include="..\Sources\Cpp\MiscExpression.cs" />
     <Compile Include="..\Sources\CodeGen\CSharpPetriGen.cs" />
+    <Compile Include="..\Sources\Document\Compiler.cs">
+      <Link>Sources\Document\Compiler.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="CSRuntime.csproj">

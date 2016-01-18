@@ -264,7 +264,7 @@ namespace Petri.Editor
 
             string libName = System.IO.Path.GetTempFileName();
 
-            var c = new CppCompiler(_document);
+            var c = new Compiler(_document);
             var o = c.CompileSource(sourceName, libName);
             if(o != "") {
                 throw new Exception(Configuration.GetLocalized("Compilation error:") + " " + o);

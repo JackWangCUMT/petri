@@ -117,7 +117,8 @@ namespace Petri.Editor
 
                 if(elem.Attribute("Language") != null) {
                     try {
-                        Language = (Cpp.Language)Cpp.Language.Parse(Language.GetType(), elem.Attribute("Language").Value);
+                        Language = (Cpp.Language)Cpp.Language.Parse(Language.GetType(),
+                                                                    elem.Attribute("Language").Value);
                     }
                     catch(Exception) {
                         Console.Error.WriteLine("Invalid language value: " + elem.Attribute("Language").Value);
@@ -283,13 +284,27 @@ namespace Petri.Editor
 
         public string LibPath {
             get {
-                return System.IO.Path.Combine(LibOutputPath, this.Name + ".so");
+                return System.IO.Path.Combine(LibOutputPath, this.Name + LibExtension);
+            }
+        }
+
+        public string LibExtension {
+            get {
+                if(Language == Cpp.Language.CSharp) {
+                    return ".dll";
+                }
+                else {
+                    return ".so";
+                }
             }
         }
 
         public string CompilerArguments(string source, string lib)
         {
             string val = "";
+            foreach(var f in CompilerFlags) {
+                val += f + " ";
+            }
 
             if(Language == Cpp.Language.C || Language == Cpp.Language.Cpp) {
                 val += "-shared ";
@@ -300,46 +315,10 @@ namespace Petri.Editor
                     val += "-fPIC ";
                 }
 
-                foreach(var f in CompilerFlags) {
-                    val += f + " ";
-                }
-
-                foreach(var i in IncludePaths) {
-                    // Recursive?
-                    if(System.IO.Directory.Exists(i.Item1)) {
-                        if(i.Item2) {
-                            var directories = System.IO.Directory.EnumerateDirectories(i.Item1,
-                                                                                       "*",
-                                                                                       System.IO.SearchOption.AllDirectories);
-                            foreach(var dir in directories) {
-                                // Do not add dotted files
-                                if(!dir.StartsWith(".")) {
-                                    val += "-I'" + dir + "' ";
-                                }
-                            }
-                        }
-                    }
-                    else {
-                        Console.Error.WriteLine("Unable to find the include directory " + i.Item1 + "!");
-                    }
-                    val += "-iquote'" + i.Item1 + "' ";
-                    val += "-I'" + i.Item1 + "' ";
-                }
                 val += "-iquote'" + SourceOutputPath + "' ";
                 val += "-I'" + SourceOutputPath + "' ";
 
-                foreach(var i in LibPaths) {
-                    // Recursive?
-                    if(i.Item2) {
-                        var directories = System.IO.Directory.EnumerateDirectories(i.Item1,
-                                                                                   "*",
-                                                                                   System.IO.SearchOption.AllDirectories);
-                        foreach(var dir in directories) {
-                            val += "-L'" + dir + "' ";
-                        }
-                    }
-                    val += "-L'" + i.Item1 + "' ";
-                }
+                val += GetPaths();
 
                 foreach(var l in Libs) {
                     val += "-l'" + l + "' ";
@@ -361,8 +340,72 @@ namespace Petri.Editor
                 if(Language == Cpp.Language.Cpp) {
                     val += "-x c++ '" + source + "'";
                 }
-                else {
+                else if(Language == Cpp.Language.C) {
                     val += "-x c '" + source + "'";
+                }
+            }
+            else if(Language == Cpp.Language.CSharp) {
+                val += "-t:module -r:CSRuntime ";
+
+                val += GetPaths();
+
+                foreach(var h in _document.Headers) {
+                    val += "'" + h + "' ";
+                }
+
+                val += "-out:'" + lib + "' ";
+            }
+
+            return val;
+        }
+
+        string GetPaths()
+        {
+            string val = "";
+            foreach(var i in LibPaths) {
+                // Recursive?
+                if(i.Item2) {
+                    var directories = System.IO.Directory.EnumerateDirectories(i.Item1,
+                                                                               "*",
+                                                                               System.IO.SearchOption.AllDirectories);
+                    foreach(var dir in directories) {
+                        if(Language == Cpp.Language.C || Language == Cpp.Language.Cpp) {
+                            val += "-L'" + dir + "' ";
+                        }
+                        else if(Language == Cpp.Language.CSharp) {
+                            val += "-lib:'" + dir + "' ";
+                        }
+                    }
+                }
+                if(Language == Cpp.Language.C || Language == Cpp.Language.Cpp) {
+                    val += "-L'" + i.Item1 + "' ";
+                }
+                else if(Language == Cpp.Language.CSharp) {
+                    val += "-lib:'" + i.Item1 + "' ";
+                }
+            }
+
+            if(Language == Cpp.Language.C || Language == Cpp.Language.Cpp) {
+                foreach(var i in IncludePaths) {
+                    // Recursive?
+                    if(System.IO.Directory.Exists(i.Item1)) {
+                        if(i.Item2) {
+                            var directories = System.IO.Directory.EnumerateDirectories(i.Item1,
+                                                                                       "*",
+                                                                                       System.IO.SearchOption.AllDirectories);
+                            foreach(var dir in directories) {
+                                // Do not add dotted files
+                                if(!dir.StartsWith(".")) {
+                                    val += "-I'" + dir + "' ";
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        Console.Error.WriteLine("Unable to find the include directory " + i.Item1 + "!");
+                    }
+                    val += "-iquote'" + i.Item1 + "' ";
+                    val += "-I'" + i.Item1 + "' ";
                 }
             }
 

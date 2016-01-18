@@ -27,9 +27,9 @@ using System.Text;
 
 namespace Petri.Editor
 {
-    public class CppCompiler
+    public class Compiler
     {
-        public CppCompiler(HeadlessDocument doc)
+        public Compiler(HeadlessDocument doc)
         {
             _document = doc;
         }
@@ -75,6 +75,12 @@ namespace Petri.Editor
             p.WaitForExit();
 
             System.IO.Directory.SetCurrentDirectory(cd);
+
+            // Removes a not meaningful error message when the editor is run into a debugger.
+            var array = err.Split(new string[]{ Environment.NewLine }, StringSplitOptions.None);
+            if(array.Length == 2 && array[0].StartsWith("debugger-agent: Unable to connect to 127.0.0.1:") && array[1].Length == 0) {
+                err = "";
+            }
 
             outputBuilder.Append(err);
 

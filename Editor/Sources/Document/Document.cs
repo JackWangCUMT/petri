@@ -555,7 +555,7 @@ namespace Petri.Editor
             Window.EditorGui.Compilation = true;
             Window.DebugGui.Compilation = true;
 
-            var c = new CppCompiler(this);
+            var c = new Compiler(this);
             var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
             if(o != "") {
                 GLib.Timeout.Add(0, () => {

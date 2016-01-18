@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Document>
-  <Settings Name="C#" Enum="ActionResult,OK,NOK" SourceOutputPath="../Examples" LibOutputPath="" Hostname="localhost" Port="12345" Language="CSharp">
-    <Compiler Invocation="/usr/bin/c++">
-      <Flag Value="-std=c++1y" />
-      <Flag Value="-g" />
-    </Compiler>
+  <Settings Name="C#" Enum="ActionResult,OK,NOK" SourceOutputPath="../Examples" LibOutputPath="../Examples" Hostname="localhost" Port="12345" Language="CSharp">
+    <Compiler Invocation="mcs" />
     <IncludePaths />
-    <LibPaths />
+    <LibPaths>
+      <LibPath Path="../Editor/bin" Recursive="false" />
+    </LibPaths>
     <Libs />
   </Settings>
-  <Window X="240" Y="23" W="920" H="640" />
+  <Window X="8" Y="23" W="920" H="640" />
   <Headers>
     <Header File="Test.cs" />
   </Headers>
