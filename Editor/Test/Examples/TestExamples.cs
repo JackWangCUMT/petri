@@ -34,7 +34,7 @@ namespace Petri.Test
         public void TestCSharpExample()
         {
             // GIVEN launch arguments requesting code generation and compilation of the C#.petri example
-            string[] args = { "-g", "-c", "../../../Examples/C#.petri" };
+            string[] args = { "-g", "-c", "../../../Examples/CSharp.petri" };
             string stdout, stderr;
 
             // WHEN the invocation is made
