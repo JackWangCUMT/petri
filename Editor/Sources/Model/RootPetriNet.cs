@@ -88,9 +88,9 @@ namespace Petri.Editor
             }
         }
 
-        public HashSet<Cpp.VariableExpression> Variables {
+        public HashSet<Code.VariableExpression> Variables {
             get {
-                var res = new HashSet<Cpp.VariableExpression>();
+                var res = new HashSet<Code.VariableExpression>();
                 var list = BuildEntitiesList();
                 foreach(Entity e in list) {
                     if(e is Action) {

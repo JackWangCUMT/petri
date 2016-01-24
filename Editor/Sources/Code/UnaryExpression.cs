@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Petri.Editor.Cpp
+namespace Petri.Editor.Code
 {
     public class UnaryExpression : Expression
     {
@@ -43,33 +43,33 @@ namespace Petri.Editor.Cpp
             return Expression.UsesFunction(f);
         }
 
-        public override string MakeCpp()
+        public override string MakeCode()
         {
             string parenthesized = Expression.Parenthesize(this,
                                                            this.Expression,
-                                                           this.Expression.MakeCpp());
+                                                           this.Expression.MakeCode());
             switch(this.Operator) {
-            case Cpp.Operator.Name.FunCall:
+            case Code.Operator.Name.FunCall:
                 throw new Exception(Configuration.GetLocalized("Already managed in FunctionInvocation class!"));
-            case Cpp.Operator.Name.UnaryPlus:
+            case Code.Operator.Name.UnaryPlus:
                 return "+" + parenthesized;
-            case Cpp.Operator.Name.UnaryMinus:
+            case Code.Operator.Name.UnaryMinus:
                 return "-" + parenthesized;
-            case Cpp.Operator.Name.LogicalNot:
+            case Code.Operator.Name.LogicalNot:
                 return "!" + parenthesized;
-            case Cpp.Operator.Name.BitwiseNot:
+            case Code.Operator.Name.BitwiseNot:
                 return "~" + parenthesized;
-            case Cpp.Operator.Name.Indirection:
+            case Code.Operator.Name.Indirection:
                 return "*" + parenthesized;
-            case Cpp.Operator.Name.AddressOf:
+            case Code.Operator.Name.AddressOf:
                 return "&" + parenthesized;
-            case Cpp.Operator.Name.PreIncr:
+            case Code.Operator.Name.PreIncr:
                 return "++" + parenthesized;
-            case Cpp.Operator.Name.PreDecr:
+            case Code.Operator.Name.PreDecr:
                 return "--" + parenthesized;
-            case Cpp.Operator.Name.PostIncr:
+            case Code.Operator.Name.PostIncr:
                 return parenthesized + "++";
-            case Cpp.Operator.Name.PostDecr:
+            case Code.Operator.Name.PostDecr:
                 return parenthesized + "--";
             }
             throw new Exception(Configuration.GetLocalized("Operator not implemented!"));
@@ -81,27 +81,27 @@ namespace Petri.Editor.Cpp
                                                            this.Expression,
                                                            this.Expression.MakeUserReadable());
             switch(this.Operator) {
-            case Cpp.Operator.Name.FunCall:
+            case Code.Operator.Name.FunCall:
                 throw new Exception(Configuration.GetLocalized("Already managed in FunctionInvocation class!"));
-            case Cpp.Operator.Name.UnaryPlus:
+            case Code.Operator.Name.UnaryPlus:
                 return "+" + parenthesized;
-            case Cpp.Operator.Name.UnaryMinus:
+            case Code.Operator.Name.UnaryMinus:
                 return "-" + parenthesized;
-            case Cpp.Operator.Name.LogicalNot:
+            case Code.Operator.Name.LogicalNot:
                 return "!" + parenthesized;
-            case Cpp.Operator.Name.BitwiseNot:
+            case Code.Operator.Name.BitwiseNot:
                 return "~" + parenthesized;
-            case Cpp.Operator.Name.Indirection:
+            case Code.Operator.Name.Indirection:
                 return "*" + parenthesized;
-            case Cpp.Operator.Name.AddressOf:
+            case Code.Operator.Name.AddressOf:
                 return "&" + parenthesized;
-            case Cpp.Operator.Name.PreIncr:
+            case Code.Operator.Name.PreIncr:
                 return "++" + parenthesized;
-            case Cpp.Operator.Name.PreDecr:
+            case Code.Operator.Name.PreDecr:
                 return "--" + parenthesized;
-            case Cpp.Operator.Name.PostIncr:
+            case Code.Operator.Name.PostIncr:
                 return parenthesized + "++";
-            case Cpp.Operator.Name.PostDecr:
+            case Code.Operator.Name.PostDecr:
                 return parenthesized + "--";
             }
 

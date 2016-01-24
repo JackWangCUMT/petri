@@ -32,7 +32,7 @@ namespace Petri.Editor
 			
         }
 
-        public abstract Cpp.Language Language {
+        public abstract Code.Language Language {
             get;
         }
 

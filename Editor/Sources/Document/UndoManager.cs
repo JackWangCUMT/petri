@@ -421,7 +421,7 @@ namespace Petri.Editor
 
     public class ConditionChangeAction : GuiAction
     {
-        public ConditionChangeAction(Transition t, Cpp.Expression newCondition)
+        public ConditionChangeAction(Transition t, Code.Expression newCondition)
         {
             Transition = t;
             _oldCondition = t.Condition;
@@ -455,12 +455,12 @@ namespace Petri.Editor
             private set;
         }
 
-        Cpp.Expression _newCondition, _oldCondition;
+        Code.Expression _newCondition, _oldCondition;
     }
 
     public class InvocationChangeAction : GuiAction
     {
-        public InvocationChangeAction(Action a, Cpp.FunctionInvocation i)
+        public InvocationChangeAction(Action a, Code.FunctionInvocation i)
         {
             Action = a;
             _oldInvocation = a.Function;
@@ -494,7 +494,7 @@ namespace Petri.Editor
             private set;
         }
 
-        Cpp.FunctionInvocation _newInvocation, _oldInvocation;
+        Code.FunctionInvocation _newInvocation, _oldInvocation;
     }
 
     public class AddCommentAction : GuiAction

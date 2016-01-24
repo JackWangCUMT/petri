@@ -61,7 +61,7 @@ namespace Petri.Editor
             {
                 ComboBox combo = ComboBox.NewText();
 
-                foreach(Cpp.Language l in Enum.GetValues(typeof(Cpp.Language))) {
+                foreach(Code.Language l in Enum.GetValues(typeof(Code.Language))) {
                     combo.AppendText(DocumentSettings.LanguageName(l));
                 }
 
@@ -81,7 +81,7 @@ namespace Petri.Editor
                     TreeIter it;
 
                     if(combo.GetActiveIter(out it)) {
-                        _document.Settings.Language = (Cpp.Language)int.Parse(combo.Model.GetStringFromIter(it));
+                        _document.Settings.Language = (Code.Language)int.Parse(combo.Model.GetStringFromIter(it));
                         _document.Settings.Modified = true;
                     }
                 };
@@ -97,7 +97,7 @@ namespace Petri.Editor
 
                 Entry entry = new Entry(_document.Settings.Name);
                 MainClass.RegisterValidation(entry, false, (obj, p) => {
-                    Regex name = new Regex(Cpp.Parser.NamePattern);
+                    Regex name = new Regex(Code.Parser.NamePattern);
                     Match nameMatch = name.Match((obj as Entry).Text);
 
                     if(!nameMatch.Success || nameMatch.Value != (obj as Entry).Text) {
@@ -125,9 +125,9 @@ namespace Petri.Editor
                 _customEnumEditor = new Entry("");
 
                 MainClass.RegisterValidation(_customEnumEditor, false, (obj, p) => {
-                    Cpp.Enum e = null;
+                    Code.Enum e = null;
                     try {
-                        e = new Cpp.Enum(_document.Settings.Language, (obj as Entry).Text);
+                        e = new Code.Enum(_document.Settings.Language, (obj as Entry).Text);
                         _document.Settings.Enum = e;
                         _document.Settings.Modified = true;
                     }
@@ -438,7 +438,7 @@ namespace Petri.Editor
         void UpdateGUIForLanguage(object sender, EventArgs e) {
             _window.ShowAll();
 
-            if(_document.Settings.Language == Cpp.Language.CSharp) {
+            if(_document.Settings.Language == Code.Language.CSharp) {
                 _headersSearchPathBox.Hide();
             }
             else {

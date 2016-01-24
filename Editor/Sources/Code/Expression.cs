@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Petri.Editor.Cpp
+namespace Petri.Editor.Code
 {
     public enum Language
     {
@@ -59,7 +59,7 @@ namespace Petri.Editor.Cpp
 
         public abstract bool UsesFunction(Function f);
 
-        public abstract string MakeCpp();
+        public abstract string MakeCode();
 
         public abstract string MakeUserReadable();
 
@@ -90,7 +90,7 @@ namespace Petri.Editor.Cpp
             return CreateFromString<ExpressionType>(s,
                                                     entity.Document.Settings.Language,
                                                     entity.Document.AllFunctions,
-                                                    entity.Document.CppMacros,
+                                                    entity.Document.PreprocessorMacros,
                                                     allowComma);
         }
 
@@ -277,9 +277,9 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                 ++i;
             }
             var newExprs = new List<Tuple<ExprType, string>>();
-            foreach(var name in Cpp.Operator.Lex) {
-                s = s.Replace(Cpp.Operator.Properties[name].cpp,
-                              Cpp.Operator.Properties[name].lexed);
+            foreach(var name in Code.Operator.Lex) {
+                s = s.Replace(Code.Operator.Properties[name].cpp,
+                              Code.Operator.Properties[name].lexed);
             }
             foreach(var expr in subexprs) {
                 string val = expr.Item2;
@@ -289,9 +289,9 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                 case ExprType.Subscript:
                 case ExprType.Invocation:
                 case ExprType.Template:
-                    foreach(var name in Cpp.Operator.Lex) {
-                        val = val.Replace(Cpp.Operator.Properties[name].cpp,
-                                          Cpp.Operator.Properties[name].lexed);
+                    foreach(var name in Code.Operator.Lex) {
+                        val = val.Replace(Code.Operator.Properties[name].cpp,
+                                          Code.Operator.Properties[name].lexed);
                     }
                     break;
                 }
@@ -310,17 +310,17 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
 
         protected static bool Match(int opIndex, string s, Operator.Op prop)
         {
-            if(prop.type == Cpp.Operator.Type.Binary) {
+            if(prop.type == Code.Operator.Type.Binary) {
                 if(opIndex == 0 || (s[opIndex - 1] != '@' && s[opIndex - 1] != '#') || opIndex + prop.lexed.Length == s.Length || (s[opIndex + prop.lexed.Length] != '@' && s[opIndex + prop.lexed.Length] != '#')) {
                     return false;
                 }
             }
-            else if(prop.type == Cpp.Operator.Type.PrefixUnary) {
+            else if(prop.type == Code.Operator.Type.PrefixUnary) {
                 if((opIndex != 0 && s[opIndex - 1] == '@') || opIndex + prop.lexed.Length == s.Length || (s[opIndex + prop.lexed.Length] != '@' && s[opIndex + prop.lexed.Length] != '#')) {
                     return false;
                 }
             }
-            else if(prop.type == Cpp.Operator.Type.SuffixUnary) {
+            else if(prop.type == Code.Operator.Type.SuffixUnary) {
                 if(opIndex == 0 || (s[opIndex - 1] != '@' && s[opIndex - 1] != '#') || (opIndex + prop.lexed.Length != s.Length && s[opIndex + prop.lexed.Length] == '@')) {
                     return false;
                 }
@@ -352,7 +352,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
             for(int i = allowComma ? 17 : 16; i >= 0; --i) {
                 int bound;
                 int direction;
-                if(Cpp.Operator.Properties[Cpp.Operator.ByPrecedence[i][0]].associativity == Cpp.Operator.Associativity.RightToLeft) {
+                if(Code.Operator.Properties[Code.Operator.ByPrecedence[i][0]].associativity == Code.Operator.Associativity.RightToLeft) {
                     bound = s.Length;
                     direction = -1;
                 }
@@ -361,9 +361,9 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                     direction = 1;
                 }
                 int index = bound;
-                var foundOperator = Cpp.Operator.Name.None;
-                foreach(var op in Cpp.Operator.ByPrecedence[i]) {
-                    var prop = Cpp.Operator.Properties[op];
+                var foundOperator = Code.Operator.Name.None;
+                foreach(var op in Code.Operator.ByPrecedence[i]) {
+                    var prop = Code.Operator.Properties[op];
                     if(prop.implemented) {
                         int currentIndex = 0;
                         while(true) {
@@ -384,15 +384,15 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                     }
                 }
                 if(index != bound) {
-                    var prop = Cpp.Operator.Properties[foundOperator];
-                    if(prop.type == Cpp.Operator.Type.Binary) {
+                    var prop = Code.Operator.Properties[foundOperator];
+                    if(prop.type == Code.Operator.Type.Binary) {
                         string e1 = s.Substring(0, index);
                         string e2 = s.Substring(index + prop.lexed.Length);// Method call
-                        if(foundOperator == Cpp.Operator.Name.SelectionRef || foundOperator == Cpp.Operator.Name.SelectionPtr) {
+                        if(foundOperator == Code.Operator.Name.SelectionRef || foundOperator == Code.Operator.Name.SelectionPtr) {
                             string that = Expression.GetStringFromPreprocessed(e1, subexprs);
                             string invocation = Expression.GetStringFromPreprocessed(e2,
                                                                                      subexprs);
-                            return CreateMethodInvocation(foundOperator == Cpp.Operator.Name.SelectionPtr,
+                            return CreateMethodInvocation(foundOperator == Code.Operator.Name.SelectionPtr,
                                                           that,
                                                           invocation,
                                                           language,
@@ -414,7 +414,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                                                                             subexprs,
                                                                                             true));
                     }
-                    else if(prop.type == Cpp.Operator.Type.PrefixUnary) {
+                    else if(prop.type == Code.Operator.Type.PrefixUnary) {
                         return new UnaryExpression(language, foundOperator,
                                                    Expression.CreateFromPreprocessedString(s.Substring(index + prop.lexed.Length),
                                                                                            language,
@@ -423,8 +423,8 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                                                                            subexprs,
                                                                                            true));
                     }
-                    else if(prop.type == Cpp.Operator.Type.SuffixUnary) {
-                        if(foundOperator == Cpp.Operator.Name.FunCall) {
+                    else if(prop.type == Code.Operator.Type.SuffixUnary) {
+                        if(foundOperator == Code.Operator.Name.FunCall) {
                             return CreateFunctionInvocation(GetStringFromPreprocessed(s, subexprs),
                                                             language,
                                                             functions,
@@ -449,9 +449,9 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
         protected static string GetStringFromPreprocessed(string prep,
                                                           List<Tuple<ExprType, string>> subexprs)
         {
-            foreach(var name in Cpp.Operator.Lex) {
-                prep = prep.Replace(Cpp.Operator.Properties[name].lexed,
-                                    " " + Cpp.Operator.Properties[name].cpp + " ");
+            foreach(var name in Code.Operator.Lex) {
+                prep = prep.Replace(Code.Operator.Properties[name].lexed,
+                                    " " + Code.Operator.Properties[name].cpp + " ");
                 var newExprs = new List<Tuple<ExprType, string>>();
                 foreach(var expr in subexprs) {
                     switch(expr.Item1) {
@@ -461,8 +461,8 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                     case ExprType.Invocation:
                     case ExprType.Template:
                         newExprs.Add(Tuple.Create(expr.Item1,
-                                                  expr.Item2.Replace(Cpp.Operator.Properties[name].lexed,
-                                                                     " " + Cpp.Operator.Properties[name].cpp + " ")));
+                                                  expr.Item2.Replace(Code.Operator.Properties[name].lexed,
+                                                                     " " + Code.Operator.Properties[name].cpp + " ")));
                         break;
                     default:
                         newExprs.Add(expr);
@@ -563,7 +563,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                                            language,
                                                            functions,
                                                            macros);
-            if(Scope.GetSeparator(language) == Cpp.Operator.Properties[Cpp.Operator.Name.SelectionRef].cpp && Regex.Match(that,
+            if(Scope.GetSeparator(language) == Code.Operator.Properties[Code.Operator.Name.SelectionRef].cpp && Regex.Match(that,
                                                                                                                           "(" + Parser.NamePattern + Scope.GetSeparator(language) + ")*" + Parser.NamePattern).Success) {
                 var scopes = that.Split(new string[]{ Scope.GetSeparator(language) },
                                         StringSplitOptions.None);
@@ -614,24 +614,24 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                              string representation)
         {
             bool parenthesize = false;
-            if(child.Operator != Cpp.Operator.Name.None) {
-                var parentProperties = Cpp.Operator.Properties[parent.Operator];
-                var childProperties = Cpp.Operator.Properties[child.Operator];
+            if(child.Operator != Code.Operator.Name.None) {
+                var parentProperties = Code.Operator.Properties[parent.Operator];
+                var childProperties = Code.Operator.Properties[child.Operator];
                 if(parentProperties.precedence < childProperties.precedence) {
                     parenthesize = true;
                 }
                 else if(parentProperties.precedence == childProperties.precedence) {// No need to manage unary operators
                     // We assume the ternary conditional operator does not need to be parenthesized either
-                    if(parentProperties.type == Cpp.Operator.Type.Binary) {
+                    if(parentProperties.type == Code.Operator.Type.Binary) {
                         var castedParent = (BinaryExpression)parent;// We can assume the associativity is the same for both operators as they have the same precedence
                         // If the operator is left-associative, but the expression was parenthesized from right to left
                         // eg. a + (b + c) (do not forget that IEEE floating point values are not communtative with regards to addition, among others).
                         // So we need to preserve the associativity the user gave at first.
-                        if(parentProperties.associativity == Cpp.Operator.Associativity.LeftToRight && castedParent.Expression2 == child) {
+                        if(parentProperties.associativity == Code.Operator.Associativity.LeftToRight && castedParent.Expression2 == child) {
                             parenthesize = true;
                         }
                             // If the operator is right-associative, but the expression was parenthesize from left to right
-                        else if(parentProperties.associativity == Cpp.Operator.Associativity.RightToLeft && castedParent.Expression1 == child) {
+                        else if(parentProperties.associativity == Code.Operator.Associativity.RightToLeft && castedParent.Expression1 == child) {
                             parenthesize = true;
                         }
                     }

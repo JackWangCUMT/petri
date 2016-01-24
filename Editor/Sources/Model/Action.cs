@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Linq;
 using System.Linq;
-using Petri.Editor.Cpp;
+using Petri.Editor.Code;
 
 namespace Petri.Editor
 {
@@ -88,7 +88,7 @@ namespace Petri.Editor
 
         public FunctionInvocation PrintAction()
         {
-            return new Cpp.FunctionInvocation(Document.Settings.Language, PrintFunction(Document), LiteralExpression.CreateFromString("$Name", Document.Settings.Language), LiteralExpression.CreateFromString("$ID", Document.Settings.Language));
+            return new Code.FunctionInvocation(Document.Settings.Language, PrintFunction(Document), LiteralExpression.CreateFromString("$Name", Document.Settings.Language), LiteralExpression.CreateFromString("$ID", Document.Settings.Language));
         }
 
         public static Function PrintFunction(HeadlessDocument doc)
@@ -96,23 +96,23 @@ namespace Petri.Editor
             var lang = doc.Settings.Language;
 
             if(lang == Language.Cpp) {
-                var f = new Cpp.Function(doc.Settings.Enum.Type, Scope.MakeFromNamespace(lang, "Utility"), "printAction", false);
-                f.AddParam(new Param(new Cpp.Type(lang, "std::string const &"), "name"));
-                f.AddParam(new Param(new Cpp.Type(lang, "std::uint64_t"), "id"));
+                var f = new Code.Function(doc.Settings.Enum.Type, Scope.MakeFromNamespace(lang, "Utility"), "printAction", false);
+                f.AddParam(new Param(new Code.Type(lang, "std::string const &"), "name"));
+                f.AddParam(new Param(new Code.Type(lang, "std::uint64_t"), "id"));
 
                 return f;
             }
             else if(lang == Language.C) {
                 var f = new Function(doc.Settings.Enum.Type, null, "PetriUtility_printAction", false);
-                f.AddParam(new Param(new Cpp.Type(lang, "char const *"), "name"));
-                f.AddParam(new Param(new Cpp.Type(lang, "uint64_t"), "id"));
+                f.AddParam(new Param(new Code.Type(lang, "char const *"), "name"));
+                f.AddParam(new Param(new Code.Type(lang, "uint64_t"), "id"));
 
                 return f;
             }
             else if(lang == Language.CSharp) {
                 var f = new Function(doc.Settings.Enum.Type, Scope.MakeFromNamespace(lang, "Petri.Runtime.Utility"), "PrintAction", false);
-                f.AddParam(new Param(new Cpp.Type(lang, "string"), "name"));
-                f.AddParam(new Param(new Cpp.Type(lang, "UInt64"), "id"));
+                f.AddParam(new Param(new Code.Type(lang, "string"), "name"));
+                f.AddParam(new Param(new Code.Type(lang, "UInt64"), "id"));
 
                 return f;
             }
@@ -145,17 +145,17 @@ namespace Petri.Editor
 
             if(lang == Language.Cpp) {
                 var f = new Function(doc.Settings.Enum.Type, Scope.MakeFromNamespace(lang, "Utility"), "pause", false);
-                f.AddParam(new Param(new Cpp.Type(lang, "std::chrono::nanoseconds"), "delay"));
+                f.AddParam(new Param(new Code.Type(lang, "std::chrono::nanoseconds"), "delay"));
                 return f;
             }
             else if(lang == Language.C) {
                 var f = new Function(doc.Settings.Enum.Type, null, "PetriUtility_pause", false);
-                f.AddParam(new Param(new Cpp.Type(lang, "time_t"), "delay"));
+                f.AddParam(new Param(new Code.Type(lang, "time_t"), "delay"));
                 return f;
             }
             else if(lang == Language.CSharp) {
                 var f = new Function(doc.Settings.Enum.Type, Scope.MakeFromNamespace(lang, "Petri.Runtime.Utility"), "Pause", false);
-                f.AddParam(new Param(new Cpp.Type(lang, "double"), "delay"));
+                f.AddParam(new Param(new Code.Type(lang, "double"), "delay"));
                 return f;
             }
 

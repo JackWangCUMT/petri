@@ -21,7 +21,7 @@
  */
 
 using System;
-using Petri.Editor.Cpp;
+using Petri.Editor.Code;
 
 namespace Petri.Editor
 {

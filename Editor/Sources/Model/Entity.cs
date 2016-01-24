@@ -156,9 +156,9 @@ namespace Petri.Editor
             }
         }
 
-        public abstract bool UsesFunction(Cpp.Function f);
+        public abstract bool UsesFunction(Code.Function f);
 
-        public abstract string CppName {
+        public abstract string CodeIdentifier {
             get;
         }
 

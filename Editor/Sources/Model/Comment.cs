@@ -83,12 +83,12 @@ namespace Petri.Editor
             set;
         }
 
-        public override bool UsesFunction(Cpp.Function f)
+        public override bool UsesFunction(Code.Function f)
         {
             return false;
         }
 
-        public override string CppName {
+        public override string CodeIdentifier {
             get {
                 return "";
             }

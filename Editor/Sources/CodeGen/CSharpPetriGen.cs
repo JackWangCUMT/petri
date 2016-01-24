@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using Petri.Editor.Cpp;
+using Petri.Editor.Code;
 using System.Linq;
 
 namespace Petri.Editor
@@ -43,7 +43,7 @@ namespace Petri.Editor
 
         public override void WriteExpressionEvaluator(Expression expression, string path)
         {
-            string cppExpr = expression.MakeCpp();
+            string cppExpr = expression.MakeCode();
 
             CodeGen generator = new CFamilyCodeGen(Language.CSharp);
             /*foreach(var s in Document.Headers) {
@@ -63,7 +63,7 @@ namespace Petri.Editor
 
             generator += GenerateVarEnum();
 
-            generator += "extern \"C\" char const *" + Document.CppPrefix + "_evaluate(void *petriPtr) {";
+            generator += "extern \"C\" char const *" + Document.CodePrefix + "_evaluate(void *petriPtr) {";
             generator += "auto &petriNet = *static_cast<PetriDebug *>(petriPtr);";
             generator += "static std::string result;";
             generator += "std::ostringstream oss;";
@@ -137,13 +137,13 @@ namespace Petri.Editor
             CodeGen += "";
 
             CodeGen += "static string Prefix() {";
-            CodeGen += "return \"" + Document.CppPrefix + "\";";
+            CodeGen += "return \"" + Document.CodePrefix + "\";";
             CodeGen += "}";
 
             CodeGen += "";
 
             CodeGen += "static string Name() {";
-            CodeGen += "return \"" + Document.CppPrefix + "\";";
+            CodeGen += "return \"" + Document.CodePrefix + "\";";
             CodeGen += "}";
 
             CodeGen += "";
@@ -186,19 +186,19 @@ namespace Petri.Editor
                 }
             }
 
-            var cpp = "(Int32)(" + a.Function.MakeCpp() + ")";
+            var cpp = "(Int32)(" + a.Function.MakeCode() + ")";
 
             var cppVar = new HashSet<VariableExpression>();
             a.GetVariables(cppVar);
 
-            _functionBodies += "static Int32 " + a.CppName + "_invocation(" + /*"PetriNet petriNet" + */") {\nreturn " + cpp + ";\n}\n";
+            _functionBodies += "static Int32 " + a.CodeIdentifier + "_invocation(" + /*"PetriNet petriNet" + */") {\nreturn " + cpp + ";\n}\n";
 
-            string action = a.CppName + "_invocation";
+            string action = a.CodeIdentifier + "_invocation";
 
-            CodeGen += "var " + a.CppName + " = " + "new PNAction(" + a.ID.ToString() + ", \"" + a.Parent.Name + "_" + a.Name + "\", " + action + ", " + a.RequiredTokens.ToString() + ");";
-            CodeGen += "petriNet.AddAction(" + a.CppName + ", " + ((a.Active && (a.Parent is RootPetriNet)) ? "true" : "false") + ");";
+            CodeGen += "var " + a.CodeIdentifier + " = " + "new PNAction(" + a.ID.ToString() + ", \"" + a.Parent.Name + "_" + a.Name + "\", " + action + ", " + a.RequiredTokens.ToString() + ");";
+            CodeGen += "petriNet.AddAction(" + a.CodeIdentifier + ", " + ((a.Active && (a.Parent is RootPetriNet)) ? "true" : "false") + ");";
             foreach(var v in cppVar) {
-                CodeGen += a.CppName + ".AddVariable(" + "(UInt32)(" + v.Prefix + v.Expression + "));";
+                CodeGen += a.CodeIdentifier + ".AddVariable(" + "(UInt32)(" + v.Prefix + v.Expression + "));";
             }
 
             foreach(var tup in old) {
@@ -208,8 +208,8 @@ namespace Petri.Editor
 
         protected override void GenerateExitPoint(ExitPoint e, IDManager lastID)
         {
-            CodeGen += "var " + e.CppName + " = new PNAction(" + e.ID.ToString() + ", \"" + e.Parent.Name + "_" + e.Name + "\", () => { return default(Int32); }, " + e.RequiredTokens.ToString() + ");";
-            CodeGen += "petriNet.AddAction(" + e.CppName + ", false);";
+            CodeGen += "var " + e.CodeIdentifier + " = new PNAction(" + e.ID.ToString() + ", \"" + e.Parent.Name + "_" + e.Name + "\", () => { return default(Int32); }, " + e.RequiredTokens.ToString() + ");";
+            CodeGen += "petriNet.AddAction(" + e.CodeIdentifier + ", false);";
         }
 
         protected override void GenerateInnerPetriNet(InnerPetriNet i, IDManager lastID)
@@ -225,7 +225,7 @@ namespace Petri.Editor
                     var newID = lastID.Consume();
                     string tName = name + "_" + newID.ToString();
 
-                    CodeGen += name + ".AddTransition(" + newID.ToString() + ", \"" + tName + "\", " + s.CppName + ", (Int32 result) => { return true; });";
+                    CodeGen += name + ".AddTransition(" + newID.ToString() + ", \"" + tName + "\", " + s.CodeIdentifier + ", (Int32 result) => { return true; });";
                 }
             }
         }
@@ -258,12 +258,12 @@ namespace Petri.Editor
                 }
             }
 
-            string bName = t.Before.CppName;
-            string aName = t.After.CppName;
+            string bName = t.Before.CodeIdentifier;
+            string aName = t.After.CodeIdentifier;
 
             var b = t.Before as InnerPetriNet;
             if(b != null) {
-                bName = b.ExitPoint.CppName;
+                bName = b.ExitPoint.CodeIdentifier;
             }
 
             var a = t.After as InnerPetriNet;
@@ -271,18 +271,18 @@ namespace Petri.Editor
                 aName = a.EntryPointName;
             }
 
-            string cpp = "return " + t.Condition.MakeCpp() + ";";
+            string cpp = "return " + t.Condition.MakeCode() + ";";
 
             var cppVar = new HashSet<VariableExpression>();
             t.GetVariables(cppVar);
 
-            _functionBodies += "static bool " + t.CppName + "_invocation(Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
+            _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
 
-            cpp = t.CppName + "_invocation";
+            cpp = t.CodeIdentifier + "_invocation";
 
             CodeGen += bName + ".AddTransition(" + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", " + cpp + ");";
             foreach(var v in cppVar) {
-                CodeGen += t.CppName + ".AddVariable(" + "(UInt32)(" + v.Prefix + v.Expression + "));";
+                CodeGen += t.CodeIdentifier + ".AddVariable(" + "(UInt32)(" + v.Prefix + v.Expression + "));";
             }
 
             foreach(var tup in old) {

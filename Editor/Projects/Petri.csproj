@@ -112,178 +112,69 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Sources\Application\Configuration.cs">
-      <Link>Sources\Application\Configuration.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Application\IgeMacMenuGlobal.cs">
-      <Link>Sources\Application\IgeMacMenuGlobal.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Application\Program.cs">
-      <Link>Sources\Application\Program.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\CodeGen\CFamilyCodeGen.cs">
-      <Link>Sources\CodeGen\CFamilyCodeGen.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\CodeGen\CPetriGen.cs">
-      <Link>Sources\CodeGen\CPetriGen.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\CodeGen\CodeGen.cs">
-      <Link>Sources\CodeGen\CodeGen.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\CodeGen\CppPetriGen.cs">
-      <Link>Sources\CodeGen\CppPetriGen.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\CodeGen\PetriGen.cs">
-      <Link>Sources\CodeGen\PetriGen.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Cpp\Cpp.cs">
-      <Link>Sources\Cpp\Cpp.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Cpp\Enum.cs">
-      <Link>Sources\Cpp\Enum.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Cpp\Expression.cs">
-      <Link>Sources\Cpp\Expression.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Cpp\Function.cs">
-      <Link>Sources\Cpp\Function.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Cpp\FunctionInvocation.cs">
-      <Link>Sources\Cpp\FunctionInvocation.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Cpp\Operator.cs">
-      <Link>Sources\Cpp\Operator.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Cpp\Parser.cs">
-      <Link>Sources\Cpp\Parser.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Cpp\Type.cs">
-      <Link>Sources\Cpp\Type.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\Document.cs">
-      <Link>Sources\Document\Document.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSettings.cs">
-      <Link>Sources\Document\DocumentSettings.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSettingsEditor.cs">
-      <Link>Sources\Document\DocumentSettingsEditor.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\HeadersManager.cs">
-      <Link>Sources\Document\HeadersManager.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\HeadlessDocument.cs">
-      <Link>Sources\Document\HeadlessDocument.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\MacrosManager.cs">
-      <Link>Sources\Document\MacrosManager.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\MainWindow.cs">
-      <Link>Sources\Document\MainWindow.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\UndoManager.cs">
-      <Link>Sources\Document\UndoManager.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Controller.cs">
-      <Link>Sources\Document\DocumentSection\Controller.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\EntityDraw.cs">
-      <Link>Sources\Document\DocumentSection\EntityDraw.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Gui.cs">
-      <Link>Sources\Document\DocumentSection\Gui.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\PaneEditor.cs">
-      <Link>Sources\Document\DocumentSection\PaneEditor.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\PetriView.cs">
-      <Link>Sources\Document\DocumentSection\PetriView.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\RenderEntityDraw.cs">
-      <Link>Sources\Document\DocumentSection\RenderEntityDraw.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\RenderView.cs">
-      <Link>Sources\Document\DocumentSection\RenderView.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugClient.cs">
-      <Link>Sources\Document\DocumentSection\Debugger\DebugClient.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugController.cs">
-      <Link>Sources\Document\DocumentSection\Debugger\DebugController.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugEditor.cs">
-      <Link>Sources\Document\DocumentSection\Debugger\DebugEditor.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugEntityDraw.cs">
-      <Link>Sources\Document\DocumentSection\Debugger\DebugEntityDraw.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugGui.cs">
-      <Link>Sources\Document\DocumentSection\Debugger\DebugGui.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugView.cs">
-      <Link>Sources\Document\DocumentSection\Debugger\DebugView.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorController.cs">
-      <Link>Sources\Document\DocumentSection\Editor\EditorController.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorEntityDraw.cs">
-      <Link>Sources\Document\DocumentSection\Editor\EditorEntityDraw.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorGui.cs">
-      <Link>Sources\Document\DocumentSection\Editor\EditorGui.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorView.cs">
-      <Link>Sources\Document\DocumentSection\Editor\EditorView.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\EntityEditor.cs">
-      <Link>Sources\Document\DocumentSection\Editor\EntityEditor.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\Find.cs">
-      <Link>Sources\Document\DocumentSection\Editor\Find.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Model\Action.cs">
-      <Link>Sources\Model\Action.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Model\Comment.cs">
-      <Link>Sources\Model\Comment.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Model\Entity.cs">
-      <Link>Sources\Model\Entity.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Model\ExitPoint.cs">
-      <Link>Sources\Model\ExitPoint.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Model\InnerPetriNet.cs">
-      <Link>Sources\Model\InnerPetriNet.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Model\PetriNet.cs">
-      <Link>Sources\Model\PetriNet.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Model\RootPetriNet.cs">
-      <Link>Sources\Model\RootPetriNet.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Model\State.cs">
-      <Link>Sources\Model\State.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Model\Transition.cs">
-      <Link>Sources\Model\Transition.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Cpp\Scope.cs">
-      <Link>Sources\Cpp\Scope.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Cpp\UnaryExpression.cs" />
-    <Compile Include="..\Sources\Cpp\BinaryExpression.cs" />
-    <Compile Include="..\Sources\Cpp\MiscExpression.cs" />
-    <Compile Include="..\Sources\CodeGen\CSharpPetriGen.cs" />
-    <Compile Include="..\Sources\Document\Compiler.cs">
-      <Link>Sources\Document\Compiler.cs</Link>
-    </Compile>
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\GeneratedDynamicLibProxy.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="CSRuntime.csproj">
       <Project>{6DBF358B-A63A-4A5C-8853-C1C7017A5DC9}</Project>
       <Name>CSRuntime</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Sources\Application\Configuration.cs" />
+    <Compile Include="..\Sources\Application\IgeMacMenuGlobal.cs" />
+    <Compile Include="..\Sources\Application\Program.cs" />
+    <Compile Include="..\Sources\Code\BinaryExpression.cs" />
+    <Compile Include="..\Sources\Code\Enum.cs" />
+    <Compile Include="..\Sources\Code\Expression.cs" />
+    <Compile Include="..\Sources\Code\Function.cs" />
+    <Compile Include="..\Sources\Code\FunctionInvocation.cs" />
+    <Compile Include="..\Sources\Code\MiscExpression.cs" />
+    <Compile Include="..\Sources\Code\Operator.cs" />
+    <Compile Include="..\Sources\Code\Parser.cs" />
+    <Compile Include="..\Sources\Code\Scope.cs" />
+    <Compile Include="..\Sources\Code\Type.cs" />
+    <Compile Include="..\Sources\Code\UnaryExpression.cs" />
+    <Compile Include="..\Sources\CodeGen\CFamilyCodeGen.cs" />
+    <Compile Include="..\Sources\CodeGen\CPetriGen.cs" />
+    <Compile Include="..\Sources\CodeGen\CSharpPetriGen.cs" />
+    <Compile Include="..\Sources\CodeGen\CodeGen.cs" />
+    <Compile Include="..\Sources\CodeGen\CppPetriGen.cs" />
+    <Compile Include="..\Sources\CodeGen\PetriGen.cs" />
+    <Compile Include="..\Sources\Document\Compiler.cs" />
+    <Compile Include="..\Sources\Document\Document.cs" />
+    <Compile Include="..\Sources\Document\DocumentSettings.cs" />
+    <Compile Include="..\Sources\Document\DocumentSettingsEditor.cs" />
+    <Compile Include="..\Sources\Document\HeadersManager.cs" />
+    <Compile Include="..\Sources\Document\HeadlessDocument.cs" />
+    <Compile Include="..\Sources\Document\MacrosManager.cs" />
+    <Compile Include="..\Sources\Document\MainWindow.cs" />
+    <Compile Include="..\Sources\Document\UndoManager.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Controller.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\EntityDraw.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Gui.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\PaneEditor.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\PetriView.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\RenderEntityDraw.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\RenderView.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugClient.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugController.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugEditor.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugEntityDraw.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugGui.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugView.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Debugger\GeneratedDynamicLibProxy.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorController.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorEntityDraw.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorGui.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorView.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Editor\EntityEditor.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Editor\Find.cs" />
+    <Compile Include="..\Sources\Model\Action.cs" />
+    <Compile Include="..\Sources\Model\Comment.cs" />
+    <Compile Include="..\Sources\Model\Entity.cs" />
+    <Compile Include="..\Sources\Model\ExitPoint.cs" />
+    <Compile Include="..\Sources\Model\InnerPetriNet.cs" />
+    <Compile Include="..\Sources\Model\PetriNet.cs" />
+    <Compile Include="..\Sources\Model\RootPetriNet.cs" />
+    <Compile Include="..\Sources\Model\State.cs" />
+    <Compile Include="..\Sources\Model\Transition.cs" />
   </ItemGroup>
 </Project>

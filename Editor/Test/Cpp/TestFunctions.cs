@@ -22,7 +22,7 @@
 
 using NUnit.Framework;
 using System;
-using Petri.Editor.Cpp;
+using Petri.Editor.Code;
 using System.Collections.Generic;
 
 namespace Petri.Test.Cpp
@@ -57,7 +57,7 @@ namespace Petri.Test.Cpp
             Assert.AreEqual(1, e.Function.Parameters.Count);
             Assert.AreEqual(1, e.Arguments.Count);
 
-            Assert.AreEqual("3", e.Arguments[0].MakeCpp());
+            Assert.AreEqual("3", e.Arguments[0].MakeCode());
         }
 
         [Test()]
@@ -73,7 +73,7 @@ namespace Petri.Test.Cpp
             Assert.AreEqual(1, e.Function.Parameters.Count);
             Assert.AreEqual(1, e.Arguments.Count);
 
-            Assert.AreEqual("3", e.Arguments[0].MakeCpp());
+            Assert.AreEqual("3", e.Arguments[0].MakeCode());
         }
 
         [Test()]
@@ -89,8 +89,8 @@ namespace Petri.Test.Cpp
             Assert.AreEqual(2, e.Function.Parameters.Count);
             Assert.AreEqual(2, e.Arguments.Count);
 
-            Assert.AreEqual("1", e.Arguments[0].MakeCpp());
-            Assert.AreEqual("2", e.Arguments[1].MakeCpp());
+            Assert.AreEqual("1", e.Arguments[0].MakeCode());
+            Assert.AreEqual("2", e.Arguments[1].MakeCode());
         }
 
         [Test()]
@@ -128,8 +128,8 @@ namespace Petri.Test.Cpp
         {
 
             // GIVEN a function list
-            var functions = new List<Editor.Cpp.Function>();
-            var f = new Editor.Cpp.Function(new Editor.Cpp.Type(Language.CSharp, "void"), null, "f", false);
+            var functions = new List<Editor.Code.Function>();
+            var f = new Editor.Code.Function(new Editor.Code.Type(Language.CSharp, "void"), null, "f", false);
             functions.Add(f);
 
             // AND a function invocation string

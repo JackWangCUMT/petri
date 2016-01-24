@@ -73,7 +73,7 @@ namespace Petri.Editor
             }
         }
 
-        public override bool UsesFunction(Cpp.Function f)
+        public override bool UsesFunction(Code.Function f)
         {
             return false;
         }

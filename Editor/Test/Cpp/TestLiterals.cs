@@ -22,7 +22,7 @@
 
 using NUnit.Framework;
 using System;
-using Petri.Editor.Cpp;
+using Petri.Editor.Code;
 
 namespace Petri.Test.Cpp
 {

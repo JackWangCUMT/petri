@@ -175,7 +175,7 @@ namespace Petri.Editor
                         if(forceGeneration && verbose) {
                             Console.WriteLine("The previously generated " + document.Settings.LanguageName() + " code is outdated or nonexistent, generating new code…");
                         }
-                        document.SaveCppDontAsk();
+                        document.GenerateCodeDontAsk();
                         document.Save();
                         if(verbose) {
                             Console.WriteLine("Successfully generated the " + document.Settings.LanguageName() + " code");

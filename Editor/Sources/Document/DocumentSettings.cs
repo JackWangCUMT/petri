@@ -123,7 +123,7 @@ namespace Petri.Editor
             this.LibOutputPath = "";
             this.Hostname = "localhost";
             this.Port = 12345;
-            this.Language = Cpp.Language.Cpp;
+            this.Language = Code.Language.Cpp;
             this.RunInEditor = false;
 
             Name = "MyPetriNet";
@@ -140,7 +140,7 @@ namespace Petri.Editor
 
                 if(elem.Attribute("Language") != null) {
                     try {
-                        Language = (Cpp.Language)Cpp.Language.Parse(Language.GetType(),
+                        Language = (Code.Language)Code.Language.Parse(Language.GetType(),
                                                                     elem.Attribute("Language").Value);
                     }
                     catch(Exception) {
@@ -149,7 +149,7 @@ namespace Petri.Editor
                 }
 
                 if(elem.Attribute("Enum") != null) {
-                    Enum = new Cpp.Enum(Language, elem.Attribute("Enum").Value);
+                    Enum = new Code.Enum(Language, elem.Attribute("Enum").Value);
                 }
 				
                 if(elem.Attribute("SourceOutputPath") != null) {
@@ -229,7 +229,7 @@ namespace Petri.Editor
         /// Gets or sets the enum representing the possible results of the execution of an action.
         /// </summary>
         /// <value>The enum.</value>
-        public Cpp.Enum Enum {
+        public Code.Enum Enum {
             get;
             set;
         }
@@ -238,9 +238,9 @@ namespace Petri.Editor
         /// Gets the default enum for a new document.
         /// </summary>
         /// <value>The default enum.</value>
-        public Cpp.Enum DefaultEnum {
+        public Code.Enum DefaultEnum {
             get {
-                return new Cpp.Enum(Language, "ActionResult", new string[]{ "OK", "NOK" });
+                return new Code.Enum(Language, "ActionResult", new string[]{ "OK", "NOK" });
             }
         }
 
@@ -331,7 +331,7 @@ namespace Petri.Editor
         /// Gets or sets the language the document uses for generation and compilation.
         /// </summary>
         /// <value>The language.</value>
-        public Cpp.Language Language {
+        public Code.Language Language {
             get {
                 return _language;
             }
@@ -352,13 +352,13 @@ namespace Petri.Editor
         /// <value><c>true</c> if run in editor; otherwise, <c>false</c>.</value>
         public bool RunInEditor {
             get {
-                if(Language != Cpp.Language.CSharp) {
+                if(Language != Code.Language.CSharp) {
                     _runInEditor = false;
                 }
                 return _runInEditor;
             }
             set {
-                _runInEditor = value && Language == Cpp.Language.CSharp;
+                _runInEditor = value && Language == Code.Language.CSharp;
             }
         }
 
@@ -367,14 +367,14 @@ namespace Petri.Editor
         /// </summary>
         /// <returns>The name.</returns>
         /// <param name="language">Language.</param>
-        public static string LanguageName(Cpp.Language language)
+        public static string LanguageName(Code.Language language)
         {
             switch(language) {
-            case Cpp.Language.Cpp:
+            case Code.Language.Cpp:
                 return "C++";
-            case Cpp.Language.C:
+            case Code.Language.C:
                 return "C";
-            case Cpp.Language.CSharp:
+            case Code.Language.CSharp:
                 return "C#";
             }
 
@@ -417,10 +417,10 @@ namespace Petri.Editor
         /// <value>The lib extension.</value>
         public string LibExtension {
             get {
-                if(Language == Cpp.Language.CSharp) {
+                if(Language == Code.Language.CSharp) {
                     return ".dll";
                 }
-                else if(Language == Cpp.Language.Cpp || Language == Cpp.Language.C) {
+                else if(Language == Code.Language.Cpp || Language == Code.Language.C) {
                     return ".so";
                 }
 
@@ -441,7 +441,7 @@ namespace Petri.Editor
                 val += f + " ";
             }
 
-            if(Language == Cpp.Language.C || Language == Cpp.Language.Cpp) {
+            if(Language == Code.Language.C || Language == Code.Language.Cpp) {
                 val += "-shared ";
                 if(Configuration.RunningPlatform == Platform.Mac) {
                     val += "-undefined dynamic_lookup -flat_namespace ";
@@ -459,7 +459,7 @@ namespace Petri.Editor
                     val += "-l'" + l + "' ";
                 }
 
-                if(Language == Cpp.Language.Cpp) {
+                if(Language == Code.Language.Cpp) {
                     val += "-std=c++14 ";
                 }
 
@@ -472,14 +472,14 @@ namespace Petri.Editor
 
                 val += "-o '" + lib + "' ";
 
-                if(Language == Cpp.Language.Cpp) {
+                if(Language == Code.Language.Cpp) {
                     val += "-x c++ '" + source + "'";
                 }
-                else if(Language == Cpp.Language.C) {
+                else if(Language == Code.Language.C) {
                     val += "-x c '" + source + "'";
                 }
             }
-            else if(Language == Cpp.Language.CSharp) {
+            else if(Language == Code.Language.CSharp) {
                 val += "-t:library -r:CSRuntime ";
 
                 val += GetPaths();
@@ -513,23 +513,23 @@ namespace Petri.Editor
                                                                                "*",
                                                                                System.IO.SearchOption.AllDirectories);
                     foreach(var dir in directories) {
-                        if(Language == Cpp.Language.C || Language == Cpp.Language.Cpp) {
+                        if(Language == Code.Language.C || Language == Code.Language.Cpp) {
                             val += "-L'" + dir + "' ";
                         }
-                        else if(Language == Cpp.Language.CSharp) {
+                        else if(Language == Code.Language.CSharp) {
                             val += "-lib:'" + dir + "' ";
                         }
                     }
                 }
-                if(Language == Cpp.Language.C || Language == Cpp.Language.Cpp) {
+                if(Language == Code.Language.C || Language == Code.Language.Cpp) {
                     val += "-L'" + i.Item1 + "' ";
                 }
-                else if(Language == Cpp.Language.CSharp) {
+                else if(Language == Code.Language.CSharp) {
                     val += "-lib:'" + i.Item1 + "' ";
                 }
             }
 
-            if(Language == Cpp.Language.C || Language == Cpp.Language.Cpp) {
+            if(Language == Code.Language.C || Language == Code.Language.Cpp) {
                 foreach(var i in IncludePaths) {
                     // Recursive?
                     if(System.IO.Directory.Exists(i.Item1)) {
@@ -556,7 +556,7 @@ namespace Petri.Editor
             return val;
         }
 
-        Cpp.Language _language;
+        Code.Language _language;
         HeadlessDocument _document;
         bool _runInEditor;
     }

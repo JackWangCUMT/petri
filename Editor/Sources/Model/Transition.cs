@@ -26,7 +26,7 @@ using System.Xml;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Linq;
-using Petri.Editor.Cpp;
+using Petri.Editor.Code;
 
 namespace Petri.Editor
 {
@@ -195,7 +195,7 @@ namespace Petri.Editor
             set;
         }
 
-        public override string CppName {
+        public override string CodeIdentifier {
             get {
                 return "transition_" + this.ID.ToString();
             }

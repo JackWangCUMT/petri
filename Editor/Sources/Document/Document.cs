@@ -31,12 +31,12 @@ namespace Petri.Editor
 {
     public class LanguageChangeEventArgs : EventArgs
     {
-        public LanguageChangeEventArgs(Cpp.Language l)
+        public LanguageChangeEventArgs(Code.Language l)
         {
             NewLanguage = l;
         }
 
-        public Cpp.Language NewLanguage {
+        public Code.Language NewLanguage {
             get;
             private set;
         }
@@ -504,12 +504,12 @@ namespace Petri.Editor
             SwitchToEditor();
         }
 
-        public void SaveCpp()
+        public void GenerateCode()
         {
             if(Path != "") {
                 if(Settings.SourceOutputPath != "") {
                     if(!Conflicts(PetriNet)) {
-                        this.SaveCppDontAsk();
+                        this.GenerateCodeDontAsk();
                         _modifiedSinceGeneration = false;
                         Window.EditorGui.Status = Configuration.GetLocalized("The <language> code has been sucessfully generated.",
                                                                              Settings.LanguageName());
@@ -537,7 +537,7 @@ namespace Petri.Editor
                         this.Settings.SourceOutputPath = GetRelativeToDoc(fc.Filename);
                         Modified = old != Settings.SourceOutputPath;
 
-                        this.SaveCppDontAsk();
+                        this.GenerateCodeDontAsk();
                     }
 
                     fc.Destroy();
@@ -560,7 +560,7 @@ namespace Petri.Editor
         {
             if(this.Path != "") {
                 if(_modifiedSinceGeneration) {
-                    SaveCpp();
+                    GenerateCode();
                 }
                 Window.Gui.Status = Configuration.GetLocalized("Compiling…");
                 Task t = Task.Run((System.Action)CompileTask);

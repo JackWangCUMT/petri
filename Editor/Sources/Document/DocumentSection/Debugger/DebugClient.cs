@@ -374,12 +374,12 @@ namespace Petri.Editor
         /// Triggers an asynchronous evaluation of a code expression.
         /// </summary>
         /// <param name="expression">The expression to evaluate.</param>
-        public void Evaluate(Cpp.Expression expression)
+        public void Evaluate(Code.Expression expression)
         {
             if(!PetriRunning) {
                 var literals = expression.GetLiterals();
                 foreach(var l in literals) {
-                    if(l is Cpp.VariableExpression) {
+                    if(l is Code.VariableExpression) {
                         throw new Exception(Configuration.GetLocalized("A variable of the petri net cannot be evaluated when the petri net is not running."));
                     }
                 }

@@ -22,7 +22,7 @@
 
 using NUnit.Framework;
 using System;
-using Petri.Editor.Cpp;
+using Petri.Editor.Code;
 
 namespace Petri.Test.Cpp
 {
@@ -30,26 +30,26 @@ namespace Petri.Test.Cpp
     public class TestExpressionToString
     {
         [Test()]
-        public void TestAdditionMakeCpp()
+        public void TestAdditionMakeCode()
         {
             // GIVEN a simple addition expression
             // WHEN we create an expression from it and convert it to a C++ string
             var e = Expression.CreateFromString("3+4", Language.CSharp);
 
             // THEN the string representations of the expression is as expected
-            Assert.AreEqual("3 + 4", e.MakeCpp());
+            Assert.AreEqual("3 + 4", e.MakeCode());
             Assert.AreEqual("3 + 4", e.MakeUserReadable());
         }
 
         [Test()]
-        public void TestMultiplicationToCpp()
+        public void TestMultiplicationToCode()
         {
             // GIVEN a composition of an addition and multiplication
             // WHEN we create an expression from it and convert it to a C++ string
             var e = Expression.CreateFromString("3+4*5", Language.CSharp);
 
             // THEN the string representations of the expression is as expected
-            Assert.AreEqual("3 + 4 * 5", e.MakeCpp());
+            Assert.AreEqual("3 + 4 * 5", e.MakeCode());
             Assert.AreEqual("3 + 4 * 5", e.MakeUserReadable());
         }
 
@@ -63,7 +63,7 @@ namespace Petri.Test.Cpp
             var e = Expression.CreateFromString<FunctionInvocation>(invocation, Language.CSharp);
 
             // THEN the string representations of the expression is as expected
-            Assert.AreEqual(invocation, e.MakeCpp());
+            Assert.AreEqual(invocation, e.MakeCode());
             Assert.AreEqual(invocation, e.MakeUserReadable());
         }
 
@@ -77,7 +77,7 @@ namespace Petri.Test.Cpp
             var e = Expression.CreateFromString<FunctionInvocation>(invocation, Language.CSharp);
 
             // THEN the string representations of the expression is as expected
-            Assert.AreEqual("f((Petri.UnknownType)(a))", e.MakeCpp());
+            Assert.AreEqual("f((Petri.UnknownType)(a))", e.MakeCode());
             Assert.AreEqual(invocation, e.MakeUserReadable());
         }
 
@@ -91,7 +91,7 @@ namespace Petri.Test.Cpp
             var e = Expression.CreateFromString<FunctionInvocation>(invocation, Language.CSharp);
 
             // THEN the string representations of the expression is as expected
-            Assert.AreEqual("f((Petri.UnknownType)(a))", e.MakeCpp());
+            Assert.AreEqual("f((Petri.UnknownType)(a))", e.MakeCode());
             Assert.AreEqual("f(a)", e.MakeUserReadable());
         }
 
@@ -105,7 +105,7 @@ namespace Petri.Test.Cpp
             var e = Expression.CreateFromString<FunctionInvocation>(invocation, Language.CSharp);
 
             // THEN the string representations of the expression is as expected
-            Assert.AreEqual("f((Petri.UnknownType)(a), (Petri.UnknownType)(b), (Petri.UnknownType)(c))", e.MakeCpp());
+            Assert.AreEqual("f((Petri.UnknownType)(a), (Petri.UnknownType)(b), (Petri.UnknownType)(c))", e.MakeCode());
             Assert.AreEqual("f(a, b, c)", e.MakeUserReadable());
         }
     }

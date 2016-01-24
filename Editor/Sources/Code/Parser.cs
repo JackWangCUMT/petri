@@ -43,7 +43,7 @@ namespace Petri.Editor
         }
     }
 
-    namespace Cpp
+    namespace Code
     {
         public class Parser
         {

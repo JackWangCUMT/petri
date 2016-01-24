@@ -122,7 +122,7 @@ namespace Petri.Editor
             set;
         }
 
-        public override string CppName {
+        public override string CodeIdentifier {
             get {
                 return "state_" + this.ID.ToString();
             }

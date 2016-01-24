@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Xml;
 using System.Linq;
-using Petri.Editor.Cpp;
+using Petri.Editor.Code;
 
 namespace Petri.Editor
 {
@@ -35,11 +35,11 @@ namespace Petri.Editor
         {
             LastHeadersUpdate = DateTime.MinValue;
             Headers = new List<string>();
-            CppActions = new List<Function>();
+            CodeActions = new List<Function>();
             AllFunctionsList = new List<Function>();
-            CppConditions = new List<Function>();
+            CodeConditions = new List<Function>();
 
-            CppMacros = new Dictionary<string, string>();
+            PreprocessorMacros = new Dictionary<string, string>();
 
             Conflicting = new HashSet<Entity>();
 
@@ -85,12 +85,12 @@ namespace Petri.Editor
             }
         }
 
-        public Dictionary<string, string> CppMacros {
+        public Dictionary<string, string> PreprocessorMacros {
             get;
             private set;
         }
 
-        public List<Function> CppConditions {
+        public List<Function> CodeConditions {
             get;
             private set;
         }
@@ -114,23 +114,23 @@ namespace Petri.Editor
             }
         }
 
-        public List<Function> CppActions {
+        public List<Function> CodeActions {
             get;
             private set;
         }
 
         public void DispatchFunctions()
         {
-            CppActions.Clear();
-            CppConditions.Clear();
-            Cpp.Type e = Settings.Enum.Type, b = new Cpp.Type(Settings.Language, "bool");
+            CodeActions.Clear();
+            CodeConditions.Clear();
+            Code.Type e = Settings.Enum.Type, b = new Code.Type(Settings.Language, "bool");
 
             foreach(Function f in AllFunctions) {
                 if(f.ReturnType.Equals(e)) {
-                    CppActions.Add(f);
+                    CodeActions.Add(f);
                 }
                 else if(f.ReturnType.Equals(b)) {
-                    CppConditions.Add(f);
+                    CodeConditions.Add(f);
                 }
             }
         }
@@ -216,7 +216,7 @@ namespace Petri.Editor
                 headers.Add(hh);
             }
             var macros = new XElement("Macros");
-            foreach(var m in CppMacros) {
+            foreach(var m in PreprocessorMacros) {
                 var mm = new XElement("Macro");
                 mm.SetAttributeValue("Name", m.Key);
                 mm.SetAttributeValue("Value", m.Value);
@@ -264,7 +264,7 @@ namespace Petri.Editor
             Headers.Clear();
             AllFunctionsList.Clear();
 
-            CppMacros.Clear();
+            PreprocessorMacros.Clear();
 
             var node = elem.Element("Headers");
             if(node != null) {
@@ -277,7 +277,7 @@ namespace Petri.Editor
             node = elem.Element("Macros");
             if(node != null) {
                 foreach(var e in node.Elements()) {
-                    CppMacros.Add(e.Attribute("Name").Value, e.Attribute("Value").Value);
+                    PreprocessorMacros.Add(e.Attribute("Name").Value, e.Attribute("Value").Value);
                 }
             }
 
@@ -287,13 +287,13 @@ namespace Petri.Editor
             PetriNet.Canonize();
         }
 
-        public string CppPrefix {
+        public string CodePrefix {
             get {
                 return Settings.Name;
             }
         }
 
-        public void SaveCppDontAsk()
+        public void GenerateCodeDontAsk()
         {
             if(this.Settings.SourceOutputPath.Length == 0) {
                 throw new Exception(Configuration.GetLocalized("No source output path defined. Please open the Petri net with the graphical editor and generate the <language> code once.",

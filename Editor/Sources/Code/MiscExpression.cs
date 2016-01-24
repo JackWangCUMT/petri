@@ -25,12 +25,12 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
 
-namespace Petri.Editor.Cpp
+namespace Petri.Editor.Code
 {
     public class EmptyExpression : Expression
     {
         public EmptyExpression(Language language, bool doWeCare) : base(language,
-                                                                        Cpp.Operator.Name.None)
+                                                                        Code.Operator.Name.None)
         {
         }
 
@@ -39,7 +39,7 @@ namespace Petri.Editor.Cpp
             return false;
         }
 
-        public override string MakeCpp()
+        public override string MakeCode()
         {
             if(DoWeCare)
                 throw new Exception(Configuration.GetLocalized("Empty expression!"));
@@ -64,7 +64,7 @@ namespace Petri.Editor.Cpp
     public class BracketedExpression : Expression
     {
         public BracketedExpression(Expression b, Expression expr, Expression a) : base(b.Language,
-                                                                                       Cpp.Operator.Name.None)
+                                                                                       Code.Operator.Name.None)
         {
             Before = b;
             Expression = expr;
@@ -82,9 +82,9 @@ namespace Petri.Editor.Cpp
             return Expression.UsesFunction(f) || Before.UsesFunction(f) || After.UsesFunction(f);
         }
 
-        public override string MakeCpp()
+        public override string MakeCode()
         {
-            return Before.MakeCpp() + "{" + Expression.MakeCpp() + "}" + After.MakeCpp();
+            return Before.MakeCode() + "{" + Expression.MakeCode() + "}" + After.MakeCode();
         }
 
         public override string MakeUserReadable()
@@ -110,7 +110,7 @@ namespace Petri.Editor.Cpp
                 return new VariableExpression(s.Substring(1), language);
             }
             if(s.Contains("{")) {
-                var tup = Cpp.Expression.Preprocess(s);
+                var tup = Code.Expression.Preprocess(s);
                 int currentIndex = 0;
                 while(currentIndex < tup.Item1.Length) {
                     int index = tup.Item1.Substring(currentIndex).IndexOf("@") + currentIndex;
@@ -120,21 +120,21 @@ namespace Petri.Editor.Cpp
                     int expr = int.Parse(tup.Item1.Substring(index + 1,
                                                              lastIndex - (index + 1)));
                     if(tup.Item2[expr].Item1 == ExprType.Brackets) {
-                        return new BracketedExpression(Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(0,
+                        return new BracketedExpression(Code.Expression.CreateFromPreprocessedString(tup.Item1.Substring(0,
                                                                                                                        index),
                                                                                                    language,
                                                                                                    null,
                                                                                                    null,
                                                                                                    tup.Item2,
                                                                                                    true),
-                                                       Cpp.Expression.CreateFromPreprocessedString(tup.Item2[expr].Item2.Substring(1,
+                                                       Code.Expression.CreateFromPreprocessedString(tup.Item2[expr].Item2.Substring(1,
                                                                                                                                    tup.Item2[expr].Item2.Length - 2),
                                                                                                    language,
                                                                                                    null,
                                                                                                    null,
                                                                                                    tup.Item2,
                                                                                                    true),
-                                                       Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(lastIndex + 1),
+                                                       Code.Expression.CreateFromPreprocessedString(tup.Item1.Substring(lastIndex + 1),
                                                                                                    language,
                                                                                                    null,
                                                                                                    null,
@@ -150,7 +150,7 @@ namespace Petri.Editor.Cpp
         }
 
         protected LiteralExpression(Language language, string expr) : base(language,
-                                                                           Cpp.Operator.Name.None)
+                                                                           Code.Operator.Name.None)
         {
             Expression = expr.Trim();
         }
@@ -162,7 +162,7 @@ namespace Petri.Editor.Cpp
             return false;
         }
 
-        public override string MakeCpp()
+        public override string MakeCode()
         {
             return Expression;
         }
@@ -193,7 +193,7 @@ namespace Petri.Editor.Cpp
             }
         }
 
-        public override string MakeCpp()
+        public override string MakeCode()
         {
             if(Language == Language.C) {
                 return "(*PetriNet_getVariable(petriNet, (uint_fast32_t)(" + Prefix + Expression + ")))";
@@ -204,7 +204,7 @@ namespace Petri.Editor.Cpp
             else if(Language == Language.CSharp) {
                 return "PetriNet.GetVariable((UInt32)(" + Prefix + Expression + "))";
             }
-            throw new Exception("VariableExpression.MakeCpp: Should not get there!");
+            throw new Exception("VariableExpression.MakeCode: Should not get there!");
         }
 
         public override string MakeUserReadable()
@@ -248,7 +248,7 @@ namespace Petri.Editor.Cpp
                                              Expression expr1,
                                              Expression expr2,
                                              Expression expr3) : base(language,
-                                                                      Cpp.Operator.Name.TernaryConditional)
+                                                                      Code.Operator.Name.TernaryConditional)
         {
             this.Expression1 = expr1;
             this.Expression2 = expr2;
@@ -261,7 +261,7 @@ namespace Petri.Editor.Cpp
 
         public Expression Expression3 { get; private set; }
 
-        public override string MakeCpp()
+        public override string MakeCode()
         {// TODO: tbd
             throw new Exception(Configuration.GetLocalized("Operator not implemented!"));
         }
@@ -286,7 +286,7 @@ namespace Petri.Editor.Cpp
     public class ExpressionList : Expression
     {
         public ExpressionList(Language language, IEnumerable<Expression> expressions) : base(language,
-                                                                                             Cpp.Operator.Name.None)
+                                                                                             Code.Operator.Name.None)
         {
             Expressions = new List<Expression>(expressions);
         }
@@ -302,11 +302,11 @@ namespace Petri.Editor.Cpp
             return false;
         }
 
-        public override string MakeCpp()
+        public override string MakeCode()
         {
             return String.Join(";\n",
                                from e in Expressions
-                                        select e.MakeCpp());
+                                        select e.MakeCode());
         }
 
         public override string MakeUserReadable()

@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using Petri.Editor.Cpp;
+using Petri.Editor.Code;
 using System.Linq;
 
 namespace Petri.Editor
@@ -142,7 +142,7 @@ namespace Petri.Editor
             _headerGen += "#endif";
             _headerGen += "";
             _headerGen += "inline PetriDynamicLib *" + Document.Settings.Name + "_createLib() {";
-            _headerGen += "\treturn PetriDynamicLib_create(\"" + Document.CppPrefix + "\", \"" + Document.CppPrefix + "\", "
+            _headerGen += "\treturn PetriDynamicLib_create(\"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
             + Document.Settings.Port + ");";
             _headerGen += "}";
             _headerGen += "";
@@ -194,14 +194,14 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             a.GetVariables(cppVar);
 
-            _functionPrototypes += "static Petri_actionResult_t " + a.CppName + "_invocation(PetriNet *);\n";
-            _functionBodies += "static Petri_actionResult_t " + a.CppName + "_invocation(PetriNet *petriNet) {\n";
+            _functionPrototypes += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(PetriNet *);\n";
+            _functionBodies += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(PetriNet *petriNet) {\n";
 
             if(a.Function.NeedsReturn) {
-                _functionBodies += a.Function.MakeCpp() + "\n";
+                _functionBodies += a.Function.MakeCode() + "\n";
             }
             else {
-                _functionBodies += Document.Settings.Enum.Name + " result = (Petri_actionResult_t)(" + a.Function.MakeCpp() + ")" + ";\n";
+                _functionBodies += Document.Settings.Enum.Name + " result = (Petri_actionResult_t)(" + a.Function.MakeCode() + ")" + ";\n";
             }
 			
             if(a.Function.NeedsReturn) {
@@ -213,9 +213,9 @@ namespace Petri.Editor
 
             _functionBodies += "}\n\n";
 
-            CodeGen += "PetriAction *" + a.CppName + " = PetriAction_createParam(" + a.ID.ToString() + ", \""
-            + a.Parent.Name + "_" + a.Name + "\", &" + a.CppName + "_invocation, " + a.RequiredTokens.ToString() + ");";
-            CodeGen += "PetriNet_addAction(petriNet, " + a.CppName + ", " + ((a.Active && (a.Parent is RootPetriNet)) ? "true" : "false") + ");";
+            CodeGen += "PetriAction *" + a.CodeIdentifier + " = PetriAction_createParam(" + a.ID.ToString() + ", \""
+            + a.Parent.Name + "_" + a.Name + "\", &" + a.CodeIdentifier + "_invocation, " + a.RequiredTokens.ToString() + ");";
+            CodeGen += "PetriNet_addAction(petriNet, " + a.CodeIdentifier + ", " + ((a.Active && (a.Parent is RootPetriNet)) ? "true" : "false") + ");";
 
             foreach(var tup in old) {
                 tup.Key.Expression = tup.Value;
@@ -224,9 +224,9 @@ namespace Petri.Editor
 
         protected override void GenerateExitPoint(ExitPoint e, IDManager lastID)
         {
-            CodeGen += "PetriAction *" + e.CppName + " = PetriAction_create(" + e.ID.ToString() + ", \""
+            CodeGen += "PetriAction *" + e.CodeIdentifier + " = PetriAction_create(" + e.ID.ToString() + ", \""
             + e.Parent.Name + "_" + e.Name + "\", &PetriUtility_returnDefault, " + e.RequiredTokens.ToString() + ");";
-            CodeGen += "PetriNet_addAction(petriNet, " + e.CppName + ", false);";
+            CodeGen += "PetriNet_addAction(petriNet, " + e.CodeIdentifier + ", false);";
         }
 
         protected override void GenerateInnerPetriNet(InnerPetriNet i, IDManager lastID)
@@ -244,7 +244,7 @@ namespace Petri.Editor
                     string tName = name + "_" + newID.ToString();
 
                     CodeGen += "PetriAction_createAndAddTransition(" + name + ", " + newID.ToString()
-                    + ", \"" + tName + "\", " + s.CppName + ", &PetriUtility_returnTrue);";
+                    + ", \"" + tName + "\", " + s.CodeIdentifier + ", &PetriUtility_returnTrue);";
                 }
             }
         }
@@ -277,12 +277,12 @@ namespace Petri.Editor
                 }
             }
 
-            string bName = t.Before.CppName;
-            string aName = t.After.CppName;
+            string bName = t.Before.CodeIdentifier;
+            string aName = t.After.CodeIdentifier;
 
             var b = t.Before as InnerPetriNet;
             if(b != null) {
-                bName = b.ExitPoint.CppName;
+                bName = b.ExitPoint.CodeIdentifier;
             }
 
             var a = t.After as InnerPetriNet;
@@ -293,14 +293,14 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             t.GetVariables(cppVar);
 
-            _functionPrototypes += "static bool " + t.CppName + "_invocation(Petri_actionResult_t);\n";
-            _functionBodies += "static bool " + t.CppName + "_invocation(Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n";
+            _functionPrototypes += "static bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t);\n";
+            _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n";
 
             if(t.Condition.NeedsReturn) {
-                _functionBodies += t.Condition.MakeCpp();
+                _functionBodies += t.Condition.MakeCode();
             }
             else {
-                _functionBodies += "bool result = " + t.Condition.MakeCpp() + ";\n";
+                _functionBodies += "bool result = " + t.Condition.MakeCode() + ";\n";
             }
 
             if(t.Condition.NeedsReturn) {
@@ -313,7 +313,7 @@ namespace Petri.Editor
             _functionBodies += "}\n\n";
 
             CodeGen += "PetriAction_createAndAddTransition(" + bName + ", " + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", "
-            + "&" + t.CppName + "_invocation" + ");";
+            + "&" + t.CodeIdentifier + "_invocation" + ");";
 
             foreach(var tup in old) {
                 tup.Key.Expression = tup.Value;

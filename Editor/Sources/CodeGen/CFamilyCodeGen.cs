@@ -22,18 +22,18 @@
 
 using System;
 using System.Collections.Generic;
-using ExprType = Petri.Editor.Cpp.Expression.ExprType;
+using ExprType = Petri.Editor.Code.Expression.ExprType;
 
 namespace Petri.Editor
 {
     public class CFamilyCodeGen : CodeGen
     {
-        public CFamilyCodeGen(Cpp.Language language)
+        public CFamilyCodeGen(Code.Language language)
         {
             _lang = language;
         }
 
-        public override Cpp.Language Language {
+        public override Code.Language Language {
             get {
                 return _lang;
             }
@@ -60,7 +60,7 @@ namespace Petri.Editor
 
             int currentIndent = 0;
 
-            var nesting = new Stack<Cpp.Expression.ExprType>();
+            var nesting = new Stack<Code.Expression.ExprType>();
 
             foreach(string line in _value.Split('\n')) {
                 string newLine = line;
@@ -167,7 +167,7 @@ namespace Petri.Editor
             return s;
         }
 
-        private Cpp.Language _lang;
+        private Code.Language _lang;
         private string _value = "";
     }
 }

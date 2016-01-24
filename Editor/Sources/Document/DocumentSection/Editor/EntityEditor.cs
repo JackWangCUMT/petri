@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using Gtk;
 using System.Linq;
-using Petri.Editor.Cpp;
+using Petri.Editor.Code;
 
 namespace Petri.Editor
 {
@@ -143,7 +143,7 @@ namespace Petri.Editor
                 list.Add(printFunction);
                 list.Add(pauseFunction);
                 list.Add(manual);
-                foreach(var func in _document.CppActions) {
+                foreach(var func in _document.CodeActions) {
                     if(func.Signature != Action.DoNothingFunction(a.Document).Signature && func.Signature != Action.PrintFunction(a.Document).Signature && func.Signature != Action.PauseFunction(a.Document).Signature && func.ReturnType.Equals(_document.Settings.Enum.Type))
                         list.Add(func.Signature);
                 }
@@ -196,7 +196,7 @@ namespace Petri.Editor
                         else {
                             actionType = ActionType.Invocation;
 
-                            var f = _document.CppActions.FirstOrDefault(delegate(Cpp.Function ff) {
+                            var f = _document.CodeActions.FirstOrDefault(delegate(Code.Function ff) {
                                 return ff.Signature == val;
                             });
 

@@ -69,7 +69,7 @@ namespace Petri.Editor
 
         public string EntryPointName {
             get {
-                return this.CppName + "_Entry";
+                return this.CodeIdentifier + "_Entry";
             }
         }
 

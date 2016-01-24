@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Petri.Editor.Cpp
+namespace Petri.Editor.Code
 {
     public class BinaryExpression : Expression
     {
@@ -46,54 +46,54 @@ namespace Petri.Editor.Cpp
             return Expression1.UsesFunction(f) || Expression2.UsesFunction(f);
         }
 
-        public override string MakeCpp()
+        public override string MakeCode()
         {
             string e1 = Expression.Parenthesize(this,
                                                 this.Expression1,
-                                                this.Expression1.MakeCpp());
+                                                this.Expression1.MakeCode());
             string e2 = Expression.Parenthesize(this,
                                                 this.Expression2,
-                                                this.Expression2.MakeCpp());
+                                                this.Expression2.MakeCode());
             switch(this.Operator) {
-            case Cpp.Operator.Name.Mult:
+            case Code.Operator.Name.Mult:
                 return e1 + " * " + e2;
-            case Cpp.Operator.Name.Div:
+            case Code.Operator.Name.Div:
                 return e1 + " / " + e2;
-            case Cpp.Operator.Name.Mod:
+            case Code.Operator.Name.Mod:
                 return e1 + " % " + e2;
-            case Cpp.Operator.Name.Plus:
+            case Code.Operator.Name.Plus:
                 return e1 + " + " + e2;
-            case Cpp.Operator.Name.Minus:
+            case Code.Operator.Name.Minus:
                 return e1 + " - " + e2;
-            case Cpp.Operator.Name.ShiftLeft:
+            case Code.Operator.Name.ShiftLeft:
                 return e1 + " << " + e2;
-            case Cpp.Operator.Name.ShiftRight:
+            case Code.Operator.Name.ShiftRight:
                 return e1 + " >> " + e2;
-            case Cpp.Operator.Name.Less:
+            case Code.Operator.Name.Less:
                 return e1 + " < " + e2;
-            case Cpp.Operator.Name.LessEqual:
+            case Code.Operator.Name.LessEqual:
                 return e1 + " <= " + e2;
-            case Cpp.Operator.Name.Greater:
+            case Code.Operator.Name.Greater:
                 return e1 + " > " + e2;
-            case Cpp.Operator.Name.GreaterEqual:
+            case Code.Operator.Name.GreaterEqual:
                 return e1 + " >= " + e2;
-            case Cpp.Operator.Name.Equal:
+            case Code.Operator.Name.Equal:
                 return e1 + " == " + e2;
-            case Cpp.Operator.Name.NotEqual:
+            case Code.Operator.Name.NotEqual:
                 return e1 + " != " + e2;
-            case Cpp.Operator.Name.BitwiseAnd:
+            case Code.Operator.Name.BitwiseAnd:
                 return e1 + " & " + e2;
-            case Cpp.Operator.Name.BitwiseXor:
+            case Code.Operator.Name.BitwiseXor:
                 return e1 + " ^ " + e2;
-            case Cpp.Operator.Name.BitwiseOr:
+            case Code.Operator.Name.BitwiseOr:
                 return e1 + " | " + e2;
-            case Cpp.Operator.Name.LogicalAnd:
+            case Code.Operator.Name.LogicalAnd:
                 return e1 + " && " + e2;
-            case Cpp.Operator.Name.LogicalOr:
+            case Code.Operator.Name.LogicalOr:
                 return e1 + " || " + e2;
-            case Cpp.Operator.Name.Assignment:
+            case Code.Operator.Name.Assignment:
                 return e1 + " = " + e2;
-            case Cpp.Operator.Name.Comma:
+            case Code.Operator.Name.Comma:
                 return e1 + ", " + e2;
             }
             throw new Exception(Configuration.GetLocalized("Operator not implemented!"));
@@ -108,65 +108,65 @@ namespace Petri.Editor.Cpp
                                                 this.Expression2,
                                                 this.Expression2.MakeUserReadable());
             switch(this.Operator) {
-            case Cpp.Operator.Name.Mult:
+            case Code.Operator.Name.Mult:
                 return p1 + " * " + p2;
-            case Cpp.Operator.Name.Div:
+            case Code.Operator.Name.Div:
                 return p1 + " / " + p2;
-            case Cpp.Operator.Name.Mod:
+            case Code.Operator.Name.Mod:
                 return p1 + " % " + p2;
-            case Cpp.Operator.Name.Plus:
+            case Code.Operator.Name.Plus:
                 return p1 + " + " + p2;
-            case Cpp.Operator.Name.Minus:
+            case Code.Operator.Name.Minus:
                 return p1 + " - " + p2;
-            case Cpp.Operator.Name.ShiftLeft:
+            case Code.Operator.Name.ShiftLeft:
                 return p1 + " << " + p2;
-            case Cpp.Operator.Name.ShiftRight:
+            case Code.Operator.Name.ShiftRight:
                 return p1 + " >> " + p2;
-            case Cpp.Operator.Name.Less:
+            case Code.Operator.Name.Less:
                 return p1 + " < " + p2;
-            case Cpp.Operator.Name.LessEqual:
+            case Code.Operator.Name.LessEqual:
                 return p1 + " <= " + p2;
-            case Cpp.Operator.Name.Greater:
+            case Code.Operator.Name.Greater:
                 return p1 + " > " + p2;
-            case Cpp.Operator.Name.GreaterEqual:
+            case Code.Operator.Name.GreaterEqual:
                 return p1 + " >= " + p2;
-            case Cpp.Operator.Name.Equal:
+            case Code.Operator.Name.Equal:
                 return p1 + " == " + p2;
-            case Cpp.Operator.Name.NotEqual:
+            case Code.Operator.Name.NotEqual:
                 return p1 + " != " + p2;
-            case Cpp.Operator.Name.BitwiseAnd:
+            case Code.Operator.Name.BitwiseAnd:
                 return p1 + " & " + p2;
-            case Cpp.Operator.Name.BitwiseXor:
+            case Code.Operator.Name.BitwiseXor:
                 return p1 + " ^ " + p2;
-            case Cpp.Operator.Name.BitwiseOr:
+            case Code.Operator.Name.BitwiseOr:
                 return p1 + " | " + p2;
-            case Cpp.Operator.Name.LogicalAnd:
+            case Code.Operator.Name.LogicalAnd:
                 return p1 + " && " + p2;
-            case Cpp.Operator.Name.LogicalOr:
+            case Code.Operator.Name.LogicalOr:
                 return p1 + " || " + p2;
-            case Cpp.Operator.Name.Assignment:
+            case Code.Operator.Name.Assignment:
                 return p1 + " = " + p2;
-            case Cpp.Operator.Name.PlusAssign:
+            case Code.Operator.Name.PlusAssign:
                 return p1 + " += " + p2;
-            case Cpp.Operator.Name.MinusAssign:
+            case Code.Operator.Name.MinusAssign:
                 return p1 + " -= " + p2;
-            case Cpp.Operator.Name.MultAssign:
+            case Code.Operator.Name.MultAssign:
                 return p1 + " *= " + p2;
-            case Cpp.Operator.Name.DivAssign:
+            case Code.Operator.Name.DivAssign:
                 return p1 + " /= " + p2;
-            case Cpp.Operator.Name.ModAssign:
+            case Code.Operator.Name.ModAssign:
                 return p1 + " %= " + p2;
-            case Cpp.Operator.Name.ShiftLeftAssign:
+            case Code.Operator.Name.ShiftLeftAssign:
                 return p1 + " <<= " + p2;
-            case Cpp.Operator.Name.ShiftRightAssign:
+            case Code.Operator.Name.ShiftRightAssign:
                 return p1 + " >>= " + p2;
-            case Cpp.Operator.Name.BitwiseAndAssig:
+            case Code.Operator.Name.BitwiseAndAssig:
                 return p1 + " &= " + p2;
-            case Cpp.Operator.Name.BitwiseXorAssign:
+            case Code.Operator.Name.BitwiseXorAssign:
                 return p1 + " ^= " + p2;
-            case Cpp.Operator.Name.BitwiseOrAssign:
+            case Code.Operator.Name.BitwiseOrAssign:
                 return p1 + " |= " + p2;
-            case Cpp.Operator.Name.Comma:
+            case Code.Operator.Name.Comma:
                 return p1 + ", " + p2;
             }
             throw new Exception(Configuration.GetLocalized("Operator not implemented!"));

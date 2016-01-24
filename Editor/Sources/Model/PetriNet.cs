@@ -106,7 +106,7 @@ namespace Petri.Editor
             return elem;
         }
 
-        public override bool UsesFunction(Cpp.Function f)
+        public override bool UsesFunction(Code.Function f)
         {
             foreach(var t in Transitions)
                 if(t.UsesFunction(f))

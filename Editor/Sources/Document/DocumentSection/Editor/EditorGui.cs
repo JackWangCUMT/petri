@@ -246,7 +246,7 @@ namespace Petri.Editor
                 _document.Save();
             }
             else if(sender == _cpp) {
-                _document.SaveCpp();
+                _document.GenerateCode();
             }
             else if(sender == _compile) {
                 _document.Compile(false);
