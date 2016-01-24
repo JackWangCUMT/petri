@@ -43,9 +43,9 @@ namespace Petri.Editor
             _vbox = new VBox(false, 5);
             this.Add(_vbox);
 
-            if(MainClass.Documents.Count > 0) {
+            if(Application.Documents.Count > 0) {
                 int x, y;
-                MainClass.Documents[MainClass.Documents.Count - 1].Window.GetPosition(out x, out y);
+                Application.Documents[Application.Documents.Count - 1].Window.GetPosition(out x, out y);
                 this.Move(x + 20, y + 42);
             }
             else {
@@ -211,7 +211,7 @@ namespace Petri.Editor
             _openRecentMenu = new Menu();
             _openRecentItem.Submenu = _openRecentMenu;
 
-            var recentItems = MainClass.RecentDocuments;
+            var recentItems = Application.RecentDocuments;
 
             foreach(var pair in recentItems) {
                 MenuItem item = new MenuItem(pair.Value);
@@ -250,7 +250,7 @@ namespace Petri.Editor
         protected void OnClickRecentMenu(object sender, EventArgs args)
         {
             var item = (Label)((MenuItem)sender).Child;
-            MainClass.OpenDocument(item.Text);
+            Application.OpenDocument(item.Text);
         }
 
         /// <summary>
@@ -261,9 +261,9 @@ namespace Petri.Editor
         protected void OnClickMenu(object sender, EventArgs args)
         {
             if(sender == _quitItem) {
-                bool shouldExit = MainClass.OnExit();
+                bool shouldExit = Application.OnExit();
                 if(shouldExit) {
-                    MainClass.SaveAndQuit();
+                    Application.SaveAndQuit();
                 }
             }
             else if(sender == _saveItem) {
@@ -337,15 +337,15 @@ namespace Petri.Editor
                 }
             }
             else if(sender == _openItem) {
-                MainClass.OpenDocument();
+                Application.OpenDocument();
             }
             else if(sender == _clearRecentItems) {
-                MainClass.RecentDocuments.Clear();
-                MainClass.UpdateRecentDocuments();
+                Application.RecentDocuments.Clear();
+                Application.UpdateRecentDocuments();
             }
             else if(sender == _newItem) {
                 var doc = new Document("");
-                MainClass.AddDocument(doc);
+                Application.AddDocument(doc);
             }
             else if(sender == _closeItem) {
                 if(_document.CloseAndConfirm())
@@ -397,9 +397,9 @@ namespace Petri.Editor
         protected static void OnClickMenuStatic(object sender, EventArgs args)
         {
             if(sender == _staticQuitItem) {
-                bool shouldExit = MainClass.OnExit();
+                bool shouldExit = Application.OnExit();
                 if(shouldExit) {
-                    MainClass.SaveAndQuit();
+                    Application.SaveAndQuit();
                 }
             }
         }
@@ -717,7 +717,7 @@ namespace Petri.Editor
             if(Configuration.RunningPlatform == Platform.Mac) {
                 MonoDevelop.MacInterop.ApplicationEvents.Quit += delegate (object sender,
                                                                            MonoDevelop.MacInterop.ApplicationQuitEventArgs e) {
-                    MainClass.SaveAndQuit();
+                    Application.SaveAndQuit();
                     // If we get here, the user has cancelled the action
                     e.UserCancelled = true;
                     e.Handled = true;
@@ -726,7 +726,7 @@ namespace Petri.Editor
                 MonoDevelop.MacInterop.ApplicationEvents.OpenDocument += delegate (object sender,
                                                                                    MonoDevelop.MacInterop.ApplicationDocumentEventArgs e) {
                     foreach(var pair in e.Documents) {
-                        MainClass.OpenDocument(pair.Key);
+                        Application.OpenDocument(pair.Key);
                     }
 
                     e.Handled = true;

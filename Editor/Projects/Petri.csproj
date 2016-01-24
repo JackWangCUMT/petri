@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <ReleaseVersion>1.2</ReleaseVersion>
     <BaseDirectory>..</BaseDirectory>
+    <StartupObject>Petri.Editor.Application</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -120,7 +121,6 @@
   <ItemGroup>
     <Compile Include="..\Sources\Application\Configuration.cs" />
     <Compile Include="..\Sources\Application\IgeMacMenuGlobal.cs" />
-    <Compile Include="..\Sources\Application\Program.cs" />
     <Compile Include="..\Sources\Code\BinaryExpression.cs" />
     <Compile Include="..\Sources\Code\Enum.cs" />
     <Compile Include="..\Sources\Code\Expression.cs" />
@@ -176,5 +176,6 @@
     <Compile Include="..\Sources\Model\RootPetriNet.cs" />
     <Compile Include="..\Sources\Model\State.cs" />
     <Compile Include="..\Sources\Model\Transition.cs" />
+    <Compile Include="..\Sources\Application\Application.cs" />
   </ItemGroup>
 </Project>

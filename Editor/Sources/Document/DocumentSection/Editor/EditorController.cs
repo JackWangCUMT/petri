@@ -40,9 +40,9 @@ namespace Petri.Editor
         public override void Copy()
         {
             if(_document.Window.EditorGui.View.SelectedEntities.Count > 0) {
-                MainClass.Clipboard = new HashSet<Entity>(CloneEntities(_document.Window.EditorGui.View.SelectedEntities,
+                Application.Clipboard = new HashSet<Entity>(CloneEntities(_document.Window.EditorGui.View.SelectedEntities,
                                                                         _document));
-                MainClass.PasteCount = 0;
+                Application.PasteCount = 0;
 
                 this.UpdateMenuItems();
             }
@@ -50,8 +50,8 @@ namespace Petri.Editor
 
         public override void Paste()
         {
-            if(MainClass.Clipboard.Count > 0) {
-                ++MainClass.PasteCount;
+            if(Application.Clipboard.Count > 0) {
+                ++Application.PasteCount;
                 var action = PasteAction();
                 _document.PostAction(action);
 
@@ -102,7 +102,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Error,
                                                         ButtonsType.None,
-                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("Unable to wrap the selection into a macro: some entities linked to the selection are not selected.")));
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("Unable to wrap the selection into a macro: some entities linked to the selection are not selected.")));
                     d.AddButton("OK", ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -241,7 +241,7 @@ namespace Petri.Editor
         {
             _document.Window.CopyItem.Sensitive = _document.Window.EditorGui.View.SelectedEntities.Count > 0;
             _document.Window.CutItem.Sensitive = _document.Window.EditorGui.View.SelectedEntities.Count > 0;
-            _document.Window.PasteItem.Sensitive = MainClass.Clipboard.Count > 0;
+            _document.Window.PasteItem.Sensitive = Application.Clipboard.Count > 0;
             _document.Window.EmbedItem.Sensitive = _document.Window.EditorGui.View.SelectedEntities.Count > 0;
         }
 
@@ -265,7 +265,7 @@ namespace Petri.Editor
         {
             var actionList = new List<GuiAction>();
 
-            var newEntities = this.CloneEntities(MainClass.Clipboard, _document);
+            var newEntities = this.CloneEntities(Application.Clipboard, _document);
             var states = from e in newEntities
                                   where e is State
                                   select (e as State);
@@ -280,15 +280,15 @@ namespace Petri.Editor
                 // Change entity's owner
                 s.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
                 s.Name = s.Name;
-                s.Position = new Cairo.PointD(s.Position.X + 20 * MainClass.PasteCount,
-                                              s.Position.Y + 20 * MainClass.PasteCount);
+                s.Position = new Cairo.PointD(s.Position.X + 20 * Application.PasteCount,
+                                              s.Position.Y + 20 * Application.PasteCount);
                 actionList.Add(new AddStateAction(s));
             }
             foreach(Comment c in comments) {
                 // Change entity's owner
                 c.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
-                c.Position = new Cairo.PointD(c.Position.X + 20 * MainClass.PasteCount,
-                                              c.Position.Y + 20 * MainClass.PasteCount);
+                c.Position = new Cairo.PointD(c.Position.X + 20 * Application.PasteCount,
+                                              c.Position.Y + 20 * Application.PasteCount);
                 actionList.Add(new AddCommentAction(c));
             }
 

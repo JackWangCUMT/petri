@@ -7,7 +7,7 @@
     <ProjectGuid>{B36436E7-0E17-4C0E-A664-E9E4B4D77942}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Petri.Editor</RootNamespace>
-    <StartupObject>Petri.Editor.OSX.OSXMain</StartupObject>
+    <StartupObject>Petri.Editor.MacApplication</StartupObject>
     <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
     <AssemblyName>Petri</AssemblyName>
     <SuppressXamMacUpsell>True</SuppressXamMacUpsell>
@@ -34,6 +34,7 @@
     <UseRefCounting>false</UseRefCounting>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Profiling>false</Profiling>
+    <StartupObject>Petri.Editor.OSX.OSXMain</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -49,6 +50,7 @@
     <UseRefCounting>false</UseRefCounting>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Profiling>false</Profiling>
+    <StartupObject>Petri.Editor.OSX.OSXMain</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MonoMac" />
@@ -67,8 +69,8 @@
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
-    <Compile Include="..\Sources\Application\MacMain.cs">
-      <Link>MacMain.cs</Link>
+    <Compile Include="..\Sources\Application\MacApplication.cs">
+      <Link>MacApplication.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

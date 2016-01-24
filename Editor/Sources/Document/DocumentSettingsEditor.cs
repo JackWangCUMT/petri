@@ -96,7 +96,7 @@ namespace Petri.Editor
                 _document.LanguageChanged += (sender, e) => labelName.Text = Configuration.GetLocalized("<language> name of the Petri net:", _document.Settings.LanguageName());
 
                 Entry entry = new Entry(_document.Settings.Name);
-                MainClass.RegisterValidation(entry, false, (obj, p) => {
+                Application.RegisterValidation(entry, false, (obj, p) => {
                     Regex name = new Regex(Code.Parser.NamePattern);
                     Match nameMatch = name.Match((obj as Entry).Text);
 
@@ -124,7 +124,7 @@ namespace Petri.Editor
                 Label labelEnum = new Label(Configuration.GetLocalized("Enum \"Action Result\":"));
                 _customEnumEditor = new Entry("");
 
-                MainClass.RegisterValidation(_customEnumEditor, false, (obj, p) => {
+                Application.RegisterValidation(_customEnumEditor, false, (obj, p) => {
                     Code.Enum e = null;
                     try {
                         e = new Code.Enum(_document.Settings.Language, (obj as Entry).Text);
@@ -189,7 +189,7 @@ namespace Petri.Editor
                 _document.LanguageChanged += UpdateGUIForLanguage;
 
                 entry = new Entry(_document.Settings.Compiler);
-                MainClass.RegisterValidation(entry, false, (obj, p) => {
+                Application.RegisterValidation(entry, false, (obj, p) => {
                     _document.Settings.Compiler = (obj as Entry).Text;
                     _document.Settings.Modified = true;
                 });
@@ -203,7 +203,7 @@ namespace Petri.Editor
                 _document.LanguageChanged += (sender, e) => flagsLabel.Text = Configuration.GetLocalized("Flags forwarded to the <language> compiler:", _document.Settings.LanguageName());
 
                 entry = new Entry(String.Join(" ", _document.Settings.CompilerFlags));
-                MainClass.RegisterValidation(entry, false, (obj, p) => {
+                Application.RegisterValidation(entry, false, (obj, p) => {
                     _document.Settings.CompilerFlags.Clear();
                     _document.Settings.CompilerFlags.AddRange((obj as Entry).Text.Split(new char[]{ ' ' }, StringSplitOptions.RemoveEmptyEntries));
                     _document.Settings.Modified = true;
@@ -217,7 +217,7 @@ namespace Petri.Editor
 
                 var outputLabel = new Label(Configuration.GetLocalized("Output path for the generated code (relative to the document):"));
                 _sourceOutputPath = new Entry(_document.Settings.SourceOutputPath);
-                MainClass.RegisterValidation(_sourceOutputPath, false, (obj, p) => {
+                Application.RegisterValidation(_sourceOutputPath, false, (obj, p) => {
                     _document.Settings.SourceOutputPath = (obj as Entry).Text;
                     _document.Settings.Modified = true;
                 });
@@ -236,7 +236,7 @@ namespace Petri.Editor
 
                 outputLabel = new Label(Configuration.GetLocalized("Output path for the dynamic library (relative to the document):"));
                 _libOutputPath = new Entry(_document.Settings.LibOutputPath);
-                MainClass.RegisterValidation(_libOutputPath, false, (obj, p) => {
+                Application.RegisterValidation(_libOutputPath, false, (obj, p) => {
                     _document.Settings.LibOutputPath = (obj as Entry).Text;
                     _document.Settings.Modified = true;
                 });
@@ -255,7 +255,7 @@ namespace Petri.Editor
 
                 var hostLabel = new Label(Configuration.GetLocalized("Host name for the debugger:"));
                 entry = new Entry(_document.Settings.Hostname);
-                MainClass.RegisterValidation(entry, false, (obj, p) => {
+                Application.RegisterValidation(entry, false, (obj, p) => {
                     _document.Settings.Hostname = (obj as Entry).Text;
                     _document.Settings.Modified = true;
                 });
@@ -267,7 +267,7 @@ namespace Petri.Editor
 
                 hostLabel = new Label(Configuration.GetLocalized("TCP Port for the debugger communication:"));
                 entry = new Entry(_document.Settings.Port.ToString());
-                MainClass.RegisterValidation(entry, false, (obj, p) => {
+                Application.RegisterValidation(entry, false, (obj, p) => {
                     try {
                         _document.Settings.Port = UInt16.Parse((obj as Entry).Text);
                     }

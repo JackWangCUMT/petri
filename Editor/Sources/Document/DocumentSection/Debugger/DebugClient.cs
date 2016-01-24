@@ -96,7 +96,7 @@ namespace Petri.Editor
                                                                 DialogFlags.Modal,
                                                                 MessageType.Question,
                                                                 ButtonsType.None,
-                                                                MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             d.Run();
                             d.Destroy();
@@ -255,7 +255,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -283,7 +283,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -312,7 +312,7 @@ namespace Petri.Editor
                                                             DialogFlags.Modal,
                                                             MessageType.Question,
                                                             ButtonsType.None,
-                                                            MainClass.SafeMarkupFromString(Configuration.GetLocalized("The compilation has failed.")));
+                                                            Application.SafeMarkupFromString(Configuration.GetLocalized("The compilation has failed.")));
                         d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                         d.Run();
                         d.Destroy();
@@ -339,7 +339,7 @@ namespace Petri.Editor
                                                                 DialogFlags.Modal,
                                                                 MessageType.Question,
                                                                 ButtonsType.None,
-                                                                MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             d.Run();
                             d.Destroy();
@@ -444,7 +444,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -472,7 +472,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("Unable to connect to the server:") + " " + e.Message));
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("Unable to connect to the server:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -542,7 +542,7 @@ namespace Petri.Editor
                                                                 DialogFlags.Modal,
                                                                 MessageType.Question,
                                                                 ButtonsType.None,
-                                                                MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + msg["payload"].ToString()));
+                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + msg["payload"].ToString()));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             d.Run();
                             d.Destroy();
@@ -610,7 +610,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();

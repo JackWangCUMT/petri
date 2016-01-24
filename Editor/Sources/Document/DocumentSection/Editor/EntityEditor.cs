@@ -94,7 +94,7 @@ namespace Petri.Editor
         {
             CreateLabel(0, Configuration.GetLocalized("State's name:"));
             var name = CreateWidget<Entry>(true, 0, a.Name);
-            MainClass.RegisterValidation(name, true, (obj, p) => {
+            Application.RegisterValidation(name, true, (obj, p) => {
                 _document.PostAction(new ChangeNameAction(a, (obj as Entry).Text));
             });
 
@@ -250,7 +250,7 @@ namespace Petri.Editor
 
                 var invocation = CreateWidget<Entry>(true, 0, userReadable);
                 editorFields.Add(invocation);
-                MainClass.RegisterValidation(invocation, false, (obj, p) => {
+                Application.RegisterValidation(invocation, false, (obj, p) => {
                     Expression cppExpr = null;
                     FunctionInvocation funcInvocation = null;
                     try {
@@ -276,7 +276,7 @@ namespace Petri.Editor
                                                             DialogFlags.Modal,
                                                             MessageType.Question,
                                                             ButtonsType.None,
-                                                            MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).",
+                                                            Application.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).",
                                                                                                                       ex.Message)));
                         d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                         d.Run();
@@ -296,7 +296,7 @@ namespace Petri.Editor
 
                     var valueEditor = CreateWidget<Entry>(true, 20, method.This.MakeUserReadable());
                     editorFields.Add(valueEditor);
-                    MainClass.RegisterValidation(valueEditor, false, (obj, p) => {
+                    Application.RegisterValidation(valueEditor, false, (obj, p) => {
                         try {
                             var args = new List<Expression>();
                             for(int j = 2; j < editorFields.Count; ++j) {
@@ -320,7 +320,7 @@ namespace Petri.Editor
                                                                 DialogFlags.Modal,
                                                                 MessageType.Question,
                                                                 ButtonsType.None,
-                                                                MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).",
+                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).",
                                                                                                                           ex.Message)));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             d.Run();
@@ -354,7 +354,7 @@ namespace Petri.Editor
                                                   20,
                                                   a.Function.Arguments[i].MakeUserReadable());
             editorFields.Add(valueEditor);
-            MainClass.RegisterValidation(valueEditor, false, (obj, ii) => {
+            Application.RegisterValidation(valueEditor, false, (obj, ii) => {
                 try {
                     var args = new List<Expression>();
                     for(int j = (a.Function.Function is Method) ? 2 : 0; j < editorFields.Count; ++j) {
@@ -385,7 +385,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).",
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).",
                                                                                                                   ex.Message)));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
@@ -498,7 +498,7 @@ namespace Petri.Editor
         {
             CreateLabel(0, Configuration.GetLocalized("Transition's name:"));
             var name = CreateWidget<Entry>(true, 0, t.Name);
-            MainClass.RegisterValidation(name, true, (obj, p) => {
+            Application.RegisterValidation(name, true, (obj, p) => {
                 _document.PostAction(new ChangeNameAction(t, (obj as Entry).Text));
             });
 
@@ -511,7 +511,7 @@ namespace Petri.Editor
                 userReadable = t.Condition.MakeUserReadable();
             }
             var condition = CreateWidget<Entry>(true, 0, userReadable);
-            MainClass.RegisterValidation(condition, false, (obj, p) => {
+            Application.RegisterValidation(condition, false, (obj, p) => {
                 try {
                     var cond = new ConditionChangeAction(t,
                                                          Expression.CreateFromStringAndEntity<Expression>((obj as Entry).Text,
@@ -523,7 +523,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified condition is invalid ({0}).",
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("The specified condition is invalid ({0}).",
                                                                                                                   e.Message)));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
@@ -541,7 +541,7 @@ namespace Petri.Editor
         {
             CreateLabel(0, Configuration.GetLocalized("Graph's name:"));
             var name = CreateWidget<Entry>(true, 0, i.Name);
-            MainClass.RegisterValidation(name, true, (obj, p) => {
+            Application.RegisterValidation(name, true, (obj, p) => {
                 _document.PostAction(new ChangeNameAction(i, (obj as Entry).Text));
             });
 

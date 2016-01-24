@@ -341,7 +341,7 @@ namespace Petri.Editor
                 w.Destroy();
             }
 
-            MainClass.RemoveDocument(this);
+            Application.RemoveDocument(this);
 
             return true;
         }
@@ -424,7 +424,7 @@ namespace Petri.Editor
                                                     DialogFlags.Modal,
                                                     MessageType.Warning,
                                                     ButtonsType.None,
-                                                    MainClass.SafeMarkupFromString(Configuration.GetLocalized("Do you want to revert the graph to the last opened version? ? All changes will be permanently lost.")));
+                                                    Application.SafeMarkupFromString(Configuration.GetLocalized("Do you want to revert the graph to the last opened version? ? All changes will be permanently lost.")));
                 d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                 d.AddButton(Configuration.GetLocalized("Revert"), ResponseType.Accept);
 
@@ -448,7 +448,7 @@ namespace Petri.Editor
                     PetriNet = new RootPetriNet(this);
                     int docID = 1;
                     string prefix = Configuration.GetLocalized("Untitled") + " ";
-                    foreach(var d in MainClass.Documents) {
+                    foreach(var d in Application.Documents) {
                         if(d.Window.Title.StartsWith(prefix)) {
                             int id = 0;
                             if(int.TryParse(d.Window.Title.Substring(prefix.Length), out id)) {
@@ -487,7 +487,7 @@ namespace Petri.Editor
                                                     DialogFlags.Modal,
                                                     MessageType.Error,
                                                     ButtonsType.None,
-                                                    MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred upon document loading:") + " " + e.Message));
+                                                    Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred upon document loading:") + " " + e.Message));
                 d.AddButton(Configuration.GetLocalized("OK"), ResponseType.Cancel);
                 d.Run();
                 d.Destroy();

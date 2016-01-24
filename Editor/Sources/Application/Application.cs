@@ -22,7 +22,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using Gtk;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -30,7 +29,7 @@ using Newtonsoft.Json;
 
 namespace Petri.Editor
 {
-    public class MainClass
+    public class Application
     {
         /*
          * The following string constants are the possible console output when invoked in compiler mode.
@@ -211,7 +210,7 @@ namespace Petri.Editor
                 return 0;
             }
             else {
-                Application.Init();
+                Gtk.Application.Init();
 
                 MainWindow.InitGUI();
 
@@ -231,7 +230,7 @@ namespace Petri.Editor
                 var document = new Document("");
                 AddDocument(document);
 
-                Application.Run();
+                Gtk.Application.Run();
 
                 return 0;
             }
@@ -263,7 +262,7 @@ namespace Petri.Editor
             }
 
             Configuration.Save();
-            Application.Quit();
+            Gtk.Application.Quit();
         }
 
         /// <summary>
@@ -326,7 +325,7 @@ namespace Petri.Editor
         {
             _documents.Remove(doc);
             if(_documents.Count == 0) {
-                MainClass.SaveAndQuit();
+                Application.SaveAndQuit();
             }
         }
 
@@ -346,16 +345,16 @@ namespace Petri.Editor
         public static void OpenDocument()
         {
             var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Open Petri Net…"), null,
-                                               FileChooserAction.Open,
-                                               new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
-                Configuration.GetLocalized("Open"), ResponseType.Accept
+                                               Gtk.FileChooserAction.Open,
+                                               new object[] {Configuration.GetLocalized("Cancel"), Gtk.ResponseType.Cancel,
+                Configuration.GetLocalized("Open"), Gtk.ResponseType.Accept
             });
 
-            var filter = new FileFilter();
+            var filter = new Gtk.FileFilter();
             filter.AddPattern("*.petri");
             fc.AddFilter(filter);
 
-            if(fc.Run() == (int)ResponseType.Accept) {
+            if(fc.Run() == (int)Gtk.ResponseType.Accept) {
                 string filename = fc.Filename;
                 fc.Destroy();
                 OpenDocument(filename);
@@ -393,7 +392,7 @@ namespace Petri.Editor
             }
             else {
                 var doc = new Document(filename);
-                MainClass.AddDocument(doc);
+                Application.AddDocument(doc);
             }
 
             RecentDocuments.Add(DateTime.UtcNow, filename);

@@ -22,13 +22,13 @@
 
 using Petri.Editor;
 
-namespace Petri.Editor.OSX
+namespace Petri.Editor
 {
-    public class OSXMain
+    public class MacApplication
     {
         public static int Main(string[] args)
         {
-            return Petri.Editor.MainClass.Main(args);
+            return Petri.Editor.Application.Main(args);
         }
      }
 }
