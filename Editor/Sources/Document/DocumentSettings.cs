@@ -29,16 +29,31 @@ namespace Petri.Editor
 {
     public class DocumentSettings
     {
+        /// <summary>
+        /// Creates the settings of a document with the provided serialized values. If the XML element is null, then a default set of values is assigned to the document.
+        /// </summary>
+        /// <returns>The settings.</returns>
+        /// <param name="doc">Document.</param>
+        /// <param name="node">The XML element containing the values.</param>
         public static DocumentSettings CreateSettings(HeadlessDocument doc, XElement node)
         {
             return new DocumentSettings(doc, node);
         }
 
+        /// <summary>
+        /// Gets the default settings for a new document.
+        /// </summary>
+        /// <returns>The default settings.</returns>
+        /// <param name="doc">Document.</param>
         public static DocumentSettings GetDefaultSettings(HeadlessDocument doc)
         {
             return new DocumentSettings(doc, null);
         }
 
+        /// <summary>
+        /// An XML element that may be used for serializing the current settings.
+        /// </summary>
+        /// <returns>The xml.</returns>
         public XElement GetXml()
         {
             var elem = new XElement("Settings");
@@ -89,6 +104,11 @@ namespace Petri.Editor
             return elem;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.DocumentSettings"/> class with a sensible set of default values if <paramref name="elem"/> is <c>null</c>, and to the values contained in the Xml element otherwise.
+        /// </summary>
+        /// <param name="doc">Document.</param>
+        /// <param name="elem">An XML element that may be null.</param>
         private DocumentSettings(HeadlessDocument doc, XElement elem)
         {
             _document = doc;
@@ -187,73 +207,130 @@ namespace Petri.Editor
             Modified = false;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="Petri.Editor.DocumentSettings"/> has been modified since its last save.
+        /// </summary>
+        /// <value><c>true</c> if modified; otherwise, <c>false</c>.</value>
         public bool Modified {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the name of the document.
+        /// </summary>
+        /// <value>The name of the document.</value>
         public string Name {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the enum representing the possible results of the execution of an action.
+        /// </summary>
+        /// <value>The enum.</value>
         public Cpp.Enum Enum {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the default enum for a new document.
+        /// </summary>
+        /// <value>The default enum.</value>
         public Cpp.Enum DefaultEnum {
             get {
                 return new Cpp.Enum(Language, "ActionResult", new string[]{ "OK", "NOK" });
             }
         }
 
-        // The bool stands for "recursive or not"
+        /// <summary>
+        /// Gets the include search paths associated with the document.
+        /// The first member of each entry is the path to the include search path, and the second member is set to <c>true</c> for a recursive include search path.
+        /// </summary>
+        /// <value>The include search paths.</value>
         public List<Tuple<string, bool>> IncludePaths {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the library search paths associated with the document.
+        /// The first member of each entry is the path to the library search path, and the second member is set to <c>true</c> for a recursive library search path.
+        /// </summary>
+        /// <value>The library search paths.</value>
         public List<Tuple<string, bool>> LibPaths {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the library that are needed to compile the document.
+        /// </summary>
+        /// <value>The libraries.</value>
         public List<string> Libs {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets or sets the compiler's command.
+        /// </summary>
+        /// <value>The compiler command.</value>
         public string Compiler {
             get;
             set;
         }
 
+        /// <summary>
+        /// The additional user provided flags to be passed to the compiler.
+        /// </summary>
+        /// <value>The compiler flags.</value>
         public List<string> CompilerFlags {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets or sets the lib output path, i.e. the directoty that will contain the library after compilation.
+        /// </summary>
+        /// <value>The lib output path.</value>
         public string LibOutputPath {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the source output path, i.e. the directoty that will contain the source after generation.
+        /// </summary>
+        /// <value>The source output path.</value>
         public string SourceOutputPath {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the hostname the DebugClient will attempt to connect to upon debugging.
+        /// </summary>
+        /// <value>The hostname.</value>
         public string Hostname {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the port the DebugClient will attempt to connect to upon debugging.
+        /// </summary>
+        /// <value>The port.</value>
         public UInt16 Port {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the language the document uses for generation and compilation.
+        /// </summary>
+        /// <value>The language.</value>
         public Cpp.Language Language {
             get {
                 return _language;
@@ -267,6 +344,12 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="Petri.Editor.DocumentSettings"/> is to be run in the editor.
+        /// This is currently only possible for C# documents, and this will result in no need for a standalone application for running the petri net.
+        /// The petri net will be run directly into the debugger part of the application.
+        /// </summary>
+        /// <value><c>true</c> if run in editor; otherwise, <c>false</c>.</value>
         public bool RunInEditor {
             get {
                 if(Language != Cpp.Language.CSharp) {
@@ -279,6 +362,11 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// A readable name for the provided language.
+        /// </summary>
+        /// <returns>The name.</returns>
+        /// <param name="language">Language.</param>
         public static string LanguageName(Cpp.Language language)
         {
             switch(language) {
@@ -293,11 +381,19 @@ namespace Petri.Editor
             throw new Exception("Unsupported language!");
         }
 
+        /// <summary>
+        /// A readable name for the current document's language.
+        /// </summary>
+        /// <returns>The name.</returns>
         public string LanguageName()
         {
             return LanguageName(Language);
         }
 
+        /// <summary>
+        /// The path to the source file generated by the document.
+        /// </summary>
+        /// <value>The source path.</value>
         public string SourcePath {
             get {
                 return System.IO.Path.Combine(SourceOutputPath,
@@ -305,12 +401,20 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// The path where the document's dynamic library is to be generated, including the file's name and extension.
+        /// </summary>
+        /// <value>The lib path.</value>
         public string LibPath {
             get {
                 return System.IO.Path.Combine(LibOutputPath, this.Name + LibExtension);
             }
         }
 
+        /// <summary>
+        /// Returns the dynamic library file extension according to the document's current language.
+        /// </summary>
+        /// <value>The lib extension.</value>
         public string LibExtension {
             get {
                 if(Language == Cpp.Language.CSharp) {
@@ -324,6 +428,12 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets the command line arguments necessary for compiling the provided source file into the requested lib.
+        /// </summary>
+        /// <returns>The arguments for the compiler invocation.</returns>
+        /// <param name="source">The path to the source file to be compiled.</param>
+        /// <param name="lib">The path and filename where the library will be generated.</param>
         public string CompilerArguments(string source, string lib)
         {
             string val = "";
@@ -389,6 +499,10 @@ namespace Petri.Editor
             return val;
         }
 
+        /// <summary>
+        /// Returns the list of library and include paths in a string formatted for passing as command line arguments to the compiler.
+        /// </summary>
+        /// <returns>The paths to be passed to the compiler.</returns>
         string GetPaths()
         {
             string val = "";
@@ -442,9 +556,9 @@ namespace Petri.Editor
             return val;
         }
 
-        private Cpp.Language _language;
-        private HeadlessDocument _document;
-        private bool _runInEditor;
+        Cpp.Language _language;
+        HeadlessDocument _document;
+        bool _runInEditor;
     }
 }
 

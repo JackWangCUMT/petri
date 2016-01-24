@@ -27,6 +27,9 @@ using System.Text;
 
 namespace Petri.Editor
 {
+    /// <summary>
+    /// This class is in charge of invoking the a document's compiler program and retrieving stdout and stderr.
+    /// </summary>
     public class Compiler
     {
         public Compiler(HeadlessDocument doc)
@@ -34,6 +37,12 @@ namespace Petri.Editor
             _document = doc;
         }
 
+        /// <summary>
+        /// Compiles the source. The source file's last modification is set to the current date.
+        /// </summary>
+        /// <returns>stdout and stderr concatenated in that order.</returns>
+        /// <param name="source">The path of the source file to compile.</param>
+        /// <param name="lib">The library file to generate.</param>
         public string CompileSource(string source, string lib)
         {
             string cd = System.IO.Directory.GetCurrentDirectory();
