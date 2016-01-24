@@ -85,7 +85,12 @@ namespace Petri.Editor
                         _document.Settings.Modified = true;
                     }
                 };
-
+                _runInEditor = new CheckButton(Configuration.GetLocalized("Run the Petri net in the editor"));
+                _runInEditor.Active = _document.Settings.RunInEditor;
+                _runInEditor.Toggled += (sender, e) => {
+                    _document.Settings.RunInEditor = _runInEditor.Active;
+                    _document.Settings.Modified = true;
+                };
 
                 Label labelName = new Label(Configuration.GetLocalized("<language> name of the Petri net:", _document.Settings.LanguageName()));
                 _document.LanguageChanged += (sender, e) => labelName.Text = Configuration.GetLocalized("<language> name of the Petri net:", _document.Settings.LanguageName());
@@ -110,6 +115,7 @@ namespace Petri.Editor
                 });
 
                 vbox.PackStart(combo, false, false, 0);
+                vbox.PackStart(_runInEditor, false, false, 0);
                 var hbox = new HBox(false, 5);
                 hbox.PackStart(labelName, false, false, 0);
                 vbox.PackStart(hbox, false, false, 0);
@@ -180,6 +186,7 @@ namespace Petri.Editor
 
                 var pathLabel = new Label(Configuration.GetLocalized("Path to the <language> compiler:", _document.Settings.LanguageName()));
                 _document.LanguageChanged += (sender, e) => pathLabel.Text = Configuration.GetLocalized("Path to the <language> compiler:", _document.Settings.LanguageName());
+                _document.LanguageChanged += UpdateGUIForLanguage;
 
                 entry = new Entry(_document.Settings.Compiler);
                 MainClass.RegisterValidation(entry, false, (obj, p) => {
@@ -277,10 +284,11 @@ namespace Petri.Editor
             }
 
             {
+                _headersSearchPathBox = new VBox();
                 var hbox = new HBox(false, 5);
                 Label label = new Label(Configuration.GetLocalized("Headers search paths:"));
                 hbox.PackStart(label, false, false, 0);
-                vbox.PackStart(hbox, false, false, 0);
+                _headersSearchPathBox.PackStart(hbox, false, false, 0);
 
                 _headersSearchPath = new TreeView();
                 TreeViewColumn c = new TreeViewColumn();
@@ -312,7 +320,7 @@ namespace Petri.Editor
                 _headersSearchPathStore = new Gtk.ListStore(typeof(string), typeof(bool));
                 _headersSearchPath.Model = _headersSearchPathStore;
 
-                vbox.PackStart(_headersSearchPath, true, true, 0);
+                _headersSearchPathBox.PackStart(_headersSearchPath, true, true, 0);
 
                 hbox = new HBox(false, 5);
                 _addHeaderSearchPath = new Button(new Label("+"));
@@ -321,7 +329,8 @@ namespace Petri.Editor
                 _removeHeaderSearchPath.Clicked += OnRemove;
                 hbox.PackStart(_addHeaderSearchPath, false, false, 0);
                 hbox.PackStart(_removeHeaderSearchPath, false, false, 0);
-                vbox.PackStart(hbox, false, false, 0);
+                _headersSearchPathBox.PackStart(hbox, false, false, 0);
+                vbox.PackStart(_headersSearchPathBox, false, false, 0);
             }
 
             {
@@ -405,7 +414,6 @@ namespace Petri.Editor
                 vbox.PackStart(hbox, false, false, 0);
             }
 
-
             _window.DeleteEvent += this.OnDeleteEvent;
 
             this.BuildHeadersSearchPath();
@@ -415,7 +423,8 @@ namespace Petri.Editor
 
         public void Show()
         {
-            _window.ShowAll();
+            UpdateGUIForLanguage(this, null);
+
             _window.Present();
             _document.AssociatedWindows.Add(_window);
         }
@@ -424,6 +433,17 @@ namespace Petri.Editor
         {
             _document.AssociatedWindows.Remove(_window);
             _window.Hide();
+        }
+
+        void UpdateGUIForLanguage(object sender, EventArgs e) {
+            _window.ShowAll();
+
+            if(_document.Settings.Language == Cpp.Language.CSharp) {
+                _headersSearchPathBox.Hide();
+            }
+            else {
+                _runInEditor.Hide();
+            }
         }
 
         protected void OnDeleteEvent(object sender, DeleteEventArgs a)
@@ -582,12 +602,15 @@ namespace Petri.Editor
         Window _window;
         Document _document;
 
+        CheckButton _runInEditor;
+
         RadioButton _defaultEnum, _customEnum;
         Entry _customEnumEditor;
 
         Entry _libOutputPath, _sourceOutputPath;
         Button _selectLibOutputPath, _selectSourceOutputPath;
 
+        VBox _headersSearchPathBox;
         TreeView _headersSearchPath;
         ListStore _headersSearchPathStore;
         Button _addHeaderSearchPath;

@@ -49,6 +49,7 @@ namespace Petri.Editor
             elem.SetAttributeValue("Hostname", Hostname);
             elem.SetAttributeValue("Port", Port.ToString());
             elem.SetAttributeValue("Language", Language.ToString());
+            elem.SetAttributeValue("RunInEditor", RunInEditor.ToString());
 
             var node = new XElement("Compiler");
             node.SetAttributeValue("Invocation", Compiler);
@@ -103,6 +104,7 @@ namespace Petri.Editor
             this.Hostname = "localhost";
             this.Port = 12345;
             this.Language = Cpp.Language.Cpp;
+            this.RunInEditor = false;
 
             Name = "MyPetriNet";
             Enum = DefaultEnum;
@@ -112,8 +114,9 @@ namespace Petri.Editor
                 CompilerFlags.Add("-g");
             }
             else {
-                if(elem.Attribute("Name") != null)
+                if(elem.Attribute("Name") != null) {
                     Name = elem.Attribute("Name").Value;
+                }
 
                 if(elem.Attribute("Language") != null) {
                     try {
@@ -129,16 +132,24 @@ namespace Petri.Editor
                     Enum = new Cpp.Enum(Language, elem.Attribute("Enum").Value);
                 }
 				
-                if(elem.Attribute("SourceOutputPath") != null)
+                if(elem.Attribute("SourceOutputPath") != null) {
                     SourceOutputPath = elem.Attribute("SourceOutputPath").Value;
-                if(elem.Attribute("LibOutputPath") != null)
+                }
+                if(elem.Attribute("LibOutputPath") != null) {
                     LibOutputPath = elem.Attribute("LibOutputPath").Value;
+                }
 
-                if(elem.Attribute("Hostname") != null)
+                if(elem.Attribute("Hostname") != null) {
                     Hostname = elem.Attribute("Hostname").Value;
+                }
 
-                if(elem.Attribute("Port") != null)
+                if(elem.Attribute("Port") != null) {
                     Port = UInt16.Parse(elem.Attribute("Port").Value);
+                }
+
+                if(elem.Attribute("RunInEditor") != null) {
+                    RunInEditor = bool.Parse(elem.Attribute("RunInEditor").Value);
+                }
 
                 var node = elem.Element("Compiler");
                 if(node != null) {
@@ -256,6 +267,18 @@ namespace Petri.Editor
             }
         }
 
+        public bool RunInEditor {
+            get {
+                if(Language != Cpp.Language.CSharp) {
+                    _runInEditor = false;
+                }
+                return _runInEditor;
+            }
+            set {
+                _runInEditor = value && Language == Cpp.Language.CSharp;
+            }
+        }
+
         public static string LanguageName(Cpp.Language language)
         {
             switch(language) {
@@ -347,13 +370,15 @@ namespace Petri.Editor
                 }
             }
             else if(Language == Cpp.Language.CSharp) {
-                val += "-t:module -r:CSRuntime ";
+                val += "-t:library -r:CSRuntime ";
 
                 val += GetPaths();
 
                 foreach(var h in _document.Headers) {
                     val += "'" + h + "' ";
                 }
+
+                val += "'" + source + "' ";
 
                 val += "-out:'" + lib + "' ";
             }
@@ -419,6 +444,7 @@ namespace Petri.Editor
 
         private Cpp.Language _language;
         private HeadlessDocument _document;
+        private bool _runInEditor;
     }
 }
 

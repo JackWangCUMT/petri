@@ -64,12 +64,12 @@ namespace Petri.Runtime
          * @param action The Callable which will be called when the action is run.
          * @param requiredTokens The number of tokens that must be inside the active action for it to execute.
          */
-        public Action(UInt64 id, string name, ParametrizedActionCallableDel action, UInt64 requiredTokens)
+        /*public Action(UInt64 id, string name, ParametrizedActionCallableDel action, UInt64 requiredTokens)
         {
             var c = WrapForNative.Wrap(action, name);
-            _parametrizedCallback = c;
+            _parametrizedCallback = action;
             Handle = Interop.Action.PetriAction_createWithParam(id, name, c, requiredTokens);
-        }
+        }*/
 
         ~Action()
         {

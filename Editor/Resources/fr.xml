@@ -667,6 +667,9 @@
 <Key>Document's settings:</Key>
 <Value>Réglages du document :</Value>
 
+<Key>Run the Petri net in the editor</Key>
+<Value>Exécter le réseau de Pétri dans l'éditeur</Value>
+
 <Key>&lt;language&gt; name of the Petri net:</Key>
 <Value>Nom {0} du réseau de pétri :</Value>
 

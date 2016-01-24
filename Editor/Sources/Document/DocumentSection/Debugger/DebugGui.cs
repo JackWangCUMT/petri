@@ -229,32 +229,32 @@ namespace Petri.Editor
         protected void OnClick(object sender, EventArgs e)
         {
             if(sender == _attachDetach) {
-                if(Server.SessionRunning) {
-                    Server.Detach();
+                if(Client.SessionRunning) {
+                    Client.Detach();
                 }
                 else {
-                    Server.Attach();
+                    Client.Attach();
                 }
             }
             else if(sender == _startStopPetri) {
-                if(Server.PetriRunning) {
-                    Server.StopPetri();
+                if(Client.PetriRunning) {
+                    Client.StopPetri();
                 }
                 else {
-                    Server.StartPetri();
+                    Client.StartPetri();
                 }
             }
             else if(sender == _playPause) {
-                Server.Pause = !Server.Pause;
+                Client.Pause = !Client.Pause;
             }
             else if(sender == _reload) {
-                Server.ReloadPetri();
+                Client.ReloadPetri();
             }
             else if(sender == _switchToEditor) {
                 _document.SwitchToEditor();
             }
             else if(sender == _exit) {
-                Server.StopSession();
+                Client.StopSession();
             }
             else if(sender == _zoomIn) {
                 _view.Zoom /= 0.8f;
@@ -272,7 +272,7 @@ namespace Petri.Editor
             }
         }
 
-        protected DebugClient Server {
+        protected DebugClient Client {
             get {
                 return _document.DebugController.Client;
             }

@@ -16,8 +16,13 @@ namespace Petri {
         _fd = socket(AF_INET,
                      SOCK_STREAM,
                      0); // AF_INET : internet; SOCK_STREAM : par flux; 0 : protocol (TCP)
+        int reuse = 0;
+        if(_fd >= 0) {
+            int enable = 1;
+            reuse = setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
+        }
 
-        if(_fd < 0) {
+        if(_fd < 0 || reuse < 0) {
             throw std::runtime_error("Impossible de créer le socket !");
         }
     }

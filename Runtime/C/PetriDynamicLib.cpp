@@ -27,7 +27,7 @@
 //  Created by Rémi on 02/07/2015.
 //
 
-#include "../Cpp/PtrPetriDynamicLib.h"
+#include "PtrPetriDynamicLib.hpp"
 #include "PetriDynamicLib.h"
 #include "PetriDynamicLib.hpp"
 #include "Types.hpp"

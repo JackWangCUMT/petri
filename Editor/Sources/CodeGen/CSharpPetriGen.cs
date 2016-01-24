@@ -191,7 +191,7 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             a.GetVariables(cppVar);
 
-            _functionBodies += "static Int32 " + a.CppName + "_invocation(PetriNet petriNet) {\nreturn " + cpp + ";\n}\n";
+            _functionBodies += "static Int32 " + a.CppName + "_invocation(" + /*"PetriNet petriNet" + */") {\nreturn " + cpp + ";\n}\n";
 
             string action = a.CppName + "_invocation";
 

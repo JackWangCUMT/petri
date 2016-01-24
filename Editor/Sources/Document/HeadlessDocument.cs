@@ -337,7 +337,7 @@ namespace Petri.Editor
 
         public string GetHash()
         {
-            var generator = new CppPetriGen(this);
+            var generator = PetriGen.PetriGenFromLanguage(Settings.Language, this);
             return generator.GetHash();
         }
 

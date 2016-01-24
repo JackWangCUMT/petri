@@ -542,7 +542,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
             }
             else {
                 f = (functions.FirstOrDefault(delegate(Function ff) {
-                    return !(ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && ((scopeNameAndArgs.Item1 == null && ff.Enclosing == null) || scopeNameAndArgs.Item1.Equals(ff.Enclosing));
+                    return !(ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && ((scopeNameAndArgs.Item1 == null && ff.Enclosing == null) || (scopeNameAndArgs.Item1 != null && scopeNameAndArgs.Item1.Equals(ff.Enclosing)));
                 })) as Function;
                 if(f == null) {
                     throw new Exception(Configuration.GetLocalized("No function match the specified expression."));

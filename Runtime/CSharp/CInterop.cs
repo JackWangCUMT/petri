@@ -27,7 +27,7 @@ using System.Runtime.CompilerServices;
 
 namespace Petri.Runtime
 {
-    public class CInterop
+    public class CInterop : MarshalByRefObject
     {
         internal CInterop()
         {

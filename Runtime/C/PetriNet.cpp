@@ -92,4 +92,3 @@ void PetriNet_unlockVariable(PetriNet *pn, uint32_t id) {
 char const *PetriNet_getName(PetriNet *pn) {
     return pn->petriNet->name().c_str();
 }
-

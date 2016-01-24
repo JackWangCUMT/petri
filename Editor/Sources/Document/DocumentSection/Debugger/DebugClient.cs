@@ -75,7 +75,11 @@ namespace Petri.Editor
                     }
                     catch(Exception e) {
                         GLib.Timeout.Add(0, () => {
-                            MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                            MessageDialog d = new MessageDialog(_document.Window,
+                                                                DialogFlags.Modal,
+                                                                MessageType.Question,
+                                                                ButtonsType.None,
+                                                                MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             d.Run();
                             d.Destroy();
@@ -101,18 +105,53 @@ namespace Petri.Editor
 
         public void Attach()
         {
+            if(_document.Settings.RunInEditor) {
+                LoadLibAndStartServer();
+            }
+
             _sessionRunning = true;
             _receiverThread = new Thread(this.Receiver);
             _pause = false;
             _receiverThread.Start();
             DateTime time = DateTime.Now.AddSeconds(1);
             while(_socket == null && DateTime.Now.CompareTo(time) < 0)
-                ;
+                System.Threading.Thread.Sleep(20);
         }
 
         public void Detach()
         {
-            this.StopOrDetach(false);
+            if(_document.Settings.RunInEditor) {
+                // If the petri net is running in the editor, we have to stop it upon detach.
+                this.StopOrDetach(true);
+                UnloadLibAndStopServer();
+            }
+            else {
+                this.StopOrDetach(false);
+            }
+        }
+
+        void LoadLibAndStartServer()
+        {
+            UnloadLibAndStopServer();
+
+            _libProxy = new GeneratedDynamicLibProxy(System.IO.Directory.GetParent(_document.Path).FullName, _document.Settings.LibPath, PetriGen.GetCompilableClassName(_document.Settings.Name));            
+            Petri.Runtime.GeneratedDynamicLib dylib = _libProxy.Load();
+
+            var dynamicLib = dylib.Lib;
+            _debugServer = new Runtime.DebugServer(dynamicLib);
+            _debugServer.Start();
+        }
+
+        void UnloadLibAndStopServer()
+        {
+            if(_debugServer != null) {
+                _debugServer.Stop();
+                _debugServer = null;
+            }
+            if(_libProxy != null) {
+                _libProxy.Unload();
+                _libProxy = null;
+            }
         }
 
         public void StopSession()
@@ -120,7 +159,7 @@ namespace Petri.Editor
             this.StopOrDetach(true);
         }
 
-        private void StopOrDetach(bool stop)
+        void StopOrDetach(bool stop)
         {
             _pause = false;
             if(_sessionRunning) {
@@ -159,11 +198,18 @@ namespace Petri.Editor
             _pause = false;
             try {
                 if(!_petriRunning)
-                    this.SendObject(new JObject(new JProperty("type", "start"), new JProperty("payload", new JObject(new JProperty("hash", _document.GetHash())))));
+                    this.SendObject(new JObject(new JProperty("type", "start"),
+                                                new JProperty("payload",
+                                                              new JObject(new JProperty("hash",
+                                                                                        _document.GetHash())))));
             }
             catch(Exception e) {
                 GLib.Timeout.Add(0, () => {
-                    MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                    MessageDialog d = new MessageDialog(_document.Window,
+                                                        DialogFlags.Modal,
+                                                        MessageType.Question,
+                                                        ButtonsType.None,
+                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -184,7 +230,11 @@ namespace Petri.Editor
             }
             catch(Exception e) {
                 GLib.Timeout.Add(0, () => {
-                    MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                    MessageDialog d = new MessageDialog(_document.Window,
+                                                        DialogFlags.Modal,
+                                                        MessageType.Question,
+                                                        ButtonsType.None,
+                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -206,7 +256,11 @@ namespace Petri.Editor
                 this.StopPetri();
                 if(!_document.Compile(true)) {
                     GLib.Timeout.Add(0, () => {
-                        MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("The compilation has failed.")));
+                        MessageDialog d = new MessageDialog(_document.Window,
+                                                            DialogFlags.Modal,
+                                                            MessageType.Question,
+                                                            ButtonsType.None,
+                                                            MainClass.SafeMarkupFromString(Configuration.GetLocalized("The compilation has failed.")));
                         d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                         d.Run();
                         d.Destroy();
@@ -220,7 +274,11 @@ namespace Petri.Editor
                     }
                     catch(Exception e) {
                         GLib.Timeout.Add(0, () => {
-                            MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                            MessageDialog d = new MessageDialog(_document.Window,
+                                                                DialogFlags.Modal,
+                                                                MessageType.Question,
+                                                                ButtonsType.None,
+                                                                MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             d.Run();
                             d.Destroy();
@@ -242,7 +300,9 @@ namespace Petri.Editor
                 foreach(var p in _document.DebugController.Breakpoints) {
                     breakpoints.Add(new JValue(p.ID));
                 }
-                this.SendObject(new JObject(new JProperty("type", "breakpoints"), new JProperty("payload", breakpoints)));
+                this.SendObject(new JObject(new JProperty("type", "breakpoints"),
+                                            new JProperty("payload",
+                                                          breakpoints)));
             }
         }
 
@@ -271,7 +331,10 @@ namespace Petri.Editor
             }
             else {
                 try {
-                    this.SendObject(new JObject(new JProperty("type", "evaluate"), new JProperty("payload", new JObject(new JProperty("lib", libName)))));
+                    this.SendObject(new JObject(new JProperty("type", "evaluate"),
+                                                new JProperty("payload",
+                                                              new JObject(new JProperty("lib",
+                                                                                        libName)))));
                 }
                 catch(Exception e) {
                     this.Detach();
@@ -282,10 +345,13 @@ namespace Petri.Editor
             System.IO.File.Delete(sourceName);
         }
 
-        private void Hello()
+        void Hello()
         {
             try {
-                this.SendObject(new JObject(new JProperty("type", "hello"), new JProperty("payload", new JObject(new JProperty("version", Version)))));
+                this.SendObject(new JObject(new JProperty("type", "hello"),
+                                            new JProperty("payload",
+                                                          new JObject(new JProperty("version",
+                                                                                    Version)))));
 		
                 var ehlo = this.ReceiveObject();
                 if(ehlo != null && ehlo["type"].ToString() == "ehlo") {
@@ -303,7 +369,11 @@ namespace Petri.Editor
             }
             catch(Exception e) {
                 GLib.Timeout.Add(0, () => {
-                    MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                    MessageDialog d = new MessageDialog(_document.Window,
+                                                        DialogFlags.Modal,
+                                                        MessageType.Question,
+                                                        ButtonsType.None,
+                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -315,7 +385,7 @@ namespace Petri.Editor
             }
         }
 
-        private void Receiver()
+        void Receiver()
         {
             try {
                 _socket = new TcpClient(_document.Settings.Hostname, _document.Settings.Port);
@@ -324,7 +394,11 @@ namespace Petri.Editor
                 this.Detach();
 
                 GLib.Timeout.Add(0, () => {
-                    MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Unable to connect to the server:") + " " + e.Message));
+                    MessageDialog d = new MessageDialog(_document.Window,
+                                                        DialogFlags.Modal,
+                                                        MessageType.Question,
+                                                        ButtonsType.None,
+                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("Unable to connect to the server:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -390,7 +464,11 @@ namespace Petri.Editor
                     }
                     else if(msg["type"].ToString() == "error") {
                         GLib.Timeout.Add(0, () => {
-                            MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + msg["payload"].ToString()));
+                            MessageDialog d = new MessageDialog(_document.Window,
+                                                                DialogFlags.Modal,
+                                                                MessageType.Question,
+                                                                ButtonsType.None,
+                                                                MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + msg["payload"].ToString()));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             d.Run();
                             d.Destroy();
@@ -428,7 +506,8 @@ namespace Petri.Editor
                                 var id = UInt64.Parse(s["id"].ToString());
                                 var e = _document.EntityFromID(id);
                                 if(e == null || !(e is State)) {
-                                    throw new Exception(Configuration.GetLocalized("Entity sent from runtime doesn't exist on our side! (id: {0})", id));
+                                    throw new Exception(Configuration.GetLocalized("Entity sent from runtime doesn't exist on our side! (id: {0})",
+                                                                                   id));
                                 }
                                 _document.DebugController.ActiveStates[e as State] = int.Parse(s["count"].ToString());
                             }
@@ -453,7 +532,11 @@ namespace Petri.Editor
             }
             catch(Exception e) {
                 GLib.Timeout.Add(0, () => {
-                    MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                    MessageDialog d = new MessageDialog(_document.Window,
+                                                        DialogFlags.Modal,
+                                                        MessageType.Question,
+                                                        ButtonsType.None,
+                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -471,7 +554,7 @@ namespace Petri.Editor
             _document.Window.DebugGui.UpdateToolbar();
         }
 
-        private JObject ReceiveObject()
+        JObject ReceiveObject()
         {
             int count = 0;
             while(_sessionRunning) {
@@ -489,12 +572,12 @@ namespace Petri.Editor
             return null;
         }
 
-        private void SendObject(JObject o)
+        void SendObject(JObject o)
         {
             this.SendString(o.ToString());
         }
 
-        private string ReceiveString()
+        string ReceiveString()
         {
             byte[] msg;
 
@@ -517,7 +600,7 @@ namespace Petri.Editor
             return System.Text.Encoding.UTF8.GetString(msg);
         }
 
-        private void SendString(string s)
+        void SendString(string s)
         {
             var msg = System.Text.Encoding.UTF8.GetBytes(s);
 
@@ -536,6 +619,9 @@ namespace Petri.Editor
                 _socket.GetStream().Write(bytes, 0, bytes.Length);
             }
         }
+
+        GeneratedDynamicLibProxy _libProxy;
+        Runtime.DebugServer _debugServer;
 
         bool _petriRunning, _pause;
         volatile bool _sessionRunning;

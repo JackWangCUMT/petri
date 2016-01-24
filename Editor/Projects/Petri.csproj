@@ -278,6 +278,7 @@
     <Compile Include="..\Sources\Document\Compiler.cs">
       <Link>Sources\Document\Compiler.cs</Link>
     </Compile>
+    <Compile Include="..\Sources\Document\DocumentSection\Debugger\GeneratedDynamicLibProxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="CSRuntime.csproj">

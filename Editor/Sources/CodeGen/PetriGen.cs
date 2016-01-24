@@ -148,14 +148,17 @@ namespace Petri.Editor
             GenerateCodeFor(Document.PetriNet, new IDManager(Document.LastEntityID + 1));
             End();
 
-            System.IO.File.WriteAllText(PathToFile(Document.Settings.Name + "." + PetriGen.SourceExtensionFromLanguage(Language)), CodeGen.Value);
+            System.IO.File.WriteAllText(PathToFile(Document.Settings.Name + "." + PetriGen.SourceExtensionFromLanguage(Language)),
+                                        CodeGen.Value);
         }
 
         public abstract void WriteExpressionEvaluator(Expression expression, string path);
 
         protected string PathToFile(string filename)
         {
-            return System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath), filename);
+            return System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
+                                                                 Document.Settings.SourceOutputPath),
+                                          filename);
         }
 
         protected string Hash {
@@ -165,8 +168,12 @@ namespace Petri.Editor
 
         protected string CompilableClassName {
             get {
-                return Document.Settings.Name.Replace(" ", "_").Replace("+", "Plus").Replace("#", "Sharp");
+                return GetCompilableClassName(Document.Settings.Name);
             }
+        }
+
+        public static string GetCompilableClassName(string name) {
+            return name.Replace(" ", "_").Replace("+", "Plus").Replace("#", "Sharp");
         }
     }
 }

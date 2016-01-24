@@ -5,7 +5,7 @@ namespace Petri.Runtime
     /// <summary>
     /// The base class of a generated petri net dynamic library
     /// </summary>
-    public abstract class GeneratedDynamicLib
+    public abstract class GeneratedDynamicLib : MarshalByRefObject
     {
         /// <summary>
         /// Accesses the DynamicLib instance embedded into the library
