@@ -35,13 +35,15 @@ namespace Petri.Editor
          * The following string constants are the possible console output when invoked in compiler mode.
          * The string are used in the units tests as well.
          */
-        internal static readonly string HelpString = "Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--arch|-a (32|64)] [--verbose|-v] [--] \"Path/To/Document.petri\"";
+        internal static readonly string HelpString = "Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--run|-r] [--arch|-a (32|64)] [--verbose|-v] [--] \"Path/To/Document.petri\"";
 
         internal static readonly string MissingPetriDocument = "The path to the Petri document must be specified as the last program argument!";
-        internal static readonly string MissingGenerateOrCompile = "Must specify \"--generate\" and/or \"--compile\"!";
+        internal static readonly string MissingGenerateOrCompileOrRun = "Must specify \"--generate\", \"--compile\", and/or \"--run\"!";
 
         internal static readonly string WrongArchitecture = "Wrong architecture specified!";
         internal static readonly string MissingArchitecture = "Missing architecture value!";
+
+        internal static readonly string WrongProjectTypeForRunning = "The project must be a C# project for being run directly by this application, and have be set as a \"Run in editor\" project!";
 
         internal static readonly int ArgumentError = 4;
         internal static readonly int CompilationFailure = 64;
@@ -75,6 +77,7 @@ namespace Petri.Editor
             if(args.Length > 0) {
                 bool generate = false;
                 bool compile = false;
+                bool run = false;
                 bool verbose = false;
                 int arch = 0;
                 var used = new bool[args.Length];
@@ -126,6 +129,10 @@ namespace Petri.Editor
                         compile = true;
                         used[i] = true;
                     }
+                    else if(args[i] == "--run" || args[i] == "-r") {
+                        run = true;
+                        used[i] = true;
+                    }
                 }
                 for(int i = 0; i < args.Length - 1; ++i) {
                     if(!used[i]) {
@@ -139,11 +146,10 @@ namespace Petri.Editor
                     return PrintUsage(ArgumentError);
                 }
 
-
                 string path = args[args.Length - 1];
 
-                if(!compile && !generate) {
-                    Console.Error.WriteLine(MissingGenerateOrCompile);
+                if(!compile && !generate && !run) {
+                    Console.Error.WriteLine(MissingGenerateOrCompileOrRun);
                     return PrintUsage(ArgumentError);
                 }
 
@@ -158,8 +164,8 @@ namespace Petri.Editor
                                                                                       document.Settings.SourceOutputPath),
                                                                document.Settings.Name) + "." + PetriGen.SourceExtensionFromLanguage(document.Settings.Language);
 
-                    bool forceGeneration = false;
-                    if(!generate && compile) {
+                    bool forceGeneration = false, forceCompilation = false;
+                    if(!generate && (compile || run)) {
                         if(!System.IO.File.Exists(sourcePath)
                            || System.IO.File.GetLastWriteTime(sourcePath) < System.IO.File.GetLastWriteTime(document.Path)) {
                             generate = true;
@@ -180,25 +186,41 @@ namespace Petri.Editor
                             Console.WriteLine("Successfully generated the " + document.Settings.LanguageName() + " code");
                         }
                     }
-                    if(compile) {
+
+                    if(!compile && run) {
                         string dylibPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
                                                                                              System.IO.Path.Combine(document.Settings.LibOutputPath,
                                                                                                                     document.Settings.Name + ".so")));
                         if(!System.IO.File.Exists(dylibPath) || System.IO.File.GetLastWriteTime(dylibPath) < System.IO.File.GetLastWriteTime(sourcePath)) {
-                            if(verbose) {
-                                Console.WriteLine("Compiling the " + document.Settings.LanguageName() + " code…");
-                            }
-                            bool res = document.Compile(false);
-                            if(!res) {
-                                Console.Error.WriteLine("Compilation failed, aborting!");
-                                return CompilationFailure;
-                            }
-                            else if(verbose) {
-                                Console.WriteLine("Compilation successful!");
-                            }
+                            compile = true;
+                            forceCompilation = true;
                         }
                         else if(verbose) {
                             Console.WriteLine("Previously compiled dylib is up to date, no need for recompilation");
+                        }
+                    }
+
+                    if(compile) {
+                        if(forceCompilation && verbose) {
+                            Console.WriteLine("Compiling the " + document.Settings.LanguageName() + " code…");
+                        }
+                        bool res = document.Compile(false);
+                        if(!res) {
+                            Console.Error.WriteLine("Compilation failed, aborting!");
+                            return CompilationFailure;
+                        }
+                        else if(verbose) {
+                            Console.WriteLine("Compilation successful!");
+                        }
+                    }
+
+                    if(run) {
+                        if(document.Settings.RunInEditor) {
+                            RunDocument(document, verbose);
+                        }
+                        else {
+                            Console.Error.WriteLine(WrongProjectTypeForRunning);
+                            return ArgumentError;
                         }
                     }
                 }
@@ -477,6 +499,50 @@ namespace Petri.Editor
         public static SortedList<DateTime, string> RecentDocuments {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Runs the petri net described by the document. It must have been already compiled.
+        /// </summary>
+        /// <param name="doc">The document to run.</param>
+        /// <param name="verbose">Whether some additional info is to be ouput upon execution.</param>
+        static void RunDocument(HeadlessDocument doc, bool verbose)
+        {
+            if(verbose) {
+                Console.WriteLine("Preparing for running the petri net…\n");
+                Console.Write("Loading the assembly…");
+            }
+            var proxy = new GeneratedDynamicLibProxy(System.IO.Directory.GetParent(doc.Path).FullName,
+                                                     doc.Settings.LibPath,
+                                                     PetriGen.GetCompilableClassName(doc.Settings.Name));            
+            Petri.Runtime.GeneratedDynamicLib dylib = proxy.Load();
+
+            if(verbose) {
+                Console.WriteLine(" Assembly loaded.");
+                Console.Write("Extracting the dynamic library…");
+            }
+
+            var dynamicLib = dylib.Lib;
+
+            if(verbose) {
+                Console.WriteLine(" OK.");
+                Console.Write("Creating the petri net…");
+            }
+            Petri.Runtime.PetriNet pn = dynamicLib.Create();
+            if(verbose) {
+                Console.WriteLine(" OK.");
+                Console.WriteLine("Ready to go! The application will automatically close when/if the petri net execution completes.\n");
+            }
+            pn.Run();
+            pn.Join();
+
+            if(verbose) {
+                Console.Write("\nExecution complete. Unloading the library…");
+            }
+            proxy.Unload();
+            if(verbose) {
+                Console.WriteLine(" Done, will now exit.");
+            }
         }
 
         static List<Document> _documents = new List<Document>();
