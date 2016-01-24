@@ -103,7 +103,7 @@ namespace Petri.Editor
             CodeGen += "";
 
             CodeGen += "#define EXPORT extern \"C\"";
-            CodeGen += "#define PETRI_PREFIX \"" + CompilableClassName + "\"\n";
+            CodeGen += "#define PETRI_PREFIX \"" + ClassName + "\"\n";
 
             CodeGen += "\nusing namespace Petri;\n";
 
@@ -136,7 +136,7 @@ namespace Petri.Editor
 
             CodeGen += "";
 
-            CodeGen += "EXPORT void *" + CompilableClassName + "_create() {";
+            CodeGen += "EXPORT void *" + ClassName + "_create() {";
             CodeGen += "auto petriNet = std::make_unique<PetriNet>(PETRI_PREFIX);";
             CodeGen += "fill(*petriNet);";
             CodeGen += "return petriNet.release();";
@@ -144,7 +144,7 @@ namespace Petri.Editor
 
             CodeGen += "";
 
-            CodeGen += "EXPORT void *" + CompilableClassName + "_createDebug() {";
+            CodeGen += "EXPORT void *" + ClassName + "_createDebug() {";
             CodeGen += "auto petriNet = std::make_unique<PetriDebug>(PETRI_PREFIX);";
             CodeGen += "fill(*petriNet);";
             CodeGen += "return petriNet.release();";
@@ -152,36 +152,36 @@ namespace Petri.Editor
 
             CodeGen += "";
 
-            CodeGen += "EXPORT char const *" + CompilableClassName + "_getHash() {";
+            CodeGen += "EXPORT char const *" + ClassName + "_getHash() {";
             CodeGen += "return \"" + Hash + "\";";
             CodeGen += "}";
 
             CodeGen += "";
 
-            CodeGen += "EXPORT char const *" + CompilableClassName + "_getAPIDate() {";
+            CodeGen += "EXPORT char const *" + ClassName + "_getAPIDate() {";
             CodeGen += "return __TIMESTAMP__;";
             CodeGen += "}";
 
             CodeGen.Format();
 
-            _headerGen += "#ifndef PETRI_" + CompilableClassName + "_H";
-            _headerGen += "#define PETRI_" + CompilableClassName + "_H\n";
+            _headerGen += "#ifndef PETRI_" + ClassName + "_H";
+            _headerGen += "#define PETRI_" + ClassName + "_H\n";
 
             _headerGen += "";
             _headerGen += "#include \"Runtime/Cpp/PetriDynamicLib.h\"";
             _headerGen += "";
-            _headerGen += "class " + CompilableClassName + " : public Petri::PetriDynamicLib {";
+            _headerGen += "class " + ClassName + " : public Petri::PetriDynamicLib {";
             _headerGen += "public:";
             _headerGen += "\t/**";
             _headerGen += "\t * Creates the dynamic library wrapper. It still needs to be loaded to make it possible to create the PetriNet objects.";
             _headerGen += "\t */";
-            _headerGen += "\t" + CompilableClassName + "() = default;";
-            _headerGen += "\t" + CompilableClassName + "(" + CompilableClassName + " const &) = delete;";
-            _headerGen += "\t" + CompilableClassName + " &operator=(" + CompilableClassName + " const &) = delete;";
+            _headerGen += "\t" + ClassName + "() = default;";
+            _headerGen += "\t" + ClassName + "(" + ClassName + " const &) = delete;";
+            _headerGen += "\t" + ClassName + " &operator=(" + ClassName + " const &) = delete;";
             _headerGen += "";
-            _headerGen += "\t" + CompilableClassName + "(" + CompilableClassName + " &&) = default;";
-            _headerGen += "\t" + CompilableClassName + " &operator=(" + CompilableClassName + " &&) = default;";
-            _headerGen += "\tvirtual ~" + CompilableClassName + "() = default;";
+            _headerGen += "\t" + ClassName + "(" + ClassName + " &&) = default;";
+            _headerGen += "\t" + ClassName + " &operator=(" + ClassName + " &&) = default;";
+            _headerGen += "\tvirtual ~" + ClassName + "() = default;";
             _headerGen += "";
             _headerGen += "\t/**";
             _headerGen += "\t * Returns the name of the Petri net.";

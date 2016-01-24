@@ -166,15 +166,10 @@ namespace Petri.Editor
             set;
         }
 
-        protected string CompilableClassName {
+        protected string ClassName {
             get {
-                return GetCompilableClassName(Document.Settings.Name);
+                return Document.Settings.Name;
             }
-        }
-
-        public static string GetCompilableClassName(string name)
-        {
-            return name.Replace(" ", "_").Replace("+", "Plus").Replace("#", "Sharp");
         }
     }
 }

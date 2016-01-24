@@ -45,7 +45,8 @@ namespace Petri.Editor
 
             if(Application.Documents.Count > 0) {
                 int x, y;
-                Application.Documents[Application.Documents.Count - 1].Window.GetPosition(out x, out y);
+                Application.Documents[Application.Documents.Count - 1].Window.GetPosition(out x,
+                                                                                          out y);
                 this.Move(x + 20, y + 42);
             }
             else {
@@ -254,6 +255,22 @@ namespace Petri.Editor
         }
 
         /// <summary>
+        /// Gets the current focused window.
+        /// </summary>
+        /// <value>The current focused window.</value>
+        static Window CurrentFocusedWindow {
+            get {
+                foreach(Window w in Gtk.Window.ListToplevels()) {
+                    if(w.HasToplevelFocus) {
+                        return w;
+                    }
+                }
+  
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Called when any of the non-static menu item is selected from the menu bar.
         /// </summary>
         /// <param name="sender">Sender.</param>
@@ -285,50 +302,62 @@ namespace Petri.Editor
                 _document.Redo();
             }
             else if(sender == _copyItem) {
-                if(Focus == Gui.BaseView)
-                    _document.CurrentController.Copy();
-                else if(Focus is Editable) {
-                    (Focus as Editable).CopyClipboard();
-                }
-                else if(Focus is TextView) {
-                    var v = Focus as TextView;
-                    v.Buffer.CopyClipboard(v.GetClipboard(Gdk.Selection.Clipboard));
+                var w = CurrentFocusedWindow;
+                if(w != null) {
+                    if(w.Focus == Gui.BaseView)
+                        _document.CurrentController.Copy();
+                    else if(w.Focus is Editable) {
+                        (w.Focus as Editable).CopyClipboard();
+                    }
+                    else if(w.Focus is TextView) {
+                        var v = w.Focus as TextView;
+                        v.Buffer.CopyClipboard(v.GetClipboard(Gdk.Selection.Clipboard));
+                    }
                 }
             }
             else if(sender == _cutItem) {
-                if(Focus == Gui.BaseView)
-                    _document.CurrentController.Cut();
-                else if(Focus is Editable) {
-                    (Focus as Editable).CutClipboard();
-                }
-                else if(Focus is TextView) {
-                    var v = Focus as TextView;
-                    v.Buffer.CutClipboard(v.GetClipboard(Gdk.Selection.Clipboard), true);
+                var w = CurrentFocusedWindow;
+                if(w != null) {
+                    if(w.Focus == Gui.BaseView)
+                        _document.CurrentController.Cut();
+                    else if(w.Focus is Editable) {
+                        (w.Focus as Editable).CutClipboard();
+                    }
+                    else if(w.Focus is TextView) {
+                        var v = w.Focus as TextView;
+                        v.Buffer.CutClipboard(v.GetClipboard(Gdk.Selection.Clipboard), true);
+                    }
                 }
             }
             else if(sender == _pasteItem) {
-                if(Focus == Gui.BaseView)
-                    _document.CurrentController.Paste();
-                else if(Focus is Editable) {
-                    (Focus as Editable).PasteClipboard();
-                }
-                else if(Focus is TextView) {
-                    var v = Focus as TextView;
-                    v.Buffer.PasteClipboard(v.GetClipboard(Gdk.Selection.Clipboard));
+                var w = CurrentFocusedWindow;
+                if(w != null) {
+                    if(w.Focus == Gui.BaseView)
+                        _document.CurrentController.Paste();
+                    else if(w.Focus is Editable) {
+                        (w.Focus as Editable).PasteClipboard();
+                    }
+                    else if(w.Focus is TextView) {
+                        var v = w.Focus as TextView;
+                        v.Buffer.PasteClipboard(v.GetClipboard(Gdk.Selection.Clipboard));
+                    }
                 }
             }
             else if(sender == _selectAllItem) {
-                if(Focus == Gui.BaseView)
-                    _document.CurrentController.SelectAll();
-                else if(Focus is Editable) {
-                    (Focus as Editable).SelectRegion(0, -1);
-                }
-                else if(Focus is TextView) {
-                    var v = Focus as TextView;
-                    TextIter start = v.Buffer.GetIterAtOffset(0), end = v.Buffer.GetIterAtOffset(0);
-                    end.ForwardToEnd();
+                var w = CurrentFocusedWindow;
+                if(w != null) {
+                    if(w.Focus == Gui.BaseView)
+                        _document.CurrentController.SelectAll();
+                    else if(w.Focus is Editable) {
+                        (w.Focus as Editable).SelectRegion(0, -1);
+                    }
+                    else if(w.Focus is TextView) {
+                        var v = w.Focus as TextView;
+                        TextIter start = v.Buffer.GetIterAtOffset(0), end = v.Buffer.GetIterAtOffset(0);
+                        end.ForwardToEnd();
 
-                    v.Buffer.SelectRange(start, end);
+                        v.Buffer.SelectRange(start, end);
+                    }
                 }
             }
             else if(sender == _embedInMacro) {
@@ -348,8 +377,18 @@ namespace Petri.Editor
                 Application.AddDocument(doc);
             }
             else if(sender == _closeItem) {
-                if(_document.CloseAndConfirm())
-                    this.Destroy();
+                var w = CurrentFocusedWindow;
+                if(w != null) {
+                    bool close = true;
+                    if(w == this) {
+                        close = _document.CloseAndConfirm();
+                    }
+                    w.Hide();
+
+                    if(w == this) {
+                        w.Destroy();
+                    }
+                }
             }
             else if(sender == _showEditorItem) {
                 _document.SwitchToEditor();

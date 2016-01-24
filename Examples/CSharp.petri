@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Document>
-  <Settings Name="C#" Enum="ActionResult,OK,NOK" SourceOutputPath="../Examples" LibOutputPath="../Examples" Hostname="localhost" Port="12345" Language="CSharp" RunInEditor="True">
+  <Settings Name="CSharp" Enum="ActionResult,OK,NOK" SourceOutputPath="../Examples" LibOutputPath="../Examples" Hostname="localhost" Port="12345" Language="CSharp" RunInEditor="True">
     <Compiler Invocation="mcs" />
     <IncludePaths />
     <LibPaths>
