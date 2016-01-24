@@ -47,6 +47,13 @@ namespace Petri.Editor
 
             Process p = new Process();
 
+            // This snippet removes the debugging environment variable from the child process, as it causes an error when the app is run into a debugger.
+            string monoEnv = p.StartInfo.EnvironmentVariables["MONO_ENV_OPTIONS"];
+            if(monoEnv != null) {
+                monoEnv = System.Text.RegularExpressions.Regex.Replace(monoEnv, "--debugger-agent=transport=dt_socket,address=127.0.0.1:[0-9]{3,5}", "");
+                p.StartInfo.EnvironmentVariables["MONO_ENV_OPTIONS"] = monoEnv;
+            }
+
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardError = true;
@@ -77,12 +84,6 @@ namespace Petri.Editor
             p.WaitForExit();
 
             System.IO.Directory.SetCurrentDirectory(cd);
-
-            // Removes a not meaningful error message when the editor is run into a debugger.
-            var array = err.Split(new string[]{ Environment.NewLine }, StringSplitOptions.None);
-            if(array.Length == 2 && array[0].StartsWith("debugger-agent: Unable to connect to 127.0.0.1:") && array[1].Length == 0) {
-                err = "";
-            }
 
             outputBuilder.Append(err);
 

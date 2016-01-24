@@ -32,6 +32,10 @@ namespace Petri.Editor
 {
     public class DebugClient
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.DebugClient"/> class.
+        /// </summary>
+        /// <param name="doc">Document.</param>
         public DebugClient(Document doc)
         {
             _document = doc;
@@ -47,18 +51,31 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="Petri.Editor.DebugClient"/> is attached to a DebugServer instance.
+        /// </summary>
+        /// <value><c>true</c> if session running; otherwise, <c>false</c>.</value>
         public bool SessionRunning {
             get {
                 return _sessionRunning;
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the PetriNet enclosed in the DebugServer's dynamic library is running or not.
+        /// </summary>
+        /// <value><c>true</c> if the petri net running; otherwise, <c>false</c>.</value>
         public bool PetriRunning {
             get {
                 return _petriRunning;
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="Petri.Editor.DebugClient"/> is paused.
+        /// The pause will be effective just after the states of the petri net that are active when the message is received have finished their execution.
+        /// </summary>
+        /// <value><c>true</c> if pause; otherwise, <c>false</c>.</value>
         public bool Pause {
             get {
                 return _pause;
@@ -97,12 +114,19 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets the version of the debugger.
+        /// </summary>
+        /// <value>The version.</value>
         public string Version {
             get {
                 return "0.2";
             }
         }
 
+        /// <summary>
+        /// Attach this instance to a DebugServer listening on the same port as in the Settings of the document.
+        /// </summary>
         public void Attach()
         {
             if(_document.Settings.RunInEditor) {
@@ -118,6 +142,9 @@ namespace Petri.Editor
                 System.Threading.Thread.Sleep(20);
         }
 
+        /// <summary>
+        /// Disconnect this instance from its DebugServer.
+        /// </summary>
         public void Detach()
         {
             if(_document.Settings.RunInEditor) {
@@ -130,6 +157,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Loads the library and starts a local DebugServer.
+        /// Valid only when the document is set to Run in the editor.
+        /// </summary>
         void LoadLibAndStartServer()
         {
             UnloadLibAndStopServer();
@@ -144,6 +175,9 @@ namespace Petri.Editor
             _debugServer.Start();
         }
 
+        /// <summary>
+        /// Stops the local DebugServer and unloads the assembly containing the PetriNet's code.
+        /// </summary>
         void UnloadLibAndStopServer()
         {
             if(_debugServer != null) {
@@ -156,11 +190,18 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Stops the petri net, detach the debugger and stops the DebugServer (it will not be listening any more after that).
+        /// </summary>
         public void StopSession()
         {
             this.StopOrDetach(true);
         }
 
+        /// <summary>
+        /// Stops or detach the instance, depending on the parameter's value.
+        /// </summary>
+        /// <param name="stop">If set to <c>true</c> then the DebugServer is stopped as well as the DebugClient and petri net, whereas only the DebugClient and petri net are stopped if <c>false</c>.</param>
         void StopOrDetach(bool stop)
         {
             _pause = false;
@@ -195,6 +236,9 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Tells the DebugServer to run the petri net.
+        /// </summary>
         public void StartPetri()
         {
             _pause = false;
@@ -223,6 +267,9 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Tells the DebugServer to stop the execution of the petri net.
+        /// </summary>
         public void StopPetri()
         {
             _pause = false;
@@ -248,6 +295,9 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Stops the petri net execution, generate and compile the new petri net and load it into the DebugServer.
+        /// </summary>
         public void ReloadPetri()
         {
             GLib.Timeout.Add(0, () => {
@@ -304,6 +354,9 @@ namespace Petri.Editor
             });
         }
 
+        /// <summary>
+        /// Sends the current breakpoints list to the DebugServer.
+        /// </summary>
         public void UpdateBreakpoints()
         {
             if(PetriRunning) {
@@ -317,6 +370,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Triggers an asynchronous evaluation of a code expression.
+        /// </summary>
+        /// <param name="expression">The expression to evaluate.</param>
         public void Evaluate(Cpp.Expression expression)
         {
             if(!PetriRunning) {
@@ -356,6 +413,9 @@ namespace Petri.Editor
             System.IO.File.Delete(sourceName);
         }
 
+        /// <summary>
+        /// Try to connect to a DebugServer.
+        /// </summary>
         void Hello()
         {
             try {
@@ -396,6 +456,9 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// The method in charge of receiving and dispatching the messages from the DebugServer.
+        /// </summary>
         void Receiver()
         {
             try {
@@ -565,6 +628,10 @@ namespace Petri.Editor
             _document.Window.DebugGui.UpdateToolbar();
         }
 
+        /// <summary>
+        /// Tries to receive a JSON object from the DebugServer.
+        /// </summary>
+        /// <returns>The object.</returns>
         JObject ReceiveObject()
         {
             int count = 0;
@@ -583,11 +650,19 @@ namespace Petri.Editor
             return null;
         }
 
+        /// <summary>
+        /// Sends a JSON message to the DebugServer.
+        /// </summary>
+        /// <param name="o">O.</param>
         void SendObject(JObject o)
         {
             this.SendString(o.ToString());
         }
 
+        /// <summary>
+        /// Low level message reception routine.
+        /// </summary>
+        /// <returns>The string.</returns>
         string ReceiveString()
         {
             byte[] msg;
@@ -611,6 +686,10 @@ namespace Petri.Editor
             return System.Text.Encoding.UTF8.GetString(msg);
         }
 
+        /// <summary>
+        /// Low level message sending routine.
+        /// </summary>
+        /// <returns>The string.</returns>
         void SendString(string s)
         {
             var msg = System.Text.Encoding.UTF8.GetBytes(s);

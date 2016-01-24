@@ -24,8 +24,17 @@ using System;
 
 namespace Petri.Editor
 {
+    /// <summary>
+    /// Generated dynamic lib proxy. This class allows for loading and unloading a dynamic lib generated from a C# PetriNet project.
+    /// </summary>
     public class GeneratedDynamicLibProxy : MarshalByRefObject
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.GeneratedDynamicLibProxy"/> class.
+        /// </summary>
+        /// <param name="libPath">The directory containing the assembly to load.</param>
+        /// <param name="libName">The name of the assambly to load. <example>MyLib.dll</example></param>
+        /// <param name="className">The name of the class inheriting <see cref="Petri.Runtime.GeneratedDynamicLib"/> contained in the assembly.</param>
         public GeneratedDynamicLibProxy(string libPath, string libName, string className)
         {
             LibPath = libPath;
@@ -48,7 +57,10 @@ namespace Petri.Editor
             set;
         }
 
-        public Petri.Runtime.GeneratedDynamicLib Load()
+        /// <summary>
+        /// Loads the assembly and extracts the <see cref="Petri.Runtime.GeneratedDynamicLib"/> instance it encloses.
+        /// </summary>
+        public Runtime.GeneratedDynamicLib Load()
         {
             var filePath = System.IO.Path.Combine(LibPath, LibName);
 
@@ -68,7 +80,7 @@ namespace Petri.Editor
         }
 
         /// <summary>
-        /// 
+        /// Unloads the assembly.
         /// </summary>
         public void Unload()
         {

@@ -51,25 +51,41 @@ namespace Petri.Editor
             set;
         }
 
+        /// <summary>
+        /// Gets the active states.
+        /// </summary>
+        /// <value>The currently active states of a running petri net.</value>
         public Dictionary<State, int> ActiveStates {
             get;
             private set;
         }
 
+        /// <summary>
+        /// The list of breakpoints installed in the currently running petri net.
+        /// </summary>
+        /// <value>The breakpoints.</value>
         public HashSet<Action> Breakpoints {
             get;
             private set;
         }
 
-        public void AddBreakpoint(Action a)
+        /// <summary>
+        /// Attach a breakpoint to the specified petri net state.
+        /// </summary>
+        /// <param name="action">The state.</param>
+        public void AddBreakpoint(Action action)
         {
-            Breakpoints.Add(a);
+            Breakpoints.Add(action);
             Client.UpdateBreakpoints();
         }
 
-        public void RemoveBreakpoint(Action a)
+        /// <summary>
+        /// Remove a breakpoint from the specified petri net state.
+        /// </summary>
+        /// <param name="action">The state.</param>
+        public void RemoveBreakpoint(Action action)
         {
-            Breakpoints.Remove(a);
+            Breakpoints.Remove(action);
             Client.UpdateBreakpoints();
         }
 
