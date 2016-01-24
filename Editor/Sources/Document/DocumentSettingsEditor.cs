@@ -216,9 +216,9 @@ namespace Petri.Editor
 
 
                 var outputLabel = new Label(Configuration.GetLocalized("Output path for the generated code (relative to the document):"));
-                _sourceOutputPath = new Entry(_document.Settings.SourceOutputPath);
+                _sourceOutputPath = new Entry(_document.Settings.RelativeSourceOutputPath);
                 Application.RegisterValidation(_sourceOutputPath, false, (obj, p) => {
-                    _document.Settings.SourceOutputPath = (obj as Entry).Text;
+                    _document.Settings.RelativeSourceOutputPath = (obj as Entry).Text;
                     _document.Settings.Modified = true;
                 });
 
@@ -235,9 +235,9 @@ namespace Petri.Editor
                 vbox.PackStart(hbox, false, false, 0);
 
                 outputLabel = new Label(Configuration.GetLocalized("Output path for the dynamic library (relative to the document):"));
-                _libOutputPath = new Entry(_document.Settings.LibOutputPath);
+                _libOutputPath = new Entry(_document.Settings.RelativeLibOutputPath);
                 Application.RegisterValidation(_libOutputPath, false, (obj, p) => {
-                    _document.Settings.LibOutputPath = (obj as Entry).Text;
+                    _document.Settings.RelativeLibOutputPath = (obj as Entry).Text;
                     _document.Settings.Modified = true;
                 });
 
@@ -521,12 +521,12 @@ namespace Petri.Editor
                 else if(sender == _selectSourceOutputPath) {
                     string filename = _document.GetRelativeToDoc(fc.Filename);
                     _sourceOutputPath.Text = filename;
-                    _document.Settings.SourceOutputPath = filename;
+                    _document.Settings.RelativeSourceOutputPath = filename;
                 }
                 else if(sender == _selectLibOutputPath) {
                     string filename = _document.GetRelativeToDoc(fc.Filename);
                     _libOutputPath.Text = filename;
-                    _document.Settings.LibOutputPath = filename;
+                    _document.Settings.RelativeLibOutputPath = filename;
                 }
 
                 _document.Settings.Modified = true;

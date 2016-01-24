@@ -57,7 +57,7 @@ namespace Petri.Editor
                 var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
                                                 s);
                 var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
-                                                                           Document.Settings.SourceOutputPath));
+                                                                           Document.Settings.RelativeSourceOutputPath));
                 generator += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
             }
 
@@ -93,7 +93,7 @@ namespace Petri.Editor
                 var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
                                                 s);
                 var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
-                                                                           Document.Settings.SourceOutputPath));
+                                                                           Document.Settings.RelativeSourceOutputPath));
                 CodeGen += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
             }
 
@@ -207,7 +207,7 @@ namespace Petri.Editor
             _headerGen += "#endif"; // ifndef header guard
 
             string path = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
-                                                                        Document.Settings.SourceOutputPath),
+                                                                        Document.Settings.RelativeSourceOutputPath),
                                                  Document.Settings.Name) + ".h";
             string headerCode = _headerGen.Value;
             if(System.IO.File.Exists(path)) {

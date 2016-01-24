@@ -35,10 +35,10 @@ namespace Petri.Editor
          * The following string constants are the possible console output when invoked in compiler mode.
          * The string are used in the units tests as well.
          */
-        internal static readonly string HelpString = "Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--run|-r] [--arch|-a (32|64)] [--verbose|-v] [--] \"Path/To/Document.petri\"";
+        internal static readonly string HelpString = "Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--run|-r] [--clean|-k] [--arch|-a (32|64)] [--verbose|-v] [--] \"Path/To/Document.petri\"";
 
         internal static readonly string MissingPetriDocument = "The path to the Petri document must be specified as the last program argument!";
-        internal static readonly string MissingGenerateOrCompileOrRun = "Must specify \"--generate\", \"--compile\", and/or \"--run\"!";
+        internal static readonly string MissingGenerateOrCompileOrRunOrClean = "Must specify one or more of \"--generate\", \"--compile\", \"clean\", and \"--run\"!";
 
         internal static readonly string WrongArchitecture = "Wrong architecture specified!";
         internal static readonly string MissingArchitecture = "Missing architecture value!";
@@ -68,6 +68,15 @@ namespace Petri.Editor
         }
 
         /// <summary>
+        /// Returns whether the argument is a short CLI option.
+        /// </summary>
+        /// <returns><c>true</c> if opt is a short option; otherwise, <c>false</c>.</returns>
+        /// <param name="opt">Option.</param>
+        static bool IsShortOption(string opt) {
+            return System.Text.RegularExpressions.Regex.Match(opt, "^-[gcrkv]+$").Success;
+        }
+
+        /// <summary>
         /// The entry point of the program. Manages boths CLI and GUI, depending on whether arguments were given or not.
         /// </summary>
         /// <param name="args">The command-line arguments.</param>
@@ -78,6 +87,7 @@ namespace Petri.Editor
                 bool generate = false;
                 bool compile = false;
                 bool run = false;
+                bool clean = false;
                 bool verbose = false;
                 int arch = 0;
                 var used = new bool[args.Length];
@@ -92,6 +102,32 @@ namespace Petri.Editor
                     if(args[i] == "--") {
                         used[i] = true;
                         break;
+                    }
+                    else if(IsShortOption(args[i])) {
+                        int count = 0;
+                        if(args[i].Contains("v")) {
+                            verbose = true;
+                            ++count;
+                        }
+                        if(args[i].Contains("g")) {
+                            generate = true;
+                            ++count;
+                        }
+                        if(args[i].Contains("c")) {
+                            compile = true;
+                            ++count;
+                        }
+                        if(args[i].Contains("r")) {
+                            run = true;
+                            ++count;
+                        }
+                        if(args[i].Contains("k")) {
+                            clean = true;
+                            ++count;
+                        }
+
+                        // The argument is used if all of the short options have been consumed.
+                        used[i] = count == (args[i].Length - 1);
                     }
                     else if(args[i] == "--arch" || args[i] == "-a") {
                         if(i < args.Length - 1) {
@@ -117,20 +153,24 @@ namespace Petri.Editor
                             return PrintUsage(ArgumentError);
                         }
                     }
-                    else if(args[i] == "--verbose" || args[i] == "-v") {
+                    else if(args[i] == "--verbose") {
                         verbose = true;
                         used[i] = true;
                     }
-                    else if(args[i] == "--generate" || args[i] == "-g") {
+                    else if(args[i] == "--generate") {
                         generate = true;
                         used[i] = true;
                     }
-                    else if(args[i] == "--compile" || args[i] == "-c") {
+                    else if(args[i] == "--compile") {
                         compile = true;
                         used[i] = true;
                     }
-                    else if(args[i] == "--run" || args[i] == "-r") {
+                    else if(args[i] == "--run") {
                         run = true;
+                        used[i] = true;
+                    }
+                    else if(args[i] == "--clean") {
+                        clean = true;
                         used[i] = true;
                     }
                 }
@@ -148,8 +188,8 @@ namespace Petri.Editor
 
                 string path = args[args.Length - 1];
 
-                if(!compile && !generate && !run) {
-                    Console.Error.WriteLine(MissingGenerateOrCompileOrRun);
+                if(!compile && !generate && !run && !clean) {
+                    Console.Error.WriteLine(MissingGenerateOrCompileOrRunOrClean);
                     return PrintUsage(ArgumentError);
                 }
 
@@ -157,12 +197,22 @@ namespace Petri.Editor
                     HeadlessDocument document = new HeadlessDocument(path);
                     document.Load();
                     if(verbose) {
-                        Console.WriteLine("Processing Petri net " + document.Settings.Name + "…");
+                        Console.WriteLine("Processing petri net \"" + document.Settings.Name + "\"…");
                     }
 
-                    string sourcePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
-                                                                                      document.Settings.SourceOutputPath),
-                                                               document.Settings.Name) + "." + PetriGen.SourceExtensionFromLanguage(document.Settings.Language);
+                    string sourcePath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
+                                                                                          document.Settings.RelativeSourcePath));
+
+                    string libPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
+                                                                                       document.Settings.RelativeLibPath));
+
+                    if(clean) {
+                        Console.Write("Cleaning artifacts of petri net \"" + document.Settings.Name + "\"…");
+                        System.IO.File.Delete(sourcePath);
+                        System.IO.File.Delete(libPath);
+                        Console.WriteLine(libPath);
+                        Console.WriteLine(" Done.");
+                    }
 
                     bool forceGeneration = false, forceCompilation = false;
                     if(!generate && (compile || run)) {
@@ -172,7 +222,7 @@ namespace Petri.Editor
                             forceGeneration = true;
                         }
                         else if(verbose) {
-                            Console.WriteLine("The previously generated " + document.Settings.LanguageName() + " code is up to date, no need for code generation");
+                            Console.WriteLine("The previously generated " + document.Settings.LanguageName() + " code is up to date, no need for code generation.");
                         }
                     }
 
@@ -183,26 +233,23 @@ namespace Petri.Editor
                         document.GenerateCodeDontAsk();
                         document.Save();
                         if(verbose) {
-                            Console.WriteLine("Successfully generated the " + document.Settings.LanguageName() + " code");
+                            Console.WriteLine("Successfully generated the " + document.Settings.LanguageName() + " code.");
                         }
                     }
 
                     if(!compile && run) {
-                        string dylibPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
-                                                                                             System.IO.Path.Combine(document.Settings.LibOutputPath,
-                                                                                                                    document.Settings.Name + ".so")));
-                        if(!System.IO.File.Exists(dylibPath) || System.IO.File.GetLastWriteTime(dylibPath) < System.IO.File.GetLastWriteTime(sourcePath)) {
+                        if(!System.IO.File.Exists(libPath) || System.IO.File.GetLastWriteTime(libPath) < System.IO.File.GetLastWriteTime(sourcePath)) {
                             compile = true;
                             forceCompilation = true;
                         }
                         else if(verbose) {
-                            Console.WriteLine("Previously compiled dylib is up to date, no need for recompilation");
+                            Console.WriteLine("The previously compiled library is up to date, no need for recompilation.");
                         }
                     }
 
                     if(compile) {
                         if(forceCompilation && verbose) {
-                            Console.WriteLine("Compiling the " + document.Settings.LanguageName() + " code…");
+                            Console.WriteLine("The previously compiled library is outdated or nonexistent, compiling…");
                         }
                         bool res = document.Compile(false);
                         if(!res) {
@@ -509,11 +556,11 @@ namespace Petri.Editor
         static void RunDocument(HeadlessDocument doc, bool verbose)
         {
             if(verbose) {
-                Console.WriteLine("Preparing for running the petri net…\n");
+                Console.WriteLine("Preparing for the petri net's exection…\n");
                 Console.Write("Loading the assembly…");
             }
             var proxy = new GeneratedDynamicLibProxy(System.IO.Directory.GetParent(doc.Path).FullName,
-                                                     doc.Settings.LibPath,
+                                                     doc.Settings.RelativeLibPath,
                                                      PetriGen.GetCompilableClassName(doc.Settings.Name));            
             Petri.Runtime.GeneratedDynamicLib dylib = proxy.Load();
 

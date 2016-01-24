@@ -295,7 +295,7 @@ namespace Petri.Editor
 
         public void GenerateCodeDontAsk()
         {
-            if(this.Settings.SourceOutputPath.Length == 0) {
+            if(this.Settings.RelativeSourceOutputPath.Length == 0) {
                 throw new Exception(Configuration.GetLocalized("No source output path defined. Please open the Petri net with the graphical editor and generate the <language> code once.",
                                                                Settings.LanguageName()));
             }
@@ -310,10 +310,10 @@ namespace Petri.Editor
         public virtual bool Compile(bool wait)
         {
             var c = new Compiler(this);
-            var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
+            var o = c.CompileSource(Settings.RelativeSourcePath, Settings.RelativeLibPath);
             if(o != "") {
-                Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.") + "\n" + Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath,
-                                                                                                                                                                                                                    Settings.LibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o);
+                Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.") + "\n" + Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
+                                                                                                                                                                                                                    Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o);
                 return false;
             }
 

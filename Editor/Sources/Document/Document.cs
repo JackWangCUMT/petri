@@ -507,7 +507,7 @@ namespace Petri.Editor
         public void GenerateCode()
         {
             if(Path != "") {
-                if(Settings.SourceOutputPath != "") {
+                if(Settings.RelativeSourceOutputPath != "") {
                     if(!Conflicts(PetriNet)) {
                         this.GenerateCodeDontAsk();
                         _modifiedSinceGeneration = false;
@@ -533,9 +533,9 @@ namespace Petri.Editor
                     });
 
                     if(fc.Run() == (int)ResponseType.Accept) {
-                        string old = Settings.SourceOutputPath;
-                        this.Settings.SourceOutputPath = GetRelativeToDoc(fc.Filename);
-                        Modified = old != Settings.SourceOutputPath;
+                        string old = Settings.RelativeSourceOutputPath;
+                        this.Settings.RelativeSourceOutputPath = GetRelativeToDoc(fc.Filename);
+                        Modified = old != Settings.RelativeSourceOutputPath;
 
                         this.GenerateCodeDontAsk();
                     }
@@ -589,7 +589,7 @@ namespace Petri.Editor
             Window.DebugGui.Compilation = true;
 
             var c = new Compiler(this);
-            var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
+            var o = c.CompileSource(Settings.RelativeSourcePath, Settings.RelativeLibPath);
             if(o != "") {
                 GLib.Timeout.Add(0, () => {
                     MessageDialog d = new MessageDialog(Window,
@@ -605,8 +605,8 @@ namespace Petri.Editor
 
                     d.Destroy();
                     if(result == ResponseType.Accept) {
-                        o = Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath,
-                                                                                                                                             Settings.LibPath) + "\n\n" + Configuration.GetLocalized("Errors:") + "\n" + o;
+                        o = Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
+                                                                                                                                             Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Errors:") + "\n" + o;
                         new CompilationErrorPresenter(this, o).Show();
                     }
 

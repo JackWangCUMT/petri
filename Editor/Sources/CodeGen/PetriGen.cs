@@ -157,7 +157,7 @@ namespace Petri.Editor
         protected string PathToFile(string filename)
         {
             return System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
-                                                                 Document.Settings.SourceOutputPath),
+                                                                 Document.Settings.RelativeSourceOutputPath),
                                           filename);
         }
 
