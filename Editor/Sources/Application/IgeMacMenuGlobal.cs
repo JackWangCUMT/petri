@@ -56,22 +56,36 @@ namespace MonoDevelop.MacInterop
         public static extern IntPtr GetApplicationEventTarget();
 
         [DllImport(CarbonLib)]
-        static extern EventStatus InstallEventHandler(IntPtr target, EventDelegate handler, uint count,
-                                                 CarbonEventTypeSpec[] types, IntPtr user_data, out IntPtr handlerRef);
+        static extern EventStatus InstallEventHandler(IntPtr target,
+                                                      EventDelegate handler,
+                                                      uint count,
+                                                      CarbonEventTypeSpec[] types,
+                                                      IntPtr user_data,
+                                                      out IntPtr handlerRef);
 
         [DllImport(CarbonLib)]
         public static extern EventStatus RemoveEventHandler(IntPtr handlerRef);
 
-        public static IntPtr InstallEventHandler(IntPtr target, EventDelegate handler, CarbonEventTypeSpec[] types)
+        public static IntPtr InstallEventHandler(IntPtr target,
+                                                 EventDelegate handler,
+                                                 CarbonEventTypeSpec[] types)
         {
             IntPtr handlerRef;
-            CheckReturn(InstallEventHandler(target, handler, (uint)types.Length, types, IntPtr.Zero, out handlerRef));
+            CheckReturn(InstallEventHandler(target,
+                                            handler,
+                                            (uint)types.Length,
+                                            types,
+                                            IntPtr.Zero,
+                                            out handlerRef));
             return handlerRef;
         }
 
-        public static IntPtr InstallApplicationEventHandler(EventDelegate handler, CarbonEventTypeSpec type)
+        public static IntPtr InstallApplicationEventHandler(EventDelegate handler,
+                                                            CarbonEventTypeSpec type)
         {
-            return InstallEventHandler(GetApplicationEventTarget(), handler, new CarbonEventTypeSpec[] { type });
+            return InstallEventHandler(GetApplicationEventTarget(),
+                                       handler,
+                                       new CarbonEventTypeSpec[] { type });
         }
 
         public static void CheckReturn(EventStatus status)
@@ -82,16 +96,31 @@ namespace MonoDevelop.MacInterop
         }
 
         [DllImport(CarbonLib)]
-        public static extern EventStatus GetEventParameter(IntPtr eventRef, CarbonEventParameterName name, CarbonEventParameterType desiredType,
-                                                      out CarbonEventParameterType actualType, uint size, ref uint outSize, ref IntPtr outPtr);
+        public static extern EventStatus GetEventParameter(IntPtr eventRef,
+                                                           CarbonEventParameterName name,
+                                                           CarbonEventParameterType desiredType,
+                                                           out CarbonEventParameterType actualType,
+                                                           uint size,
+                                                           ref uint outSize,
+                                                           ref IntPtr outPtr);
 
         [DllImport(CarbonLib)]
-        static extern EventStatus GetEventParameter(IntPtr eventRef, CarbonEventParameterName name, CarbonEventParameterType desiredType,	
-                                               out CarbonEventParameterType actualType, uint size, ref uint outSize, IntPtr dataBuffer);
+        static extern EventStatus GetEventParameter(IntPtr eventRef,
+                                                    CarbonEventParameterName name,
+                                                    CarbonEventParameterType desiredType,	
+                                                    out CarbonEventParameterType actualType,
+                                                    uint size,
+                                                    ref uint outSize,
+                                                    IntPtr dataBuffer);
 
         [DllImport(CarbonLib)]
-        static extern EventStatus GetEventParameter(IntPtr eventRef, CarbonEventParameterName name, CarbonEventParameterType desiredType,	
-                                               uint zero, uint size, uint zero2, IntPtr dataBuffer);
+        static extern EventStatus GetEventParameter(IntPtr eventRef,
+                                                    CarbonEventParameterName name,
+                                                    CarbonEventParameterType desiredType,	
+                                                    uint zero,
+                                                    uint size,
+                                                    uint zero2,
+                                                    IntPtr dataBuffer);
 
         [DllImport(CarbonLib)]
         public static extern AEDescStatus AEDisposeDesc(ref AEDesc desc);
@@ -101,16 +130,28 @@ namespace MonoDevelop.MacInterop
         //return an OSErr
 
         [DllImport(CarbonLib)]
-        static extern AEDescStatus AEGetNthPtr(ref AEDesc descList, int index, OSType desiredType, uint keyword,
-                                          uint zero, out IntPtr outPtr, int bufferSize, int zero2);
+        static extern AEDescStatus AEGetNthPtr(ref AEDesc descList,
+                                               int index,
+                                               OSType desiredType,
+                                               uint keyword,
+                                               uint zero,
+                                               out IntPtr outPtr,
+                                               int bufferSize,
+                                               int zero2);
+
+        [DllImport(CarbonLib)]
+        static extern AEDescStatus AEGetNthPtr(ref AEDesc descList,
+                                               int index,
+                                               OSType desiredType,
+                                               uint keyword,
+                                               out CarbonEventParameterType actualType,
+                                               IntPtr buffer,
+                                               int bufferSize,
+                                               out int actualSize);
 
         [DllImport(CarbonLib)]
         static extern AEDescStatus AEGetNthPtr(ref AEDesc descList, int index, OSType desiredType, uint keyword,
-                                          out CarbonEventParameterType actualType, IntPtr buffer, int bufferSize, out int actualSize);
-
-        [DllImport(CarbonLib)]
-        static extern AEDescStatus AEGetNthPtr(ref AEDesc descList, int index, OSType desiredType, uint keyword,
-                                          uint zero, IntPtr buffer, int bufferSize, int zero2);
+                                               uint zero, IntPtr buffer, int bufferSize, int zero2);
 
         public static int AECountItems(ref AEDesc descList)
         {
@@ -124,7 +165,14 @@ namespace MonoDevelop.MacInterop
             int len = Marshal.SizeOf(typeof(T));
             IntPtr bufferPtr = Marshal.AllocHGlobal(len);
             try {
-                CheckReturnAE(AEGetNthPtr(ref descList, index, desiredType, 0, 0, bufferPtr, len, 0));
+                CheckReturnAE(AEGetNthPtr(ref descList,
+                                          index,
+                                          desiredType,
+                                          0,
+                                          0,
+                                          bufferPtr,
+                                          len,
+                                          0));
                 T val = (T)Marshal.PtrToStructure(bufferPtr, typeof(T));
                 return val;
             }
@@ -140,16 +188,26 @@ namespace MonoDevelop.MacInterop
             return ret;
         }
 
-        public static IntPtr GetEventParameter(IntPtr eventRef, CarbonEventParameterName name, CarbonEventParameterType desiredType)
+        public static IntPtr GetEventParameter(IntPtr eventRef,
+                                               CarbonEventParameterName name,
+                                               CarbonEventParameterType desiredType)
         {
             CarbonEventParameterType actualType;
             uint outSize = 0;
             IntPtr val = IntPtr.Zero;
-            CheckReturn(GetEventParameter(eventRef, name, desiredType, out actualType, (uint)IntPtr.Size, ref outSize, ref val));
+            CheckReturn(GetEventParameter(eventRef,
+                                          name,
+                                          desiredType,
+                                          out actualType,
+                                          (uint)IntPtr.Size,
+                                          ref outSize,
+                                          ref val));
             return val;
         }
 
-        public static T GetEventParameter<T>(IntPtr eventRef, CarbonEventParameterName name, CarbonEventParameterType desiredType) where T : struct
+        public static T GetEventParameter<T>(IntPtr eventRef,
+                                             CarbonEventParameterName name,
+                                             CarbonEventParameterType desiredType) where T : struct
         {
             int len = Marshal.SizeOf(typeof(T));
             IntPtr bufferPtr = Marshal.AllocHGlobal(len);
@@ -159,7 +217,9 @@ namespace MonoDevelop.MacInterop
             return val;
         }
 
-        public static T[] GetListFromAEDesc<T,TRef>(ref AEDesc list, AEDescValueSelector<TRef,T> sel, OSType type)
+        public static T[] GetListFromAEDesc<T,TRef>(ref AEDesc list,
+                                                    AEDescValueSelector<TRef,T> sel,
+                                                    OSType type)
 			where TRef : struct
         {
             long count = AECountItems(ref list);
@@ -190,18 +250,23 @@ namespace MonoDevelop.MacInterop
 
         public static Dictionary<string,int> GetFileListFromEventRef(IntPtr eventRef)
         {
-            AEDesc list = GetEventParameter<AEDesc>(eventRef, CarbonEventParameterName.DirectObject, CarbonEventParameterType.AEList);
+            AEDesc list = GetEventParameter<AEDesc>(eventRef,
+                                                    CarbonEventParameterName.DirectObject,
+                                                    CarbonEventParameterType.AEList);
             try {
                 int line = 0;
                 try {
-                    SelectionRange range = GetEventParameter<SelectionRange>(eventRef, CarbonEventParameterName.AEPosition, CarbonEventParameterType.Char);
+                    SelectionRange range = GetEventParameter<SelectionRange>(eventRef,
+                                                                             CarbonEventParameterName.AEPosition,
+                                                                             CarbonEventParameterType.Char);
                     line = range.lineNum + 1;
                 }
                 catch {
                 }
 
-                var arr = GetListFromAEDesc<string,FSRef>(ref list, FSRefToString,
-                    (OSType)(int)CarbonEventParameterType.FSRef);
+                var arr = GetListFromAEDesc<string,FSRef>(ref list,
+                                                          FSRefToString,
+                                                          (OSType)(int)CarbonEventParameterType.FSRef);
                 var files = new Dictionary<string,int>();
                 foreach(var s in arr) {
                     if(!string.IsNullOrEmpty(s))
@@ -522,12 +587,14 @@ namespace MonoDevelop.MacInterop
         {
         }
 
-        public CarbonEventTypeSpec(CarbonEventCommand kind) : this(CarbonEventClass.Command, (uint)kind)
+        public CarbonEventTypeSpec(CarbonEventCommand kind) : this(CarbonEventClass.Command,
+                                                                   (uint)kind)
         {
         }
 
 
-        public CarbonEventTypeSpec(CarbonEventApple kind) : this(CarbonEventClass.AppleEvent, (uint)kind)
+        public CarbonEventTypeSpec(CarbonEventApple kind) : this(CarbonEventClass.AppleEvent,
+                                                                 (uint)kind)
         {
         }
 
@@ -597,7 +664,8 @@ namespace MonoDevelop.MacInterop
                 lock(lockObj) {
                     document += value;
                     if(documentHandlerRef == IntPtr.Zero)
-                        documentHandlerRef = Carbon.InstallApplicationEventHandler(HandleDoc, CarbonEventApple.OpenDocuments);
+                        documentHandlerRef = Carbon.InstallApplicationEventHandler(HandleDoc,
+                                                                                   CarbonEventApple.OpenDocuments);
                 }
             }
             remove {
@@ -611,7 +679,9 @@ namespace MonoDevelop.MacInterop
             }
         }
 
-        static CarbonEventHandlerStatus HandleDoc(IntPtr callRef, IntPtr eventRef, IntPtr user_data)
+        static CarbonEventHandlerStatus HandleDoc(IntPtr callRef,
+                                                  IntPtr eventRef,
+                                                  IntPtr user_data)
         {
             try {
                 var docs = Carbon.GetFileListFromEventRef(eventRef);
@@ -630,7 +700,8 @@ namespace MonoDevelop.MacInterop
                 lock(lockObj) {
                     quit += value;
                     if(quitHandlerRef == IntPtr.Zero)
-                        quitHandlerRef = Carbon.InstallApplicationEventHandler(HandleQuit, CarbonEventApple.QuitApplication);
+                        quitHandlerRef = Carbon.InstallApplicationEventHandler(HandleQuit,
+                                                                               CarbonEventApple.QuitApplication);
                 }
             }
             remove {
@@ -644,7 +715,9 @@ namespace MonoDevelop.MacInterop
             }
         }
 
-        static CarbonEventHandlerStatus HandleQuit(IntPtr callRef, IntPtr eventRef, IntPtr user_data)
+        static CarbonEventHandlerStatus HandleQuit(IntPtr callRef,
+                                                   IntPtr eventRef,
+                                                   IntPtr user_data)
         {
             var args = new ApplicationQuitEventArgs();
             quit(null, args);
@@ -726,7 +799,9 @@ namespace IgeMacIntegration
         public static IgeMacIntegration.IgeMacMenuGroup AddAppMenuGroup()
         {
             IntPtr raw_ret = ige_mac_menu_add_app_menu_group();
-            IgeMacIntegration.IgeMacMenuGroup ret = raw_ret == IntPtr.Zero ? null : (IgeMacIntegration.IgeMacMenuGroup)GLib.Opaque.GetOpaque(raw_ret, typeof(IgeMacIntegration.IgeMacMenuGroup), false);
+            IgeMacIntegration.IgeMacMenuGroup ret = raw_ret == IntPtr.Zero ? null : (IgeMacIntegration.IgeMacMenuGroup)GLib.Opaque.GetOpaque(raw_ret,
+                                                                                                                                             typeof(IgeMacIntegration.IgeMacMenuGroup),
+                                                                                                                                             false);
             return ret;
         }
     }
@@ -735,12 +810,16 @@ namespace IgeMacIntegration
     {
 
         [DllImport("libigemacintegration.dylib")]
-        static extern void ige_mac_menu_add_app_menu_item(IntPtr raw, IntPtr menu_item, IntPtr label);
+        static extern void ige_mac_menu_add_app_menu_item(IntPtr raw,
+                                                          IntPtr menu_item,
+                                                          IntPtr label);
 
         public void AddMenuItem(Gtk.MenuItem menu_item, string label)
         {
             IntPtr native_label = GLib.Marshaller.StringToPtrGStrdup(label);
-            ige_mac_menu_add_app_menu_item(Handle, menu_item == null ? IntPtr.Zero : menu_item.Handle, native_label);
+            ige_mac_menu_add_app_menu_item(Handle,
+                                           menu_item == null ? IntPtr.Zero : menu_item.Handle,
+                                           native_label);
             GLib.Marshaller.Free(native_label);
         }
 

@@ -27,9 +27,9 @@
 //  Created by Rémi on 02/07/2015.
 //
 
-#include "PtrPetriDynamicLib.hpp"
 #include "PetriDynamicLib.h"
 #include "PetriDynamicLib.hpp"
+#include "PtrPetriDynamicLib.hpp"
 #include "Types.hpp"
 
 PetriDynamicLib *PetriDynamicLib_create(char const *name, char const *prefix, uint16_t port) {

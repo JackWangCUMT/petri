@@ -172,7 +172,8 @@ namespace Petri.Editor
 
         public class ConflictFunctionInvocation : FunctionInvocation
         {
-            public ConflictFunctionInvocation(Language language, string value) : base(language, GetDummy(language))
+            public ConflictFunctionInvocation(Language language, string value) : base(language,
+                                                                                      GetDummy(language))
             {
                 _value = value;
             }

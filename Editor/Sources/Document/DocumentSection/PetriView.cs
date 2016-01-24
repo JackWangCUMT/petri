@@ -100,7 +100,7 @@ namespace Petri.Editor
                     var scrolled = _document.Window.Gui.ScrolledWindow;
 
                     if(ev.X >= 15 + scrolled.Hadjustment.Value && ev.X < _parentHierarchy[_parentHierarchy.Count - 1].extents.Width + 15 + scrolled.Hadjustment.Value
-                    && ev.Y >= 15 + scrolled.Vadjustment.Value && ev.Y < _parentHierarchy[_parentHierarchy.Count - 1].extents.Height + 15 + scrolled.Vadjustment.Value) {
+                       && ev.Y >= 15 + scrolled.Vadjustment.Value && ev.Y < _parentHierarchy[_parentHierarchy.Count - 1].extents.Height + 15 + scrolled.Vadjustment.Value) {
                         double currX = 15;
                         foreach(var item in _parentHierarchy) {
                             if(item.petriNet != null && ev.X - currX < item.extents.Width + pathSeparatorLenth + scrolled.Hadjustment.Value) {
@@ -244,10 +244,14 @@ namespace Petri.Editor
 
                 context.SetSourceRGBA(0.9, 0.9, 0.9, 1);
                 TextExtents ext = _parentHierarchy[_parentHierarchy.Count - 1].extents;
-                context.Rectangle((scrolled.Hadjustment.Value + 10) / Zoom, (scrolled.Vadjustment.Value + 10) / Zoom, (ext.Width + 10) / Zoom, (ext.Height + 10) / Zoom);
+                context.Rectangle((scrolled.Hadjustment.Value + 10) / Zoom,
+                                  (scrolled.Vadjustment.Value + 10) / Zoom,
+                                  (ext.Width + 10) / Zoom,
+                                  (ext.Height + 10) / Zoom);
                 context.Fill();
 
-                context.MoveTo((scrolled.Hadjustment.Value + 15 - ext.XBearing) / Zoom, (scrolled.Vadjustment.Value + 15 - ext.YBearing) / Zoom);
+                context.MoveTo((scrolled.Hadjustment.Value + 15 - ext.XBearing) / Zoom,
+                               (scrolled.Vadjustment.Value + 15 - ext.YBearing) / Zoom);
 
                 context.SetFontSize(16 / Zoom);
                 context.SetSourceRGBA(0.0, 0.6, 0.2, 1);

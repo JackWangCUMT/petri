@@ -532,12 +532,13 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
             Function f;
             if(functions == null) {
                 f = new Function(Type.UnknownType(language),
-                                     scopeNameAndArgs.Item1,
-                                     scopeNameAndArgs.Item2,
-                                     false);
+                                 scopeNameAndArgs.Item1,
+                                 scopeNameAndArgs.Item2,
+                                 false);
                 int i = 0;
                 foreach(Expression e in scopeNameAndArgs.Item3) {
-                    f.Parameters.Add(new Param(Type.UnknownType(language), "param" + (i++).ToString()));
+                    f.Parameters.Add(new Param(Type.UnknownType(language),
+                                               "param" + (i++).ToString()));
                 }
             }
             else {
@@ -580,13 +581,14 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
             Method m;
             if(functions == null) {
                 m = new Method(Type.UnknownType(language),
-                                   Type.UnknownType(language),
-                                   scopeNameAndArgs.Item2,
-                                   "",
-                                   false);
+                               Type.UnknownType(language),
+                               scopeNameAndArgs.Item2,
+                               "",
+                               false);
                 int i = 0;
                 foreach(Expression e in scopeNameAndArgs.Item3) {
-                    m.Parameters.Add(new Param(Type.UnknownType(language), "param" + (i++).ToString()));
+                    m.Parameters.Add(new Param(Type.UnknownType(language),
+                                               "param" + (i++).ToString()));
                 }
             }
             else {

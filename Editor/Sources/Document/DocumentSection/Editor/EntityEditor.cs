@@ -71,7 +71,8 @@ namespace Petri.Editor
             Entity = e;
 
             if(!_document.Window.EditorGui.View.MultipleSelection && e != null) {
-                var label = CreateLabel(0, Configuration.GetLocalized("Entity's ID:") + " " + e.ID.ToString());
+                var label = CreateLabel(0,
+                                        Configuration.GetLocalized("Entity's ID:") + " " + e.ID.ToString());
                 label.Markup = "<span color=\"grey\">" + label.Text + "</span>";
             }
         }
@@ -97,7 +98,9 @@ namespace Petri.Editor
                 _document.PostAction(new ChangeNameAction(a, (obj as Entry).Text));
             });
 
-            var active = CreateWidget<CheckButton>(false, 0, Configuration.GetLocalized("Active on t=0:"));
+            var active = CreateWidget<CheckButton>(false,
+                                                   0,
+                                                   Configuration.GetLocalized("Active on t=0:"));
             active.Active = a.Active;
             active.Toggled += (sender, e) => {
                 _document.PostAction(new ToggleActiveAction(a));
@@ -170,7 +173,9 @@ namespace Petri.Editor
                     if(combo.GetActiveIter(out iter)) {
                         var val = combo.Model.GetValue(iter, 0) as string;
                         if(val == nothingFunction) {
-                            _document.PostAction(new InvocationChangeAction(a, new FunctionInvocation(a.Document.Settings.Language, Action.DoNothingFunction(a.Document))));
+                            _document.PostAction(new InvocationChangeAction(a,
+                                                                            new FunctionInvocation(a.Document.Settings.Language,
+                                                                                                   Action.DoNothingFunction(a.Document))));
                             actionType = ActionType.Nothing;
                         }
                         else if(val == printFunction) {
@@ -178,7 +183,11 @@ namespace Petri.Editor
                             actionType = ActionType.Print;
                         }
                         else if(val == pauseFunction) {
-                            _document.PostAction(new InvocationChangeAction(a, new FunctionInvocation(a.Document.Settings.Language, Action.PauseFunction(a.Document), LiteralExpression.CreateFromString("1s", a.Document.Settings.Language))));
+                            _document.PostAction(new InvocationChangeAction(a,
+                                                                            new FunctionInvocation(a.Document.Settings.Language,
+                                                                                                   Action.PauseFunction(a.Document),
+                                                                                                   LiteralExpression.CreateFromString("1s",
+                                                                                                                                      a.Document.Settings.Language))));
                             actionType = ActionType.Pause;
                         }
                         else if(val == manual) {
@@ -198,10 +207,17 @@ namespace Petri.Editor
                                 }
                                 FunctionInvocation invocation;
                                 if(f is Method) {
-                                    invocation = new MethodInvocation(a.Document.Settings.Language, f as Method, new EmptyExpression(a.Document.Settings.Language, true), false, pp.ToArray());
+                                    invocation = new MethodInvocation(a.Document.Settings.Language,
+                                                                      f as Method,
+                                                                      new EmptyExpression(a.Document.Settings.Language,
+                                                                                          true),
+                                                                      false,
+                                                                      pp.ToArray());
                                 }
                                 else {
-                                    invocation = new FunctionInvocation(a.Document.Settings.Language, f, pp.ToArray());
+                                    invocation = new FunctionInvocation(a.Document.Settings.Language,
+                                                                        f,
+                                                                        pp.ToArray());
                                 }
                                 _document.PostAction(new InvocationChangeAction(a, invocation));
                             }
@@ -238,20 +254,30 @@ namespace Petri.Editor
                     Expression cppExpr = null;
                     FunctionInvocation funcInvocation = null;
                     try {
-                        cppExpr = Expression.CreateFromStringAndEntity<Expression>((obj as Entry).Text, a);
+                        cppExpr = Expression.CreateFromStringAndEntity<Expression>((obj as Entry).Text,
+                                                                                   a);
                         if(cppExpr is FunctionInvocation) {
                             funcInvocation = (FunctionInvocation)cppExpr;
                             if(!funcInvocation.Function.ReturnType.Equals(_document.Settings.Enum.Type)) {
-                                throw new Exception(Configuration.GetLocalized("Incorrect return type for the function: {0} expected, {1} found.", _document.Settings.Enum.Name, funcInvocation.Function.ReturnType.ToString()));
+                                throw new Exception(Configuration.GetLocalized("Incorrect return type for the function: {0} expected, {1} found.",
+                                                                               _document.Settings.Enum.Name,
+                                                                               funcInvocation.Function.ReturnType.ToString()));
                             }
                         }
                         else {
-                            funcInvocation = new WrapperFunctionInvocation(_document.Settings.Language, _document.Settings.Enum.Type, cppExpr);
+                            funcInvocation = new WrapperFunctionInvocation(_document.Settings.Language,
+                                                                           _document.Settings.Enum.Type,
+                                                                           cppExpr);
                         }
                         _document.PostAction(new InvocationChangeAction(a, funcInvocation));
                     }
                     catch(Exception ex) {
-                        MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).", ex.Message)));
+                        MessageDialog d = new MessageDialog(_document.Window,
+                                                            DialogFlags.Modal,
+                                                            MessageType.Question,
+                                                            ButtonsType.None,
+                                                            MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).",
+                                                                                                                      ex.Message)));
                         d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                         d.Run();
                         d.Destroy();
@@ -263,7 +289,9 @@ namespace Petri.Editor
             else if(type == ActionType.Invocation) {
                 if(a.Function.Function is Method) {
                     var method = a.Function as MethodInvocation;
-                    var editorHeader = CreateLabel(20, Configuration.GetLocalized("*this object of type {0}:", method.Function.Enclosing.ToString()));
+                    var editorHeader = CreateLabel(20,
+                                                   Configuration.GetLocalized("*this object of type {0}:",
+                                                                              method.Function.Enclosing.ToString()));
                     editorFields.Add(editorHeader);
 
                     var valueEditor = CreateWidget<Entry>(true, 20, method.This.MakeUserReadable());
@@ -274,13 +302,26 @@ namespace Petri.Editor
                             for(int j = 2; j < editorFields.Count; ++j) {
                                 Widget w = editorFields[j];
                                 if(w.GetType() == typeof(Entry)) {
-                                    args.Add(Expression.CreateFromStringAndEntity<Expression>((w as Entry).Text, a, false));
+                                    args.Add(Expression.CreateFromStringAndEntity<Expression>((w as Entry).Text,
+                                                                                              a,
+                                                                                              false));
                                 }
                             }
-                            _document.PostAction(new InvocationChangeAction(a, new MethodInvocation(_document.Settings.Language, method.Function as Method, Expression.CreateFromStringAndEntity<Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray())));
+                            _document.PostAction(new InvocationChangeAction(a,
+                                                                            new MethodInvocation(_document.Settings.Language,
+                                                                                                 method.Function as Method,
+                                                                                                 Expression.CreateFromStringAndEntity<Expression>((editorFields[1] as Entry).Text,
+                                                                                                                                                  a),
+                                                                                                 false,
+                                                                                                 args.ToArray())));
                         }
                         catch(Exception ex) {
-                            MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).", ex.Message)));
+                            MessageDialog d = new MessageDialog(_document.Window,
+                                                                DialogFlags.Modal,
+                                                                MessageType.Question,
+                                                                ButtonsType.None,
+                                                                MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).",
+                                                                                                                          ex.Message)));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             d.Run();
                             d.Destroy();
@@ -303,10 +344,15 @@ namespace Petri.Editor
         private void EditParameter(Action a, int i, List<Widget> editorFields)
         {
             var p = a.Function.Function.Parameters[i];
-            var editorHeader = CreateLabel(20, Configuration.GetLocalized("Parameter {0} {1} :", p.Type, p.Name));
+            var editorHeader = CreateLabel(20,
+                                           Configuration.GetLocalized("Parameter {0} {1} :",
+                                                                      p.Type,
+                                                                      p.Name));
             editorFields.Add(editorHeader);
 
-            var valueEditor = CreateWidget<Entry>(true, 20, a.Function.Arguments[i].MakeUserReadable());
+            var valueEditor = CreateWidget<Entry>(true,
+                                                  20,
+                                                  a.Function.Arguments[i].MakeUserReadable());
             editorFields.Add(valueEditor);
             MainClass.RegisterValidation(valueEditor, false, (obj, ii) => {
                 try {
@@ -314,20 +360,33 @@ namespace Petri.Editor
                     for(int j = (a.Function.Function is Method) ? 2 : 0; j < editorFields.Count; ++j) {
                         Widget w = editorFields[j];
                         if(w.GetType() == typeof(Entry)) {
-                            args.Add(Expression.CreateFromStringAndEntity<Expression>((w as Entry).Text, a));
+                            args.Add(Expression.CreateFromStringAndEntity<Expression>((w as Entry).Text,
+                                                                                      a));
                         }
                     }
                     FunctionInvocation invocation;
                     if(a.Function.Function is Method) {
-                        invocation = new MethodInvocation(_document.Settings.Language, a.Function.Function as Method, Expression.CreateFromStringAndEntity<Expression>((editorFields[1] as Entry).Text, a), false, args.ToArray());
+                        invocation = new MethodInvocation(_document.Settings.Language,
+                                                          a.Function.Function as Method,
+                                                          Expression.CreateFromStringAndEntity<Expression>((editorFields[1] as Entry).Text,
+                                                                                                           a),
+                                                          false,
+                                                          args.ToArray());
                     }
                     else {
-                        invocation = new FunctionInvocation(_document.Settings.Language, a.Function.Function, args.ToArray());
+                        invocation = new FunctionInvocation(_document.Settings.Language,
+                                                            a.Function.Function,
+                                                            args.ToArray());
                     }
                     _document.PostAction(new InvocationChangeAction(a, invocation));
                 }
                 catch(Exception ex) {
-                    MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).", ex.Message)));
+                    MessageDialog d = new MessageDialog(_document.Window,
+                                                        DialogFlags.Modal,
+                                                        MessageType.Question,
+                                                        ButtonsType.None,
+                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified expression is invalid ({0}).",
+                                                                                                                  ex.Message)));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -379,7 +438,10 @@ namespace Petri.Editor
             _button = new ColorButton();
             _button.ColorSet += (object sender, EventArgs e) => {
                 var newColor = (sender as ColorButton).Color;
-                _document.PostAction(new ChangeCommentColorAction(c, new Cairo.Color(newColor.Red / 65535.0, newColor.Green / 65535.0, newColor.Blue / 65535.0)));
+                _document.PostAction(new ChangeCommentColorAction(c,
+                                                                  new Cairo.Color(newColor.Red / 65535.0,
+                                                                                  newColor.Green / 65535.0,
+                                                                                  newColor.Blue / 65535.0)));
             };
 
             this.EditColor(c, _colorNames[colorIndex], false);
@@ -404,7 +466,9 @@ namespace Petri.Editor
                     return obj.Item1 is Label && (obj.Item1 as Label).Text == Configuration.GetLocalized("Color:");
                 });
                 _objectList.Insert(index + 2, Tuple.Create(_button as Widget, 20, false));
-                _button.Color = new Gdk.Color((byte)(comment.Color.R * 255), (byte)(comment.Color.G * 255), (byte)(comment.Color.B * 255));
+                _button.Color = new Gdk.Color((byte)(comment.Color.R * 255),
+                                              (byte)(comment.Color.G * 255),
+                                              (byte)(comment.Color.B * 255));
             }
             else {
                 int index = _objectList.FindIndex(obj => {
@@ -415,7 +479,8 @@ namespace Petri.Editor
                 }
 
                 if(changed) {
-                    _document.PostAction(new ChangeCommentColorAction(comment, _colors[_colorNames.IndexOf(color)]));
+                    _document.PostAction(new ChangeCommentColorAction(comment,
+                                                                      _colors[_colorNames.IndexOf(color)]));
                 }
             }
             _document.Window.EditorGui.View.Redraw();
@@ -448,11 +513,18 @@ namespace Petri.Editor
             var condition = CreateWidget<Entry>(true, 0, userReadable);
             MainClass.RegisterValidation(condition, false, (obj, p) => {
                 try {
-                    var cond = new ConditionChangeAction(t, Expression.CreateFromStringAndEntity<Expression>((obj as Entry).Text, t));
+                    var cond = new ConditionChangeAction(t,
+                                                         Expression.CreateFromStringAndEntity<Expression>((obj as Entry).Text,
+                                                                                                          t));
                     _document.PostAction(cond);
                 }
                 catch(Exception e) {
-                    MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified condition is invalid ({0}).", e.Message)));
+                    MessageDialog d = new MessageDialog(_document.Window,
+                                                        DialogFlags.Modal,
+                                                        MessageType.Question,
+                                                        ButtonsType.None,
+                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("The specified condition is invalid ({0}).",
+                                                                                                                  e.Message)));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();

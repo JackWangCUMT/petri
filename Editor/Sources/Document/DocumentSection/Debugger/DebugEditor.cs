@@ -30,20 +30,27 @@ namespace Petri.Editor
         public DebugEditor(Document doc, Entity selected) : base(doc, doc.Window.DebugGui.Editor)
         {
             if(selected != null) {
-                var label = CreateLabel(0, Configuration.GetLocalized("Entity's ID:") + " " + selected.ID.ToString());
+                var label = CreateLabel(0,
+                                        Configuration.GetLocalized("Entity's ID:") + " " + selected.ID.ToString());
                 label.Markup = "<span color=\"grey\">" + label.Text + "</span>";
             }
             if(selected is Transition) {
                 CreateLabel(0, Configuration.GetLocalized("Transition's condition:"));
-                Entry e = CreateWidget<Entry>(true, 0, ((Transition)selected).Condition.MakeUserReadable());
+                Entry e = CreateWidget<Entry>(true,
+                                              0,
+                                              ((Transition)selected).Condition.MakeUserReadable());
                 e.IsEditable = false;
             }
             else if(selected is Action) {
                 CreateLabel(0, Configuration.GetLocalized("State's action:"));
-                Entry ee = CreateWidget<Entry>(true, 0, ((Action)selected).Function.MakeUserReadable());
+                Entry ee = CreateWidget<Entry>(true,
+                                               0,
+                                               ((Action)selected).Function.MakeUserReadable());
                 ee.IsEditable = false;
 
-                var active = CreateWidget<CheckButton>(false, 0, Configuration.GetLocalized("Breakpoint on the state"));
+                var active = CreateWidget<CheckButton>(false,
+                                                       0,
+                                                       Configuration.GetLocalized("Breakpoint on the state"));
                 active.Active = _document.DebugController.Breakpoints.Contains((Action)selected);
                 active.Toggled += (sender, e) => {
                     if(_document.DebugController.Breakpoints.Contains((Action)selected)) {
@@ -74,7 +81,8 @@ namespace Petri.Editor
                 if(_document.DebugController.Client.SessionRunning && (!_document.DebugController.Client.PetriRunning || _document.DebugController.Client.Pause)) {
                     string str = entry.Text;
                     try {
-                        Cpp.Expression expr = Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>(str, _document.PetriNet);
+                        Cpp.Expression expr = Cpp.Expression.CreateFromStringAndEntity<Cpp.Expression>(str,
+                                                                                                       _document.PetriNet);
                         _document.DebugController.Client.Evaluate(expr);
                     }
                     catch(Exception e) {

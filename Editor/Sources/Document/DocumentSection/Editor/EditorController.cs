@@ -40,7 +40,8 @@ namespace Petri.Editor
         public override void Copy()
         {
             if(_document.Window.EditorGui.View.SelectedEntities.Count > 0) {
-                MainClass.Clipboard = new HashSet<Entity>(CloneEntities(_document.Window.EditorGui.View.SelectedEntities, _document));
+                MainClass.Clipboard = new HashSet<Entity>(CloneEntities(_document.Window.EditorGui.View.SelectedEntities,
+                                                                        _document));
                 MainClass.PasteCount = 0;
 
                 this.UpdateMenuItems();
@@ -65,7 +66,8 @@ namespace Petri.Editor
         {
             if(_document.Window.EditorGui.View.SelectedEntities.Count > 0) {
                 Copy();
-                _document.PostAction(new GuiActionWrapper(this.RemoveSelection(), Configuration.GetLocalized("Cut the entities")));
+                _document.PostAction(new GuiActionWrapper(this.RemoveSelection(),
+                                                          Configuration.GetLocalized("Cut the entities")));
             }
         }
 
@@ -96,7 +98,11 @@ namespace Petri.Editor
                 }
 
                 if(toRemove.Count > 0) {
-                    MessageDialog d = new MessageDialog(_document.Window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, MainClass.SafeMarkupFromString(Configuration.GetLocalized("Unable to wrap the selection into a macro: some entities linked to the selection are not selected.")));
+                    MessageDialog d = new MessageDialog(_document.Window,
+                                                        DialogFlags.Modal,
+                                                        MessageType.Error,
+                                                        ButtonsType.None,
+                                                        MainClass.SafeMarkupFromString(Configuration.GetLocalized("Unable to wrap the selection into a macro: some entities linked to the selection are not selected.")));
                     d.AddButton("OK", ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -113,7 +119,10 @@ namespace Petri.Editor
                         pos.Y = Math.Min(pos.Y, e.Position.Y);
                     }
                 }
-                var macro = new InnerPetriNet(_document, _document.Window.EditorGui.View.CurrentPetriNet, false, pos);
+                var macro = new InnerPetriNet(_document,
+                                              _document.Window.EditorGui.View.CurrentPetriNet,
+                                              false,
+                                              pos);
 
                 foreach(var e in selected) {
                     if(e is Comment) {
@@ -141,13 +150,16 @@ namespace Petri.Editor
                     }
 
                     if(!(e is Transition)) {
-                        actions.Add(new MoveAction(e, new Cairo.PointD(-pos.X + 50, -pos.Y + 50), true));
+                        actions.Add(new MoveAction(e,
+                                                   new Cairo.PointD(-pos.X + 50, -pos.Y + 50),
+                                                   true));
                     }
                 }
 
                 actions.Add(new AddStateAction(macro));
 
-                _document.PostAction(new GuiActionList(actions, Configuration.GetLocalized("Wrap into a macro")));
+                _document.PostAction(new GuiActionList(actions,
+                                                       Configuration.GetLocalized("Wrap into a macro")));
             }
         }
 
@@ -180,7 +192,8 @@ namespace Petri.Editor
 
             var deleteEntities = new List<GuiAction>();
             foreach(var t in transitions) {
-                deleteEntities.Add(new RemoveTransitionAction(t, t.After.RequiredTokens == t.After.TransitionsBefore.Count));
+                deleteEntities.Add(new RemoveTransitionAction(t,
+                                                              t.After.RequiredTokens == t.After.TransitionsBefore.Count));
             }
             foreach(State s in states) {
                 deleteEntities.Add(new RemoveStateAction(s));
@@ -191,7 +204,8 @@ namespace Petri.Editor
 
             _document.Window.EditorGui.View.ResetSelection();
 
-            return new GuiActionList(deleteEntities, Configuration.GetLocalized("Remove the entities"));
+            return new GuiActionList(deleteEntities,
+                                     Configuration.GetLocalized("Remove the entities"));
         }
 
         public override void SelectAll()
@@ -253,26 +267,28 @@ namespace Petri.Editor
 
             var newEntities = this.CloneEntities(MainClass.Clipboard, _document);
             var states = from e in newEntities
-                         where e is State
-                         select (e as State);
+                                  where e is State
+                                  select (e as State);
             var transitions = new HashSet<Transition>(from e in newEntities
-                                                      where e is Transition
-                                                      select (e as Transition));
+                                                               where e is Transition
+                                                               select (e as Transition));
             var comments = from e in newEntities
-                           where e is Comment
-                           select (e as Comment);
+                                    where e is Comment
+                                    select (e as Comment);
 
             foreach(State s in states) {
                 // Change entity's owner
                 s.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
                 s.Name = s.Name;
-                s.Position = new Cairo.PointD(s.Position.X + 20 * MainClass.PasteCount, s.Position.Y + 20 * MainClass.PasteCount);
+                s.Position = new Cairo.PointD(s.Position.X + 20 * MainClass.PasteCount,
+                                              s.Position.Y + 20 * MainClass.PasteCount);
                 actionList.Add(new AddStateAction(s));
             }
             foreach(Comment c in comments) {
                 // Change entity's owner
                 c.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
-                c.Position = new Cairo.PointD(c.Position.X + 20 * MainClass.PasteCount, c.Position.Y + 20 * MainClass.PasteCount);
+                c.Position = new Cairo.PointD(c.Position.X + 20 * MainClass.PasteCount,
+                                              c.Position.Y + 20 * MainClass.PasteCount);
                 actionList.Add(new AddCommentAction(c));
             }
 
@@ -291,15 +307,15 @@ namespace Petri.Editor
             var cloned = new List<Entity>();
 
             var states = from e in entities
-                         where (e is State && !(e is ExitPoint))
-                         select (e as State);
+                                  where (e is State && !(e is ExitPoint))
+                                  select (e as State);
             var comments = from e in entities
-                           where (e is Comment)
-                           select (e as Comment);
+                                    where (e is Comment)
+                                    select (e as Comment);
 
             var transitions = new List<Transition>(from e in entities
-                                                   where e is Transition
-                                                   select (e as Transition));
+                                                            where e is Transition
+                                                            select (e as Transition));
 
             // We cannot clone a transition without its 2 ends being cloned too
             transitions.RemoveAll(t => !states.Contains(t.After) || !states.Contains(t.Before));
@@ -308,12 +324,18 @@ namespace Petri.Editor
             var statesTable = new Dictionary<UInt64, State>();
             foreach(State s in states) {
                 var xml = s.GetXml();
-                var newState = Entity.EntityFromXml(_document, xml, _document.Window.EditorGui.View.CurrentPetriNet, null) as State;
+                var newState = Entity.EntityFromXml(_document,
+                                                    xml,
+                                                    _document.Window.EditorGui.View.CurrentPetriNet,
+                                                    null) as State;
                 statesTable.Add(newState.ID, newState);
             }
             foreach(Comment c in comments) {
                 var xml = c.GetXml();
-                var newComment = Entity.EntityFromXml(_document, xml, _document.Window.EditorGui.View.CurrentPetriNet, null) as Comment;
+                var newComment = Entity.EntityFromXml(_document,
+                                                      xml,
+                                                      _document.Window.EditorGui.View.CurrentPetriNet,
+                                                      null) as Comment;
                 newComment.Document = destination;
                 newComment.ID = destination.LastEntityID++;
                 cloned.Add(newComment);
@@ -321,7 +343,10 @@ namespace Petri.Editor
 
             foreach(Transition t in transitions) {
                 var xml = t.GetXml();
-                Transition newTransition = (Transition)Entity.EntityFromXml(destination, xml, _document.Window.EditorGui.View.CurrentPetriNet, statesTable);
+                Transition newTransition = (Transition)Entity.EntityFromXml(destination,
+                                                                            xml,
+                                                                            _document.Window.EditorGui.View.CurrentPetriNet,
+                                                                            statesTable);
 
                 // Reassigning an ID to the transitions to keep a unique one for each entity
                 newTransition.ID = _document.LastEntityID++;

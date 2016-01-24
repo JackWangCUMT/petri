@@ -42,7 +42,8 @@ namespace Petri.Runtime
         /// Release this instance. Call at your own risk, as accessing one of the object's methods afterwards will probably segfault.
         /// The destructor however will be invoked without risk.
         /// </summary>
-        public IntPtr Release() {
+        public IntPtr Release()
+        {
             var h = Handle;
             Handle = IntPtr.Zero;
             return h;

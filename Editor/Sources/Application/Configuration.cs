@@ -135,8 +135,8 @@ namespace Petri.Editor
         }
 
         [ConfigurationProperty("savePath",
-            DefaultValue = "",
-            IsRequired = true)]
+                               DefaultValue = "",
+                               IsRequired = true)]
         public static string SavePath {
             get {
                 return (string)Get()["savePath"];
@@ -159,8 +159,8 @@ namespace Petri.Editor
         }
 
         [ConfigurationProperty("windowWidth",
-            DefaultValue = 800,
-            IsRequired = true)]
+                               DefaultValue = 800,
+                               IsRequired = true)]
         public static int WindowWidth {
             get {
                 return (int)Get()["windowWidth"];
@@ -171,8 +171,8 @@ namespace Petri.Editor
         }
 
         [ConfigurationProperty("windowHeight",
-            DefaultValue = 600,
-            IsRequired = true)]
+                               DefaultValue = 600,
+                               IsRequired = true)]
         public static int WindowHeight {
             get {
                 return (int)Get()["windowHeight"];
@@ -183,8 +183,8 @@ namespace Petri.Editor
         }
 
         [ConfigurationProperty("windowX",
-            DefaultValue = 80,
-            IsRequired = true)]
+                               DefaultValue = 80,
+                               IsRequired = true)]
         public static int WindowX {
             get {
                 return (int)Get()["windowX"];
@@ -195,8 +195,8 @@ namespace Petri.Editor
         }
 
         [ConfigurationProperty("windowY",
-            DefaultValue = 80,
-            IsRequired = true)]
+                               DefaultValue = 80,
+                               IsRequired = true)]
         public static int WindowY {
             get {
                 return (int)Get()["windowY"];
@@ -207,8 +207,8 @@ namespace Petri.Editor
         }
 
         [ConfigurationProperty("graphWidth",
-            DefaultValue = 640,
-            IsRequired = true)]
+                               DefaultValue = 640,
+                               IsRequired = true)]
         public static int GraphWidth {
             get {
                 return (int)Get()["graphWidth"];
@@ -219,8 +219,8 @@ namespace Petri.Editor
         }
 
         [ConfigurationProperty("arch",
-            DefaultValue = 0,
-            IsRequired = true)]
+                               DefaultValue = 0,
+                               IsRequired = true)]
         public static int Arch {
             get {
                 return (int)Get()["arch"];
@@ -237,7 +237,8 @@ namespace Petri.Editor
                 folder += Path.DirectorySeparatorChar;
             }
             Uri folderUri = new Uri(folder);
-            return Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
+            return Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/',
+                                                                                                Path.DirectorySeparatorChar));
         }
 
         private void LoadLanguage()

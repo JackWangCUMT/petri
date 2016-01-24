@@ -90,9 +90,16 @@ namespace Petri.Runtime
          * @param cond the condition of the Transition to be added
          * @return The newly created transition.
          */
-        public Transition AddTransition(UInt64 id, string name, Action next, TransitionCallableDel cond)
+        public Transition AddTransition(UInt64 id,
+                                        string name,
+                                        Action next,
+                                        TransitionCallableDel cond)
         {
-            var handle = Interop.Action.PetriAction_addTransition(Handle, id, name, next.Handle, cond);
+            var handle = Interop.Action.PetriAction_addTransition(Handle,
+                                                                  id,
+                                                                  name,
+                                                                  next.Handle,
+                                                                  cond);
             return new Transition(handle);
         }
 

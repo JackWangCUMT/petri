@@ -28,10 +28,10 @@ namespace Petri.Editor.Cpp
     public class BinaryExpression : Expression
     {
         public BinaryExpression(Language language,
-                                    Operator.Name o,
-                                    Expression expr1,
-                                    Expression expr2) : base(language,
-                                                             o)
+                                Operator.Name o,
+                                Expression expr1,
+                                Expression expr2) : base(language,
+                                                         o)
         {
             this.Expression1 = expr1;
             this.Expression2 = expr2;
@@ -49,11 +49,11 @@ namespace Petri.Editor.Cpp
         public override string MakeCpp()
         {
             string e1 = Expression.Parenthesize(this,
-                                                    this.Expression1,
-                                                    this.Expression1.MakeCpp());
+                                                this.Expression1,
+                                                this.Expression1.MakeCpp());
             string e2 = Expression.Parenthesize(this,
-                                                    this.Expression2,
-                                                    this.Expression2.MakeCpp());
+                                                this.Expression2,
+                                                this.Expression2.MakeCpp());
             switch(this.Operator) {
             case Cpp.Operator.Name.Mult:
                 return e1 + " * " + e2;
@@ -102,11 +102,11 @@ namespace Petri.Editor.Cpp
         public override string MakeUserReadable()
         {
             string p1 = Expression.Parenthesize(this,
-                                                    this.Expression1,
-                                                    this.Expression1.MakeUserReadable());
+                                                this.Expression1,
+                                                this.Expression1.MakeUserReadable());
             string p2 = Expression.Parenthesize(this,
-                                                    this.Expression2,
-                                                    this.Expression2.MakeUserReadable());
+                                                this.Expression2,
+                                                this.Expression2.MakeUserReadable());
             switch(this.Operator) {
             case Cpp.Operator.Name.Mult:
                 return p1 + " * " + p2;

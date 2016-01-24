@@ -76,9 +76,7 @@ namespace Petri {
     Action::Action(uint64_t id, std::string const &name, actionResult_t (*action)(PetriNet &), size_t requiredTokens)
             : Action(id, name, make_param_action_callable(action), requiredTokens) {}
 
-    Action::Action(Action &&a) noexcept
-            : Entity(a.ID())
-            , _internals(std::move(a._internals)) {
+    Action::Action(Action &&a) noexcept : Entity(a.ID()), _internals(std::move(a._internals)) {
         for(auto &t : _internals->_transitions) {
             t.setPrevious(*this);
         }

@@ -43,7 +43,9 @@ namespace Petri.Editor
             }
         }
 
-        protected void RenderPetriNet(Cairo.PdfSurface surface, Cairo.Context context, PetriNet petriNet)
+        protected void RenderPetriNet(Cairo.PdfSurface surface,
+                                      Cairo.Context context,
+                                      PetriNet petriNet)
         {
             this.RenderInternal(context, petriNet);
             surface.SetSize(petriNet.Size.X, petriNet.Size.Y);

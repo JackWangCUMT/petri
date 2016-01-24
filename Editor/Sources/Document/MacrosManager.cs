@@ -126,7 +126,11 @@ namespace Petri.Editor
 
             for(int i = treePath.Length; i > 0; i--) {
                 _dataStore.GetIter(out iter, treePath[(i - 1)]);
-                MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, Configuration.GetLocalized("Removing a macro used in the document will make it inconsistent. Be careful!"));
+                MessageDialog d = new MessageDialog(_window,
+                                                    DialogFlags.Modal,
+                                                    MessageType.Error,
+                                                    ButtonsType.None,
+                                                    Configuration.GetLocalized("Removing a macro used in the document will make it inconsistent. Be careful!"));
                 d.AddButton(Configuration.GetLocalized("Remove"), ResponseType.Accept);
                 d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                 if(d.Run() == (int)ResponseType.Accept) {
@@ -150,7 +154,11 @@ namespace Petri.Editor
 
         private void OnAdd(object sender, EventArgs e)
         {
-            MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Question, ButtonsType.None, Configuration.GetLocalized("Please write down the macro name (cannot be changed later):"));
+            MessageDialog d = new MessageDialog(_window,
+                                                DialogFlags.Modal,
+                                                MessageType.Question,
+                                                ButtonsType.None,
+                                                Configuration.GetLocalized("Please write down the macro name (cannot be changed later):"));
             d.AddButton(Configuration.GetLocalized("Add the macro"), ResponseType.Accept);
             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
             Entry entry = new Entry(Configuration.GetLocalized("Name"));

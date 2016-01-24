@@ -176,7 +176,8 @@ namespace Petri.Editor
 
             string val = s.Name;
             TextExtents te = context.TextExtents(val);
-            context.MoveTo(s.Position.X - te.Width / 2 - te.XBearing, s.Position.Y - te.Height / 2 - te.YBearing + tokenShift);
+            context.MoveTo(s.Position.X - te.Width / 2 - te.XBearing,
+                           s.Position.Y - te.Height / 2 - te.YBearing + tokenShift);
             context.TextPath(val);
             context.Fill();
         }
@@ -191,7 +192,8 @@ namespace Petri.Editor
             if(s.TransitionsBefore.Count > 0) {
                 string tokNum = s.RequiredTokens.ToString() + " tok";
                 TextExtents te = context.TextExtents(tokNum);
-                context.MoveTo(s.Position.X - te.Width / 2 - te.XBearing, s.Position.Y - te.Height / 2 - te.YBearing + 5);
+                context.MoveTo(s.Position.X - te.Width / 2 - te.XBearing,
+                               s.Position.Y - te.Height / 2 - te.YBearing + 5);
                 context.TextPath(tokNum);
                 context.Fill();
             }
@@ -221,7 +223,8 @@ namespace Petri.Editor
                 direction = PetriView.Normalized(direction);
                 PointD destination = TransitionDestination(t, direction);
 
-                direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
+                direction = PetriView.Normalized(t.Position.X - t.Before.Position.X,
+                                                 t.Position.Y - t.Before.Position.Y);
                 PointD origin = TransitionOrigin(t);
 
                 context.MoveTo(origin);
@@ -229,14 +232,19 @@ namespace Petri.Editor
                 PointD c1 = new PointD(t.Position.X, t.Position.Y);
                 PointD c2 = new PointD(t.Position.X, t.Position.Y);
 
-                PointD direction2 = new PointD(destination.X - t.Position.X, destination.Y - t.Position.Y);
+                PointD direction2 = new PointD(destination.X - t.Position.X,
+                                               destination.Y - t.Position.Y);
                 direction2 = PetriView.Normalized(direction2);
 
-                context.CurveTo(c1, c2, new PointD(destination.X - 0.99 * direction2.X * arrowScale, destination.Y - 0.99 * direction2.Y * arrowScale));
+                context.CurveTo(c1,
+                                c2,
+                                new PointD(destination.X - 0.99 * direction2.X * arrowScale,
+                                           destination.Y - 0.99 * direction2.Y * arrowScale));
 
                 context.Stroke();
 
-                direction = PetriView.Normalized(destination.X - t.Position.X, destination.Y - t.Position.Y);
+                direction = PetriView.Normalized(destination.X - t.Position.X,
+                                                 destination.Y - t.Position.Y);
                 EntityDraw.DrawArrow(context, direction, destination, arrowScale);
             }
         }
@@ -248,13 +256,16 @@ namespace Petri.Editor
 
         static protected PointD TransitionOrigin(Transition t)
         {
-            var direction = PetriView.Normalized(t.Position.X - t.Before.Position.X, t.Position.Y - t.Before.Position.Y);
-            return new PointD(t.Before.Position.X + direction.X * t.Before.Radius, t.Before.Position.Y + direction.Y * t.Before.Radius);
+            var direction = PetriView.Normalized(t.Position.X - t.Before.Position.X,
+                                                 t.Position.Y - t.Before.Position.Y);
+            return new PointD(t.Before.Position.X + direction.X * t.Before.Radius,
+                              t.Before.Position.Y + direction.Y * t.Before.Radius);
         }
 
         static protected PointD TransitionDestination(Transition t, PointD direction)
         {
-            return new PointD(t.After.Position.X - direction.X * t.After.Radius, t.After.Position.Y - direction.Y * t.After.Radius);
+            return new PointD(t.After.Position.X - direction.X * t.After.Radius,
+                              t.After.Position.Y - direction.Y * t.After.Radius);
         }
 
         protected virtual void InitContextForBorder(Transition t, Context context)
@@ -301,12 +312,16 @@ namespace Petri.Editor
         {
             string val = t.Name.ToString();
             TextExtents te = context.TextExtents(val);
-            context.MoveTo(t.Position.X - te.Width / 2 - te.XBearing, t.Position.Y - te.Height / 2 - te.YBearing);
+            context.MoveTo(t.Position.X - te.Width / 2 - te.XBearing,
+                           t.Position.Y - te.Height / 2 - te.YBearing);
             context.TextPath(val);
             context.Fill();
         }
 
-        public static void DrawArrow(Context context, PointD direction, PointD position, double scaleAlongAxis)
+        public static void DrawArrow(Context context,
+                                     PointD direction,
+                                     PointD position,
+                                     double scaleAlongAxis)
         {
             double angle = 20 * Math.PI / 180;
 
@@ -320,8 +335,10 @@ namespace Petri.Editor
             normal.Y *= scaleAlongAxis;
 
             context.MoveTo(position);
-            context.LineTo(position.X - direction.X + normal.X, position.Y - direction.Y + normal.Y);
-            context.LineTo(position.X - direction.X - normal.X, position.Y - direction.Y - normal.Y);
+            context.LineTo(position.X - direction.X + normal.X,
+                           position.Y - direction.Y + normal.Y);
+            context.LineTo(position.X - direction.X - normal.X,
+                           position.Y - direction.Y - normal.Y);
 
             context.Fill();
         }

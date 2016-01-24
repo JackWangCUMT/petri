@@ -110,7 +110,8 @@ namespace Petri.Runtime
                 return Interop.Transition.PetriTransition_getDelayBetweenEvaluation(Handle) / 1.0e6;
             }
             set {
-                Interop.Transition.PetriTransition_setDelayBetweenEvaluation(Handle, (UInt64)(value * 1.0e6));
+                Interop.Transition.PetriTransition_setDelayBetweenEvaluation(Handle,
+                                                                             (UInt64)(value * 1.0e6));
             }
         }
 

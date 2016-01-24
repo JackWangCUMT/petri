@@ -72,7 +72,8 @@ namespace Petri.Editor
 
                 // If path is relative, then make it absolute
                 if(!System.IO.Path.IsPathRooted(header)) {
-                    filename = System.IO.Path.Combine(System.IO.Directory.GetParent(this.Path).FullName, filename);
+                    filename = System.IO.Path.Combine(System.IO.Directory.GetParent(this.Path).FullName,
+                                                      filename);
                 }
 
                 var functions = Parser.Parse(Settings.Language, filename);
@@ -255,8 +256,10 @@ namespace Petri.Editor
             Settings = DocumentSettings.CreateSettings(this, elem.Element("Settings"));
 
             var winConf = elem.Element("Window");
-            SetWindowPosition(int.Parse(winConf.Attribute("X").Value), int.Parse(winConf.Attribute("Y").Value));
-            SetWindowSize(int.Parse(winConf.Attribute("W").Value), int.Parse(winConf.Attribute("H").Value));
+            SetWindowPosition(int.Parse(winConf.Attribute("X").Value),
+                              int.Parse(winConf.Attribute("Y").Value));
+            SetWindowSize(int.Parse(winConf.Attribute("W").Value),
+                          int.Parse(winConf.Attribute("H").Value));
 
             Headers.Clear();
             AllFunctionsList.Clear();
@@ -293,7 +296,8 @@ namespace Petri.Editor
         public void SaveCppDontAsk()
         {
             if(this.Settings.SourceOutputPath.Length == 0) {
-                throw new Exception(Configuration.GetLocalized("No source output path defined. Please open the Petri net with the graphical editor and generate the <language> code once.", Settings.LanguageName()));
+                throw new Exception(Configuration.GetLocalized("No source output path defined. Please open the Petri net with the graphical editor and generate the <language> code once.",
+                                                               Settings.LanguageName()));
             }
             else if(Conflicts(PetriNet)) {
                 throw new Exception(Configuration.GetLocalized("The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts."));
@@ -308,7 +312,8 @@ namespace Petri.Editor
             var c = new Compiler(this);
             var o = c.CompileSource(Settings.SourcePath, Settings.LibPath);
             if(o != "") {
-                Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.") + "\n" + Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath, Settings.LibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o);
+                Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.") + "\n" + Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.SourcePath,
+                                                                                                                                                                                                                    Settings.LibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o);
                 return false;
             }
 

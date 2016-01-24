@@ -39,7 +39,8 @@ namespace Petri.Editor
             string cd = System.IO.Directory.GetCurrentDirectory();
             System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(_document.Path).FullName);
             if(!System.IO.File.Exists(source)) {
-                return Configuration.GetLocalized("Error: the file \"{0}\" doesn't exist. Please generate the source code before compiling.", source);
+                return Configuration.GetLocalized("Error: the file \"{0}\" doesn't exist. Please generate the source code before compiling.",
+                                                  source);
             }
 
             System.IO.File.SetLastWriteTime(source, DateTime.Now);
@@ -55,7 +56,8 @@ namespace Petri.Editor
                 p.StartInfo.Arguments = s;
             }
             else {
-                return Configuration.GetLocalized("Error: the compiler invocation is too long ({0}) characters. Try to remove some recursive inclusion paths.", s.Length);
+                return Configuration.GetLocalized("Error: the compiler invocation is too long ({0}) characters. Try to remove some recursive inclusion paths.",
+                                                  s.Length);
             }
 
             StringBuilder outputBuilder = new StringBuilder();

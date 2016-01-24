@@ -78,7 +78,7 @@ namespace Petri {
         /**
          * Removes the dynamic library associated to this wrapper from memory.
          */
-        void unload();
+        virtual void unload();
 
         /**
          * Unloads the code of the dynamic library previously loaded, and loads the code contained

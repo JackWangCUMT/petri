@@ -27,8 +27,9 @@ namespace Petri.Runtime
     public enum ActionResult
     {
         OK,
-        NOK
-    };
+        NOK}
+
+    ;
 
     public class Utility
     {

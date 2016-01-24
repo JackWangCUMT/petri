@@ -29,7 +29,9 @@ namespace Petri.Editor
 {
     public class CppPetriGen : PetriGen
     {
-        public CppPetriGen(HeadlessDocument doc) : base(doc, Language.Cpp, new CFamilyCodeGen(Language.Cpp))
+        public CppPetriGen(HeadlessDocument doc) : base(doc,
+                                                        Language.Cpp,
+                                                        new CFamilyCodeGen(Language.Cpp))
         {
             _headerGen = new CFamilyCodeGen(Language.Cpp);	
             _functionBodies = "";
@@ -41,7 +43,8 @@ namespace Petri.Editor
             base.WritePetriNet();
 
             if(_generateHeader) {
-                System.IO.File.WriteAllText(PathToFile(Document.Settings.Name + ".h"), _headerGen.Value);
+                System.IO.File.WriteAllText(PathToFile(Document.Settings.Name + ".h"),
+                                            _headerGen.Value);
             }
         }
 
@@ -51,8 +54,10 @@ namespace Petri.Editor
 
             CodeGen generator = new CFamilyCodeGen(Language.Cpp);
             foreach(var s in Document.Headers) {
-                var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, s);
-                var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath));
+                var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
+                                                s);
+                var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
+                                                                           Document.Settings.SourceOutputPath));
                 generator += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
             }
 
@@ -85,8 +90,10 @@ namespace Petri.Editor
             CodeGen += "#include \"Runtime/Cpp/Action.h\"";
             CodeGen += "#include \"Runtime/Cpp/Atomic.h\"";
             foreach(var s in Document.Headers) {
-                var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, s);
-                var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath));
+                var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
+                                                s);
+                var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
+                                                                           Document.Settings.SourceOutputPath));
                 CodeGen += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
             }
 
@@ -124,7 +131,8 @@ namespace Petri.Editor
             string toHash = CodeGen.Value;
 
             System.Security.Cryptography.SHA1 sha = new System.Security.Cryptography.SHA1CryptoServiceProvider(); 
-            Hash = BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(toHash))).Replace("-", "");
+            Hash = BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(toHash))).Replace("-",
+                                                                                                              "");
 
             CodeGen += "";
 
@@ -198,7 +206,9 @@ namespace Petri.Editor
 
             _headerGen += "#endif"; // ifndef header guard
 
-            string path = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName, Document.Settings.SourceOutputPath), Document.Settings.Name) + ".h";
+            string path = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
+                                                                        Document.Settings.SourceOutputPath),
+                                                 Document.Settings.Name) + ".h";
             string headerCode = _headerGen.Value;
             if(System.IO.File.Exists(path)) {
                 string existing = System.IO.File.ReadAllText(path);
@@ -346,9 +356,10 @@ namespace Petri.Editor
         {
             var variables = Document.PetriNet.Variables;
             var cppVar = from v in variables
-                         select v.Expression;
+                                  select v.Expression;
             if(variables.Count > 0) {
-                return "enum class " + VariableExpression.EnumName + "  : std::uint_fast32_t {" + String.Join(", ", cppVar) + "};\n";
+                return "enum class " + VariableExpression.EnumName + "  : std::uint_fast32_t {" + String.Join(", ",
+                                                                                                              cppVar) + "};\n";
             }
 
             return "";

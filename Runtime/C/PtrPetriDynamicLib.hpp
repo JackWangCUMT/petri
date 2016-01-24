@@ -36,12 +36,7 @@
 namespace Petri {
     class PtrPetriDynamicLib : public PetriDynamicLib {
     public:
-        PtrPetriDynamicLib(void *(*createPtr)(),
-                           void *(*createDebugPtr)(),
-                           char const *(*hashPtr)(),
-                           char const *(*namePtr)(),
-                           uint16_t (*portPtr)(),
-                           char const *(*prefixPtr)())
+        PtrPetriDynamicLib(void *(*createPtr)(), void *(*createDebugPtr)(), char const *(*hashPtr)(), char const *(*namePtr)(), uint16_t (*portPtr)(), char const *(*prefixPtr)())
                 : _namePtr(namePtr)
                 , _portPtr(portPtr)
                 , _prefixPtr(prefixPtr) {
@@ -100,6 +95,7 @@ namespace Petri {
         }
 
         virtual void load() override {}
+        virtual void unload() override {}
 
         virtual bool loaded() const override {
             return true;

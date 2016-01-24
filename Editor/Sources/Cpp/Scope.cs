@@ -28,7 +28,9 @@ namespace Petri.Editor
     {
         public class Scope : IEquatable<Scope>
         {
-            public static Scope MakeFromNamespace(Language language, string ns, Scope enclosing = null)
+            public static Scope MakeFromNamespace(Language language,
+                                                  string ns,
+                                                  Scope enclosing = null)
             {
                 Scope s = new Scope();
                 s.Language = language;
@@ -116,7 +118,8 @@ namespace Petri.Editor
                 }
             }
 
-            public static string GetSeparator(Language lang) {
+            public static string GetSeparator(Language lang)
+            {
                 switch(lang) {
                 case Language.Cpp:
                     return "::";

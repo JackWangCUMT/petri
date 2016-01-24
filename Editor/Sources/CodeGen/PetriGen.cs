@@ -172,7 +172,8 @@ namespace Petri.Editor
             }
         }
 
-        public static string GetCompilableClassName(string name) {
+        public static string GetCompilableClassName(string name)
+        {
             return name.Replace(" ", "_").Replace("+", "Plus").Replace("#", "Sharp");
         }
     }

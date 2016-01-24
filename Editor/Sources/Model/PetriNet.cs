@@ -30,7 +30,10 @@ namespace Petri.Editor
 {
     public abstract class PetriNet : NonRootState
     {
-        public PetriNet(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos)
+        public PetriNet(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc,
+                                                                                                     parent,
+                                                                                                     active,
+                                                                                                     pos)
         {
             Comments = new List<Comment>();
             States = new List<State>();
@@ -40,7 +43,9 @@ namespace Petri.Editor
             this.Size = new Cairo.PointD(0, 0);
         }
 
-        public PetriNet(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor)
+        public PetriNet(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc,
+                                                                                           parent,
+                                                                                           descriptor)
         {
             Comments = new List<Comment>();
             States = new List<State>();

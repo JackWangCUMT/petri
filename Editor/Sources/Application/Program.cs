@@ -156,7 +156,7 @@ namespace Petri.Editor
                     }
 
                     string sourcePath = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
-                                                                                   document.Settings.SourceOutputPath),
+                                                                                      document.Settings.SourceOutputPath),
                                                                document.Settings.Name) + "." + PetriGen.SourceExtensionFromLanguage(document.Settings.Language);
 
                     bool forceGeneration = false;

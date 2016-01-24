@@ -47,7 +47,8 @@ namespace Petri.Editor
             _cpp = new ToolButton("CppGen");
             _cpp.IconName = "CppGen";
             _cpp.Label = Configuration.GetLocalized("Generate <language>", "C++");
-            _document.LanguageChanged += (sender, e) => _cpp.Label = Configuration.GetLocalized("Generate <language>", DocumentSettings.LanguageName(e.NewLanguage));
+            _document.LanguageChanged += (sender, e) => _cpp.Label = Configuration.GetLocalized("Generate <language>",
+                                                                                                DocumentSettings.LanguageName(e.NewLanguage));
 
             buf = Pixbuf.LoadFromResource("build");
             IconTheme.AddBuiltinIcon("Build", (int)(buf.Width / 0.8), buf);
@@ -166,7 +167,10 @@ namespace Petri.Editor
             _findView.AppendColumn(c1);
             _findView.AppendColumn(c2);
             _findView.AppendColumn(c3);
-            _findStore = new Gtk.ListStore(typeof(string), typeof(string), typeof(string), typeof(string));
+            _findStore = new Gtk.ListStore(typeof(string),
+                                           typeof(string),
+                                           typeof(string),
+                                           typeof(string));
             _findView.Model = _findStore;
 
             var scroll = new ScrolledWindow();
@@ -322,27 +326,37 @@ namespace Petri.Editor
                     var e = (Action)ee;
                     if(e.Function.MakeUserReadable().Contains(what)) {
                         _findResults.Add(e);
-                        _findStore.AppendValues(e.ID.ToString(), Configuration.GetLocalized("State"), e.Name, e.Function.MakeUserReadable());
+                        _findStore.AppendValues(e.ID.ToString(),
+                                                Configuration.GetLocalized("State"),
+                                                e.Name,
+                                                e.Function.MakeUserReadable());
                     }
                 }
                 else if(ee is Transition && (type == Petri.Editor.Find.FindType.All || type == Petri.Editor.Find.FindType.Transition)) {
                     var e = (Transition)ee;
                     if(e.Condition.MakeUserReadable().Contains(what)) {
                         _findResults.Add(e);
-                        _findStore.AppendValues(e.ID.ToString(), Configuration.GetLocalized("Transition"), e.Name, e.Condition.MakeUserReadable());
+                        _findStore.AppendValues(e.ID.ToString(),
+                                                Configuration.GetLocalized("Transition"),
+                                                e.Name,
+                                                e.Condition.MakeUserReadable());
                     }
                 }
                 else if(ee is Comment && (type == Petri.Editor.Find.FindType.All || type == Petri.Editor.Find.FindType.Comment)) {
                     var e = (Comment)ee;
                     if(e.Name.Contains(what)) {
                         _findResults.Add(e);
-                        _findStore.AppendValues(e.ID.ToString(), Configuration.GetLocalized("Comment"), "-", e.Name);
+                        _findStore.AppendValues(e.ID.ToString(),
+                                                Configuration.GetLocalized("Comment"),
+                                                "-",
+                                                e.Name);
                     }
                 }
             }
 
             if(_vpaned.Position == _vpaned.MaxPosition) {
-                _vpaned.Position = Math.Max((_vpaned.MaxPosition - _vpaned.MinPosition) / 2, (_vpaned.HeightRequest - _scroll.HeightRequest));
+                _vpaned.Position = Math.Max((_vpaned.MaxPosition - _vpaned.MinPosition) / 2,
+                                            (_vpaned.HeightRequest - _scroll.HeightRequest));
             }
         }
 

@@ -66,9 +66,12 @@ namespace Petri.Editor
             return label;
         }
 
-        protected WidgetType CreateWidget<WidgetType>(bool resizeable, int indentation, params object[] widgetConstructionArgs) where WidgetType : Widget
+        protected WidgetType CreateWidget<WidgetType>(bool resizeable,
+                                                      int indentation,
+                                                      params object[] widgetConstructionArgs) where WidgetType : Widget
         {
-            WidgetType w = (WidgetType)Activator.CreateInstance(typeof(WidgetType), widgetConstructionArgs);
+            WidgetType w = (WidgetType)Activator.CreateInstance(typeof(WidgetType),
+                                                                widgetConstructionArgs);
             this.AddWidget(w, resizeable, indentation);
             return w;
         }

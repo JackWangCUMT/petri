@@ -29,7 +29,8 @@ namespace Petri.Editor.Cpp
 {
     public class EmptyExpression : Expression
     {
-        public EmptyExpression(Language language, bool doWeCare) : base(language, Cpp.Operator.Name.None)
+        public EmptyExpression(Language language, bool doWeCare) : base(language,
+                                                                        Cpp.Operator.Name.None)
         {
         }
 
@@ -127,18 +128,18 @@ namespace Petri.Editor.Cpp
                                                                                                    tup.Item2,
                                                                                                    true),
                                                        Cpp.Expression.CreateFromPreprocessedString(tup.Item2[expr].Item2.Substring(1,
-                                                                                                                                       tup.Item2[expr].Item2.Length - 2),
-                                                                                                       language,
-                                                                                                       null,
-                                                                                                       null,
-                                                                                                       tup.Item2,
-                                                                                                       true),
+                                                                                                                                   tup.Item2[expr].Item2.Length - 2),
+                                                                                                   language,
+                                                                                                   null,
+                                                                                                   null,
+                                                                                                   tup.Item2,
+                                                                                                   true),
                                                        Cpp.Expression.CreateFromPreprocessedString(tup.Item1.Substring(lastIndex + 1),
-                                                                                                       language,
-                                                                                                       null,
-                                                                                                       null,
-                                                                                                       tup.Item2,
-                                                                                                       true));
+                                                                                                   language,
+                                                                                                   null,
+                                                                                                   null,
+                                                                                                   tup.Item2,
+                                                                                                   true));
                     }
                     else {
                         currentIndex = lastIndex + 1;
@@ -183,7 +184,7 @@ namespace Petri.Editor.Cpp
     public class VariableExpression : LiteralExpression
     {
         public VariableExpression(string expr, Language language) : base(language,
-                                                                                         expr)
+                                                                         expr)
         {
             Regex name = new Regex(Parser.NamePattern);
             Match nameMatch = name.Match(expr);
@@ -305,14 +306,14 @@ namespace Petri.Editor.Cpp
         {
             return String.Join(";\n",
                                from e in Expressions
-                                            select e.MakeCpp());
+                                        select e.MakeCpp());
         }
 
         public override string MakeUserReadable()
         {
             return String.Join("; ",
                                from e in Expressions
-                                            select e.MakeUserReadable());
+                                        select e.MakeUserReadable());
         }
 
         public override List<LiteralExpression> GetLiterals()

@@ -37,7 +37,8 @@ namespace Petri.Editor
 
         public void Show()
         {
-            _window.Title = Configuration.GetLocalized("Find in the document {0}", _document.Window.Title);
+            _window.Title = Configuration.GetLocalized("Find in the document {0}",
+                                                       _document.Window.Title);
             _window.ShowAll();
             _window.Present();
             _document.AssociatedWindows.Add(_window);

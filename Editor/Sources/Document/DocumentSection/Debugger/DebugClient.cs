@@ -134,7 +134,9 @@ namespace Petri.Editor
         {
             UnloadLibAndStopServer();
 
-            _libProxy = new GeneratedDynamicLibProxy(System.IO.Directory.GetParent(_document.Path).FullName, _document.Settings.LibPath, PetriGen.GetCompilableClassName(_document.Settings.Name));            
+            _libProxy = new GeneratedDynamicLibProxy(System.IO.Directory.GetParent(_document.Path).FullName,
+                                                     _document.Settings.LibPath,
+                                                     PetriGen.GetCompilableClassName(_document.Settings.Name));            
             Petri.Runtime.GeneratedDynamicLib dylib = _libProxy.Load();
 
             var dynamicLib = dylib.Lib;
@@ -270,7 +272,16 @@ namespace Petri.Editor
                 }
                 else {
                     try {
-                        this.SendObject(new JObject(new JProperty("type", "reload")));
+                        if(_document.Settings.RunInEditor) {
+                            _pause = false;
+                            if(_petriRunning)
+                                this.SendObject(new JObject(new JProperty("type", "stop")));
+                            UnloadLibAndStopServer();
+                            LoadLibAndStartServer();
+                        }
+                        else {
+                            this.SendObject(new JObject(new JProperty("type", "reload")));
+                        }
                     }
                     catch(Exception e) {
                         GLib.Timeout.Add(0, () => {

@@ -27,7 +27,8 @@ namespace Petri.Editor.Cpp
 {
     public class UnaryExpression : Expression
     {
-        public UnaryExpression(Language language, Operator.Name o, Expression expr) : base(language, o)
+        public UnaryExpression(Language language, Operator.Name o, Expression expr) : base(language,
+                                                                                           o)
         {
             this.Expression = expr;
         }
@@ -44,7 +45,9 @@ namespace Petri.Editor.Cpp
 
         public override string MakeCpp()
         {
-            string parenthesized = Expression.Parenthesize(this, this.Expression, this.Expression.MakeCpp());
+            string parenthesized = Expression.Parenthesize(this,
+                                                           this.Expression,
+                                                           this.Expression.MakeCpp());
             switch(this.Operator) {
             case Cpp.Operator.Name.FunCall:
                 throw new Exception(Configuration.GetLocalized("Already managed in FunctionInvocation class!"));
@@ -75,8 +78,8 @@ namespace Petri.Editor.Cpp
         public override string MakeUserReadable()
         {
             string parenthesized = Expression.Parenthesize(this,
-                                                               this.Expression,
-                                                               this.Expression.MakeUserReadable());
+                                                           this.Expression,
+                                                           this.Expression.MakeUserReadable());
             switch(this.Operator) {
             case Cpp.Operator.Name.FunCall:
                 throw new Exception(Configuration.GetLocalized("Already managed in FunctionInvocation class!"));
