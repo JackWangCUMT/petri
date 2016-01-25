@@ -187,6 +187,9 @@ namespace Petri.Editor
             set;
         }
 
+        /// <summary>
+        /// Save the document to disk, or throw an Exception if the Path is empty.
+        /// </summary>
         public virtual void Save()
         {
             string tempFileName = "";
@@ -247,6 +250,9 @@ namespace Petri.Editor
             Settings.Modified = false;
         }
 
+        /// <summary>
+        /// Loads the document from disk.
+        /// </summary>
         public void Load()
         {
             var document = XDocument.Load(Path);
@@ -293,6 +299,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Generates the code without prompting the user. If no code have ever been generated for this document, meaning we don't know where to save it, then an Exception is thrown.
+        /// <exception cref="Exception">When no save path has been defined for the document.</exception>
+        /// </summary>
         public void GenerateCodeDontAsk()
         {
             if(this.Settings.RelativeSourceOutputPath.Length == 0) {
@@ -307,6 +317,10 @@ namespace Petri.Editor
             generator.WritePetriNet();
         }
 
+        /// <summary>
+        /// Compiles the document. If some output is made by the invoked compiler, then the method returns false, true otherwise.
+        /// </summary>
+        /// <param name="wait">Unused.</param>
         public virtual bool Compile(bool wait)
         {
             var c = new Compiler(this);
@@ -320,6 +334,10 @@ namespace Petri.Editor
             return true;
         }
 
+        /// <summary>
+        /// An ever increasing ID. When a new Entity is created, it increments this value its ID from the new value.
+        /// </summary>
+        /// <value>The last entity I.</value>
         public UInt64 LastEntityID {
             get;
             set;
