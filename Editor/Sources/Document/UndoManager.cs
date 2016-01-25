@@ -25,6 +25,9 @@ using System.Collections.Generic;
 
 namespace Petri.Editor
 {
+    /// <summary>
+    /// The undo manager of the application, one instance per document.
+    /// </summary>
     public class UndoManager
     {
         public UndoManager()
@@ -33,23 +36,37 @@ namespace Petri.Editor
             _redoStack = new Stack<ActionDescription>();
         }
 
-        public void PostAction(GuiAction a)
+        /// <summary>
+        /// Registers the GUI action into the undo manager's stacks, and commit the action so that its effect are visible.
+        /// </summary>
+        /// <param name="action">Action.</param>
+        public void CommitGuiAction(GuiAction action)
         {
             _redoStack.Clear();
-            _undoStack.Push(new ActionDescription(a, a.Description));
-            a.Apply();
+            _undoStack.Push(new ActionDescription(action, action.Description));
+            action.Apply();
         }
 
+        /// <summary>
+        /// Undoes the last committed GUI action and pushes it onto the redo stack.
+        /// </summary>
         public void Undo()
         {
             this.SwapAndApply(_undoStack, _redoStack);
         }
 
+        /// <summary>
+        /// Undoes the last undone GUI action and pushes it onto the undo stack.
+        /// </summary>
         public void Redo()
         {
             this.SwapAndApply(_redoStack, _undoStack);
         }
 
+        /// <summary>
+        /// Gets the GUI action on top of the undo stack.
+        /// </summary>
+        /// <value>The next undo action, or <c>null</c> if the stack is empty.</value>
         public GuiAction NextUndo {
             get {
                 if(_undoStack.Count > 0)
@@ -59,12 +76,21 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets the description of the GUI action on top of the undo stack.
+        /// Do not call when the stack is empty, or be prepared to get a <c>NullReferenceException</c>.
+        /// </summary>
+        /// <value>The description of the next undo action, or <c>null</c> if the stack is empty.</value>
         public string NextUndoDescription {
             get {
                 return _undoStack.Peek()._description;
             }
         }
 
+        /// <summary>
+        /// Gets the GUI action on top of the redo stack.
+        /// </summary>
+        /// <value>The next redo action, or <c>null</c> if the stack is empty.</value>
         public GuiAction NextRedo {
             get {
                 if(_redoStack.Count > 0)
@@ -74,6 +100,11 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets the description of the GUI action on top of the red stack.
+        /// Do not call when the stack is empty, or be prepared to get a <c>NullReferenceException</c>.
+        /// </summary>
+        /// <value>The description of the next redo action, or <c>null</c> if the stack is empty.</value>
         public string NextRedoDescription {
             get {
                 return _redoStack.Peek()._description;
@@ -92,12 +123,18 @@ namespace Petri.Editor
             public string _description;
         }
 
+        /// <summary>
+        /// Removes the top Gui action from <paramref name="toPop"/>, pushes its opposite to <paramref name="toPush"/> and commits this opposite action.
+        /// </summary>
+        /// <param name="toPop">To stack to pop from.</param>
+        /// <param name="toPush">To stack to push to.</param>
         private void SwapAndApply(Stack<ActionDescription> toPop, Stack<ActionDescription> toPush)
         {
             if(toPop.Count > 0) {
                 var actionDescription = toPop.Pop();
                 actionDescription._action = actionDescription._action.Reverse();
-                toPush.Push(new ActionDescription(actionDescription._action, actionDescription._description));
+                toPush.Push(new ActionDescription(actionDescription._action,
+                                                  actionDescription._description));
                 actionDescription._action.Apply();
             }
         }
@@ -106,26 +143,51 @@ namespace Petri.Editor
         Stack<ActionDescription> _redoStack;
     }
 
+    /// <summary>
+    /// GUI action.
+    /// </summary>
     public abstract class GuiAction
     {
+        /// <summary>
+        /// Apply this instance, actually applying the Gui change it encapsulates.
+        /// </summary>
         public abstract void Apply();
 
+        /// <summary>
+        /// Gets the opposite instance of <c>this</c>. The opposite of moving and entity 10px to the right is moving it 10px to the left.
+        /// </summary>
         public abstract GuiAction Reverse();
 
+        /// <summary>
+        /// The object that is meant to gain the user's focus upon Apply()ing.
+        /// </summary>
+        /// <value>The focus.</value>
         public abstract object Focus {
             get;
         }
 
+        /// <summary>
+        /// Gets the description of the GUI action's effect.
+        /// </summary>
+        /// <value>The description.</value>
         public abstract string Description {
             get;
         }
     }
 
+    /// <summary>
+    /// A simple wrapper that allows to change the description of a GUI action but keep its effect.
+    /// </summary>
     public class GuiActionWrapper : GuiAction
     {
-        public GuiActionWrapper(GuiAction a, string description)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.GuiActionWrapper"/> class.
+        /// </summary>
+        /// <param name="action">The action to wrap.</param>
+        /// <param name="description">The description of the wrapper.</param>
+        public GuiActionWrapper(GuiAction action, string description)
         {
-            _action = a;
+            _action = action;
             _description = description;
         }
 
@@ -155,11 +217,19 @@ namespace Petri.Editor
         string _description;
     }
 
+    /// <summary>
+    /// A GUI action that wraps around a list of GUI actions, by applying then in the order they are given, and undoing them in the reverse order they are given.
+    /// </summary>
     public class GuiActionList : GuiAction
     {
-        public GuiActionList(IEnumerable<GuiAction> a, string description)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.GuiActionList"/> class.
+        /// </summary>
+        /// <param name="actions">The actions list, considered in the enumeration's natural order. Must not be empty.</param>
+        /// <param name="description">The description for the wrapper action.</param>
+        public GuiActionList(IEnumerable<GuiAction> actions, string description)
         {
-            _actions = new List<GuiAction>(a);
+            _actions = new List<GuiAction>(actions);
             _description = description;
 
             // Strange use case anyway
@@ -175,6 +245,9 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// The opposite action correctly reverses the order each GUI action's opposite has to be applied.
+        /// </summary>
         public override GuiAction Reverse()
         {
             var l = new List<GuiAction>();
@@ -185,18 +258,24 @@ namespace Petri.Editor
             return new GuiActionList(l, _description);
         }
 
+        /// <summary>
+        /// The object that is meant to gain the user's focus upon Apply()ing.
+        /// Here, the object is a list of the inner action's Focus objects.
+        /// When an inner object's Focus returns a List<object>, then the list is flattened into the return value.
+        /// </summary>
+        /// <value>The focus.</value>
         public override object Focus {
             get {
-                var l = new List<Entity>();
+                var l = new List<object>();
                 foreach(var a in _actions) {
                     var f = a.Focus;
-                    if(f is List<Entity>)
-                        l.AddRange(f as List<Entity>);
+                    if(f is IEnumerable<object>)
+                        l.AddRange(f as IEnumerable<object>);
                     else
-                        l.Add(f as Entity);
+                        l.Add(f);
                 }
 
-                return l;
+                return l.AsReadOnly();
             }
         }
 
@@ -210,8 +289,16 @@ namespace Petri.Editor
         string _description;
     }
 
+    /// <summary>
+    /// Change the Entity's parent, removing it from its previous and adding it to the new.
+    /// </summary>
     public class ChangeParentAction : GuiAction
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.ChangeParentAction"/> class.
+        /// </summary>
+        /// <param name="e">The entity</param>
+        /// <param name="parent">The new parent.</param>
         public ChangeParentAction(Entity e, PetriNet parent)
         {
             _entity = e;
@@ -246,11 +333,19 @@ namespace Petri.Editor
         PetriNet _oldParent;
     }
 
+    /// <summary>
+    /// Change the name of an entity.
+    /// </summary>
     public class ChangeNameAction : GuiAction
     {
-        public ChangeNameAction(Entity e, string newName)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.ChangeNameAction"/> class.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="newName">The new name.</param>
+        public ChangeNameAction(Entity entity, string newName)
         {
-            _entity = e;
+            _entity = entity;
             _newName = newName;
             _oldName = _entity.Name;
         }
@@ -287,13 +382,21 @@ namespace Petri.Editor
         string _oldName;
     }
 
+    /// <summary>
+    /// Change the required tokens count of a state.
+    /// </summary>
     public class ChangeRequiredTokensAction : GuiAction
     {
-        public ChangeRequiredTokensAction(State s, int newCount)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.ChangeRequiredTokensAction"/> class.
+        /// </summary>
+        /// <param name="state">State.</param>
+        /// <param name="newCount">The new token count.</param>
+        public ChangeRequiredTokensAction(State state, int newCount)
         {
-            _state = s;
+            _state = state;
             _newCount = newCount;
-            _oldCount = s.RequiredTokens;
+            _oldCount = state.RequiredTokens;
         }
 
         public override void Apply()
@@ -323,22 +426,43 @@ namespace Petri.Editor
         int _oldCount;
     }
 
+    /// <summary>
+    /// Moves an petri net entity in the view from a specified amount.
+    /// </summary>
     public class MoveAction : GuiAction
     {
-        public MoveAction(Entity e, Cairo.PointD delta, bool grid) : this(e, delta, grid, false)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.MoveAction"/> class.
+        /// The opposite action of this instance will not put the entity back aligned to the grid.
+        /// </summary>
+        /// <param name="entity">The entity to move.</param>
+        /// <param name="delta">The position delta to move the entity from.</param>
+        /// <param name="grid">If set to <c>true</c>, the new position will be adapted to fit on the grid.</param>
+        public MoveAction(Entity entity, Cairo.PointD delta, bool grid) : this(entity,
+                                                                               delta,
+                                                                               grid,
+                                                                               false)
         {
 			
         }
 
-        private MoveAction(Entity e, Cairo.PointD delta, bool grid, bool oldGrid)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.MoveAction"/> class.
+        /// </summary>
+        /// <param name="entity">The entity to move.</param>
+        /// <param name="delta">The position delta to move the entity from.</param>
+        /// <param name="grid">If set to <c>true</c>, the new position will be adapted to fit on the grid.</param>
+        /// <param name="oldGrid">Tells whether the opposite action will put the entity back on the grid or not.</param>
+        private MoveAction(Entity entity, Cairo.PointD delta, bool grid, bool oldGrid)
         {
             _oldGrid = oldGrid;
             _grid = grid;
-            _entity = e;
+            _entity = entity;
             _delta = new Cairo.PointD(delta.X, delta.Y);
 
             if(_grid) {
-                var pos = new Cairo.PointD(_entity.Position.X + _delta.X, _entity.Position.Y + _delta.Y);
+                var pos = new Cairo.PointD(_entity.Position.X + _delta.X,
+                                           _entity.Position.Y + _delta.Y);
                 pos.X = Math.Round(pos.X / Entity.GridSize) * Entity.GridSize;
                 pos.Y = Math.Round(pos.Y / Entity.GridSize) * Entity.GridSize;
                 _delta.X = pos.X - _entity.Position.X;
@@ -348,7 +472,8 @@ namespace Petri.Editor
 
         public override void Apply()
         {
-            _entity.Position = new Cairo.PointD(_entity.Position.X + _delta.X, _entity.Position.Y + _delta.Y);
+            _entity.Position = new Cairo.PointD(_entity.Position.X + _delta.X,
+                                                _entity.Position.Y + _delta.Y);
         }
 
         public override GuiAction Reverse()
@@ -387,6 +512,9 @@ namespace Petri.Editor
         Cairo.PointD _delta;
     }
 
+    /// <summary>
+    /// Toggles if the specified state is active upon the petri net's launch or not.
+    /// </summary>
     public class ToggleActiveAction : GuiAction
     {
         public ToggleActiveAction(State e)
@@ -419,12 +547,20 @@ namespace Petri.Editor
         State _entity;
     }
 
+    /// <summary>
+    /// Changes the expression associated to the condition of a transition.
+    /// </summary>
     public class ConditionChangeAction : GuiAction
     {
-        public ConditionChangeAction(Transition t, Code.Expression newCondition)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.ConditionChangeAction"/> class.
+        /// </summary>
+        /// <param name="transition">Transition.</param>
+        /// <param name="newCondition">New condition.</param>
+        public ConditionChangeAction(Transition transition, Code.Expression newCondition)
         {
-            Transition = t;
-            _oldCondition = t.Condition;
+            Transition = transition;
+            _oldCondition = transition.Condition;
             _newCondition = newCondition;
         }
 
@@ -458,13 +594,21 @@ namespace Petri.Editor
         Code.Expression _newCondition, _oldCondition;
     }
 
+    /// <summary>
+    /// Changes the expression associated to the invocation of a petri net action.
+    /// </summary>
     public class InvocationChangeAction : GuiAction
     {
-        public InvocationChangeAction(Action a, Code.FunctionInvocation i)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.InvocationChangeAction"/> class.
+        /// </summary>
+        /// <param name="action">Action.</param>
+        /// <param name="invocation">The new invocation.</param>
+        public InvocationChangeAction(Action action, Code.FunctionInvocation invocation)
         {
-            Action = a;
-            _oldInvocation = a.Function;
-            _newInvocation = i;
+            Action = action;
+            _oldInvocation = action.Function;
+            _newInvocation = invocation;
         }
 
         public override void Apply()
@@ -497,11 +641,14 @@ namespace Petri.Editor
         Code.FunctionInvocation _newInvocation, _oldInvocation;
     }
 
+    /// <summary>
+    /// Add a comment action to the petri net.
+    /// </summary>
     public class AddCommentAction : GuiAction
     {
-        public AddCommentAction(Comment c)
+        public AddCommentAction(Comment comment)
         {
-            _comment = c;
+            _comment = comment;
         }
 
         public override void Apply()
@@ -529,11 +676,14 @@ namespace Petri.Editor
         Comment _comment;
     }
 
+    /// <summary>
+    /// Removes a comment from the petri net.
+    /// </summary>
     public class RemoveCommentAction : GuiAction
     {
-        public RemoveCommentAction(Comment c)
+        public RemoveCommentAction(Comment comment)
         {
-            _comment = c;
+            _comment = comment;
         }
 
         public override void Apply()
@@ -561,12 +711,23 @@ namespace Petri.Editor
         Comment _comment;
     }
 
+    /// <summary>
+    /// Changes a petri net comment's background color.
+    /// </summary>
     public class ChangeCommentColorAction : GuiAction
     {
-        public ChangeCommentColorAction(Comment c, Cairo.Color color)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.ChangeCommentColorAction"/> class.
+        /// </summary>
+        /// <param name="comment">The comment.</param>
+        /// <param name="color">The new color.</param>
+        public ChangeCommentColorAction(Comment comment, Cairo.Color color)
         {
-            _comment = c;
-            _oldColor = new Cairo.Color(c.Color.R, c.Color.G, c.Color.B, c.Color.A);
+            _comment = comment;
+            _oldColor = new Cairo.Color(comment.Color.R,
+                                        comment.Color.G,
+                                        comment.Color.B,
+                                        comment.Color.A);
             _newColor = color;
         }
 
@@ -596,12 +757,20 @@ namespace Petri.Editor
         Cairo.Color _oldColor, _newColor;
     }
 
+    /// <summary>
+    /// Resize a petri net comment.
+    /// </summary>
     public class ResizeCommentAction : GuiAction
     {
-        public ResizeCommentAction(Comment c, Cairo.PointD size)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.ResizeCommentAction"/> class.
+        /// </summary>
+        /// <param name="comment">The comment.</param>
+        /// <param name="size">The new size.</param>
+        public ResizeCommentAction(Comment comment, Cairo.PointD size)
         {
-            _comment = c;
-            _oldSize = new Cairo.PointD(c.Size.X, c.Size.Y);
+            _comment = comment;
+            _oldSize = new Cairo.PointD(comment.Size.X, comment.Size.Y);
             _newSize = size;
         }
 
@@ -631,6 +800,9 @@ namespace Petri.Editor
         Cairo.PointD _oldSize, _newSize;
     }
 
+    /// <summary>
+    /// Adds a transition to the petri net.
+    /// </summary>
     public class AddTransitionAction : GuiAction
     {
         public AddTransitionAction(Transition t, bool incrementTokenCount)
@@ -670,16 +842,51 @@ namespace Petri.Editor
         bool _incrementTokenCount;
     }
 
+    /// <summary>
+    /// Detach one of the transition's end and attach it to a new state (possibly the same).
+    /// </summary>
     public class ChangeTransitionEndAction : GuiAction
     {
-        public ChangeTransitionEndAction(Transition t, State newEnd, bool destination) : this(t, newEnd, destination, destination && t.After.RequiredTokens == t.After.TransitionsBefore.Count, destination && newEnd.TransitionsBefore.Count == 0)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.ChangeTransitionEndAction"/> class.
+        /// It sets <c>true</c> to the last but one parameter of the other constructor of this class iff:
+        /// <list type="bullet">
+        /// <item><description><paramref name="destination"/> is set to <c>true</c></description></item>
+        /// <item><description><c>transition.After.RequiredTokens == transition.After.TransitionsBefore.Count</c></description></item>
+        /// </list>
+        /// It sets <c>true</c> to the last parameter of the other constructor of this class iff:
+        /// <list type="bullet">
+        /// <item><description><paramref name="destination"/> is set to <c>true</c></description></item>
+        /// <item><description><c>newEnd.TransitionsBefore.Count == 0</c></description></item>
+        /// </list>
+        /// </summary>
+        /// <param name="transition">The transition.</param>
+        /// <param name="newEnd">The new state at which the transition's end will be attached</param>
+        /// <param name="destination">If set to <c>true</c>, the transition's end which is moved is the destination end (pointed towards by the arrow). Otherwise, it is the start state of the transition.</param>
+        public ChangeTransitionEndAction(Transition transition, State newEnd, bool destination) : this(transition,
+                                                                                                       newEnd,
+                                                                                                       destination,
+                                                                                                       destination && transition.After.RequiredTokens == transition.After.TransitionsBefore.Count,
+                                                                                                       destination && newEnd.TransitionsBefore.Count == 0)
         {
 		
         }
 
-        private ChangeTransitionEndAction(Transition t, State newEnd, bool destination, bool decrementOld, bool incrementNew)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.ChangeTransitionEndAction"/> class.
+        /// </summary>
+        /// <param name="transition">The transition.</param>
+        /// <param name="newEnd">The new state at which the transition's end will be attached</param>
+        /// <param name="destination">If set to <c>true</c>, the transition's end which is moved is the destination end (pointed towards by the arrow). Otherwise, it is the start state of the transition.</param>
+        /// <param name="decrementOld">Whether the transitions' detached end sees its required token count decremented. Only effective is <c>destination</c> is set to true.</param>
+        /// <param name="incrementNew">Whether the transitions' newly attached end sees its required token count incremented. Only effective is <c>destination</c> is set to true.</param>
+        private ChangeTransitionEndAction(Transition transition,
+                                          State newEnd,
+                                          bool destination,
+                                          bool decrementOld,
+                                          bool incrementNew)
         {
-            _transition = t;
+            _transition = transition;
             _newEnd = newEnd;
             _destination = destination;
             _decrementOld = decrementOld;
@@ -711,14 +918,18 @@ namespace Petri.Editor
                 _newEnd.AddTransitionAfter(_transition);
             }
 
-            if(_incrementNew) {
+            if(_destination && _incrementNew) {
                 ++_newEnd.RequiredTokens;
             }
         }
 
         public override GuiAction Reverse()
         {
-            return new ChangeTransitionEndAction(_transition, _oldEnd, _destination, _incrementNew, _decrementOld); 
+            return new ChangeTransitionEndAction(_transition,
+                                                 _oldEnd,
+                                                 _destination,
+                                                 _incrementNew,
+                                                 _decrementOld); 
         }
 
         public override object Focus {
@@ -738,11 +949,19 @@ namespace Petri.Editor
         bool _destination, _decrementOld, _incrementNew;
     }
 
+    /// <summary>
+    /// Removes a transition from its petri net.
+    /// </summary>
     public class RemoveTransitionAction : GuiAction
     {
-        public RemoveTransitionAction(Transition t, bool decrementTokenCount)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.RemoveTransitionAction"/> class.
+        /// </summary>
+        /// <param name="transtition">Transtition.</param>
+        /// <param name="decrementTokenCount">If set to <c>true</c> then decrement token count of the destination.</param>
+        public RemoveTransitionAction(Transition transtition, bool decrementTokenCount)
         {
-            _transition = t;
+            _transition = transtition;
             _decrementTokenCount = decrementTokenCount;
         }
 
@@ -775,6 +994,9 @@ namespace Petri.Editor
         bool _decrementTokenCount;
     }
 
+    /// <summary>
+    /// Adds a state to its petri net.
+    /// </summary>
     public class AddStateAction : GuiAction
     {
         public AddStateAction(State s)
@@ -807,6 +1029,9 @@ namespace Petri.Editor
         State _state;
     }
 
+    /// <summary>
+    /// Removes a state from its petri net.
+    /// </summary>
     public class RemoveStateAction : GuiAction
     {
         public RemoveStateAction(State s)
@@ -839,11 +1064,14 @@ namespace Petri.Editor
         State _state;
     }
 
+    /// <summary>
+    /// A dumb GUI action that only remembers an object as the return value of the Focus getter.
+    /// </summary>
     public class DoNothingAction : GuiAction
     {
-        public DoNothingAction(Entity e)
+        public DoNothingAction(object focus)
         {
-            _entity = e;
+            _focus = focus;
         }
 
         public override void Apply()
@@ -852,12 +1080,12 @@ namespace Petri.Editor
 
         public override GuiAction Reverse()
         {
-            return new DoNothingAction(_entity); 
+            return new DoNothingAction(_focus); 
         }
 
         public override object Focus {
             get {
-                return _entity;
+                return _focus;
             }
         }
 
@@ -867,7 +1095,7 @@ namespace Petri.Editor
             }
         }
 
-        Entity _entity;
+        object _focus;
     }
 }
 

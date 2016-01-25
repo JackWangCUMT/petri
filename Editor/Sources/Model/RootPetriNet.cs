@@ -34,10 +34,16 @@ namespace Petri.Editor
         {
         }
 
-        public RootPetriNet(HeadlessDocument doc, XElement descriptor) : base(doc, null, descriptor)
+        public RootPetriNet(HeadlessDocument doc, XElement descriptor) : base(doc,
+                                                                              null,
+                                                                              descriptor)
         {
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="Petri.Editor.RootPetriNet"/> is active.
+        /// </summary>
+        /// <value><c>true</c> if active; otherwise, <c>false</c>.</value>
         public override bool Active {
             get {
                 return true;
@@ -47,14 +53,21 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets or sets the required tokens that must be brought by transitions to activate the state.
+        /// </summary>
+        /// <value>The required tokens.</value>
         public override int RequiredTokens {
             get {
                 return 0;
             }
-            set {
-            }
+            set{ }
         }
 
+        /// <summary>
+        /// The name is forced to "Root" here.
+        /// </summary>
+        /// <value>The name.</value>
         public override string Name {
             get {
                 return "Root";
@@ -64,12 +77,19 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets or sets the document.
+        /// </summary>
+        /// <value>The document.</value>
         public override HeadlessDocument Document {
             get;
             set;
         }
-		
-        // Use this to scale down the IDs of entities to 0...N, with N = number of entities
+
+        /// <summary>
+        /// Use this to scale down the IDs of entities to 0...N, with N = number of entities
+        /// </summary>
+        /// <returns><c>true</c> if this instance canonize ; otherwise, <c>false</c>.</returns>
         public void Canonize()
         {
             var entities = this.BuildEntitiesList();
@@ -79,15 +99,19 @@ namespace Petri.Editor
                 return o1.ID.CompareTo(o2.ID);
             });
 
-            Document.LastEntityID = 0;
+            Document.IDManager = new IDManager(0);
             foreach(Entity o in entities) {
-                o.ID = Document.LastEntityID++;
+                o.ID = Document.IDManager.Consume();
                 if(o is InnerPetriNet) {
-                    ((InnerPetriNet)o).EntryPointID = Document.LastEntityID++;
+                    ((InnerPetriNet)o).EntryPointID = Document.IDManager.Consume();
                 }
             }
         }
 
+        /// <summary>
+        /// Recursively gets the variables contained in the expressions of child entities. 
+        /// </summary>
+        /// <value>The variables.</value>
         public HashSet<Code.VariableExpression> Variables {
             get {
                 var res = new HashSet<Code.VariableExpression>();

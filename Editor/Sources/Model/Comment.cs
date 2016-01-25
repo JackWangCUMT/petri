@@ -28,6 +28,10 @@ using Cairo;
 
 namespace Petri.Editor
 {
+    /// <summary>
+    /// A graphical entity containing a text comment. It does not interact in any way with the other Entity subclasses, other than being contained in PetriNets.
+    /// Only for documentation/hints purpose.
+    /// </summary>
     public class Comment : Entity
     {
         public Comment(HeadlessDocument doc, PetriNet parent, Cairo.PointD pos) : base(doc, parent)
@@ -54,14 +58,14 @@ namespace Petri.Editor
             Color = color;
         }
 
-        public override XElement GetXml()
+        public override XElement GetXML()
         {
             var elem = new XElement("Comment");
             this.Serialize(elem);
             return elem;
         }
 
-        public override void Serialize(XElement elem)
+        protected override void Serialize(XElement elem)
         {
             base.Serialize(elem);
             elem.SetAttributeValue("Width", Size.X);
@@ -73,24 +77,41 @@ namespace Petri.Editor
             elem.SetAttributeValue("A", Color.A);
         }
 
+        /// <summary>
+        /// Gets or sets the size of the comment's frame.
+        /// </summary>
+        /// <value>The size.</value>
         public PointD Size {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the color of the comment's background.
+        /// </summary>
+        /// <value>The color.</value>
         public Color Color {
             get;
             set;
         }
 
+        /// <summary>
+        /// Nothing to see here, as the Entity is not code generated at all.
+        /// </summary>
+        /// <returns><c>true</c>, if function was used, <c>false</c> otherwise.</returns>
+        /// <param name="f">F.</param>
         public override bool UsesFunction(Code.Function f)
         {
             return false;
         }
 
+        /// <summary>
+        /// Nothing to see here, as the Entity is not code generated at all.
+        /// </summary>
+        /// <value>The code identifier.</value>
         public override string CodeIdentifier {
             get {
-                return "";
+                return null;
             }
         }
 

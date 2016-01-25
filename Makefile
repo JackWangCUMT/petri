@@ -7,7 +7,7 @@ CXX:=c++
 MSBUILD:=xbuild
 CXXVERSION:=$(shell $(CXX) --version)
 
-CXXFLAGS:=-std=c++14 -I./Runtime/Cpp/jsoncpp/include
+CXXFLAGS:=-std=c++14
 LDFLAGS:=-shared
 
 CSCONF:=Release

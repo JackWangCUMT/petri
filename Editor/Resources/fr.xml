@@ -319,9 +319,6 @@
 <Key>The &lt;language&gt; code has been sucessfully generated.</Key>
 <Value>Le code {0} a été généré avec succès.</Value>
 
-<Key>The Petri Net contains conflicting entities. Please solve them before you can generate the source code.</Key>
-<Value>Le réseau de Pétri contient des entités en conflit. Veuillez les résoudre avant de pouvoir générer le code.</Value>
-
 <Key>Save the generated code as…</Key>
 <Value>Enregistrer le code généré sous…</Value>
 
@@ -384,9 +381,6 @@
 
 <Key>No conflicting entity.</Key>
 <Value>0 entité en conflit.</Value>
-
-<Key>Conflicts have to be solved before the generation/compilation step.</Key>
-<Value>Les conflits devront être résolus avant l'étape de génération/compilation.</Value>
 
 <Key>Debugger still running!</Key>
 <Value>Le débuggueur est toujours lancé!</Value>
@@ -470,7 +464,7 @@
 <Value>Manuel…</Value>
 
 <Key>State's invocation:</Key>
-<Value>Invocation de l'action :</Value>
+<Value>Invocation de l'état :</Value>
 
 <Key>Incorrect return type for the function: {0} expected, {1} found.</Key>
 <Value>Type de retour de la fonction incorrect : {0} attendu, {1} trouvé.</Value>
@@ -658,11 +652,14 @@
 <Key>No source output path defined. Please open the Petri net with the graphical editor and generate the &lt;language&gt; code once.</Key>
 <Value>Pas de chemin de génération des sources. Veuillez ouvrir le réseau de pétri avec l'éditeur graphique et générer le code {0} au moins une fois.</Value>
 
-<Key>The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts.</Key>
-<Value>Le réseau de pétri a des états en conflit. Veuillez l'ouvrir avec l'éditeur graphique et résoudre les conflits.</Value>
+<Key>Line {0}, Row {1}:</Key>
+<Value>Ligne {0}, colonne {1} :</Value>
 
-<Key>Erreurs :</Key>
-<Value>Erreurs :</Value>
+<Key>Compilation errors:</Key>
+<Value>Erreurs de compilation :</Value>
+
+<Key>Some entities contained in this petri net are causing compilation errors.</Key>
+<Value>Des entités contenues dans ce réseau de pétri causent des erreurs de compilation.</Value>
 
 <Key>Document's settings:</Key>
 <Value>Réglages du document :</Value>

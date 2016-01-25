@@ -94,6 +94,9 @@ namespace Petri.Editor
 
             System.IO.Directory.SetCurrentDirectory(cd);
 
+            if(outputBuilder.Length > 0) {
+                outputBuilder.Append("\n");
+            }
             outputBuilder.Append(err);
 
             return outputBuilder.ToString();

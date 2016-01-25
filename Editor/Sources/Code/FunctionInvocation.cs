@@ -28,8 +28,8 @@ namespace Petri.Editor.Code
     public class FunctionInvocation : Expression
     {
         public FunctionInvocation(Language language,
-                                      Function function,
-                                      params Expression[] arguments) : base(language,
+                                  Function function,
+                                  params Expression[] arguments) : base(language,
                                                                             Code.Operator.Name.FunCall)
         {
             if(arguments.Length != function.Parameters.Count) {
@@ -78,17 +78,26 @@ namespace Petri.Editor.Code
                     args += ", ";
                 }
 
+                var code = Arguments[i].MakeCode();
+                bool cast = !(Function.Parameters[i].Type.Equals(Type.UnknownType(Language)));
+
                 switch(Language) {
                 case Language.Cpp:
-                    args += "static_cast<" + Function.Parameters[i].Type.ToString() + ">(" + Arguments[i].MakeCode() + ")";
-                    continue;
+                    if(cast) {
+                        code = "static_cast<" + Function.Parameters[i].Type.ToString() + ">(" + code + ")";
+                    }
+                    break;
                 case Language.C:
                 case Language.CSharp:
-                    args += "(" + Function.Parameters[i].Type.ToString() + ")(" + Arguments[i].MakeCode() + ")";
-                    continue;
+                    if(cast) {
+                        code = "(" + Function.Parameters[i].Type.ToString() + ")(" + code + ")";
+                    }
+                    break;
                 default:
                     throw new Exception("FunctionInvoction.MakeCode: Should not get there!");
                 }
+
+                args += code;
             }
 
             string template = "";
@@ -126,10 +135,10 @@ namespace Petri.Editor.Code
     public class MethodInvocation : FunctionInvocation
     {
         public MethodInvocation(Language language,
-                                    Method function,
-                                    Expression that,
-                                    bool indirection,
-                                    params Expression[] arguments) : base(language,
+                                Method function,
+                                Expression that,
+                                bool indirection,
+                                params Expression[] arguments) : base(language,
                                                                           function,
                                                                           arguments)
         {
@@ -171,7 +180,7 @@ namespace Petri.Editor.Code
     public class ConflictFunctionInvocation : FunctionInvocation
     {
         public ConflictFunctionInvocation(Language language, string value) : base(language,
-                                                                                      GetDummy(language))
+                                                                                  GetDummy(language))
         {
             _value = value;
         }
@@ -204,8 +213,8 @@ namespace Petri.Editor.Code
     public class WrapperFunctionInvocation : FunctionInvocation
     {
         public WrapperFunctionInvocation(Language language,
-                                             Type returnType,
-                                             Expression expr) : base(language,
+                                         Type returnType,
+                                         Expression expr) : base(language,
                                                                      GetWrapperFunction(language,
                                                                                         returnType),
                                                                      expr)
@@ -216,9 +225,9 @@ namespace Petri.Editor.Code
         public static Function GetWrapperFunction(Language language, Type returnType)
         {
             var f = new Function(returnType,
-                                     Scope.MakeFromNamespace(language, "Utility"),
-                                     "",
-                                     false);
+                                 Scope.MakeFromNamespace(language, "Utility"),
+                                 "",
+                                 false);
             f.AddParam(new Param(new Type(language, "void"), "param"));
             return f;
         }

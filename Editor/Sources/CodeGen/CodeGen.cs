@@ -29,7 +29,7 @@ namespace Petri.Editor
     {
         public CodeGen()
         {
-			
+            LineCount = 0;
         }
 
         public abstract Code.Language Language {
@@ -43,7 +43,15 @@ namespace Petri.Editor
 
         public abstract void Format();
 
-        public abstract void Add(string line);
+        public void Add(string line)
+        {
+            AddInternal(line);
+            foreach(char c in line) {
+                if(c == '\n') {
+                    ++LineCount;
+                }
+            }
+        }
 
         public void AddLine(string line = "")
         {
@@ -55,6 +63,13 @@ namespace Petri.Editor
             gen.AddLine(s);
             return gen;
         }
+
+        public int LineCount {
+            get;
+            private set;
+        }
+
+        protected abstract void AddInternal(string line);
     }
 }
 

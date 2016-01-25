@@ -29,6 +29,48 @@ using Petri.Editor.Code;
 
 namespace Petri.Editor
 {
+    /// <summary>
+    /// A class that intends to encapsulate an ever increasing sequence of identifiers.
+    /// </summary>
+    public class IDManager
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.IDManager"/> with the parameter as the first ID that will be consumed.
+        /// </summary>
+        /// <param name="firstID">First ID.</param>
+        public IDManager(UInt64 firstID)
+        {
+            ID = firstID + 1;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.IDManager"/> class.
+        /// The first ID that will be consumed by the new instance will be the next ID that would have been consumed by the parameter.
+        /// </summary>
+        /// <param name="reference">Reference.</param>
+        public IDManager(IDManager reference)
+        {
+            ID = reference.ID + 1;
+        }
+
+        /// <summary>
+        /// Consume a new ID from this instance and returns it.
+        /// </summary>
+        public UInt64 Consume()
+        {
+            return ID++;
+        }
+
+        /// <summary>
+        /// Gets the current ID of this instance.
+        /// </summary>
+        /// <value>The I.</value>
+        public UInt64 ID {
+            get;
+            private set;
+        }
+    }
+
     public class HeadlessDocument
     {
         public HeadlessDocument(string path)
@@ -41,9 +83,10 @@ namespace Petri.Editor
 
             PreprocessorMacros = new Dictionary<string, string>();
 
-            Conflicting = new HashSet<Entity>();
+            Conflicting = new Dictionary<Entity, string>();
 
             Path = path;
+            ResetID();
         }
 
         public string Path {
@@ -59,7 +102,6 @@ namespace Petri.Editor
         public virtual void AddHeader(string header)
         {
             AddHeaderNoUpdate(header);
-            UpdateConflicts();
         }
 
         public void AddHeaderNoUpdate(string header)
@@ -187,6 +229,9 @@ namespace Petri.Editor
             set;
         }
 
+        /// <summary>
+        /// Save the document to disk, or throw an Exception if the Path is empty.
+        /// </summary>
         public virtual void Save()
         {
             string tempFileName = "";
@@ -226,7 +271,7 @@ namespace Petri.Editor
             root.Add(winConf);
             root.Add(headers);
             root.Add(macros);
-            root.Add(PetriNet.GetXml());
+            root.Add(PetriNet.GetXML());
 
             // Write to a temporary file to avoid corrupting the existing document on error
             tempFileName = System.IO.Path.GetTempFileName();
@@ -247,6 +292,9 @@ namespace Petri.Editor
             Settings.Modified = false;
         }
 
+        /// <summary>
+        /// Loads the document from disk.
+        /// </summary>
         public void Load()
         {
             var document = XDocument.Load(Path);
@@ -293,34 +341,59 @@ namespace Petri.Editor
             }
         }
 
-        public void GenerateCodeDontAsk()
+        /// <summary>
+        /// Generates the code without prompting the user. If no code have ever been generated for this document, meaning we don't know where to save it, then an Exception is thrown.
+        /// <exception cref="Exception">When no save path has been defined for the document.</exception>
+        /// </summary>
+        public Dictionary<Entity, CodeRange> GenerateCodeDontAsk()
         {
             if(this.Settings.RelativeSourceOutputPath.Length == 0) {
                 throw new Exception(Configuration.GetLocalized("No source output path defined. Please open the Petri net with the graphical editor and generate the <language> code once.",
                                                                Settings.LanguageName()));
             }
-            else if(Conflicts(PetriNet)) {
-                throw new Exception(Configuration.GetLocalized("The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts."));
-            }
 
             var generator = PetriGen.PetriGenFromLanguage(Settings.Language, this);
             generator.WritePetriNet();
+
+            return generator.CodeRanges;
         }
 
+        /// <summary>
+        /// Compiles the document. If some output is made by the invoked compiler, then the method returns false, true otherwise.
+        /// </summary>
+        /// <param name="wait">Unused.</param>
         public virtual bool Compile(bool wait)
         {
             var c = new Compiler(this);
             var o = c.CompileSource(Settings.RelativeSourcePath, Settings.RelativeLibPath);
             if(o != "") {
-                Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.") + "\n" + Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
-                                                                                                                                                                                                                    Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o);
+                ParseCompilationErrors(o);
+
                 return false;
             }
 
             return true;
         }
 
-        public UInt64 LastEntityID {
+        /// <summary>
+        /// Parses the compilation errors and attempt to give a meaningful diagnostic.
+        /// </summary>
+        /// <param name="errors">The error string.</param>
+        protected virtual void ParseCompilationErrors(string errors)
+        {
+            Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.")
+            + "\n" + Configuration.GetLocalized("Compiler invocation:")
+            + "\n" + Settings.Compiler
+            + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
+                                               Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Compilation errors:") + "\n" + errors);
+        
+        }
+
+        /// <summary>
+        /// Gets or sets the ID manager of the document.
+        /// </summary>
+        /// <value>The identifier manager.</value>
+        public IDManager IDManager {
             get;
             set;
         }
@@ -332,9 +405,14 @@ namespace Petri.Editor
 
         public void ResetID()
         {
-            this.LastEntityID = 0;
+            ////this.LastEntityID = 0;
+            IDManager = new IDManager(0);
         }
 
+        /// <summary>
+        /// Gets or sets the document's settings.
+        /// </summary>
+        /// <value>The settings.</value>
         public DocumentSettings Settings {
             get;
             protected set;
@@ -346,31 +424,25 @@ namespace Petri.Editor
             return generator.GetHash();
         }
 
-        public HashSet<Entity> Conflicting {
+        public Dictionary<Entity, string> Conflicting {
             get;
             private set;
         }
 
         public bool Conflicts(Entity e)
         {
-            if(Conflicting.Contains(e)) {
+            if(Conflicting.ContainsKey(e)) {
                 return true;
             }
             else if(e is PetriNet) {
                 foreach(var ee in Conflicting) {
-                    if(((PetriNet)e).EntityFromID(ee.ID) != null) {
+                    if(((PetriNet)e).EntityFromID(ee.Key.ID) != null) {
                         return true;
                     }
                 }
             }
 
             return false;
-        }
-
-        public virtual void UpdateConflicts()
-        {
-            Conflicting.Clear();
-            PetriNet.UpdateConflicts();
         }
 
         int _wX, _wY, _wW, _wH;

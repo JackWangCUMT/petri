@@ -27,31 +27,22 @@ using System.Collections.Generic;
 
 namespace Petri.Editor
 {
-    public class IDManager
-    {
-        public IDManager(UInt64 LastID)
-        {
-            ID = LastID + 1;
-        }
-
-        public UInt64 Consume()
-        {
-            return ID++;
-        }
-
-        UInt64 ID;
-    }
-
+    /// <summary>
+    /// The base class from every entity enclosed in a petri net.
+    /// </summary>
     public abstract class Entity
     {
         public Entity(HeadlessDocument doc, PetriNet parent)
         {
-            _parent = parent;
+            Parent = parent;
             this.Document = doc;
-            this.ID = Document.LastEntityID++;
+            this.ID = Document.IDManager.Consume();
         }
 
-        public static Entity EntityFromXml(HeadlessDocument document, XElement descriptor, PetriNet parent, IDictionary<UInt64, State> statesTable)
+        public static Entity EntityFromXml(HeadlessDocument document,
+                                           XElement descriptor,
+                                           PetriNet parent,
+                                           IDictionary<UInt64, State> statesTable)
         {
             switch(descriptor.Name.ToString()) {
             case "Action":
@@ -74,20 +65,29 @@ namespace Petri.Editor
 
         public Entity(HeadlessDocument doc, PetriNet parent, XElement descriptor)
         {
-            _parent = parent;
+            Parent = parent;
             this.Document = doc;
 
             this.ID = XmlConvert.ToUInt64(descriptor.Attribute("ID").Value);
             this.Name = descriptor.Attribute("Name").Value;
-            this.Position = new Cairo.PointD(XmlConvert.ToDouble(descriptor.Attribute("X").Value), XmlConvert.ToDouble(descriptor.Attribute("Y").Value));
+            this.Position = new Cairo.PointD(XmlConvert.ToDouble(descriptor.Attribute("X").Value),
+                                             XmlConvert.ToDouble(descriptor.Attribute("Y").Value));
 
-            if(this.ID >= Document.LastEntityID)
-                Document.LastEntityID = this.ID + 1;
+            if(this.ID >= Document.IDManager.ID)
+                Document.IDManager = new IDManager(this.ID + 1);
         }
 
-        public abstract XElement GetXml();
+        /// <summary>
+        /// Creates an empty node correctly named to represent an entity, and fill it with the serialization data.
+        /// </summary>
+        /// <returns>The empty node.</returns>
+        public abstract XElement GetXML();
 
-        public virtual void Serialize(XElement element)
+        /// <summary>
+        /// Serialize the specified element into the provided XML element.
+        /// </summary>
+        /// <param name="element">The XML element to fill with the serialization data.</param>
+        protected virtual void Serialize(XElement element)
         {
             element.SetAttributeValue("ID", this.ID);
             element.SetAttributeValue("Name", this.Name);
@@ -95,58 +95,79 @@ namespace Petri.Editor
             element.SetAttributeValue("Y", this.Position.Y);
         }
 
+        /// <summary>
+        /// Gets or sets the identifier of the instance.
+        /// </summary>
+        /// <value>The identifier of the instance.</value>
         public UInt64 ID {
-            get {
-                return _id;
-            }
-            set {
-                _id = value;
-            }
+            get;
+            set;
         }
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <exception cref="ArgumentException">When the value contains two consecutive '_' characters, or starts or ends with '_' (this has to do with C++ name mangling and UB).</exception>
+        /// <value>The name.</value>
         public virtual string Name {
             get {
                 return _name;
             }
             set {
-                if(value == "_") {
+                if(value.StartsWith("_") || value.EndsWith("_") || value.Contains("__")) {
                     throw new ArgumentException();
                 }
                 _name = value;
             }
         }
 
+        /// <summary>
+        /// Gets or sets the parent.
+        /// </summary>
+        /// <value>The parent.</value>
         public PetriNet Parent {
-            get {
-                return _parent;
-            }
-            set {
-                _parent = value;
-            }
+            get;
+            set;
         }
 
+        /// <summary>
+        /// Gets or sets the parent's document.
+        /// </summary>
+        /// <value>The document.</value>
         public virtual HeadlessDocument Document {
             get {
                 return this.Parent.Document;
             }
             set {
                 if(this.Parent != null)
-                    _parent.Document = value;
+                    Parent.Document = value;
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="Petri.Editor.Entity"/> sticks to the grid.
+        /// </summary>
+        /// <value><c>true</c> if stick to grid; otherwise, <c>false</c>.</value>
         public virtual bool StickToGrid {
             get {
                 return true;
             }
         }
 
+        /// <summary>
+        /// Gets the size of the grid on which the entities will stick if requested.
+        /// </summary>
+        /// <value>The size of the grid.</value>
         static public int GridSize {
             get {
                 return 10;
             }
         }
 
+        /// <summary>
+        /// Gets or sets the position of the entity in its parent's frame.
+        /// </summary>
+        /// <value>The position.</value>
         public virtual Cairo.PointD Position {
             get {
                 return _position;
@@ -158,13 +179,15 @@ namespace Petri.Editor
 
         public abstract bool UsesFunction(Code.Function f);
 
+        /// <summary>
+        /// Gets the code identifier of the entity, i.e. the name of the variable containing the entity in the generated code.
+        /// </summary>
+        /// <value>The code identifier.</value>
         public abstract string CodeIdentifier {
             get;
         }
 
-        UInt64 _id;
         string _name;
-        PetriNet _parent;
         Cairo.PointD _position;
     }
 }

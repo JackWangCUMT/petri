@@ -33,7 +33,7 @@ namespace Petri.Editor
                                                            Language.CSharp,
                                                            new CFamilyCodeGen(Language.CSharp))
         {
-            _functionBodies = "";
+            _functionBodies = new CFamilyCodeGen(Language.CSharp);
         }
 
         public override void WritePetriNet()
@@ -43,36 +43,8 @@ namespace Petri.Editor
 
         public override void WriteExpressionEvaluator(Expression expression, string path)
         {
-            string cppExpr = expression.MakeCode();
-
-            CodeGen generator = new CFamilyCodeGen(Language.CSharp);
-            /*foreach(var s in Document.Headers) {
-                var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
-                                                s);
-                var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
-                                                                           Document.Settings.SourceOutputPath));
-                generator += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
-            }*/
-
-            /*generator += "#include \"Runtime/Cpp/Petri.h\"";
-            generator += "#include \"Runtime/Cpp/Atomic.h\"";
-            generator += "#include <string>";
-            generator += "#include <sstream>";
-
-            generator += "using namespace Petri;";
-
-            generator += GenerateVarEnum();
-
-            generator += "extern \"C\" char const *" + Document.CodePrefix + "_evaluate(void *petriPtr) {";
-            generator += "auto &petriNet = *static_cast<PetriDebug *>(petriPtr);";
-            generator += "static std::string result;";
-            generator += "std::ostringstream oss;";
-            generator += "oss << " + cppExpr + ";";
-            generator += "result = oss.str();";
-            generator += "return result.c_str();";
-            generator += "}\n";*/
-
-            System.IO.File.WriteAllText(path, generator.Value);
+            // TODO: tbd
+            throw new Exception("Not implemented yet!");
         }
 
         protected override void Begin()
@@ -104,7 +76,16 @@ namespace Petri.Editor
         {
             CodeGen += "}"; // Populate()
 
-            CodeGen += _functionBodies;
+            int linesSoFar = CodeGen.LineCount;
+            var keys = new List<Entity>(CodeRanges.Keys);
+            foreach(var key in keys) {
+                var range = CodeRanges[key];
+                range.FirstLine += linesSoFar;
+                range.LastLine += linesSoFar;
+                CodeRanges[key] = range;
+            }
+
+            CodeGen += _functionBodies.Value;
 
             string toHash = CodeGen.Value;
 
@@ -191,7 +172,12 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             a.GetVariables(cppVar);
 
+            CodeRange range = new CodeRange();
+            range.FirstLine = _functionBodies.LineCount;
             _functionBodies += "static Int32 " + a.CodeIdentifier + "_invocation(" + /*"PetriNet petriNet" + */") {\nreturn " + cpp + ";\n}\n";
+            range.LastLine = _functionBodies.LineCount;
+
+            CodeRanges[a] = range;
 
             string action = a.CodeIdentifier + "_invocation";
 
@@ -276,7 +262,12 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             t.GetVariables(cppVar);
 
+            CodeRange range = new CodeRange();
+            range.FirstLine = _functionBodies.LineCount;
             _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
+            range.LastLine = _functionBodies.LineCount;
+  
+            CodeRanges[t] = range;
 
             cpp = t.CodeIdentifier + "_invocation";
 
@@ -302,7 +293,7 @@ namespace Petri.Editor
             return "";
         }
 
-        private string _functionBodies;
+        private CodeGen _functionBodies;
     }
 }
 

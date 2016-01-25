@@ -28,11 +28,12 @@ using System.Xml.Linq;
 
 namespace Petri.Editor
 {
-    public abstract class PetriNet : NonRootState
+    public abstract class PetriNet : State
     {
         public PetriNet(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc,
                                                                                                      parent,
                                                                                                      active,
+                                                                                                     0,
                                                                                                      pos)
         {
             Comments = new List<Comment>();
@@ -78,20 +79,20 @@ namespace Petri.Editor
             }
         }
 
-        public override void Serialize(XElement elem)
+        protected override void Serialize(XElement elem)
         {
             base.Serialize(elem);
             var comments = new XElement("Comments");
             foreach(var c in this.Comments) {
-                comments.Add(c.GetXml());
+                comments.Add(c.GetXML());
             }
             var states = new XElement("States");
             foreach(var s in this.States) {
-                states.Add(s.GetXml());
+                states.Add(s.GetXML());
             }
             var transitions = new XElement("Transitions");
             foreach(var t in this.Transitions) {
-                transitions.Add(t.GetXml());
+                transitions.Add(t.GetXML());
             }
 
             elem.Add(comments);
@@ -99,7 +100,7 @@ namespace Petri.Editor
             elem.Add(transitions);
         }
 
-        public override XElement GetXml()
+        public override XElement GetXML()
         {
             var elem = new XElement("PetriNet");
             this.Serialize(elem);
@@ -118,37 +119,51 @@ namespace Petri.Editor
             return false;
         }
 
-        public override void UpdateConflicts()
+        /// <summary>
+        /// Adds a Comment entity to the instance.
+        /// </summary>
+        /// <param name="comment">The comment.</param>
+        public void AddComment(Comment comment)
         {
-            foreach(var t in Transitions)
-                t.UpdateConflicts();
-            foreach(var s in States)
-                s.UpdateConflicts();
+            Comments.Add(comment);
         }
 
-        public void AddComment(Comment c)
+        /// <summary>
+        /// Adds a State entity to the instance.
+        /// </summary>
+        /// <param name="state">The state.</param>
+        public void AddState(State state)
         {
-            Comments.Add(c);
+            States.Add(state);
         }
 
-        public void AddState(State a)
+        /// <summary>
+        /// Adds a Transition entity to the instance.
+        /// </summary>
+        /// <param name="transition">The transition.</param>
+        public void AddTransition(Transition transition)
         {
-            States.Add(a);
+            Transitions.Add(transition);
         }
 
-        public void AddTransition(Transition t)
-        {
-            Transitions.Add(t);
-        }
-
+        /// <summary>
+        /// The size of the petri net's content.
+        /// The Radius property represents the external view of a petri net, and the size property represents the size of the drawing area for the entities inside the petri net.
+        /// </summary>
+        /// <value>The size.</value>
         public Cairo.PointD Size {
             get;
             set;
         }
 
-        // TODO: come back with a better collision algorithm :p
+        /// <summary>
+        /// Gets the comment that is located at the given position, or null if none exist.
+        /// </summary>
+        /// <returns>The comment at the given position.</returns>
+        /// <param name="position">Position.</param>
         public Comment CommentAtPosition(Cairo.PointD position)
         {
+            // TODO: come back with a better collision detection algorithm :p
             for(int i = Comments.Count - 1; i >= 0; --i) {
                 var c = Comments[i];
                 if(Math.Abs(c.Position.X - position.X) <= c.Size.X / 2 && Math.Abs(c.Position.Y - position.Y) < c.Size.Y / 2) {
@@ -159,8 +174,14 @@ namespace Petri.Editor
             return null;
         }
 
+        /// <summary>
+        /// Gets the state that is located at the given position, or null if none exist.
+        /// </summary>
+        /// <returns>The syaye at the given position.</returns>
+        /// <param name="position">Position.</param>
         public State StateAtPosition(Cairo.PointD position)
         {
+            // TODO: come back with a better collision detection algorithm :p
             for(int i = States.Count - 1; i >= 0; --i) {
                 var s = States[i];
                 if(s.PointInState(position)) {
@@ -171,8 +192,14 @@ namespace Petri.Editor
             return null;
         }
 
+        /// <summary>
+        /// Gets the transition that is located at the given position, or null if none exist.
+        /// </summary>
+        /// <returns>The transition at the given position.</returns>
+        /// <param name="position">Position.</param>
         public Transition TransitionAtPosition(Cairo.PointD position)
         {
+            // TODO: come back with a better collision detection algorithm :p
             for(int i = Transitions.Count - 1; i >= 0; --i) {
                 var t = Transitions[i];
                 if(Math.Abs(t.Position.X - position.X) <= t.Width / 2 && Math.Abs(t.Position.Y - position.Y) < t.Height / 2) {
@@ -183,39 +210,68 @@ namespace Petri.Editor
             return null;
         }
 
-        public void RemoveComment(Comment c)
+        /// <summary>
+        /// Removes the comment from this instance.
+        /// </summary>
+        /// <param name="comment">Comment.</param>
+        public void RemoveComment(Comment comment)
         {
-            Comments.Remove(c);
+            Comments.Remove(comment);
         }
 
-        public void RemoveState(State a)
+        /// <summary>
+        /// Removes the state from this instance.
+        /// </summary>
+        /// <param name="state">State.</param>
+        public void RemoveState(State state)
         {
-            States.Remove(a);
+            States.Remove(state);
         }
 
-        public void RemoveTransition(Transition t)
+        /// <summary>
+        /// Removes the transition from this instance.
+        /// </summary>
+        /// <param name="transition">Transition.</param>
+        public void RemoveTransition(Transition transition)
         {
-            t.Before.RemoveTransitionAfter(t);
-            t.After.RemoveTransitionBefore(t);
+            transition.Before.RemoveTransitionAfter(transition);
+            transition.After.RemoveTransitionBefore(transition);
 
-            Transitions.Remove(t);
+            Transitions.Remove(transition);
         }
 
+        /// <summary>
+        /// Gets the comments directly contained in this instance, and not recursively from this instance's inner petri nets.
+        /// </summary>
+        /// <value>The transitions.</value>
         public List<Comment> Comments {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the states directly contained in this instance, and not recursively from this instance's inner petri nets.
+        /// </summary>
+        /// <value>The transitions.</value>
         public List<State> States {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the transitions directly contained in this instance, and not recursively from this instance's inner petri nets.
+        /// </summary>
+        /// <value>The transitions.</value>
         public List<Transition> Transitions {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Return the entity which ID is equal to the parameter, or null if none is found.
+        /// </summary>
+        /// <returns>The entity of ID <paramref name="id"/>, or <c>null</c> if none exist.</returns>
+        /// <param name="id">Identifier.</param>
         public Entity EntityFromID(UInt64 id)
         {
             foreach(var s in States) {
@@ -242,7 +298,11 @@ namespace Petri.Editor
             return null;
         }
 
-        // Recursively gets all of the Action/PetriNet/Transitions
+        /// <summary>
+        /// Recursively gets all of the Action/PetriNet/Transitions/Comments contained in the instance.
+        /// Does not include <c>this</c>.
+        /// </summary>
+        /// <returns>The entities list.</returns>
         public List<Entity> BuildEntitiesList()
         {
             var l = new List<Entity>();

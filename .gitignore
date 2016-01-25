@@ -25,3 +25,5 @@ TestResult.xml
 /Examples/*.cs
 /Examples/*.so
 /Examples/*.dll
+/Examples/*.cpp
+/Examples/*.h
