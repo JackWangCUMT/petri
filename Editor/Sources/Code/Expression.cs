@@ -241,8 +241,9 @@ namespace Petri.Editor.Code
                 case '"':// First quote
                     if(nesting.Count == 0 || (nesting.Peek().Item1 != ExprType.DoubleQuote && nesting.Peek().Item1 != ExprType.Quote)) {
                         nesting.Push(Tuple.Create(ExprType.DoubleQuote, i));
-                    }// Second quote
-else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.DoubleQuote && s[i - 1] != '\\') {
+                    }
+                    // Second quote
+                    else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.DoubleQuote && s[i - 1] != '\\') {
                         subexprs.Add(Tuple.Create(ExprType.DoubleQuote,
                                                   s.Substring(nesting.Peek().Item2,
                                                               i - nesting.Peek().Item2 + 1)));
@@ -252,15 +253,17 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.DoubleQuote && s[i
                         i += newstr.Length;
                         nesting.Pop();
                     }
-                    else
+                    else {
                         throw new Exception(Configuration.GetLocalized("{0} expected, but \" found!",
                                                                        nesting.Peek().Item1));
+                    }
                     break;
                 case '\'':// First quote
                     if(nesting.Count == 0 || (nesting.Peek().Item1 != ExprType.Quote && nesting.Peek().Item1 != ExprType.DoubleQuote)) {
                         nesting.Push(Tuple.Create(ExprType.Quote, i));
-                    }// Second quote
-else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] != '\\') {
+                    }
+                    // Second quote
+                    else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] != '\\') {
                         subexprs.Add(Tuple.Create(ExprType.Quote,
                                                   s.Substring(nesting.Peek().Item2,
                                                               i - nesting.Peek().Item2 + 1)));
@@ -270,8 +273,10 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                         i += newstr.Length;
                         nesting.Pop();
                     }
-                    new Exception(Configuration.GetLocalized("{0} expected, but \' found!",
-                                                             nesting.Peek().Item1));
+                    else {
+                        throw new Exception(Configuration.GetLocalized("{0} expected, but \' found!",
+                                                                       nesting.Peek().Item1));
+                    }
                     break;
                 }
                 ++i;
@@ -529,8 +534,14 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                                            language,
                                                            functions,
                                                            macros);
-            Function f;
-            if(functions == null) {
+            Function f = null;
+            if(functions != null) {
+                f = (functions.FirstOrDefault(delegate(Function ff) {
+                    return !(ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && ((scopeNameAndArgs.Item1 == null && ff.Enclosing == null) || (scopeNameAndArgs.Item1 != null && scopeNameAndArgs.Item1.Equals(ff.Enclosing)));
+                })) as Function;
+            }
+
+            if(f == null) {
                 f = new Function(Type.UnknownType(language),
                                  scopeNameAndArgs.Item1,
                                  scopeNameAndArgs.Item2,
@@ -539,14 +550,6 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                 foreach(Expression e in scopeNameAndArgs.Item3) {
                     f.Parameters.Add(new Param(Type.UnknownType(language),
                                                "param" + (i++).ToString()));
-                }
-            }
-            else {
-                f = (functions.FirstOrDefault(delegate(Function ff) {
-                    return !(ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && ((scopeNameAndArgs.Item1 == null && ff.Enclosing == null) || (scopeNameAndArgs.Item1 != null && scopeNameAndArgs.Item1.Equals(ff.Enclosing)));
-                })) as Function;
-                if(f == null) {
-                    throw new Exception(Configuration.GetLocalized("No function match the specified expression."));
                 }
             }
             return new FunctionInvocation(language, f, scopeNameAndArgs.Item3.ToArray());
@@ -564,7 +567,7 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                                            functions,
                                                            macros);
             if(Scope.GetSeparator(language) == Code.Operator.Properties[Code.Operator.Name.SelectionRef].cpp && Regex.Match(that,
-                                                                                                                          "(" + Parser.NamePattern + Scope.GetSeparator(language) + ")*" + Parser.NamePattern).Success) {
+                                                                                                                            "(" + Parser.NamePattern + Scope.GetSeparator(language) + ")*" + Parser.NamePattern).Success) {
                 var scopes = that.Split(new string[]{ Scope.GetSeparator(language) },
                                         StringSplitOptions.None);
                 Scope outerScope = null;
@@ -578,8 +581,13 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                                                 functions,
                                                 macros);
             }
-            Method m;
-            if(functions == null) {
+            Method m = null;
+            if(functions != null) {
+                m = (functions.FirstOrDefault(delegate(Function ff) {
+                    return (ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && scopeNameAndArgs.Item1.Equals(ff.Enclosing);
+                })) as Method;
+            }
+            if(m == null) {
                 m = new Method(Type.UnknownType(language),
                                Type.UnknownType(language),
                                scopeNameAndArgs.Item2,
@@ -589,14 +597,6 @@ else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] 
                 foreach(Expression e in scopeNameAndArgs.Item3) {
                     m.Parameters.Add(new Param(Type.UnknownType(language),
                                                "param" + (i++).ToString()));
-                }
-            }
-            else {
-                m = (functions.FirstOrDefault(delegate(Function ff) {
-                    return (ff is Method) && ff.Parameters.Count == scopeNameAndArgs.Item3.Count && scopeNameAndArgs.Item2 == ff.Name && scopeNameAndArgs.Item1.Equals(ff.Enclosing);
-                })) as Method;
-                if(m == null) {
-                    throw new Exception(Configuration.GetLocalized("No method match the specified expression."));
                 }
             }
             return new MethodInvocation(language,
