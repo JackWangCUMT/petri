@@ -77,7 +77,7 @@ namespace Petri.Test.Cpp
             var e = Expression.CreateFromString<FunctionInvocation>(invocation, Language.CSharp);
 
             // THEN the string representations of the expression is as expected
-            Assert.AreEqual("f((Petri.UnknownType)(a))", e.MakeCode());
+            Assert.AreEqual("f(a)", e.MakeCode());
             Assert.AreEqual(invocation, e.MakeUserReadable());
         }
 
@@ -91,7 +91,7 @@ namespace Petri.Test.Cpp
             var e = Expression.CreateFromString<FunctionInvocation>(invocation, Language.CSharp);
 
             // THEN the string representations of the expression is as expected
-            Assert.AreEqual("f((Petri.UnknownType)(a))", e.MakeCode());
+            Assert.AreEqual("f(a)", e.MakeCode());
             Assert.AreEqual("f(a)", e.MakeUserReadable());
         }
 
@@ -105,7 +105,7 @@ namespace Petri.Test.Cpp
             var e = Expression.CreateFromString<FunctionInvocation>(invocation, Language.CSharp);
 
             // THEN the string representations of the expression is as expected
-            Assert.AreEqual("f((Petri.UnknownType)(a), (Petri.UnknownType)(b), (Petri.UnknownType)(c))", e.MakeCode());
+            Assert.AreEqual("f(a, b, c)", e.MakeCode());
             Assert.AreEqual("f(a, b, c)", e.MakeUserReadable());
         }
     }

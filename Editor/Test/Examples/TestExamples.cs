@@ -45,6 +45,22 @@ namespace Petri.Test
             Assert.AreEqual("", stdout);
             Assert.AreEqual("", stderr);
         }
+
+        [Test()]
+        public void TestCppExample()
+        {
+            // GIVEN launch arguments requesting code generation and compilation of the C#.petri example
+            string[] args = { "-g", "-c", "../../../Examples/Cpp.petri" };
+            string stdout, stderr;
+
+            // WHEN the invocation is made
+            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
+
+            // THEN no error is returned.
+            Assert.AreEqual(0, result);
+            Assert.AreEqual("", stdout);
+            Assert.AreEqual("", stderr);
+        }
     }
 }
 
