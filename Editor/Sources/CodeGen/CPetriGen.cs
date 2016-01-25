@@ -81,7 +81,7 @@ namespace Petri.Editor
 
             _prototypesIndex = CodeGen.Value.Length;
 
-            CodeGen += "static void fill(PetriNet *petriNet) {";
+            CodeGen += "static void fill(struct PetriNet *petriNet) {";
 
             foreach(var e in Document.PetriNet.Variables) {
                 CodeGen += "PetriNet_addVariable(petriNet, (uint_fast32_t)" + e.Prefix + e.Expression + ");";
@@ -112,7 +112,7 @@ namespace Petri.Editor
                                                                                                               "");
 
             CodeGen += "EXPORT void *" + Document.Settings.Name + "_create() {";
-            CodeGen += "PetriNet *petriNet = PetriNet_create(PETRI_PREFIX);";
+            CodeGen += "struct PetriNet *petriNet = PetriNet_create(PETRI_PREFIX);";
             CodeGen += "fill(petriNet);";
             CodeGen += "return petriNet;";
             CodeGen += "}"; // create()
@@ -120,7 +120,7 @@ namespace Petri.Editor
             CodeGen += "";
 
             CodeGen += "EXPORT void *" + Document.Settings.Name + "_createDebug() {";
-            CodeGen += "PetriNet *petriNet = PetriNet_createDebug(PETRI_PREFIX);";
+            CodeGen += "struct PetriNet *petriNet = PetriNet_createDebug(PETRI_PREFIX);";
             CodeGen += "fill(petriNet);";
             CodeGen += "return petriNet;";
             CodeGen += "}"; // create()
@@ -150,7 +150,7 @@ namespace Petri.Editor
             _headerGen += "extern \"C\" {";
             _headerGen += "#endif";
             _headerGen += "";
-            _headerGen += "inline PetriDynamicLib *" + Document.Settings.Name + "_createLib() {";
+            _headerGen += "inline struct PetriDynamicLib *" + Document.Settings.Name + "_createLib() {";
             _headerGen += "\treturn PetriDynamicLib_create(\"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
             + Document.Settings.Port + ");";
             _headerGen += "}";
@@ -203,12 +203,12 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             a.GetVariables(cppVar);
 
-            _functionPrototypes += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(PetriNet *);\n";
+            _functionPrototypes += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(struct PetriNet *);\n";
 
             CodeRange range = new CodeRange();
             range.FirstLine = _functionBodies.LineCount;
 
-            _functionBodies += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(PetriNet *petriNet) {\n";
+            _functionBodies += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(struct PetriNet *petriNet) {\n";
 
             if(a.Function.NeedsReturn) {
                 _functionBodies += a.Function.MakeCode() + "\n";
@@ -230,7 +230,7 @@ namespace Petri.Editor
 
             CodeRanges[a] = range;
 
-            CodeGen += "PetriAction *" + a.CodeIdentifier + " = PetriAction_createParam(" + a.ID.ToString() + ", \""
+            CodeGen += "struct PetriAction *" + a.CodeIdentifier + " = PetriAction_createWithParam(" + a.ID.ToString() + ", \""
             + a.Parent.Name + "_" + a.Name + "\", &" + a.CodeIdentifier + "_invocation, " + a.RequiredTokens.ToString() + ");";
             CodeGen += "PetriNet_addAction(petriNet, " + a.CodeIdentifier + ", " + ((a.Active && (a.Parent is RootPetriNet)) ? "true" : "false") + ");";
 
@@ -241,7 +241,7 @@ namespace Petri.Editor
 
         protected override void GenerateExitPoint(ExitPoint e, IDManager lastID)
         {
-            CodeGen += "PetriAction *" + e.CodeIdentifier + " = PetriAction_create(" + e.ID.ToString() + ", \""
+            CodeGen += "struct PetriAction *" + e.CodeIdentifier + " = PetriAction_create(" + e.ID.ToString() + ", \""
             + e.Parent.Name + "_" + e.Name + "\", &PetriUtility_returnDefault, " + e.RequiredTokens.ToString() + ");";
             CodeGen += "PetriNet_addAction(petriNet, " + e.CodeIdentifier + ", false);";
         }
@@ -251,7 +251,7 @@ namespace Petri.Editor
             string name = i.EntryPointName;
 
             // Adding an entry point
-            CodeGen += "PetriAction *" + name + " = PetriAction_create(" + i.EntryPointID + ", \"" + i.Name + "_Entry\", &PetriUtility_returnDefault, " + i.RequiredTokens.ToString() + ");";
+            CodeGen += "struct PetriAction *" + name + " = PetriAction_create(" + i.EntryPointID + ", \"" + i.Name + "_Entry\", &PetriUtility_returnDefault, " + i.RequiredTokens.ToString() + ");";
             CodeGen += "PetriNet_addAction(petriNet, " + name + ", " + (i.Active ? "true" : "false") + ");";
 
             // Adding a transition from the entry point to all of the initially active states
@@ -260,7 +260,7 @@ namespace Petri.Editor
                     var newID = lastID.Consume();
                     string tName = name + "_" + newID.ToString();
 
-                    CodeGen += "PetriAction_createAndAddTransition(" + name + ", " + newID.ToString()
+                    CodeGen += "PetriAction_addTransition(" + name + ", " + newID.ToString()
                     + ", \"" + tName + "\", " + s.CodeIdentifier + ", &PetriUtility_returnTrue);";
                 }
             }
@@ -336,7 +336,7 @@ namespace Petri.Editor
 
             CodeRanges[t] = range;
 
-            CodeGen += "PetriAction_createAndAddTransition(" + bName + ", " + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", "
+            CodeGen += "PetriAction_addTransition(" + bName + ", " + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", "
             + "&" + t.CodeIdentifier + "_invocation" + ");";
 
             foreach(var tup in old) {

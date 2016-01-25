@@ -119,6 +119,7 @@ namespace Petri.Editor.Code
         public static string GetSeparator(Language lang)
         {
             switch(lang) {
+            case Language.C: // Here we need a separator, but it should not be met in real code…
             case Language.Cpp:
                 return "::";
             case Language.CSharp:

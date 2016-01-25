@@ -37,6 +37,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+struct PetriTransition;
 struct PetriAction;
 
 // typedef struct PetriTransition PetriTransition;

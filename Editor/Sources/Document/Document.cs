@@ -709,7 +709,7 @@ namespace Petri.Editor
                         // TODO: sort + binary search
                         foreach(var entry in _codeRanges) {
                             if(lineNumber >= entry.Value.FirstLine && lineNumber <= entry.Value.LastLine) {
-                                Conflicting.Add(entry.Key, Configuration.GetLocalized("Line {0}, Row {1}:", lineNumber, match.Groups["row"].Value) + "\n" + match.Groups["msg"].Value);
+                                AddConflicting(entry.Key, Configuration.GetLocalized("Line {0}, Row {1}:", lineNumber, match.Groups["row"].Value) + "\n" + match.Groups["msg"].Value);
                                 break;
                             }
                         }

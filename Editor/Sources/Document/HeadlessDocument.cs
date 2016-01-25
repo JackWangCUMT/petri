@@ -429,6 +429,18 @@ namespace Petri.Editor
             private set;
         }
 
+        public void AddConflicting(Entity entity, string message) {
+            string value;
+            if(Conflicting.TryGetValue(entity, out value)) {
+                value = value + "\n\n" + message;
+            }
+            else {
+                value = message;
+            }
+
+            Conflicting[entity] = value;
+        }
+
         public bool Conflicts(Entity e)
         {
             if(Conflicting.ContainsKey(e)) {
