@@ -13,16 +13,16 @@
     <Header File="Test.cs" />
   </Headers>
   <Macros />
-  <PetriNet ID="0" Name="Root" X="0" Y="0" Active="true" RequiredTokens="0" Radius="30">
+  <PetriNet ID="1" Name="Root" X="0" Y="0" Active="true" RequiredTokens="0" Radius="30">
     <Comments />
     <States>
-      <Action ID="1" Name="1" X="200" Y="90" Active="true" RequiredTokens="0" Radius="20" Function="TestNS.Action1()" />
-      <Action ID="2" Name="2" X="400" Y="230" Active="false" RequiredTokens="1" Radius="20" Function="TestNS.Action2()" />
-      <Action ID="3" Name="3" X="130" Y="270" Active="false" RequiredTokens="1" Radius="20" Function="TestNS.Action2()" />
+      <Action ID="2" Name="1" X="200" Y="90" Active="true" RequiredTokens="0" Radius="20" Function="TestNS.Action1()" />
+      <Action ID="3" Name="2" X="400" Y="230" Active="false" RequiredTokens="1" Radius="20" Function="TestNS.Action2()" />
+      <Action ID="4" Name="3" X="130" Y="270" Active="false" RequiredTokens="1" Radius="20" Function="TestNS.Action2()" />
     </States>
     <Transitions>
-      <Transition ID="4" Name="4" X="300" Y="160" BeforeID="1" AfterID="2" Condition="TestNS.Condition1($Res)" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="244.13111231467406" />
-      <Transition ID="5" Name="5" X="265" Y="250" BeforeID="2" AfterID="3" Condition="TestNS.Condition1($Res)" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="272.9468812791236" />
+      <Transition ID="5" Name="4" X="300" Y="160" BeforeID="2" AfterID="3" Condition="TestNS.Condition1($Res)" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="244.13111231467406" />
+      <Transition ID="6" Name="5" X="265" Y="250" BeforeID="3" AfterID="4" Condition="TestNS.Condition1($Res)" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="272.9468812791236" />
     </Transitions>
   </PetriNet>
 </Document>
