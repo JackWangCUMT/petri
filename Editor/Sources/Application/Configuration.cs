@@ -40,6 +40,10 @@ namespace Petri.Editor
 
     public class Configuration : ConfigurationSection
     {
+        /// <summary>
+        /// Gets the running platform.
+        /// </summary>
+        /// <value>The running platform.</value>
         public static Platform RunningPlatform {
             get {
                 Configuration.Get();
@@ -47,19 +51,21 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets the configuration instance.
+        /// </summary>
         public static Configuration Get()
         {
             if(Configuration._instance == null) {
                 try {
                     switch(Environment.OSVersion.Platform) {
                     case PlatformID.Unix:
-                        if(Directory.Exists("/Applications")
-                           & Directory.Exists("/System")
-                           & Directory.Exists("/Users")
-                           & Directory.Exists("/Volumes"))
+                        if(Directory.Exists("/Applications") && Directory.Exists("/System") && Directory.Exists("/Users") && Directory.Exists("/Volumes")) {
                             Configuration._platform = Platform.Mac;
-                        else
+                        }
+                        else {
                             Configuration._platform = Platform.Linux;
+                        }
                         break;
                     case PlatformID.MacOSX:
                         Configuration._platform = Platform.Mac;
@@ -102,6 +108,9 @@ namespace Petri.Editor
             return Configuration._instance;
         }
 
+        /// <summary>
+        /// Save the configuration.
+        /// </summary>
         public static void Save()
         {
             if(Configuration._instance != null) {
@@ -109,34 +118,53 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets the GUI language.
+        /// </summary>
+        /// <value>The language.</value>
         public static string Language {
             get {
                 return System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
             }
         }
 
-        public static string GetLocalized(string value)
+        /// <summary>
+        /// Gets the localized value of the given key, accordind to the current GUI language.
+        /// </summary>
+        /// <returns>The localized.</returns>
+        /// <param name="key">The key.</param>
+        public static string GetLocalized(string key)
         {
             if(Configuration._localizedStrings.Count == 0) {
                 Configuration.Get().LoadLanguage();
             }
-            if(!Configuration._localizedStrings.ContainsKey(value)) {
-                Console.Error.WriteLine("No localization found for locale \"" + Language + "\" and key \"" + value + "\"");
-                return value;
+            if(!Configuration._localizedStrings.ContainsKey(key)) {
+                Console.Error.WriteLine("No localization found for locale \"" + Language + "\" and key \"" + key + "\"");
+                return key;
             }
             else {
-                return Configuration._localizedStrings[value];
+                return Configuration._localizedStrings[key];
             }
         }
 
-        public static string GetLocalized(string value, params object[] args)
+        /// <summary>
+        /// Gets the localized value for the given key, and formats it withe the given arguments.
+        /// </summary>
+        /// <returns>The localized.</returns>
+        /// <param name="value">Value.</param>
+        /// <param name="args">Arguments.</param>
+        public static string GetLocalized(string key, params object[] args)
         {
-            return string.Format(GetLocalized(value), args);
+            return string.Format(GetLocalized(key), args);
         }
-
+            
         [ConfigurationProperty("savePath",
                                DefaultValue = "",
                                IsRequired = true)]
+        /// <summary>
+        /// Gets or sets the path used for the last document save operation.
+        /// </summary>
+        /// <value>The save path.</value>
         public static string SavePath {
             get {
                 return (string)Get()["savePath"];
@@ -149,6 +177,10 @@ namespace Petri.Editor
         [ConfigurationProperty("recentDocuments",
                                DefaultValue = "",
                                IsRequired = false)]
+        /// <summary>
+        /// Gets or sets the recent documents list, as a JSON-serialized array of paths and access time.
+        /// </summary>
+        /// <value>The recent documents.</value>
         public static string RecentDocuments {
             get {
                 return (string)Get()["recentDocuments"];
@@ -158,69 +190,13 @@ namespace Petri.Editor
             }
         }
 
-        [ConfigurationProperty("windowWidth",
-                               DefaultValue = 800,
-                               IsRequired = true)]
-        public static int WindowWidth {
-            get {
-                return (int)Get()["windowWidth"];
-            }
-            set {
-                Get()["windowWidth"] = value;
-            }
-        }
-
-        [ConfigurationProperty("windowHeight",
-                               DefaultValue = 600,
-                               IsRequired = true)]
-        public static int WindowHeight {
-            get {
-                return (int)Get()["windowHeight"];
-            }
-            set {
-                Get()["windowHeight"] = value;
-            }
-        }
-
-        [ConfigurationProperty("windowX",
-                               DefaultValue = 80,
-                               IsRequired = true)]
-        public static int WindowX {
-            get {
-                return (int)Get()["windowX"];
-            }
-            set {
-                Get()["windowX"] = value;
-            }
-        }
-
-        [ConfigurationProperty("windowY",
-                               DefaultValue = 80,
-                               IsRequired = true)]
-        public static int WindowY {
-            get {
-                return (int)Get()["windowY"];
-            }
-            set {
-                Get()["windowY"] = value;
-            }
-        }
-
-        [ConfigurationProperty("graphWidth",
-                               DefaultValue = 640,
-                               IsRequired = true)]
-        public static int GraphWidth {
-            get {
-                return (int)Get()["graphWidth"];
-            }
-            set {
-                Get()["graphWidth"] = value;
-            }
-        }
-
         [ConfigurationProperty("arch",
                                DefaultValue = 0,
                                IsRequired = true)]
+        /// <summary>
+        /// Gets or sets the build architecture (32 or 64).
+        /// </summary>
+        /// <value>The arch.</value>
         public static int Arch {
             get {
                 return (int)Get()["arch"];
@@ -230,6 +206,12 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets the path of <paramref name="file"/> relative to <paramref name="folder"/>.
+        /// </summary>
+        /// <returns>The relative path.</returns>
+        /// <param name="file">File.</param>
+        /// <param name="folder">Folder.</param>
         public static string GetRelativePath(string file, string folder)
         {
             Uri pathUri = new Uri(file);
@@ -241,6 +223,9 @@ namespace Petri.Editor
                                                                                                 Path.DirectorySeparatorChar));
         }
 
+        /// <summary>
+        /// Loads the current language's resource file.
+        /// </summary>
         private void LoadLanguage()
         {
             string resource;
@@ -282,6 +267,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.Configuration"/> class.
+        /// Must be kept public, otherwise a Save operation will result in an exception.
+        /// </summary>
         public Configuration()
         {
         }

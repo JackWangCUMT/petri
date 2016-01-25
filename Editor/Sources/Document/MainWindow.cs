@@ -385,7 +385,7 @@ namespace Petri.Editor
                     }
                     w.Hide();
 
-                    if(w == this) {
+                    if(close && w == this) {
                         w.Destroy();
                     }
                 }
