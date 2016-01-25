@@ -95,7 +95,7 @@ namespace Petri.Editor
             CreateLabel(0, Configuration.GetLocalized("State's name:"));
             var name = CreateWidget<Entry>(true, 0, a.Name);
             Application.RegisterValidation(name, true, (obj, p) => {
-                _document.PostAction(new ChangeNameAction(a, (obj as Entry).Text));
+                _document.CommitGuiAction(new ChangeNameAction(a, (obj as Entry).Text));
             });
 
             var active = CreateWidget<CheckButton>(false,
@@ -103,7 +103,7 @@ namespace Petri.Editor
                                                    Configuration.GetLocalized("Active on t=0:"));
             active.Active = a.Active;
             active.Toggled += (sender, e) => {
-                _document.PostAction(new ToggleActiveAction(a));
+                _document.CommitGuiAction(new ToggleActiveAction(a));
             };
 
             if(a.TransitionsBefore.Count > 0) {
@@ -124,7 +124,7 @@ namespace Petri.Editor
                     if(combo.GetActiveIter(out iter)) {
                         var val = combo.Model.GetValue(iter, 0) as string;
                         int nbTok = int.Parse(val);
-                        _document.PostAction(new ChangeRequiredTokensAction(a, nbTok));
+                        _document.CommitGuiAction(new ChangeRequiredTokensAction(a, nbTok));
                     }
                 };
             }
@@ -173,17 +173,17 @@ namespace Petri.Editor
                     if(combo.GetActiveIter(out iter)) {
                         var val = combo.Model.GetValue(iter, 0) as string;
                         if(val == nothingFunction) {
-                            _document.PostAction(new InvocationChangeAction(a,
+                            _document.CommitGuiAction(new InvocationChangeAction(a,
                                                                             new FunctionInvocation(a.Document.Settings.Language,
                                                                                                    Action.DoNothingFunction(a.Document))));
                             actionType = ActionType.Nothing;
                         }
                         else if(val == printFunction) {
-                            _document.PostAction(new InvocationChangeAction(a, a.PrintAction()));
+                            _document.CommitGuiAction(new InvocationChangeAction(a, a.PrintAction()));
                             actionType = ActionType.Print;
                         }
                         else if(val == pauseFunction) {
-                            _document.PostAction(new InvocationChangeAction(a,
+                            _document.CommitGuiAction(new InvocationChangeAction(a,
                                                                             new FunctionInvocation(a.Document.Settings.Language,
                                                                                                    Action.PauseFunction(a.Document),
                                                                                                    LiteralExpression.CreateFromString("1s",
@@ -219,7 +219,7 @@ namespace Petri.Editor
                                                                         f,
                                                                         pp.ToArray());
                                 }
-                                _document.PostAction(new InvocationChangeAction(a, invocation));
+                                _document.CommitGuiAction(new InvocationChangeAction(a, invocation));
                             }
                         }
                         EditInvocation(a, actionType, editorFields);
@@ -269,7 +269,7 @@ namespace Petri.Editor
                                                                            _document.Settings.Enum.Type,
                                                                            cppExpr);
                         }
-                        _document.PostAction(new InvocationChangeAction(a, funcInvocation));
+                        _document.CommitGuiAction(new InvocationChangeAction(a, funcInvocation));
                     }
                     catch(Exception ex) {
                         MessageDialog d = new MessageDialog(_document.Window,
@@ -307,7 +307,7 @@ namespace Petri.Editor
                                                                                               false));
                                 }
                             }
-                            _document.PostAction(new InvocationChangeAction(a,
+                            _document.CommitGuiAction(new InvocationChangeAction(a,
                                                                             new MethodInvocation(_document.Settings.Language,
                                                                                                  method.Function as Method,
                                                                                                  Expression.CreateFromStringAndEntity<Expression>((editorFields[1] as Entry).Text,
@@ -378,7 +378,7 @@ namespace Petri.Editor
                                                             a.Function.Function,
                                                             args.ToArray());
                     }
-                    _document.PostAction(new InvocationChangeAction(a, invocation));
+                    _document.CommitGuiAction(new InvocationChangeAction(a, invocation));
                 }
                 catch(Exception ex) {
                     MessageDialog d = new MessageDialog(_document.Window,
@@ -438,7 +438,7 @@ namespace Petri.Editor
             _button = new ColorButton();
             _button.ColorSet += (object sender, EventArgs e) => {
                 var newColor = (sender as ColorButton).Color;
-                _document.PostAction(new ChangeCommentColorAction(c,
+                _document.CommitGuiAction(new ChangeCommentColorAction(c,
                                                                   new Cairo.Color(newColor.Red / 65535.0,
                                                                                   newColor.Green / 65535.0,
                                                                                   newColor.Blue / 65535.0)));
@@ -455,7 +455,7 @@ namespace Petri.Editor
             comment.WrapMode = WrapMode.Word;
 
             comment.FocusOutEvent += (obj, eventInfo) => {
-                _document.PostAction(new ChangeNameAction(c, (obj as TextView).Buffer.Text));
+                _document.CommitGuiAction(new ChangeNameAction(c, (obj as TextView).Buffer.Text));
             };
         }
 
@@ -479,7 +479,7 @@ namespace Petri.Editor
                 }
 
                 if(changed) {
-                    _document.PostAction(new ChangeCommentColorAction(comment,
+                    _document.CommitGuiAction(new ChangeCommentColorAction(comment,
                                                                       _colors[_colorNames.IndexOf(color)]));
                 }
             }
@@ -499,7 +499,7 @@ namespace Petri.Editor
             CreateLabel(0, Configuration.GetLocalized("Transition's name:"));
             var name = CreateWidget<Entry>(true, 0, t.Name);
             Application.RegisterValidation(name, true, (obj, p) => {
-                _document.PostAction(new ChangeNameAction(t, (obj as Entry).Text));
+                _document.CommitGuiAction(new ChangeNameAction(t, (obj as Entry).Text));
             });
 
             CreateLabel(0, Configuration.GetLocalized("Transition's condition:"));
@@ -516,7 +516,7 @@ namespace Petri.Editor
                     var cond = new ConditionChangeAction(t,
                                                          Expression.CreateFromStringAndEntity<Expression>((obj as Entry).Text,
                                                                                                           t));
-                    _document.PostAction(cond);
+                    _document.CommitGuiAction(cond);
                 }
                 catch(Exception e) {
                     MessageDialog d = new MessageDialog(_document.Window,
@@ -542,13 +542,13 @@ namespace Petri.Editor
             CreateLabel(0, Configuration.GetLocalized("Graph's name:"));
             var name = CreateWidget<Entry>(true, 0, i.Name);
             Application.RegisterValidation(name, true, (obj, p) => {
-                _document.PostAction(new ChangeNameAction(i, (obj as Entry).Text));
+                _document.CommitGuiAction(new ChangeNameAction(i, (obj as Entry).Text));
             });
 
             var active = CreateWidget<CheckButton>(false, 0, "Active on t=0:");
             active.Active = i.Active;
             active.Toggled += (sender, e) => {
-                _document.PostAction(new ToggleActiveAction(i));
+                _document.CommitGuiAction(new ToggleActiveAction(i));
             };
         }
     }

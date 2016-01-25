@@ -114,7 +114,7 @@ namespace Petri.Editor
             set;
         }
 
-        public void PostAction(GuiAction a)
+        public void CommitGuiAction(GuiAction a)
         {
             if(a is ConditionChangeAction) {
                 Transition t = (a as ConditionChangeAction).Transition;
@@ -129,7 +129,7 @@ namespace Petri.Editor
                 }
             }
             Modified = true;
-            UndoManager.PostAction(a);
+            UndoManager.CommitGuiAction(a);
             UpdateUndo();
             if(a.Focus is Entity && CurrentController == EditorController) {
                 Window.EditorGui.View.SelectedEntity = (Entity)a.Focus;

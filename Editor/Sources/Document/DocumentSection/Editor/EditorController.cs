@@ -53,7 +53,7 @@ namespace Petri.Editor
             if(Application.Clipboard.Count > 0) {
                 ++Application.PasteCount;
                 var action = PasteAction();
-                _document.PostAction(action);
+                _document.CommitGuiAction(action);
 
                 var pasted = action.Focus as List<Entity>;
                 _document.Window.EditorGui.View.SelectedEntities.Clear();
@@ -66,7 +66,7 @@ namespace Petri.Editor
         {
             if(_document.Window.EditorGui.View.SelectedEntities.Count > 0) {
                 Copy();
-                _document.PostAction(new GuiActionWrapper(this.RemoveSelection(),
+                _document.CommitGuiAction(new GuiActionWrapper(this.RemoveSelection(),
                                                           Configuration.GetLocalized("Cut the entities")));
             }
         }
@@ -158,7 +158,7 @@ namespace Petri.Editor
 
                 actions.Add(new AddStateAction(macro));
 
-                _document.PostAction(new GuiActionList(actions,
+                _document.CommitGuiAction(new GuiActionList(actions,
                                                        Configuration.GetLocalized("Wrap into a macro")));
             }
         }

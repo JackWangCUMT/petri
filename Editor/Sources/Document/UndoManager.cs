@@ -33,7 +33,7 @@ namespace Petri.Editor
             _redoStack = new Stack<ActionDescription>();
         }
 
-        public void PostAction(GuiAction a)
+        public void CommitGuiAction(GuiAction a)
         {
             _redoStack.Clear();
             _undoStack.Push(new ActionDescription(a, a.Description));

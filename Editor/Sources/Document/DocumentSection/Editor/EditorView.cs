@@ -99,7 +99,7 @@ namespace Petri.Editor
             if(button == 1) {
                 // Add new action
                 if(_selectedEntities.Count == 0) {
-                    _document.PostAction(new AddStateAction(new Action(this.CurrentPetriNet.Document,
+                    _document.CommitGuiAction(new AddStateAction(new Action(this.CurrentPetriNet.Document,
                                                                        CurrentPetriNet,
                                                                        false,
                                                                        new PointD(x,
@@ -167,7 +167,7 @@ namespace Petri.Editor
                             guiActionList.Add(new AddStateAction(inner));
                             var guiAction = new GuiActionList(guiActionList,
                                                               Configuration.GetLocalized("Change the state into a macro"));
-                            _document.PostAction(guiAction);
+                            _document.CommitGuiAction(guiAction);
                             selected = inner;
                         }
                         d.Destroy();
@@ -181,7 +181,7 @@ namespace Petri.Editor
             }
             else if(button == 3) {
                 if(_selectedEntities.Count == 0) {
-                    _document.PostAction(new AddCommentAction(new Comment(this.CurrentPetriNet.Document,
+                    _document.CommitGuiAction(new AddCommentAction(new Comment(this.CurrentPetriNet.Document,
                                                                           CurrentPetriNet,
                                                                           new PointD(x,
                                                                                      y))));
@@ -274,7 +274,7 @@ namespace Petri.Editor
                 }
                 else if(CurrentTool == EditorTool.Action) {
                     if(_hoveredItem == null) {
-                        _document.PostAction(new AddStateAction(new Action(this.CurrentPetriNet.Document,
+                        _document.CommitGuiAction(new AddStateAction(new Action(this.CurrentPetriNet.Document,
                                                                            CurrentPetriNet,
                                                                            false,
                                                                            new PointD(x,
@@ -291,7 +291,7 @@ namespace Petri.Editor
                 }
                 else if(CurrentTool == EditorTool.Comment) {
                     if(_hoveredItem == null) {
-                        _document.PostAction(new AddCommentAction(new Comment(this.CurrentPetriNet.Document,
+                        _document.CommitGuiAction(new AddCommentAction(new Comment(this.CurrentPetriNet.Document,
                                                                               CurrentPetriNet,
                                                                               new PointD(x,
                                                                                          y))));
@@ -331,7 +331,7 @@ namespace Petri.Editor
                                                                   -backToPrevious.Y),
                                                        (!_altDown && e.StickToGrid) || (_altDown && !e.StickToGrid)));
                         }
-                        _document.PostAction(new GuiActionList(actions,
+                        _document.CommitGuiAction(new GuiActionList(actions,
                                                                actions.Count > 1 ? Configuration.GetLocalized("Move the entities") : Configuration.GetLocalized("Move the entity")));
                     }
                 }
@@ -340,7 +340,7 @@ namespace Petri.Editor
             else if(CurrentAction == EditorAction.CreatingTransition && button == 1) {
                 CurrentAction = EditorAction.None;
                 if(_hoveredItem != null && _hoveredItem is State) {
-                    _document.PostAction(new AddTransitionAction(new Transition(CurrentPetriNet.Document,
+                    _document.CommitGuiAction(new AddTransitionAction(new Transition(CurrentPetriNet.Document,
                                                                                 CurrentPetriNet,
                                                                                 SelectedEntity as State,
                                                                                 _hoveredItem as State),
@@ -362,12 +362,12 @@ namespace Petri.Editor
                 var newSize = new PointD((_hoveredItem as Comment).Size.X,
                                          (_hoveredItem as Comment).Size.Y);
                 (_hoveredItem as Comment).Size = _beforeResize;
-                _document.PostAction(new ResizeCommentAction(_hoveredItem as Comment, newSize));
+                _document.CommitGuiAction(new ResizeCommentAction(_hoveredItem as Comment, newSize));
             }
             else if(CurrentAction == EditorAction.ChangingTransitionOrigin) {
                 CurrentAction = EditorAction.None;
                 if(_hoveredItem is State) {
-                    _document.PostAction(new ChangeTransitionEndAction((Transition)SelectedEntity,
+                    _document.CommitGuiAction(new ChangeTransitionEndAction((Transition)SelectedEntity,
                                                                        (State)_hoveredItem,
                                                                        false));
                 }
@@ -375,7 +375,7 @@ namespace Petri.Editor
             else if(CurrentAction == EditorAction.ChangingTransitionDestination) {
                 CurrentAction = EditorAction.None;
                 if(_hoveredItem is State) {
-                    _document.PostAction(new ChangeTransitionEndAction((Transition)SelectedEntity,
+                    _document.CommitGuiAction(new ChangeTransitionEndAction((Transition)SelectedEntity,
                                                                        (State)_hoveredItem,
                                                                        true));
                 }
@@ -490,7 +490,7 @@ namespace Petri.Editor
                 }
             }
             else if(_selectedEntities.Count > 0 && CurrentAction == EditorAction.None && (ev.Key == Gdk.Key.Delete || ev.Key == Gdk.Key.BackSpace)) {
-                _document.PostAction(_document.EditorController.RemoveSelection());
+                _document.CommitGuiAction(_document.EditorController.RemoveSelection());
             }
             else if(ev.Key == Gdk.Key.Shift_L || ev.Key == Gdk.Key.Shift_R) {
                 _shiftDown = true;
