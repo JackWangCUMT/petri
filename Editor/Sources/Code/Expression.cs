@@ -552,6 +552,7 @@ namespace Petri.Editor.Code
                                                "param" + (i++).ToString()));
                 }
             }
+
             return new FunctionInvocation(language, f, scopeNameAndArgs.Item3.ToArray());
         }
 
@@ -599,8 +600,7 @@ namespace Petri.Editor.Code
                                                "param" + (i++).ToString()));
                 }
             }
-            return new MethodInvocation(language,
-                                        m,
+            return new MethodInvocation(language, m,
                                         Expression.CreateFromString<Expression>(that,
                                                                                 language,
                                                                                 functions,

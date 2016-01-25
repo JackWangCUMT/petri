@@ -515,6 +515,9 @@ namespace Petri.Editor
 
             this.Save();
 
+            Application.RecentDocuments.Add(DateTime.UtcNow, Path);
+            Application.UpdateRecentDocuments();
+
             return true;
         }
 
