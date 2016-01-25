@@ -85,8 +85,8 @@ namespace Petri.Editor
             try {
                 Condition = Expression.CreateFromStringAndEntity<Expression>(s, this);
             }
-            catch(Exception) {
-                Document.Conflicting.Add(this);
+            catch(Exception e) {
+                Document.Conflicting.Add(this, e.Message);
                 Condition = LiteralExpression.CreateFromString(s, Document.Settings.Language);
             }
         }

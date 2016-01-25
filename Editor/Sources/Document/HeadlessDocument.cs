@@ -83,7 +83,7 @@ namespace Petri.Editor
 
             PreprocessorMacros = new Dictionary<string, string>();
 
-            Conflicting = new HashSet<Entity>();
+            Conflicting = new Dictionary<Entity, string>();
 
             Path = path;
             ResetID();
@@ -385,7 +385,7 @@ namespace Petri.Editor
             + "\n" + Configuration.GetLocalized("Compiler invocation:")
             + "\n" + Settings.Compiler
             + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
-                                               Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + errors);
+                                               Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Compilation errors:") + "\n" + errors);
         
         }
 
@@ -424,19 +424,19 @@ namespace Petri.Editor
             return generator.GetHash();
         }
 
-        public HashSet<Entity> Conflicting {
+        public Dictionary<Entity, string> Conflicting {
             get;
             private set;
         }
 
         public bool Conflicts(Entity e)
         {
-            if(Conflicting.Contains(e)) {
+            if(Conflicting.ContainsKey(e)) {
                 return true;
             }
             else if(e is PetriNet) {
                 foreach(var ee in Conflicting) {
-                    if(((PetriNet)e).EntityFromID(ee.ID) != null) {
+                    if(((PetriNet)e).EntityFromID(ee.Key.ID) != null) {
                         return true;
                     }
                 }

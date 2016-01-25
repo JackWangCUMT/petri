@@ -76,6 +76,28 @@ namespace Petri.Editor
                 label.Markup = "<span color=\"grey\">" + label.Text + "</span>";
             }
         }
+
+        /// <summary>
+        /// Displays the entity's compilation error if any
+        /// </summary>
+        protected void AddErrorIfAny() {
+            if(_document.Conflicts(Entity)) {
+                CreateLabel(0, Configuration.GetLocalized("Compilation errors:"));
+
+                var buf = new TextBuffer(new TextTagTable());
+
+                if(Entity is PetriNet) {
+                    buf.Text = Configuration.GetLocalized("Some entities contained in this petri net are causing compilation errors.");
+                }
+                else {
+                    buf.Text = _document.Conflicting[Entity];
+                }
+                var error = CreateWidget<TextView>(true, 0, buf);
+                error.SetSizeRequest(200, 100);
+                error.WrapMode = WrapMode.Word;
+                error.Editable = false;
+            }
+        }
     }
 
     public class ActionEditor : EntityEditor
@@ -128,6 +150,7 @@ namespace Petri.Editor
                     }
                 };
             }
+
             // Manage C++ function
             {
                 CreateLabel(0, Configuration.GetLocalized("Associated action:"));
@@ -229,6 +252,8 @@ namespace Petri.Editor
 
                 EditInvocation(a, actionType, editorFields);
             }
+
+            AddErrorIfAny();
         }
 
         private void EditInvocation(Action a, ActionType type, List<Widget> editorFields)
@@ -239,7 +264,7 @@ namespace Petri.Editor
             editorFields.Clear();
 
             if(type == ActionType.Manual) {
-                var label = CreateLabel(0, Configuration.GetLocalized("Invocation de l'action :"));
+                var label = CreateLabel(0, Configuration.GetLocalized("State's invocation:"));
                 editorFields.Add(label);
                 string userReadable;
                 if(a.Function.NeedsExpansion) {
@@ -533,6 +558,8 @@ namespace Petri.Editor
                     (obj as Entry).Text = userReadable;
                 }
             });
+
+            AddErrorIfAny();
         }
     }
 
@@ -551,6 +578,8 @@ namespace Petri.Editor
             active.Toggled += (sender, e) => {
                 _document.CommitGuiAction(new ToggleActiveAction(i));
             };
+
+            AddErrorIfAny();
         }
     }
 

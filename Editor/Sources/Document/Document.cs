@@ -709,7 +709,7 @@ namespace Petri.Editor
                         // TODO: sort + binary search
                         foreach(var entry in _codeRanges) {
                             if(lineNumber >= entry.Value.FirstLine && lineNumber <= entry.Value.LastLine) {
-                                Conflicting.Add(entry.Key);
+                                Conflicting.Add(entry.Key, Configuration.GetLocalized("Line {0}, Row {1}:", lineNumber, match.Groups["row"].Value) + "\n" + match.Groups["msg"].Value);
                                 break;
                             }
                         }
@@ -759,7 +759,7 @@ namespace Petri.Editor
                     d.Destroy();
                     if(result == ResponseType.Accept) {
                         o = Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
-                                                                                                                                             Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Errors:") + "\n" + o;
+                                                                                                                                             Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Compilation errors:") + "\n" + o;
                         new CompilationErrorPresenter(this, o).Show();
                     }
 

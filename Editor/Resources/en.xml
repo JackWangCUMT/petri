@@ -652,8 +652,14 @@
 <Key>No source output path defined. Please open the Petri net with the graphical editor and generate the &lt;language&gt; code once.</Key>
 <Value>No source output path defined. Please open the Petri net with the graphical editor and generate the {0} code once.</Value>
 
-<Key>Erreurs :</Key>
-<Value>Erreurs :</Value>
+<Key>Line {0}, Row {1}:</Key>
+<Value>Line {0}, Row {1}:</Value>
+
+<Key>Compilation errors:</Key>
+<Value>Compilation errors:</Value>
+
+<Key>Some entities contained in this petri net are causing compilation errors.</Key>
+<Value>Some entities contained in this petri net are causing compilation errors.</Value>
 
 <Key>Document's settings:</Key>
 <Value>Document's settings:</Value>

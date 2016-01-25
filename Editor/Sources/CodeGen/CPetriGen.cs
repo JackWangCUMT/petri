@@ -90,7 +90,7 @@ namespace Petri.Editor
 
         protected override void End()
         {
-            CodeGen.Value = CodeGen.Value.Substring(0, _prototypesIndex) + _functionPrototypes + "\n" + CodeGen.Value.Substring(_prototypesIndex);
+            CodeGen.Value = CodeGen.Value.Substring(0, _prototypesIndex) + _functionPrototypes.Value + "\n" + CodeGen.Value.Substring(_prototypesIndex);
 
             CodeGen += "}\n"; // fill()
 
