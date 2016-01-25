@@ -29,9 +29,13 @@ using Petri.Editor.Code;
 
 namespace Petri.Editor
 {
-    public sealed class Action : NonRootState
+    public sealed class Action : State
     {
-        public Action(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos)
+        public Action(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc,
+                                                                                                   parent,
+                                                                                                   active,
+                                                                                                   0,
+                                                                                                   pos)
         {
             this.Position = pos;
             this.Radius = 20;
@@ -41,7 +45,9 @@ namespace Petri.Editor
             this.Function = new FunctionInvocation(doc.Settings.Language, DoNothingFunction(doc));
         }
 
-        public Action(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor)
+        public Action(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc,
+                                                                                         parent,
+                                                                                         descriptor)
         {
             TrySetFunction(descriptor.Attribute("Function").Value);
         }
@@ -59,7 +65,9 @@ namespace Petri.Editor
                     Function = f;
                 }
                 else {
-                    Function = new WrapperFunctionInvocation(Document.Settings.Language, Document.Settings.Enum.Type, exp);
+                    Function = new WrapperFunctionInvocation(Document.Settings.Language,
+                                                             Document.Settings.Enum.Type,
+                                                             exp);
                 }
             }
             catch(Exception) {
@@ -73,44 +81,67 @@ namespace Petri.Editor
             this.TrySetFunction(Function.MakeUserReadable());
         }
 
-        public override XElement GetXml()
+        public override XElement GetXML()
         {
             var elem = new XElement("Action");
             this.Serialize(elem);
             return elem;
         }
 
-        public override void Serialize(XElement element)
+        protected override void Serialize(XElement element)
         {
             base.Serialize(element);
             element.SetAttributeValue("Function", this.Function.MakeUserReadable());
         }
 
+        /// <summary>
+        /// Gets the action's invocation that pretty prints the petri net action at runtime.
+        /// </summary>
+        /// <returns>The action.</returns>
         public FunctionInvocation PrintAction()
         {
-            return new Code.FunctionInvocation(Document.Settings.Language, PrintFunction(Document), LiteralExpression.CreateFromString("$Name", Document.Settings.Language), LiteralExpression.CreateFromString("$ID", Document.Settings.Language));
+            return new Code.FunctionInvocation(Document.Settings.Language,
+                                               PrintFunction(Document),
+                                               LiteralExpression.CreateFromString("$Name",
+                                                                                  Document.Settings.Language),
+                                               LiteralExpression.CreateFromString("$ID",
+                                                                                  Document.Settings.Language));
         }
 
+        /// <summary>
+        /// Gets the function that pretty prints the petri net action at runtime.
+        /// </summary>
+        /// <returns>The print function.</returns>
         public static Function PrintFunction(HeadlessDocument doc)
         {
             var lang = doc.Settings.Language;
 
             if(lang == Language.Cpp) {
-                var f = new Code.Function(doc.Settings.Enum.Type, Scope.MakeFromNamespace(lang, "Utility"), "printAction", false);
+                var f = new Code.Function(doc.Settings.Enum.Type,
+                                          Scope.MakeFromNamespace(lang, "Utility"),
+                                          "printAction",
+                                          false);
                 f.AddParam(new Param(new Code.Type(lang, "std::string const &"), "name"));
                 f.AddParam(new Param(new Code.Type(lang, "std::uint64_t"), "id"));
 
                 return f;
             }
             else if(lang == Language.C) {
-                var f = new Function(doc.Settings.Enum.Type, null, "PetriUtility_printAction", false);
+                var f = new Function(doc.Settings.Enum.Type,
+                                     null,
+                                     "PetriUtility_printAction",
+                                     false);
                 f.AddParam(new Param(new Code.Type(lang, "char const *"), "name"));
                 f.AddParam(new Param(new Code.Type(lang, "uint64_t"), "id"));
 
                 return f;
             }
             else if(lang == Language.CSharp) {
-                var f = new Function(doc.Settings.Enum.Type, Scope.MakeFromNamespace(lang, "Petri.Runtime.Utility"), "PrintAction", false);
+                var f = new Function(doc.Settings.Enum.Type,
+                                     Scope.MakeFromNamespace(lang,
+                                                             "Petri.Runtime.Utility"),
+                                     "PrintAction",
+                                     false);
                 f.AddParam(new Param(new Code.Type(lang, "string"), "name"));
                 f.AddParam(new Param(new Code.Type(lang, "UInt64"), "id"));
 
@@ -120,11 +151,19 @@ namespace Petri.Editor
             throw new Exception("Action.PrintFunction: Should not get there !");
         }
 
+        /// <summary>
+        /// Gets the function that does nothing at runtime.
+        /// </summary>
+        /// <returns>The do nothing function.</returns>
         public static Function DoNothingFunction(HeadlessDocument doc)
         {
             var lang = doc.Settings.Language;
             if(lang == Language.Cpp) {
-                var f = new Function(doc.Settings.Enum.Type, Scope.MakeFromNamespace(lang, "Utility"), "doNothing", false);
+                var f = new Function(doc.Settings.Enum.Type,
+                                     Scope.MakeFromNamespace(lang,
+                                                             "Utility"),
+                                     "doNothing",
+                                     false);
                 return f;
             }
             else if(lang == Language.C) {
@@ -132,43 +171,55 @@ namespace Petri.Editor
                 return f;
             }
             else if(lang == Language.CSharp) {
-                var f = new Function(doc.Settings.Enum.Type, Scope.MakeFromNamespace(lang, "Petri.Runtime.Utility"), "DoNothing", false);
+                var f = new Function(doc.Settings.Enum.Type,
+                                     Scope.MakeFromNamespace(lang,
+                                                             "Petri.Runtime.Utility"),
+                                     "DoNothing",
+                                     false);
                 return f;
             }
 
             throw new Exception("Action.DoNothingFunction: Should not get there !");
         }
 
+        /// <summary>
+        /// Gets the function that make the calling thread to pause for the requested amount of time.
+        /// </summary>
+        /// <returns>The pause function.</returns>
         public static Function PauseFunction(HeadlessDocument doc)
         {
             var lang = doc.Settings.Language;
 
             if(lang == Language.Cpp) {
-                var f = new Function(doc.Settings.Enum.Type, Scope.MakeFromNamespace(lang, "Utility"), "pause", false);
+                var f = new Function(doc.Settings.Enum.Type,
+                                     Scope.MakeFromNamespace(lang, "Utility"),
+                                     "pause", false);
                 f.AddParam(new Param(new Code.Type(lang, "std::chrono::nanoseconds"), "delay"));
                 return f;
             }
             else if(lang == Language.C) {
                 var f = new Function(doc.Settings.Enum.Type, null, "PetriUtility_pause", false);
-                f.AddParam(new Param(new Code.Type(lang, "time_t"), "delay"));
+                f.AddParam(new Param(new Code.Type(lang, "uint64_t"), "delayMicroSeconds"));
                 return f;
             }
             else if(lang == Language.CSharp) {
-                var f = new Function(doc.Settings.Enum.Type, Scope.MakeFromNamespace(lang, "Petri.Runtime.Utility"), "Pause", false);
-                f.AddParam(new Param(new Code.Type(lang, "double"), "delay"));
+                var f = new Function(doc.Settings.Enum.Type,
+                                     Scope.MakeFromNamespace(lang, "Petri.Runtime.Utility"),
+                                     "Pause", false);
+                f.AddParam(new Param(new Code.Type(lang, "double"), "delayInSeconds"));
                 return f;
             }
 
             throw new Exception("Action.PauseFunction: Should not get there !");
         }
 
+        /// <summary>
+        /// Gets or sets the function invocation that will be run when the action becomes active.
+        /// </summary>
+        /// <value>The function.</value>
         public FunctionInvocation Function {
-            get {
-                return _function;
-            }
-            set {
-                _function = value;
-            }
+            get;
+            set;
         }
 
         public override bool UsesFunction(Function f)
@@ -176,6 +227,10 @@ namespace Petri.Editor
             return Function.UsesFunction(f);
         }
 
+        /// <summary>
+        /// Adds the VariableExpressions contained in the condition to the set passed as an argument.
+        /// </summary>
+        /// <param name="result">Result.</param>
         public void GetVariables(HashSet<VariableExpression> res)
         {				
             var l = Function.GetLiterals();
@@ -185,8 +240,6 @@ namespace Petri.Editor
                 }
             }
         }
-
-        FunctionInvocation _function;
     }
 }
 

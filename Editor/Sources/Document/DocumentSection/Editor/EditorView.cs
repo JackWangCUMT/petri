@@ -141,10 +141,10 @@ namespace Petri.Editor
                                                                              t.After.RequiredTokens == t.After.TransitionsBefore.Count));
 
                                 var newTransition = Entity.EntityFromXml(_document,
-                                                                         t.GetXml(),
+                                                                         t.GetXML(),
                                                                          _document.Window.EditorGui.View.CurrentPetriNet,
                                                                          statesTable) as Transition;
-                                newTransition.ID = _document.LastEntityID++;
+                                newTransition.ID = _document.IDManager.Consume();
                                 guiActionList.Add(new AddTransitionAction(newTransition,
                                                                           newTransition.After.RequiredTokens == newTransition.After.TransitionsBefore.Count));
                             }
@@ -155,10 +155,10 @@ namespace Petri.Editor
                                                                              t.After.RequiredTokens == t.After.TransitionsBefore.Count));
 
                                 var newTransition = Entity.EntityFromXml(_document,
-                                                                         t.GetXml(),
+                                                                         t.GetXML(),
                                                                          _document.Window.EditorGui.View.CurrentPetriNet,
                                                                          statesTable) as Transition;
-                                newTransition.ID = _document.LastEntityID++;
+                                newTransition.ID = _document.IDManager.Consume();
                                 guiActionList.Add(new AddTransitionAction(newTransition,
                                                                           newTransition.After.RequiredTokens == newTransition.After.TransitionsBefore.Count));
                             }

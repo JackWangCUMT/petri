@@ -29,6 +29,48 @@ using Petri.Editor.Code;
 
 namespace Petri.Editor
 {
+    /// <summary>
+    /// A class that intends to encapsulate an ever increasing sequence of identifiers.
+    /// </summary>
+    public class IDManager
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.IDManager"/> with the parameter as the first ID that will be consumed.
+        /// </summary>
+        /// <param name="firstID">First ID.</param>
+        public IDManager(UInt64 firstID)
+        {
+            ID = firstID + 1;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.IDManager"/> class.
+        /// The first ID that will be consumed by the new instance will be the next ID that would have been consumed by the parameter.
+        /// </summary>
+        /// <param name="reference">Reference.</param>
+        public IDManager(IDManager reference)
+        {
+            ID = reference.ID + 1;
+        }
+
+        /// <summary>
+        /// Consume a new ID from this instance and returns it.
+        /// </summary>
+        public UInt64 Consume()
+        {
+            return ID++;
+        }
+
+        /// <summary>
+        /// Gets the current ID of this instance.
+        /// </summary>
+        /// <value>The I.</value>
+        public UInt64 ID {
+            get;
+            private set;
+        }
+    }
+
     public class HeadlessDocument
     {
         public HeadlessDocument(string path)
@@ -44,6 +86,7 @@ namespace Petri.Editor
             Conflicting = new HashSet<Entity>();
 
             Path = path;
+            ResetID();
         }
 
         public string Path {
@@ -229,7 +272,7 @@ namespace Petri.Editor
             root.Add(winConf);
             root.Add(headers);
             root.Add(macros);
-            root.Add(PetriNet.GetXml());
+            root.Add(PetriNet.GetXML());
 
             // Write to a temporary file to avoid corrupting the existing document on error
             tempFileName = System.IO.Path.GetTempFileName();
@@ -335,10 +378,10 @@ namespace Petri.Editor
         }
 
         /// <summary>
-        /// An ever increasing ID. When a new Entity is created, it increments this value its ID from the new value.
+        /// Gets or sets the ID manager of the document.
         /// </summary>
-        /// <value>The last entity I.</value>
-        public UInt64 LastEntityID {
+        /// <value>The identifier manager.</value>
+        public IDManager IDManager {
             get;
             set;
         }
@@ -350,9 +393,14 @@ namespace Petri.Editor
 
         public void ResetID()
         {
-            this.LastEntityID = 0;
+            ////this.LastEntityID = 0;
+            IDManager = new IDManager(0);
         }
 
+        /// <summary>
+        /// Gets or sets the document's settings.
+        /// </summary>
+        /// <value>The settings.</value>
         public DocumentSettings Settings {
             get;
             protected set;

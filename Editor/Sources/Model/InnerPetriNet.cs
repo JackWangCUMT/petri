@@ -28,52 +28,66 @@ namespace Petri.Editor
 {
     public sealed class InnerPetriNet : PetriNet
     {
-        public InnerPetriNet(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, pos)
+        public InnerPetriNet(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc,
+                                                                                                          parent,
+                                                                                                          active,
+                                                                                                          pos)
         {
-            _exitPoint = new ExitPoint(doc, this, new Cairo.PointD(300, 100));
+            ExitPoint = new ExitPoint(doc, this, new Cairo.PointD(300, 100));
             this.AddState(this.ExitPoint);
-            this.EntryPointID = Document.LastEntityID++;
+            this.EntryPointID = Document.IDManager.Consume();
         }
 
-        public InnerPetriNet(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor)
+        public InnerPetriNet(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc,
+                                                                                                parent,
+                                                                                                descriptor)
         {
             EntryPointID = UInt64.Parse(descriptor.Attribute("EntryPointID").Value);
 
             foreach(var s in this.States) {
                 if(s.GetType() == typeof(ExitPoint)) {
-                    _exitPoint = s as ExitPoint;
+                    ExitPoint = s as ExitPoint;
                     break;
                 }
             }
 
-            if(_exitPoint == null)
+            if(ExitPoint == null)
                 throw new Exception(Configuration.GetLocalized("No Exit node found in the saved Petri net!"));
         }
 
-        public override void Serialize(XElement elem)
+        protected override void Serialize(XElement elem)
         {
             elem.SetAttributeValue("EntryPointID", this.EntryPointID);
             base.Serialize(elem);
         }
 
+        /// <summary>
+        /// Gets the exit point of the inner petri net, which is supposed to be a convenient state to synchronize every other state upon the inner petri net's end of execution.
+        /// </summary>
+        /// <value>The exit point.</value>
         public ExitPoint ExitPoint {
-            get {
-                return _exitPoint;
-            }
+            get;
+            private set;
         }
 
+        /// <summary>
+        /// Gets or sets the entry point ID. It represents the virtual EntryPoint entity and is used for code generation.
+        /// </summary>
+        /// <value>The entry point ID.</value>
         public UInt64 EntryPointID {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the entry point name. It represents the virtual EntryPoint entity and is used for code generation.
+        /// </summary>
+        /// <value>The entry point name.</value>
         public string EntryPointName {
             get {
                 return this.CodeIdentifier + "_Entry";
             }
         }
-
-        ExitPoint _exitPoint;
     }
 }
 

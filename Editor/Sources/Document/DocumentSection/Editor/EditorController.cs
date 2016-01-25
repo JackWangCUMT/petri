@@ -323,7 +323,7 @@ namespace Petri.Editor
             // Basic cloning strategy: serialization/deserialization to XElement, with the save/restore mechanism
             var statesTable = new Dictionary<UInt64, State>();
             foreach(State s in states) {
-                var xml = s.GetXml();
+                var xml = s.GetXML();
                 var newState = Entity.EntityFromXml(_document,
                                                     xml,
                                                     _document.Window.EditorGui.View.CurrentPetriNet,
@@ -331,25 +331,25 @@ namespace Petri.Editor
                 statesTable.Add(newState.ID, newState);
             }
             foreach(Comment c in comments) {
-                var xml = c.GetXml();
+                var xml = c.GetXML();
                 var newComment = Entity.EntityFromXml(_document,
                                                       xml,
                                                       _document.Window.EditorGui.View.CurrentPetriNet,
                                                       null) as Comment;
                 newComment.Document = destination;
-                newComment.ID = destination.LastEntityID++;
+                newComment.ID = destination.IDManager.Consume();
                 cloned.Add(newComment);
             }
 
             foreach(Transition t in transitions) {
-                var xml = t.GetXml();
+                var xml = t.GetXML();
                 Transition newTransition = (Transition)Entity.EntityFromXml(destination,
                                                                             xml,
                                                                             _document.Window.EditorGui.View.CurrentPetriNet,
                                                                             statesTable);
 
                 // Reassigning an ID to the transitions to keep a unique one for each entity
-                newTransition.ID = _document.LastEntityID++;
+                newTransition.ID = _document.IDManager.Consume();
                 cloned.Add(newTransition);
 
                 newTransition.Before.AddTransitionAfter(t);
@@ -385,16 +385,16 @@ namespace Petri.Editor
         private static void UpdateID(State s, Document d)
         {
             s.Document = d;
-            s.ID = s.Document.LastEntityID++;
+            s.ID = s.Document.IDManager.Consume();
             var ss = s as PetriNet;
             if(ss != null) {
                 foreach(Comment c in ss.Comments) {
                     c.Document = d;
-                    c.ID = c.Document.LastEntityID++;
+                    c.ID = c.Document.IDManager.Consume();
                 }
                 foreach(Transition t in ss.Transitions) {
                     t.Document = d;
-                    t.ID = t.Document.LastEntityID++;
+                    t.ID = t.Document.IDManager.Consume();
                 }
                 foreach(State s2 in ss.States) {
                     UpdateID(s2, d);

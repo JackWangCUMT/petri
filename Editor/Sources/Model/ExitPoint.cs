@@ -27,9 +27,9 @@ using System.Xml.Linq;
 
 namespace Petri.Editor
 {
-    public sealed class ExitPoint : NonRootState
+    public sealed class ExitPoint : State
     {
-        public ExitPoint(HeadlessDocument doc, PetriNet parent, Cairo.PointD pos) : base(doc, parent, false, pos)
+        public ExitPoint(HeadlessDocument doc, PetriNet parent, Cairo.PointD pos) : base(doc, parent, false, 0, pos)
         {
             this.Radius = 25;
         }
@@ -39,13 +39,17 @@ namespace Petri.Editor
 			
         }
 
-        public override XElement GetXml()
+        public override XElement GetXML()
         {
             var elem = new XElement("Exit");
             this.Serialize(elem);
             return elem;
         }
 
+        /// <summary>
+        /// Forces the value to <c>false</c> as the instance can never be active.
+        /// </summary>
+        /// <value><c>true</c> if active; otherwise, <c>false</c>.</value>
         public override bool Active {
             get {
                 return false;
@@ -55,6 +59,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Always require as much token as there are transitions leading to <c>this</c>, so that every state is sync'ed before exiting.
+        /// </summary>
+        /// <value>The required tokens.</value>
         public override int RequiredTokens {
             get {
                 return this.TransitionsBefore.Count;
@@ -64,6 +72,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets or sets the name of the entity. This is a no-op here.
+        /// </summary>
+        /// <value>The name.</value>
         public override string Name {
             get {
                 return "End";
@@ -73,6 +85,11 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// The entity doesn't use any function.
+        /// </summary>
+        /// <returns><c>true</c>, if function was used, <c>false</c> otherwise.</returns>
+        /// <param name="f">F.</param>
         public override bool UsesFunction(Code.Function f)
         {
             return false;

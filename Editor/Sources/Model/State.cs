@@ -50,7 +50,7 @@ namespace Petri.Editor
             this.Radius = XmlConvert.ToDouble(descriptor.Attribute("Radius").Value);
         }
 
-        public override void Serialize(XElement element)
+        protected override void Serialize(XElement element)
         {
             base.Serialize(element);
             element.SetAttributeValue("Active", this.Active);
@@ -58,46 +58,86 @@ namespace Petri.Editor
             element.SetAttributeValue("Radius", this.Radius);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="Petri.Editor.State"/> is active when the petri net starts its execution.
+        /// </summary>
+        /// <value><c>true</c> if active; otherwise, <c>false</c>.</value>
         public virtual bool Active {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the required tokens that must be brought by transitions to activate the state.
+        /// </summary>
+        /// <value>The required tokens.</value>
         public virtual int RequiredTokens {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the list of transitions that lead to <c>this</c>.
+        /// </summary>
+        /// <value>The transitions before.</value>
         public List<Transition> TransitionsBefore {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the list of transitions that go from <c>this</c> to another state.
+        /// </summary>
+        /// <value>The transitions after.</value>
         public List<Transition> TransitionsAfter {
             get;
             private set;
         }
 
-        public void AddTransitionBefore(Transition t)
+        /// <summary>
+        /// Adds a transition before.
+        /// <see cref="State.TransitionBefore"/>
+        /// </summary>
+        /// <param name="transition">The transition.</param>
+        public void AddTransitionBefore(Transition transition)
         {
-            TransitionsBefore.Add(t);
+            TransitionsBefore.Add(transition);
         }
 
-        public void AddTransitionAfter(Transition t)
+        /// <summary>
+        /// Adds a transition after.
+        /// <see cref="State.TransitionAfter"/>
+        /// </summary>
+        /// <param name="transition">The transition.</param>
+        public void AddTransitionAfter(Transition transition)
         {
-            TransitionsAfter.Add(t);
+            TransitionsAfter.Add(transition);
         }
 
+        /// <summary>
+        /// Removes a transition before.
+        /// <see cref="State.TransitionBefore"/>
+        /// </summary>
+        /// <param name="transition">The transition to remove.</param>
         public void RemoveTransitionBefore(Transition t)
         {
             TransitionsBefore.Remove(t);
         }
 
+        /// <summary>
+        /// Removes a transition after.
+        /// <see cref="State.TransitionAfter"/>
+        /// </summary>
+        /// <param name="transition">The transition to remove.</param>
         public void RemoveTransitionAfter(Transition t)
         {
             TransitionsAfter.Remove(t);
         }
 
+        /// <summary>
+        /// Gets or sets the position as in <c>Entity.Position</c>, except that the transitions attached to this instance are given a chance to gracefully update their position.
+        /// </summary>
+        /// <value>The position.</value>
         public override Cairo.PointD Position {
             get {
                 return base.Position;
@@ -117,6 +157,10 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Gets or sets the radius of the circle representing the state.
+        /// </summary>
+        /// <value>The radius.</value>
         public double Radius {
             get;
             set;
@@ -128,6 +172,11 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Checks whether the parameter is enclosed into this instance's shape.
+        /// </summary>
+        /// <returns><c>true</c>, if in <c>point</c> is contained by this instance, <c>false</c> otherwise.</returns>
+        /// <param name="p">P.</param>
         public virtual bool PointInState(Cairo.PointD p)
         {
             if(Math.Pow(p.X - this.Position.X, 2) + Math.Pow(p.Y - this.Position.Y, 2) < Math.Pow(this.Radius, 2)) {
@@ -140,17 +189,6 @@ namespace Petri.Editor
         public virtual void UpdateConflicts()
         {
 			
-        }
-    }
-
-    public abstract class NonRootState : State
-    {
-        public NonRootState(HeadlessDocument doc, PetriNet parent, bool active, Cairo.PointD pos) : base(doc, parent, active, 0, pos)
-        {
-        }
-
-        public NonRootState(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor)
-        {
         }
     }
 }

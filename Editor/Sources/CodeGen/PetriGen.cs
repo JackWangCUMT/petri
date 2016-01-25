@@ -136,7 +136,7 @@ namespace Petri.Editor
         public string GetHash()
         {
             Begin();
-            GenerateCodeFor(Document.PetriNet, new IDManager(Document.LastEntityID + 1));
+            GenerateCodeFor(Document.PetriNet, new IDManager(Document.IDManager));
             End();
 
             return Hash;
@@ -145,7 +145,7 @@ namespace Petri.Editor
         public virtual void WritePetriNet()
         {
             Begin();
-            GenerateCodeFor(Document.PetriNet, new IDManager(Document.LastEntityID + 1));
+            GenerateCodeFor(Document.PetriNet, new IDManager(Document.IDManager));
             End();
 
             System.IO.File.WriteAllText(PathToFile(Document.Settings.Name + "." + PetriGen.SourceExtensionFromLanguage(Language)),
