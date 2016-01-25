@@ -31,11 +31,11 @@ namespace Petri.Editor
     {
         public CPetriGen(HeadlessDocument doc) : base(doc,
                                                       Language.C,
-                                                      new CFamilyCodeGen(Language.Cpp))
+                                                      new CFamilyCodeGen(Language.C))
         {
             _headerGen = new CFamilyCodeGen(Language.C);
-            _functionBodies = "";
-            _functionPrototypes = "";
+            _functionBodies = new CFamilyCodeGen(Language.C);
+            _functionPrototypes = new CFamilyCodeGen(Language.C);
             _prototypesIndex = 0;
         }
 
@@ -94,7 +94,16 @@ namespace Petri.Editor
 
             CodeGen += "}\n"; // fill()
 
-            CodeGen += _functionBodies;
+            int linesSoFar = CodeGen.LineCount;
+            var keys = new List<Entity>(CodeRanges.Keys);
+            foreach(var key in keys) {
+                var range = CodeRanges[key];
+                range.FirstLine += linesSoFar;
+                range.LastLine += linesSoFar;
+                CodeRanges[key] = range;
+            }
+
+            CodeGen += _functionBodies.Value;
 
             string toHash = CodeGen.Value;
 
@@ -195,6 +204,10 @@ namespace Petri.Editor
             a.GetVariables(cppVar);
 
             _functionPrototypes += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(PetriNet *);\n";
+
+            CodeRange range = new CodeRange();
+            range.FirstLine = _functionBodies.LineCount;
+
             _functionBodies += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(PetriNet *petriNet) {\n";
 
             if(a.Function.NeedsReturn) {
@@ -212,6 +225,10 @@ namespace Petri.Editor
             }
 
             _functionBodies += "}\n\n";
+
+            range.LastLine = _functionBodies.LineCount;
+
+            CodeRanges[a] = range;
 
             CodeGen += "PetriAction *" + a.CodeIdentifier + " = PetriAction_createParam(" + a.ID.ToString() + ", \""
             + a.Parent.Name + "_" + a.Name + "\", &" + a.CodeIdentifier + "_invocation, " + a.RequiredTokens.ToString() + ");";
@@ -294,6 +311,9 @@ namespace Petri.Editor
             t.GetVariables(cppVar);
 
             _functionPrototypes += "static bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t);\n";
+
+            CodeRange range = new CodeRange();
+            range.FirstLine = _functionBodies.LineCount;
             _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n";
 
             if(t.Condition.NeedsReturn) {
@@ -311,6 +331,10 @@ namespace Petri.Editor
             }
 
             _functionBodies += "}\n\n";
+
+            range.LastLine = _functionBodies.LineCount;
+
+            CodeRanges[t] = range;
 
             CodeGen += "PetriAction_createAndAddTransition(" + bName + ", " + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", "
             + "&" + t.CodeIdentifier + "_invocation" + ");";
@@ -333,8 +357,8 @@ namespace Petri.Editor
         }
 
         private CodeGen _headerGen;
-        private string _functionBodies;
-        private string _functionPrototypes;
+        private CodeGen _functionBodies;
+        private CodeGen _functionPrototypes;
         private bool _generateHeader = true;
         private int _prototypesIndex;
     }

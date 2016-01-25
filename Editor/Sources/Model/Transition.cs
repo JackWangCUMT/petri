@@ -91,11 +91,6 @@ namespace Petri.Editor
             }
         }
 
-        public void UpdateConflicts()
-        {
-            this.TrySetCondition(Condition.MakeUserReadable());
-        }
-
         public override XElement GetXML()
         {
             var elem = new XElement("Transition");

@@ -102,7 +102,6 @@ namespace Petri.Editor
         public virtual void AddHeader(string header)
         {
             AddHeaderNoUpdate(header);
-            UpdateConflicts();
         }
 
         public void AddHeaderNoUpdate(string header)
@@ -346,18 +345,17 @@ namespace Petri.Editor
         /// Generates the code without prompting the user. If no code have ever been generated for this document, meaning we don't know where to save it, then an Exception is thrown.
         /// <exception cref="Exception">When no save path has been defined for the document.</exception>
         /// </summary>
-        public void GenerateCodeDontAsk()
+        public Dictionary<Entity, CodeRange> GenerateCodeDontAsk()
         {
             if(this.Settings.RelativeSourceOutputPath.Length == 0) {
                 throw new Exception(Configuration.GetLocalized("No source output path defined. Please open the Petri net with the graphical editor and generate the <language> code once.",
                                                                Settings.LanguageName()));
             }
-            else if(Conflicts(PetriNet)) {
-                throw new Exception(Configuration.GetLocalized("The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts."));
-            }
 
             var generator = PetriGen.PetriGenFromLanguage(Settings.Language, this);
             generator.WritePetriNet();
+
+            return generator.CodeRanges;
         }
 
         /// <summary>
@@ -369,15 +367,26 @@ namespace Petri.Editor
             var c = new Compiler(this);
             var o = c.CompileSource(Settings.RelativeSourcePath, Settings.RelativeLibPath);
             if(o != "") {
-                Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.")
-                                        + "\n" + Configuration.GetLocalized("Compiler invocation:")
-                                        + "\n" + Settings.Compiler
-                                        + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
-                                                                                                                                                                                                                    Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o);
+                ParseCompilationErrors(o);
+
                 return false;
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Parses the compilation errors and attempt to give a meaningful diagnostic.
+        /// </summary>
+        /// <param name="errors">The error string.</param>
+        protected virtual void ParseCompilationErrors(string errors)
+        {
+            Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.")
+            + "\n" + Configuration.GetLocalized("Compiler invocation:")
+            + "\n" + Settings.Compiler
+            + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
+                                               Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + errors);
+        
         }
 
         /// <summary>
@@ -434,12 +443,6 @@ namespace Petri.Editor
             }
 
             return false;
-        }
-
-        public virtual void UpdateConflicts()
-        {
-            Conflicting.Clear();
-            PetriNet.UpdateConflicts();
         }
 
         int _wX, _wY, _wW, _wH;

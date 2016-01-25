@@ -59,7 +59,7 @@ namespace Petri.Editor
                 exp = Expression.CreateFromStringAndEntity<Expression>(s, this);
                 if(exp is FunctionInvocation) {
                     var f = (FunctionInvocation)exp;
-                    if(!f.Function.ReturnType.Equals(Document.Settings.Enum.Type)) {
+                    if(!f.Function.ReturnType.Equals(Code.Type.UnknownType(Document.Settings.Language)) && !f.Function.ReturnType.Equals(Document.Settings.Enum.Type)) {
                         Document.Conflicting.Add(this);
                     }
                     Function = f;
@@ -74,11 +74,6 @@ namespace Petri.Editor
                 Document.Conflicting.Add(this);
                 Function = new ConflictFunctionInvocation(Document.Settings.Language, s);
             }
-        }
-
-        public override void UpdateConflicts()
-        {
-            this.TrySetFunction(Function.MakeUserReadable());
         }
 
         public override XElement GetXML()

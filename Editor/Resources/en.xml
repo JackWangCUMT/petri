@@ -319,9 +319,6 @@
 <Key>The &lt;language&gt; code has been sucessfully generated.</Key>
 <Value>The {0} code has been sucessfully generated.</Value>
 
-<Key>The Petri Net contains conflicting entities. Please solve them before you can generate the source code.</Key>
-<Value>The Petri Net contains conflicting entities. Please solve them before you can generate the source code.</Value>
-
 <Key>Save the generated code as…</Key>
 <Value>Save the generated code as…</Value>
 
@@ -384,9 +381,6 @@
 
 <Key>No conflicting entity.</Key>
 <Value>No conflicting entity.</Value>
-
-<Key>Conflicts have to be solved before the generation/compilation step.</Key>
-<Value>Conflicts have to be solved before the generation/compilation step.</Value>
 
 <Key>Debugger still running!</Key>
 <Value>Debugger still running!</Value>
@@ -657,9 +651,6 @@
 
 <Key>No source output path defined. Please open the Petri net with the graphical editor and generate the &lt;language&gt; code once.</Key>
 <Value>No source output path defined. Please open the Petri net with the graphical editor and generate the {0} code once.</Value>
-
-<Key>The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts.</Key>
-<Value>The Petri net has conflicting states. Please open it with the graphical editor and solve the conflicts.</Value>
 
 <Key>Erreurs :</Key>
 <Value>Erreurs :</Value>

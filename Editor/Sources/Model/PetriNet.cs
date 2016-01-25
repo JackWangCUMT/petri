@@ -119,14 +119,6 @@ namespace Petri.Editor
             return false;
         }
 
-        public override void UpdateConflicts()
-        {
-            foreach(var t in Transitions)
-                t.UpdateConflicts();
-            foreach(var s in States)
-                s.UpdateConflicts();
-        }
-
         /// <summary>
         /// Adds a Comment entity to the instance.
         /// </summary>

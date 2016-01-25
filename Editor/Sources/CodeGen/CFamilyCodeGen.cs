@@ -31,6 +31,7 @@ namespace Petri.Editor
         public CFamilyCodeGen(Code.Language language)
         {
             _lang = language;
+            _value = new System.Text.StringBuilder();
         }
 
         public override Code.Language Language {
@@ -41,16 +42,17 @@ namespace Petri.Editor
 
         public override string Value {
             get {
-                return _value;
+                return _value.ToString();
             }
             set {
-                _value = value;
+                _value.Clear();
+                _value.Append(value);
             }
         }
 
         public override void Format()
         {
-            string newVal = "";
+            var newVal = new System.Text.StringBuilder();
 
             Dictionary<char, int> dict = new Dictionary<char, int>();
             dict['{'] = 1;
@@ -62,7 +64,8 @@ namespace Petri.Editor
 
             var nesting = new Stack<Code.Expression.ExprType>();
 
-            foreach(string line in _value.Split('\n')) {
+            var lines = Value.Split('\n');
+            foreach(string line in lines) {
                 string newLine = line;
 
                 if(!line.StartsWith("#")) {
@@ -144,20 +147,20 @@ namespace Petri.Editor
                     currentIndent += deltaNext;
                 }
 
-                newVal += newLine + "\n";
+                newVal.Append(newLine + "\n");
             }
 
             _value = newVal;
         }
 
-        public override void Add(string line)
+        protected override void AddInternal(string line)
         {
-            _value += line;
+            _value.Append(line);
         }
 
 
         // TODO: better complexity, please.
-        private static string GetNTab(int n)
+        static string GetNTab(int n)
         {
             string s = "";
             for(int i = 0; i < n; ++i) {
@@ -168,7 +171,7 @@ namespace Petri.Editor
         }
 
         private Code.Language _lang;
-        private string _value = "";
+        private System.Text.StringBuilder _value;
     }
 }
 

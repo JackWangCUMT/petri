@@ -29,7 +29,12 @@ namespace Petri.Editor
 {
     public abstract class State : Entity
     {
-        public State(HeadlessDocument doc, PetriNet parent, bool active, int requiredTokens, Cairo.PointD pos) : base(doc, parent)
+        public State(HeadlessDocument doc,
+                     PetriNet parent,
+                     bool active,
+                     int requiredTokens,
+                     Cairo.PointD pos) : base(doc,
+                                                                                                                      parent)
         {
             this.TransitionsBefore = new List<Transition>();
             this.TransitionsAfter = new List<Transition>();
@@ -40,7 +45,9 @@ namespace Petri.Editor
             this.Name = this.ID.ToString();
         }
 
-        public State(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc, parent, descriptor)
+        public State(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc,
+                                                                                        parent,
+                                                                                        descriptor)
         {
             this.TransitionsBefore = new List<Transition>();
             this.TransitionsAfter = new List<Transition>();
@@ -179,16 +186,12 @@ namespace Petri.Editor
         /// <param name="p">P.</param>
         public virtual bool PointInState(Cairo.PointD p)
         {
-            if(Math.Pow(p.X - this.Position.X, 2) + Math.Pow(p.Y - this.Position.Y, 2) < Math.Pow(this.Radius, 2)) {
+            if(Math.Pow(p.X - this.Position.X, 2) + Math.Pow(p.Y - this.Position.Y, 2) < Math.Pow(this.Radius,
+                                                                                                  2)) {
                 return true;
             }
 
             return false;
-        }
-
-        public virtual void UpdateConflicts()
-        {
-			
         }
     }
 }
