@@ -369,7 +369,10 @@ namespace Petri.Editor
             var c = new Compiler(this);
             var o = c.CompileSource(Settings.RelativeSourcePath, Settings.RelativeLibPath);
             if(o != "") {
-                Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.") + "\n" + Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
+                Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.")
+                                        + "\n" + Configuration.GetLocalized("Compiler invocation:")
+                                        + "\n" + Settings.Compiler
+                                        + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
                                                                                                                                                                                                                     Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Erreurs :") + "\n" + o);
                 return false;
             }

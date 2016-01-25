@@ -30,11 +30,64 @@
 #include "Action.h"
 #include "DebugServer.h"
 #include "PetriDynamicLib.h"
+#include "Socket.h"
 #include "ThreadPool.h"
+#include "jsoncpp/include/json/json.h"
+#include <atomic>
+#include <condition_variable>
 #include <cstring>
+#include <mutex>
+#include <set>
 #include <string>
+#include <thread>
 
 namespace Petri {
+
+    struct DebugServer::Internals {
+        Internals(DebugServer &that, PetriDynamicLib &lib)
+                : _that(that)
+                , _socket()
+                , _client()
+                , _petriNetFactory(lib) {}
+
+        DebugServer &_that;
+
+        void addActiveState(Action &a);
+        void removeActiveState(Action &a);
+        void notifyStop();
+
+        void serverCommunication();
+        void heartBeat();
+
+        void clearPetri();
+
+        void setPause(bool pause);
+
+        void updateBreakpoints(Json::Value const &breakpoints);
+
+        Json::Value receiveObject();
+        void sendObject(Json::Value const &o);
+
+        Json::Value json(std::string const &type, Json::Value const &payload);
+        Json::Value error(std::string const &error);
+
+        std::map<Action *, std::size_t> _activeStates;
+        bool _stateChange = false;
+        std::condition_variable _stateChangeCondition;
+        std::mutex _stateChangeMutex;
+
+        std::thread _receptionThread;
+        std::thread _heartBeat;
+        Petri::Socket _socket;
+        Petri::Socket _client;
+        std::atomic_bool _running = {false};
+
+        PetriDynamicLib &_petriNetFactory;
+        std::unique_ptr<PetriDebug> _petri;
+        std::mutex _sendMutex;
+        std::mutex _breakpointsMutex;
+        std::set<Action *> _breakpoints;
+    };
 
     std::string const &DebugServer::getVersion() {
         static auto const version = "0.2"s;
@@ -55,36 +108,47 @@ namespace Petri {
     }
 
     DebugServer::DebugServer(PetriDynamicLib &petri)
-            : _socket()
-            , _client()
-            , _petriNetFactory(petri) {}
+            : _internals(std::make_unique<Internals>(*this, petri)) {}
 
     DebugServer::~DebugServer() {
-        if(_receptionThread.joinable())
-            _receptionThread.join();
-        if(_heartBeat.joinable())
-            _heartBeat.join();
+        if(_internals->_receptionThread.joinable())
+            _internals->_receptionThread.join();
+        if(_internals->_heartBeat.joinable())
+            _internals->_heartBeat.join();
     }
 
     void DebugServer::start() {
-        _running = true;
-        _receptionThread = std::thread(&DebugServer::serverCommunication, this);
+        _internals->_running = true;
+        _internals->_receptionThread = std::thread(&DebugServer::Internals::serverCommunication, &*_internals);
     }
 
     void DebugServer::stop() {
-        _running = false;
+        _internals->_running = false;
 
-        if(_receptionThread.joinable())
-            _receptionThread.join();
-        if(_heartBeat.joinable())
-            _heartBeat.join();
+        if(_internals->_receptionThread.joinable())
+            _internals->_receptionThread.join();
+        if(_internals->_heartBeat.joinable())
+            _internals->_heartBeat.join();
     }
 
     bool DebugServer::running() const {
-        return _running;
+        return _internals->_running;
     }
 
+
     void DebugServer::addActiveState(Action &a) {
+        _internals->addActiveState(a);
+    }
+
+    void DebugServer::removeActiveState(Action &a) {
+        _internals->removeActiveState(a);
+    }
+
+    void DebugServer::notifyStop() {
+        _internals->notifyStop();
+    }
+
+    void DebugServer::Internals::addActiveState(Action &a) {
         {
             std::lock_guard<std::mutex> lk(_breakpointsMutex);
             if(_breakpoints.count(&a) > 0) {
@@ -99,7 +163,7 @@ namespace Petri {
         _stateChangeCondition.notify_all();
     }
 
-    void DebugServer::removeActiveState(Action &a) {
+    void DebugServer::Internals::removeActiveState(Action &a) {
         std::lock_guard<std::mutex> lk(_stateChangeMutex);
         auto it = _activeStates.find(&a);
         if(it == _activeStates.end() || it->second == 0)
@@ -110,11 +174,11 @@ namespace Petri {
         _stateChangeCondition.notify_all();
     }
 
-    void DebugServer::notifyStop() {
+    void DebugServer::Internals::notifyStop() {
         this->sendObject(this->json("ack", "stop"));
     }
 
-    void DebugServer::serverCommunication() {
+    void DebugServer::Internals::serverCommunication() {
         setThreadName(std::string("DebugServer ") + _petriNetFactory.name());
 
         int attempts = 0;
@@ -156,7 +220,7 @@ namespace Petri {
                             ehlo["type"] = "ehlo";
                             ehlo["version"] = DebugServer::getVersion();
                             this->sendObject(ehlo);
-                            _heartBeat = std::thread(&DebugServer::heartBeat, this);
+                            _heartBeat = std::thread(&DebugServer::Internals::heartBeat, this);
                         }
                     } else if(type == "start") {
                         if(!_petriNetFactory.loaded()) {
@@ -186,7 +250,7 @@ namespace Petri {
                             } else {
                                 if(!_petri) {
                                     _petri = _petriNetFactory.createDebug();
-                                    _petri->setObserver(this);
+                                    _petri->setObserver(&_that);
                                 } else if(_petri->running()) {
                                     throw std::runtime_error("Petri net is already running!");
                                 }
@@ -224,7 +288,7 @@ namespace Petri {
                         _petriNetFactory.reload();
                         _petriNetFactory.hash();
                         _petri = _petriNetFactory.createDebug();
-                        _petri->setObserver(this);
+                        _petri->setObserver(&_that);
                         std::cout << "Reloaded Petri Net." << std::endl;
                         std::cout << "Got hash: " << _petriNetFactory.hash() << std::endl;
                         this->sendObject(this->json("ack", "reload"));
@@ -271,7 +335,7 @@ namespace Petri {
             _petri->stop();
     }
 
-    void DebugServer::updateBreakpoints(Json::Value const &breakpoints) {
+    void DebugServer::Internals::updateBreakpoints(Json::Value const &breakpoints) {
         if(breakpoints.type() != Json::arrayValue) {
             throw std::runtime_error("Invalid breakpoint specifying format!");
         }
@@ -284,7 +348,7 @@ namespace Petri {
         }
     }
 
-    void DebugServer::heartBeat() {
+    void DebugServer::Internals::heartBeat() {
         setThreadName(std::string("DebugServer ") + _petriNetFactory.name() +
                       std::string(" heart beat"));
         auto lastSendDate = std::chrono::system_clock::now();
@@ -320,14 +384,14 @@ namespace Petri {
         }
     }
 
-    void DebugServer::clearPetri() {
+    void DebugServer::Internals::clearPetri() {
         if(_petri != nullptr) {
             _petri = nullptr;
         }
         _activeStates.clear();
     }
 
-    void DebugServer::setPause(bool pause) {
+    void DebugServer::Internals::setPause(bool pause) {
         if(!_petri || !_petri->running())
             throw std::runtime_error("Petri net is not running!");
 
@@ -338,7 +402,7 @@ namespace Petri {
         }
     }
 
-    Json::Value DebugServer::receiveObject() {
+    Json::Value DebugServer::Internals::receiveObject() {
         std::vector<uint8_t> vect = _socket.receiveNewMsg(_client);
 
         std::string msg(vect.begin(), vect.end());
@@ -353,7 +417,7 @@ namespace Petri {
         return root;
     }
 
-    void DebugServer::sendObject(Json::Value const &o) {
+    void DebugServer::Internals::sendObject(Json::Value const &o) {
         std::lock_guard<std::mutex> lk(_sendMutex);
 
         Json::FastWriter writer;
@@ -364,7 +428,7 @@ namespace Petri {
         _socket.sendMsg(_client, s.c_str(), s.size());
     }
 
-    Json::Value DebugServer::json(std::string const &type, Json::Value const &payload) {
+    Json::Value DebugServer::Internals::json(std::string const &type, Json::Value const &payload) {
         Json::Value err;
         err["type"] = type;
         err["payload"] = payload;
@@ -372,7 +436,7 @@ namespace Petri {
         return err;
     }
 
-    Json::Value DebugServer::error(std::string const &error) {
+    Json::Value DebugServer::Internals::error(std::string const &error) {
         return this->json("error", error);
     }
 }
