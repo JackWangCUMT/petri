@@ -143,7 +143,9 @@ namespace Petri.Editor
                         deltaNext += delta;
                     }
 
-                    newLine = GetNTab(currentIndent + firstIndent - existingIndent) + line;
+                    if(line.Length > 0) {
+                        newLine = GetNTab(currentIndent + firstIndent - existingIndent) + line;
+                    }
                     currentIndent += deltaNext;
                 }
 

@@ -258,7 +258,7 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             a.GetVariables(cppVar);
 
-            _functionPrototypes += "Petri_actionResult_t " + a.CodeIdentifier + "_invocation(PetriNet &);\n";
+            _functionPrototypes += "Petri_actionResult_t " + a.CodeIdentifier + "_invocation(PetriNet &);";
 
             CodeRange range = new CodeRange();
             range.FirstLine = _functionBodies.LineCount;
@@ -353,7 +353,7 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             t.GetVariables(cppVar);
 
-            _functionPrototypes += "bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t);\n";
+            _functionPrototypes += "bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t);";
 
             CodeRange range = new CodeRange();
             range.FirstLine = _functionBodies.LineCount;

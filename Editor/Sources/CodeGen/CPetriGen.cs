@@ -75,7 +75,7 @@ namespace Petri.Editor
             CodeGen += "#include \"" + Document.Settings.Name + ".h\"";
             CodeGen += "";
             CodeGen += "#define EXPORT extern";
-            CodeGen += "#define PETRI_PREFIX \"" + Document.Settings.Name + "\"\n";
+            CodeGen += "#define PETRI_PREFIX \"" + Document.Settings.Name + "\"";
 
             CodeGen += GenerateVarEnum();
 
@@ -203,28 +203,28 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             a.GetVariables(cppVar);
 
-            _functionPrototypes += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(struct PetriNet *);\n";
+            _functionPrototypes += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(struct PetriNet *);";
 
             CodeRange range = new CodeRange();
             range.FirstLine = _functionBodies.LineCount;
 
-            _functionBodies += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(struct PetriNet *petriNet) {\n";
+            _functionBodies += "static Petri_actionResult_t " + a.CodeIdentifier + "_invocation(struct PetriNet *petriNet) {";
 
             if(a.Function.NeedsReturn) {
-                _functionBodies += a.Function.MakeCode() + "\n";
+                _functionBodies += a.Function.MakeCode();
             }
             else {
-                _functionBodies += Document.Settings.Enum.Name + " result = (Petri_actionResult_t)(" + a.Function.MakeCode() + ")" + ";\n";
+                _functionBodies += Document.Settings.Enum.Name + " result = (Petri_actionResult_t)(" + a.Function.MakeCode() + ")" + ";";
             }
 			
             if(a.Function.NeedsReturn) {
-                _functionBodies += "return PetriUtility_returnDefault();\n";
+                _functionBodies += "return PetriUtility_returnDefault();";
             }
             else {
-                _functionBodies += "return result;\n";
+                _functionBodies += "return result;";
             }
 
-            _functionBodies += "}\n\n";
+            _functionBodies += "}\n";
 
             range.LastLine = _functionBodies.LineCount;
 
@@ -310,27 +310,27 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             t.GetVariables(cppVar);
 
-            _functionPrototypes += "static bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t);\n";
+            _functionPrototypes += "static bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t);";
 
             CodeRange range = new CodeRange();
             range.FirstLine = _functionBodies.LineCount;
-            _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n";
+            _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {";
 
             if(t.Condition.NeedsReturn) {
                 _functionBodies += t.Condition.MakeCode();
             }
             else {
-                _functionBodies += "bool result = " + t.Condition.MakeCode() + ";\n";
+                _functionBodies += "bool result = " + t.Condition.MakeCode() + ";";
             }
 
             if(t.Condition.NeedsReturn) {
-                _functionBodies += "return true;\n";
+                _functionBodies += "return true;";
             }
             else {
-                _functionBodies += "return result;\n";
+                _functionBodies += "return result;";
             }
 
-            _functionBodies += "}\n\n";
+            _functionBodies += "}\n";
 
             range.LastLine = _functionBodies.LineCount;
 
