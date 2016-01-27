@@ -105,7 +105,7 @@ namespace Petri.Editor
             CodeGen += "#define EXPORT extern \"C\"";
             CodeGen += "#define PETRI_PREFIX \"" + ClassName + "\"\n";
 
-            CodeGen += "\nusing namespace Petri;\n";
+            CodeGen += "using namespace Petri;";
 
             CodeGen += GenerateVarEnum();
 
@@ -172,6 +172,24 @@ namespace Petri.Editor
             CodeGen += "return __TIMESTAMP__;";
             CodeGen += "}";
 
+            CodeGen += "";
+
+            CodeGen += "EXPORT void *" + Document.Settings.Name + "_createLib() {";
+            CodeGen += "return std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
+                + Document.Settings.Port + ").release();";
+            CodeGen += "}";
+
+            CodeGen += "";
+
+            CodeGen += "namespace Petri {";
+            CodeGen += "namespace Generated {";
+            CodeGen += "std::unique_ptr<::Petri::PetriDynamicLib> " + Document.Settings.Name + "_createLib() {";
+            CodeGen += "return std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
+                + Document.Settings.Port + ");";
+            CodeGen += "}";
+            CodeGen += "}";
+            CodeGen += "}";
+
             CodeGen.Format();
 
             _headerGen += "#ifndef PETRI_" + ClassName + "_H";
@@ -183,10 +201,7 @@ namespace Petri.Editor
 
             _headerGen += "namespace Petri {";
             _headerGen += "namespace Generated {";
-            _headerGen += "inline std::unique_ptr<::Petri::PetriDynamicLib> " + Document.Settings.Name + "_createLib() {";
-            _headerGen += "return std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
-                + Document.Settings.Port + ");";
-            _headerGen += "}";
+            _headerGen += "std::unique_ptr<::Petri::PetriDynamicLib> " + Document.Settings.Name + "_createLib();";
             _headerGen += "}";
             _headerGen += "}";
 
