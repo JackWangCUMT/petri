@@ -89,7 +89,7 @@ namespace Petri {
         /**
          * Gets an atomic variable previously added to the Petri net. Trying to retrieve a non
          * existing variable will throw an exception.
-         * @param the id of the Atomic to retrieve.
+         * @param id the id of the Atomic to retrieve.
          */
         Atomic &getVariable(std::uint_fast32_t id);
 

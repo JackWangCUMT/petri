@@ -1,5 +1,7 @@
-CXXSRC:=$(wildcard Runtime/Cpp/*.cpp) $(wildcard Runtime/C/*.cpp) $(wildcard Runtime/Cpp/jsoncpp/src/lib_json/*.cpp)
+CXXSRC:=$(wildcard Runtime/Cpp/*.cpp) $(wildcard Runtime/C/*.cpp)
 CXXOBJ:=$(CXXSRC:%.cpp=build/%.o)
+JSONSRC:=$(wildcard Runtime/Cpp/jsoncpp/src/lib_json/*.cpp)
+JSONOBJ:=$(JSONSRC:%.cpp=build/json/%.o)
 
 WARN:=-Wall -Wunused-value -Wuninitialized
 
@@ -8,6 +10,7 @@ MSBUILD:=xbuild
 CXXVERSION:=$(shell $(CXX) --version)
 
 CXXFLAGS:=-std=c++14 -I./Runtime/Cpp/jsoncpp/include
+WARN_JSON:=
 LDFLAGS:=-shared
 
 CSCONF:=Release
@@ -15,9 +18,10 @@ CSCONF:=Release
 ifneq (,$(findstring clang,$(CXXVERSION)))
 # if the compiler is clang++
 
-WARN:=$(WARN) -Werror=return-stack-address
+WARN:=$(WARN) -Werror=return-stack-address -Woverloaded-virtual -Wdocumentation -Wunused-parameter -Wmissing-prototypes
 CXXFLAGS:=$(CXXFLAGS) -arch i386 -arch x86_64
 LDFLAGS:=$(LDFLAGS) -undefined dynamic_lookup -flat_namespace -arch i386 -arch x86_64
+WARN_JSON:=$(WARN_JSON) -Wno-documentation -Wno-missing-prototypes
 
 else
 # else, we assume g++
@@ -63,17 +67,21 @@ test: all
 	nunit-console Editor/Test/Test.csproj
 
 builddir:
-	mkdir -p build/Runtime/Cpp/jsoncpp/src/lib_json
+	mkdir -p build/json/Runtime/Cpp/jsoncpp/src/lib_json
+	mkdir -p build/Runtime/Cpp
 	mkdir -p build/Runtime/C
 	mkdir -p Editor/Test/bin
 	mkdir -p Editor/bin
 
 lib: builddir buildlib
 
-buildlib: $(CXXOBJ)
+buildlib: $(CXXOBJ) $(JSONOBJ)
 	$(CXX) -o Runtime/$(OUTPUT) $^ $(LDFLAGS)
 	ln -sf $(abspath Runtime/$(OUTPUT)) Editor/Test/bin/$(OUTPUT)
 	ln -sf $(abspath Runtime/$(OUTPUT)) Editor/bin/$(OUTPUT)
 
 build/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+build/json/%.o: %.cpp
+	$(CXX) -o $@ -c $< $(CXXFLAGS) $(WARN_JSON)

@@ -94,7 +94,7 @@ uint64_t PetriAction_getRequiredTokens(PetriAction *action) {
     return getAction(action).requiredTokens();
 }
 
-void PetriAction_setRequiredTokens(PetriAction *action, size_t requiredTokens) {
+void PetriAction_setRequiredTokens(PetriAction *action, uint64_t requiredTokens) {
     getAction(action).setRequiredTokens(requiredTokens);
 }
 

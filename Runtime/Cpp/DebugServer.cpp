@@ -32,7 +32,14 @@
 #include "PetriDynamicLib.h"
 #include "Socket.h"
 #include "ThreadPool.h"
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+#endif
 #include "jsoncpp/include/json/json.h"
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 #include <atomic>
 #include <condition_variable>
 #include <cstring>
@@ -257,8 +264,8 @@ namespace Petri {
 
                                 this->sendObject(this->json("ack", "start"));
 
-                                auto const root = this->receiveObject();
-                                this->updateBreakpoints(root["payload"]);
+                                auto const obj = this->receiveObject();
+                                this->updateBreakpoints(obj["payload"]);
 
                                 _petri->run();
                             }

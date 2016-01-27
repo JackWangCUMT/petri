@@ -45,39 +45,26 @@ namespace Petri {
          * Creates the dynamic library wrapper. It still needs to be loaded to make it possible to
          * create the PetriNet objects.
          */
-        PetriDynamicLib() = default;
+        PetriDynamicLib(bool c_dynamicLib)
+                : _c_dynamicLib(c_dynamicLib) {}
         PetriDynamicLib(PetriDynamicLib const &pn) = delete;
         PetriDynamicLib &operator=(PetriDynamicLib const &pn) = delete;
 
         PetriDynamicLib(PetriDynamicLib &&pn) = default;
         PetriDynamicLib &operator=(PetriDynamicLib &&pn) = default;
-        virtual ~PetriDynamicLib() = default;
+        virtual ~PetriDynamicLib();
 
         /**
          * Creates the PetriNet object according to the code contained in the dynamic library.
          * @return The PetriNet object wrapped in a std::unique_ptr
          */
-        virtual std::unique_ptr<PetriNet> create() {
-            if(!this->loaded()) {
-                throw std::runtime_error("Dynamic library not loaded!");
-            }
-
-            void *ptr = _createPtr();
-            return std::unique_ptr<PetriNet>(static_cast<PetriNet *>(ptr));
-        }
+        std::unique_ptr<PetriNet> create();
 
         /**
          * Creates the PetriDebug object according to the code contained in the dynamic library.
          * @return The PetriDebug object wrapped in a std::unique_ptr
          */
-        virtual std::unique_ptr<PetriDebug> createDebug() {
-            if(!this->loaded()) {
-                throw std::runtime_error("Dynamic library not loaded!");
-            }
-
-            void *ptr = _createDebugPtr();
-            return std::unique_ptr<PetriDebug>(static_cast<PetriDebug *>(ptr));
-        }
+        std::unique_ptr<PetriDebug> createDebug();
 
         /**
          * Returns the SHA1 hash of the dynamic library. It uniquely identifies the code of the
@@ -154,6 +141,8 @@ namespace Petri {
         void *(*_createPtr)() = nullptr;
         void *(*_createDebugPtr)() = nullptr;
         char const *(*_hashPtr)() = nullptr;
+
+        bool _c_dynamicLib;
     };
 }
 

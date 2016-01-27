@@ -14,6 +14,7 @@
 
 template <typename ReturnType, typename... Args>
 struct CallableBase {
+    virtual ~CallableBase() = default;
     virtual ReturnType operator()(Args...) = 0;
     virtual std::unique_ptr<CallableBase<ReturnType, Args...>> copy_ptr() const = 0;
 };

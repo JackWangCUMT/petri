@@ -63,8 +63,8 @@ namespace Petri {
         // This method is executed concurrently on the thread pool.
         virtual void executeState(Action &a);
 
-        virtual void stateEnabled(Action &a) {}
-        virtual void stateDisabled(Action &a) {}
+        virtual void stateEnabled(Action &) {}
+        virtual void stateDisabled(Action &) {}
 
         void enableState(Action &a);
         void disableState(Action &a);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Rémi Saurel
+ * Copyright (c) 2016 Rémi Saurel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,30 +21,46 @@
  */
 
 //
-//  PetriUtils.c
-//  Petri
+//  PetriDynamicLib.cpp
+//  TestPetri
 //
-//  Created by Rémi on 01/07/2015.
+//  Created by Rémi on 27/01/2016.
 //
 
-#include "../Cpp/DynamicLib.h"
-#include "../Cpp/PetriUtils.h"
+#include "../C/PetriNet.h"
+#include "../C/Types.hpp"
 #include "PetriDynamicLib.h"
-#include "PetriUtils.h"
-#include <iostream>
 
-Petri_actionResult_t PetriUtility_pause(uint64_t usdelay) {
-    return Petri::Utility::pause(std::chrono::microseconds(usdelay));
-}
+namespace Petri {
+    PetriDynamicLib::~PetriDynamicLib() = default;
 
-Petri_actionResult_t PetriUtility_printAction(char const *name, uint64_t id) {
-    return Petri::Utility::printAction(name, id);
-}
+    std::unique_ptr<PetriNet> PetriDynamicLib::create() {
+        if(!this->loaded()) {
+            throw std::runtime_error("Dynamic library not loaded!");
+        }
 
-Petri_actionResult_t PetriUtility_doNothing() {
-    return Petri::Utility::doNothing();
-}
+        void *ptr = _createPtr();
 
-bool PetriUtility_returnTrue(Petri_actionResult_t) {
-    return true;
+        if(_c_dynamicLib) {
+            ::PetriNet *cPetriNet = static_cast<::PetriNet *>(ptr);
+            ptr = cPetriNet->petriNet.release();
+        }
+
+        return std::unique_ptr<PetriNet>(static_cast<PetriNet *>(ptr));
+    }
+
+    std::unique_ptr<PetriDebug> PetriDynamicLib::createDebug() {
+        if(!this->loaded()) {
+            throw std::runtime_error("Dynamic library not loaded!");
+        }
+
+        void *ptr = _createDebugPtr();
+
+        if(_c_dynamicLib) {
+            ::PetriNet *cPetriNet = static_cast<::PetriNet *>(ptr);
+            ptr = cPetriNet->petriNet.release();
+        }
+
+        return std::unique_ptr<PetriDebug>(static_cast<PetriDebug *>(ptr));
+    }
 }

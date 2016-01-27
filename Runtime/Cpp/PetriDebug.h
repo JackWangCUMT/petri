@@ -66,7 +66,7 @@ namespace Petri {
 
         /**
          * Finds the state associated to the specified ID, or nullptr if not found.
-         * @param The ID to match with a state.
+         * @param id The ID to match with a state.
          * @return The state matching ID
          */
         Action *stateWithID(uint64_t id) const;

@@ -100,27 +100,27 @@ namespace Petri {
         }
     }
 
-    void PetriNet::Internals::executeState(Action &a) {
+    void PetriNet::Internals::executeState(Action &state) {
         Action *nextState = nullptr;
 
         actionResult_t res;
 
         {
             std::vector<std::unique_lock<std::mutex>> locks;
-            locks.reserve(a.getVariables().size());
-            for(auto &var : a.getVariables()) {
+            locks.reserve(state.getVariables().size());
+            for(auto &var : state.getVariables()) {
                 locks.emplace_back(_this.getVariable(var).getLock());
             }
 
             lock(locks.begin(), locks.end());
 
             // Runs the Callable
-            res = a.action()(_this);
+            res = state.action()(_this);
         }
 
-        if(!a.transitions().empty()) {
+        if(!state.transitions().empty()) {
             std::list<Transition *> transitionsToTest;
-            for(auto &t : a.transitions()) {
+            for(auto &t : state.transitions()) {
                 transitionsToTest.push_back(const_cast<Transition *>(&t));
             }
 
@@ -184,9 +184,9 @@ namespace Petri {
         }
 
         if(nextState != nullptr) {
-            this->swapStates(a, *nextState);
+            this->swapStates(state, *nextState);
         } else {
-            this->disableState(a);
+            this->disableState(state);
         }
     }
 

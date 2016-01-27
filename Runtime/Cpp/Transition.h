@@ -97,7 +97,7 @@ namespace Petri {
 
         /**
          * Changes the name of the Transition.
-         * @param The new name of the Transition.
+         * @param name The new name of the Transition.
          */
         void setName(std::string const &name);
 

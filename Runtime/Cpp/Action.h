@@ -144,7 +144,6 @@ namespace Petri {
         /**
          * Changes the required tokens of the Action to be activated.
          * @param requiredTokens The new required tokens count
-         * @return The required tokens of the Action
          */
         void setRequiredTokens(std::size_t requiredTokens) noexcept;
 
@@ -168,7 +167,6 @@ namespace Petri {
 
         /**
          * Returns the transitions exiting the Action.
-         * @param name The exiting transitions of the Action
          */
         std::list<Transition> const &transitions() const noexcept;
 

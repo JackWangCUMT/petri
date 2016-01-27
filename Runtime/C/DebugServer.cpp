@@ -29,7 +29,6 @@
 
 #include "../Cpp/DebugServer.h"
 #include "DebugServer.h"
-#include "PetriDynamicLib.hpp"
 #include "Types.hpp"
 
 char const *PetriDebugServer_getVersion() {

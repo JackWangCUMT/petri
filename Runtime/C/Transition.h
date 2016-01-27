@@ -93,7 +93,7 @@ char const *PetriTransition_getName(struct PetriTransition *transition);
 /**
  * Changes the name of the PetriTransition.
  * @param transition The PetriTransition instance to change.
- * @param The new name of the PetriTransition.
+ * @param name The new name of the PetriTransition.
  */
 void PetriTransition_setName(struct PetriTransition *transition, char const *name);
 
@@ -110,7 +110,7 @@ uint64_t PetriTransition_getDelayBetweenEvaluation(struct PetriTransition *trans
 /**
  * Changes the delay between successive evaluations of the PetriTransition.
  * @param transition The PetriTransition instance to change.
- * @param delay The new minimal delay in microseconds between two evaluations of the
+ * @param usDelay The new minimal delay in microseconds between two evaluations of the
  * PetriTransition.
  */
 void PetriTransition_setDelayBetweenEvaluation(struct PetriTransition *transition, uint64_t usDelay);

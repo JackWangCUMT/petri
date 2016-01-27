@@ -28,12 +28,12 @@
 //
 
 #include "PetriDynamicLib.h"
-#include "PetriDynamicLib.hpp"
+#include "../Cpp/MemberPetriDynamicLib.h"
 #include "PtrPetriDynamicLib.hpp"
 #include "Types.hpp"
 
 PetriDynamicLib *PetriDynamicLib_create(char const *name, char const *prefix, uint16_t port) {
-    return new PetriDynamicLib{std::make_unique<CPetriDynamicLib>(name, prefix, port)};
+    return new PetriDynamicLib{std::make_unique<Petri::MemberPetriDynamicLib>(true, name, prefix, port)};
 }
 
 PetriDynamicLib *PetriDynamicLib_createWithPtr(void *(*createPtr)(), void *(*createDebugPtr)(), char const *(*hashPtr)(), char const *(*namePtr)(), uint16_t (*portPtr)(), char const *(*prefixPtr)()) {

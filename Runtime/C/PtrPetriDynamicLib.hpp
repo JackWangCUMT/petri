@@ -34,10 +34,12 @@
 #include "Types.hpp"
 
 namespace Petri {
+
     class PtrPetriDynamicLib : public PetriDynamicLib {
     public:
         PtrPetriDynamicLib(void *(*createPtr)(), void *(*createDebugPtr)(), char const *(*hashPtr)(), char const *(*namePtr)(), uint16_t (*portPtr)(), char const *(*prefixPtr)())
-                : _namePtr(namePtr)
+                : PetriDynamicLib(true)
+                , _namePtr(namePtr)
                 , _portPtr(portPtr)
                 , _prefixPtr(prefixPtr) {
             _createPtr = createPtr;
@@ -50,28 +52,6 @@ namespace Petri {
         PtrPetriDynamicLib(PtrPetriDynamicLib &&) = default;
         PtrPetriDynamicLib &operator=(PtrPetriDynamicLib &&) = default;
         virtual ~PtrPetriDynamicLib() = default;
-
-        virtual std::unique_ptr<Petri::PetriNet> create() override {
-            if(!this->loaded()) {
-                throw std::runtime_error("Dynamic library not loaded!");
-            }
-
-            void *ptr = _createPtr();
-            ::PetriNet *cPetriNet = static_cast<::PetriNet *>(ptr);
-            Petri::PetriNet *petriNet = cPetriNet->petriNet.release();
-            return std::unique_ptr<Petri::PetriNet>(petriNet);
-        }
-
-        virtual std::unique_ptr<Petri::PetriDebug> createDebug() override {
-            if(!this->loaded()) {
-                throw std::runtime_error("Dynamic library not loaded!");
-            }
-
-            void *ptr = _createDebugPtr();
-            ::PetriNet *cPetriNet = static_cast<::PetriNet *>(ptr);
-            Petri::PetriDebug *petriNet = static_cast<Petri::PetriDebug *>(cPetriNet->petriNet.release());
-            return std::unique_ptr<Petri::PetriDebug>(petriNet);
-        }
 
         /**
          * Returns the name of the Petri net.

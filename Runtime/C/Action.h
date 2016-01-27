@@ -137,7 +137,6 @@ uint64_t PetriAction_getRequiredTokens(struct PetriAction *action);
 /**
  * Changes the required tokens of the Action to be activated.
  * @param requiredTokens The new required tokens count
- * @return The required tokens of the Action
  */
 void PetriAction_setRequiredTokens(struct PetriAction *action, uint64_t requiredTokens);
 
