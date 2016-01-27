@@ -151,7 +151,7 @@ namespace Petri.Editor
             _headerGen += "#endif";
             _headerGen += "";
             _headerGen += "inline struct PetriDynamicLib *" + Document.Settings.Name + "_createLib() {";
-            _headerGen += "\treturn PetriDynamicLib_create(\"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
+            _headerGen += "return PetriDynamicLib_create(\"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
             + Document.Settings.Port + ");";
             _headerGen += "}";
             _headerGen += "";

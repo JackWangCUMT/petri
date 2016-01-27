@@ -210,7 +210,6 @@ namespace Petri.Editor
                         Console.Write("Cleaning artifacts of petri net \"" + document.Settings.Name + "\"…");
                         System.IO.File.Delete(sourcePath);
                         System.IO.File.Delete(libPath);
-                        Console.WriteLine(libPath);
                         Console.WriteLine(" Done.");
                     }
 

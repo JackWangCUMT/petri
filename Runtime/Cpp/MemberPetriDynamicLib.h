@@ -58,7 +58,7 @@ namespace Petri {
             return _port;
         }
 
-        virtual char const *prefix() const {
+        virtual char const *prefix() const override {
             return _prefix.c_str();
         }
 

@@ -175,46 +175,26 @@ namespace Petri.Editor
             CodeGen.Format();
 
             _headerGen += "#ifndef PETRI_" + ClassName + "_H";
-            _headerGen += "#define PETRI_" + ClassName + "_H\n";
+            _headerGen += "#define PETRI_" + ClassName + "_H";
 
             _headerGen += "";
-            _headerGen += "#include \"Runtime/Cpp/PetriDynamicLib.h\"";
+            _headerGen += "#include \"Runtime/Cpp/MemberPetriDynamicLib.h\"";
             _headerGen += "";
-            _headerGen += "class " + ClassName + " : public Petri::PetriDynamicLib {";
-            _headerGen += "public:";
-            _headerGen += "\t/**";
-            _headerGen += "\t * Creates the dynamic library wrapper. It still needs to be loaded to make it possible to create the PetriNet objects.";
-            _headerGen += "\t */";
-            _headerGen += "\t" + ClassName + "() = default;";
-            _headerGen += "\t" + ClassName + "(" + ClassName + " const &) = delete;";
-            _headerGen += "\t" + ClassName + " &operator=(" + ClassName + " const &) = delete;";
-            _headerGen += "";
-            _headerGen += "\t" + ClassName + "(" + ClassName + " &&) = default;";
-            _headerGen += "\t" + ClassName + " &operator=(" + ClassName + " &&) = default;";
-            _headerGen += "\tvirtual ~" + ClassName + "() = default;";
-            _headerGen += "";
-            _headerGen += "\t/**";
-            _headerGen += "\t * Returns the name of the Petri net.";
-            _headerGen += "\t * @return The name of the Petri net";
-            _headerGen += "\t */";
-            _headerGen += "\tvirtual std::string name() const override {";
-            _headerGen += "\t\treturn \"" + Document.CodePrefix + "\";";
-            _headerGen += "\t}";
-            _headerGen += "";
-            _headerGen += "\t/**";
-            _headerGen += "\t * Returns the TCP port on which a DebugSession initialized with this wrapper will listen to debugger connection.";
-            _headerGen += "\t * @return The TCP port which will be used by DebugSession";
-            _headerGen += "\t */";
-            _headerGen += "\tvirtual uint16_t port() const override {";
-            _headerGen += "\t\treturn " + Document.Settings.Port + ";";
-            _headerGen += "\t}";
-            _headerGen += "";
-            _headerGen += "\tvirtual char const *prefix() const override {";
-            _headerGen += "\t\treturn \"" + Document.CodePrefix + "\";";
-            _headerGen += "\t}";
-            _headerGen += "};";
+
+            _headerGen += "namespace Petri {";
+            _headerGen += "namespace Generated {";
+            _headerGen += "inline std::unique_ptr<::Petri::PetriDynamicLib> " + Document.Settings.Name + "_createLib() {";
+            _headerGen += "return std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
+                + Document.Settings.Port + ");";
+            _headerGen += "}";
+            _headerGen += "}";
+            _headerGen += "}";
+
+            _headerGen.AddLine();
 
             _headerGen += "#endif"; // ifndef header guard
+
+            _headerGen.Format();
 
             string path = System.IO.Path.Combine(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
                                                                         Document.Settings.RelativeSourceOutputPath),
