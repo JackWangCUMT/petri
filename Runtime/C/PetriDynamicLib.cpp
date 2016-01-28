@@ -27,8 +27,8 @@
 //  Created by Rémi on 02/07/2015.
 //
 
-#include "PetriDynamicLib.h"
 #include "../Cpp/MemberPetriDynamicLib.h"
+#include "PetriDynamicLib.h"
 #include "PtrPetriDynamicLib.hpp"
 #include "Types.hpp"
 
@@ -36,8 +36,8 @@ PetriDynamicLib *PetriDynamicLib_create(char const *name, char const *prefix, ui
     return new PetriDynamicLib{std::make_unique<Petri::MemberPetriDynamicLib>(true, name, prefix, port)};
 }
 
-PetriDynamicLib *PetriDynamicLib_createWithPtr(void *(*createPtr)(), void *(*createDebugPtr)(), char const *(*hashPtr)(), char const *(*namePtr)(), uint16_t (*portPtr)(), char const *(*prefixPtr)()) {
-    return new PetriDynamicLib{std::make_unique<Petri::PtrPetriDynamicLib>(createPtr, createDebugPtr, hashPtr, namePtr, portPtr, prefixPtr)};
+PetriDynamicLib *PetriDynamicLib_createWithPtr(void *(*createPtr)(), void *(*createDebugPtr)(), char const *(*hashPtr)(), char const *name, char const *prefix, uint16_t port) {
+    return new PetriDynamicLib{std::make_unique<Petri::PtrPetriDynamicLib>(createPtr, createDebugPtr, hashPtr, name, prefix, port)};
 }
 
 void PetriDynamicLib_destroy(PetriDynamicLib *lib) {

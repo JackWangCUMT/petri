@@ -56,7 +56,7 @@ struct PetriDynamicLib *PetriDynamicLib_create(char const *name, char const *pre
  * Create a dynamic library handle with the specified function ptr.
  * No dynamic library is actually loaded, but this provides a convenient interface for being used by the DebugServer API.
  */
-struct PetriDynamicLib *PetriDynamicLib_createWithPtr(void *(*createPtr)(), void *(*createDebugPtr)(), char const *(*hashPtr)(), char const *(*namePtr)(), uint16_t (*portPtr)(), char const *(*prefixPtr)());
+struct PetriDynamicLib *PetriDynamicLib_createWithPtr(void *(*createPtr)(), void *(*createDebugPtr)(), char const *(*hashPtr)(), char const *name, char const *prefix, uint16_t port);
 
 /**
 * Destroys the specified dynamic library handle.

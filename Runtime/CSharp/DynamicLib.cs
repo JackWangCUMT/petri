@@ -27,6 +27,11 @@ namespace Petri.Runtime
 {
     public class DynamicLib : CInterop
     {
+        internal DynamicLib(IntPtr handle)
+        {
+            Handle = handle;
+        }
+
         /**
          * Creates the dynamic library wrapper. It still needs to be loaded to make it possible to
          * create the PetriNet objects.
@@ -34,12 +39,12 @@ namespace Petri.Runtime
         public DynamicLib(PtrCallableDel create,
                           PtrCallableDel createDebug,
                           StringCallableDel hash,
-                          StringCallableDel name,
-                          StringCallableDel prefix,
-                          UInt16CallableDel port)
+                          string name,
+                          string prefix,
+                          UInt16 port)
         {
             Handle = Interop.PetriDynamicLib.PetriDynamicLib_createWithPtr(create, createDebug, hash,
-                                                                           name, port, prefix);
+                                                                           name, prefix, port);
         }
 
         ~DynamicLib()

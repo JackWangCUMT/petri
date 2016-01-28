@@ -62,7 +62,7 @@ namespace Petri.Editor
 
             CodeGen += "public " + ClassName + "()";
             CodeGen += "{";
-            CodeGen += "Lib = new DynamicLib(Create, CreateDebug, Hash, Name, Prefix, Port);";
+            CodeGen += "Lib = new DynamicLib(Create, CreateDebug, Hash, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", " + Document.Settings.Port + ");";
             CodeGen += "}\n";
 
             CodeGen += "static void Populate(PetriNet petriNet) {";
@@ -75,6 +75,7 @@ namespace Petri.Editor
         protected override void End()
         {
             CodeGen += "}"; // Populate()
+            CodeGen.AddLine();
 
             int linesSoFar = CodeGen.LineCount;
             var keys = new List<Entity>(CodeRanges.Keys);
@@ -92,9 +93,7 @@ namespace Petri.Editor
             System.Security.Cryptography.SHA1 sha = new System.Security.Cryptography.SHA1CryptoServiceProvider(); 
             Hash = BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(toHash))).Replace("-",
                                                                                                               "");
-
-            CodeGen += "";
-
+            
             CodeGen += "static IntPtr Create() {";
             CodeGen += "var petriNet = new PetriNet(\"" + Document.Settings.Name + "\");";
             CodeGen += "Populate(petriNet);";
@@ -114,26 +113,6 @@ namespace Petri.Editor
             CodeGen += "static string Hash() {";
             CodeGen += "return \"" + Hash + "\";";
             CodeGen += "}";
-
-            CodeGen += "";
-
-            CodeGen += "static string Prefix() {";
-            CodeGen += "return \"" + Document.CodePrefix + "\";";
-            CodeGen += "}";
-
-            CodeGen += "";
-
-            CodeGen += "static string Name() {";
-            CodeGen += "return \"" + Document.CodePrefix + "\";";
-            CodeGen += "}";
-
-            CodeGen += "";
-
-            CodeGen += "static UInt16 Port() {";
-            CodeGen += "return " + Document.Settings.Port + ";";
-            CodeGen += "}";
-
-            CodeGen += "";
 
             CodeGen += "}"; // class
             CodeGen += "}"; // namespace

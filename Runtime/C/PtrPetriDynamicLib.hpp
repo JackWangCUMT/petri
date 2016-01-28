@@ -30,22 +30,20 @@
 #ifndef Petri_PtrPetriDynamicLib_h
 #define Petri_PtrPetriDynamicLib_h
 
-#include "../Cpp/PetriDynamicLib.h"
+#include "../Cpp/MemberPetriDynamicLib.h"
 #include "Types.hpp"
 
 namespace Petri {
 
-    class PtrPetriDynamicLib : public PetriDynamicLib {
+    class PtrPetriDynamicLib : public MemberPetriDynamicLib {
     public:
-        PtrPetriDynamicLib(void *(*createPtr)(), void *(*createDebugPtr)(), char const *(*hashPtr)(), char const *(*namePtr)(), uint16_t (*portPtr)(), char const *(*prefixPtr)())
-                : PetriDynamicLib(true)
-                , _namePtr(namePtr)
-                , _portPtr(portPtr)
-                , _prefixPtr(prefixPtr) {
+        PtrPetriDynamicLib(void *(*createPtr)(), void *(*createDebugPtr)(), char const *(*hashPtr)(), char const *name, char const *prefix, std::uint16_t port)
+                : MemberPetriDynamicLib(true, name, prefix, port) {
             _createPtr = createPtr;
             _createDebugPtr = createDebugPtr;
             _hashPtr = hashPtr;
         }
+        
         PtrPetriDynamicLib(PtrPetriDynamicLib const &) = delete;
         PtrPetriDynamicLib &operator=(PtrPetriDynamicLib const &) = delete;
 
@@ -53,38 +51,12 @@ namespace Petri {
         PtrPetriDynamicLib &operator=(PtrPetriDynamicLib &&) = default;
         virtual ~PtrPetriDynamicLib() = default;
 
-        /**
-         * Returns the name of the Petri net.
-         * @return The name of the Petri net
-         */
-        virtual std::string name() const override {
-            return _namePtr();
-        }
-
-        /**
-         * Returns the TCP port on which a DebugSession initialized with this wrapper will listen to
-         * debugger connection.
-         * @return The TCP port which will be used by DebugSession
-         */
-        virtual uint16_t port() const override {
-            return _portPtr();
-        }
-
-        virtual char const *prefix() const override {
-            return _prefixPtr();
-        }
-
         virtual void load() override {}
         virtual void unload() override {}
 
         virtual bool loaded() const override {
             return true;
         }
-
-    private:
-        char const *(*_namePtr)();
-        uint16_t (*_portPtr)();
-        char const *(*_prefixPtr)();
     };
 }
 
