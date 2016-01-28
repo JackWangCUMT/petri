@@ -352,13 +352,10 @@ namespace Petri.Editor
         /// <value><c>true</c> if run in editor; otherwise, <c>false</c>.</value>
         public bool RunInEditor {
             get {
-                if(Language != Code.Language.CSharp) {
-                    _runInEditor = false;
-                }
                 return _runInEditor;
             }
             set {
-                _runInEditor = value && Language == Code.Language.CSharp;
+                _runInEditor = value;
             }
         }
 

@@ -36,7 +36,7 @@ namespace Petri {
 
     std::unique_ptr<PetriNet> PetriDynamicLib::create() {
         if(!this->loaded()) {
-            throw std::runtime_error("Dynamic library not loaded!");
+            throw std::runtime_error("PetriDynamicLib::create: Dynamic library not loaded!");
         }
 
         void *ptr = _createPtr();
@@ -51,7 +51,7 @@ namespace Petri {
 
     std::unique_ptr<PetriDebug> PetriDynamicLib::createDebug() {
         if(!this->loaded()) {
-            throw std::runtime_error("Dynamic library not loaded!");
+            throw std::runtime_error("PetriDynamicLib::createDebug: Dynamic library not loaded!");
         }
 
         void *ptr = _createDebugPtr();

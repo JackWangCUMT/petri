@@ -165,7 +165,7 @@ namespace Petri.Editor
         {
             UnloadLibAndStopServer();
 
-            _libProxy = new GeneratedDynamicLibProxy(System.IO.Directory.GetParent(_document.Path).FullName,
+            _libProxy = new GeneratedDynamicLibProxy(_document.Settings.Language, System.IO.Directory.GetParent(_document.Path).FullName,
                                                      _document.Settings.RelativeLibPath,
                                                      _document.Settings.Name);            
             Petri.Runtime.GeneratedDynamicLib dylib = _libProxy.Load();

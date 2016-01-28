@@ -43,7 +43,7 @@ namespace Petri {
             _createDebugPtr = createDebugPtr;
             _hashPtr = hashPtr;
         }
-        
+
         PtrPetriDynamicLib(PtrPetriDynamicLib const &) = delete;
         PtrPetriDynamicLib &operator=(PtrPetriDynamicLib const &) = delete;
 

@@ -58,11 +58,11 @@ namespace Petri.Editor
             CodeGen += GenerateVarEnum();
 
             CodeGen += "namespace Petri.Generated\n{";
-            CodeGen += "public class " + ClassName + " : Petri.Runtime.GeneratedDynamicLib\n{";
+            CodeGen += "public class " + ClassName + " : Petri.Runtime.CSharpGeneratedDynamicLib\n{";
 
             CodeGen += "public " + ClassName + "()";
             CodeGen += "{";
-            CodeGen += "Lib = new DynamicLib(Create, CreateDebug, Hash, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", " + Document.Settings.Port + ");";
+            CodeGen += "_lib = new DynamicLib(Create, CreateDebug, Hash, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", " + Document.Settings.Port + ");";
             CodeGen += "}\n";
 
             CodeGen += "static void Populate(PetriNet petriNet) {";

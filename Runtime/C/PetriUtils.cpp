@@ -48,3 +48,19 @@ Petri_actionResult_t PetriUtility_doNothing() {
 bool PetriUtility_returnTrue(Petri_actionResult_t) {
     return true;
 }
+
+PetriDynamicLib *Petri_loadPetriDynamicLib(char const *path, char const *prefix, uint16_t port) {
+    Petri::DynamicLib lib(path);
+
+    try {
+        lib.load();
+        auto createPtr = lib.loadSymbol<PetriDynamicLib *()>(std::string{prefix} + "_createLib");
+
+        return createPtr();
+
+    } catch(std::exception const &e) {
+        std::cerr << e.what() << std::endl;
+    }
+
+    return nullptr;
+}

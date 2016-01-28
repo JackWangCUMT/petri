@@ -74,7 +74,7 @@ namespace Petri {
          */
         std::string hash() const {
             if(!this->loaded()) {
-                throw std::runtime_error("Dynamic library not loaded!");
+                throw std::runtime_error("PetriDynamicLib::hash: Dynamic library not loaded!");
             }
             return std::string(_hashPtr());
         }

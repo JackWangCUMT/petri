@@ -43,8 +43,6 @@ namespace Petri.Editor
         internal static readonly string WrongArchitecture = "Wrong architecture specified!";
         internal static readonly string MissingArchitecture = "Missing architecture value!";
 
-        internal static readonly string WrongProjectTypeForRunning = "The project must be a C# project for being run directly by this application, and have be set as a \"Run in editor\" project!";
-
         internal static readonly int ArgumentError = 4;
         internal static readonly int CompilationFailure = 64;
         internal static readonly int UnexpectedError = 124;
@@ -72,7 +70,8 @@ namespace Petri.Editor
         /// </summary>
         /// <returns><c>true</c> if opt is a short option; otherwise, <c>false</c>.</returns>
         /// <param name="opt">Option.</param>
-        static bool IsShortOption(string opt) {
+        static bool IsShortOption(string opt)
+        {
             return System.Text.RegularExpressions.Regex.Match(opt, "^-[gcrkv]+$").Success;
         }
 
@@ -261,17 +260,11 @@ namespace Petri.Editor
                     }
 
                     if(run) {
-                        if(document.Settings.RunInEditor) {
-                            RunDocument(document, verbose);
-                        }
-                        else {
-                            Console.Error.WriteLine(WrongProjectTypeForRunning);
-                            return ArgumentError;
-                        }
+                        RunDocument(document, verbose);
                     }
                 }
                 catch(Exception e) {
-                    Console.Error.WriteLine("An exception occurred: " + e.Message);
+                    Console.Error.WriteLine("An exception occurred: " + e + " " + e.Message);
                     return UnexpectedError;
                 }
 
@@ -556,15 +549,18 @@ namespace Petri.Editor
         {
             if(verbose) {
                 Console.WriteLine("Preparing for the petri net's exection…\n");
-                Console.Write("Loading the assembly…");
+                Console.Write("Loading the assembly… ");
             }
-            var proxy = new GeneratedDynamicLibProxy(System.IO.Directory.GetParent(doc.Path).FullName,
+            var proxy = new GeneratedDynamicLibProxy(doc.Settings.Language, System.IO.Directory.GetParent(doc.Path).FullName,
                                                      doc.Settings.RelativeLibPath,
                                                      doc.Settings.Name);            
             Petri.Runtime.GeneratedDynamicLib dylib = proxy.Load();
 
+            if(dylib == null) {
+                return;
+            }
             if(verbose) {
-                Console.WriteLine(" Assembly loaded.");
+                Console.WriteLine("Assembly loaded.");
                 Console.Write("Extracting the dynamic library…");
             }
 

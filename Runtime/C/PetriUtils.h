@@ -38,6 +38,8 @@
 extern "C" {
 #endif
 
+struct PetriDynamicLib;
+
 enum ActionResult { OK, NOK };
 
 Petri_actionResult_t PetriUtility_pause(uint64_t usdelay);
@@ -45,6 +47,8 @@ Petri_actionResult_t PetriUtility_printAction(char const *name, uint64_t id);
 Petri_actionResult_t PetriUtility_doNothing();
 
 bool PetriUtility_returnTrue(Petri_actionResult_t res);
+
+struct PetriDynamicLib *Petri_loadPetriDynamicLib(char const *path, char const *prefix, uint16_t port);
 
 #ifdef __cplusplus
 }

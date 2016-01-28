@@ -17,6 +17,9 @@ namespace Petri.Runtime.Interop {
 
         [DllImport("PetriRuntime")]
         public static extern bool PetriUtility_returnTrue(Int32 res);
+
+        [DllImport("PetriRuntime")]
+        public static extern IntPtr Petri_loadPetriDynamicLib([MarshalAs(UnmanagedType.LPTStr)] string path, [MarshalAs(UnmanagedType.LPTStr)] string prefix, UInt16 port);
     }
 }
 

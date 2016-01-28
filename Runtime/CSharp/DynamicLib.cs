@@ -30,6 +30,7 @@ namespace Petri.Runtime
         internal DynamicLib(IntPtr handle)
         {
             Handle = handle;
+            Interop.PetriDynamicLib.PetriDynamicLib_load(Handle);
         }
 
         /**
@@ -45,6 +46,7 @@ namespace Petri.Runtime
         {
             Handle = Interop.PetriDynamicLib.PetriDynamicLib_createWithPtr(create, createDebug, hash,
                                                                            name, prefix, port);
+            Interop.PetriDynamicLib.PetriDynamicLib_load(Handle);
         }
 
         ~DynamicLib()
