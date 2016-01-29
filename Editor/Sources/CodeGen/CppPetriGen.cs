@@ -196,8 +196,8 @@ namespace Petri.Editor
             _headerGen += " */";
             _headerGen.AddLine();
 
-            _headerGen += "#ifndef PETRI_GENERATED" + ClassName + "_H";
-            _headerGen += "#define PETRI_GENERATED" + ClassName + "_H";
+            _headerGen += "#ifndef PETRI_GENERATED_" + ClassName + "_H";
+            _headerGen += "#define PETRI_GENERATED_" + ClassName + "_H";
 
             _headerGen += "";
             _headerGen += "#include \"Runtime/Cpp/MemberPetriDynamicLib.h\"";

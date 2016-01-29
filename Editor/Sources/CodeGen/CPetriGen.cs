@@ -157,8 +157,8 @@ namespace Petri.Editor
             _headerGen += " */";
             _headerGen.AddLine();
 
-            _headerGen += "#ifndef PETRI_GENERATED" + Document.Settings.Name + "_H";
-            _headerGen += "#define PETRI_GENERATED" + Document.Settings.Name + "_H";
+            _headerGen += "#ifndef PETRI_GENERATED_" + Document.Settings.Name + "_H";
+            _headerGen += "#define PETRI_GENERATED_" + Document.Settings.Name + "_H";
 
             _headerGen += "";
             _headerGen += "#include \"Runtime/C/PetriDynamicLib.h\"";
