@@ -242,7 +242,7 @@ namespace Petri.Editor
                             Console.WriteLine("The previously generated " + document.Settings.LanguageName() + " code is outdated or nonexistent, generating new code…");
                         }
                         document.GenerateCodeDontAsk();
-                        document.Save();
+                        System.IO.File.SetLastWriteTime(path, DateTime.Now);
                         if(verbose) {
                             Console.WriteLine("Successfully generated the " + document.Settings.LanguageName() + " code.");
                         }
