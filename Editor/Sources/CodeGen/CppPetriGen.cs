@@ -107,10 +107,7 @@ namespace Petri.Editor
 
             CodeGen += "#define EXPORT extern \"C\"";
             CodeGen += "#define PETRI_PREFIX \"" + ClassName + "\"\n";
-            CodeGen += "using Petri::PetriNet;";
-            CodeGen += "using Petri::PetriDebug;";
-            CodeGen += "using Petri::Action;";
-            CodeGen += "using Petri::actionResult_t;";
+            CodeGen += "using namespace Petri;";
 
             CodeGen += GenerateVarEnum();
 
@@ -180,7 +177,7 @@ namespace Petri.Editor
             CodeGen += "";
 
             CodeGen += "EXPORT void *" + Document.Settings.Name + "_createLib() {";
-            CodeGen += "return new PetriDynamicLib{std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
+            CodeGen += "return new ::PetriDynamicLib{std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
                 + Document.Settings.Port + ")};";
             CodeGen += "}";
 
