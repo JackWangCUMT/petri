@@ -206,10 +206,10 @@ namespace Petri.Editor
                                                                                        document.Settings.RelativeLibPath));
 
                     if(clean) {
-                        Console.Write("Cleaning artifacts of petri net \"" + document.Settings.Name + "\"…");
+                        Console.Write("Cleaning artifacts of petri net \"" + document.Settings.Name + "\"… ");
                         System.IO.File.Delete(sourcePath);
                         System.IO.File.Delete(libPath);
-                        Console.WriteLine(" Done.");
+                        Console.WriteLine("Done.");
                     }
 
                     bool forceGeneration = false, forceCompilation = false;
@@ -561,29 +561,29 @@ namespace Petri.Editor
             }
             if(verbose) {
                 Console.WriteLine("Assembly loaded.");
-                Console.Write("Extracting the dynamic library…");
+                Console.Write("Extracting the dynamic library… ");
             }
 
             var dynamicLib = dylib.Lib;
 
             if(verbose) {
-                Console.WriteLine(" OK.");
-                Console.Write("Creating the petri net…");
+                Console.WriteLine("OK.");
+                Console.Write("Creating the petri net… ");
             }
             Petri.Runtime.PetriNet pn = dynamicLib.Create();
             if(verbose) {
-                Console.WriteLine(" OK.");
+                Console.WriteLine("OK.");
                 Console.WriteLine("Ready to go! The application will automatically close when/if the petri net execution completes.\n");
             }
             pn.Run();
             pn.Join();
 
             if(verbose) {
-                Console.Write("\nExecution complete. Unloading the library…");
+                Console.Write("\nExecution complete. Unloading the library… ");
             }
             proxy.Unload();
             if(verbose) {
-                Console.WriteLine(" Done, will now exit.");
+                Console.WriteLine("Done, will now exit.");
             }
         }
 

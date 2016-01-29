@@ -233,7 +233,7 @@ namespace Petri {
                         if(!_petriNetFactory.loaded()) {
                             try {
                                 _petriNetFactory.load();
-                            } catch(std::exception &e) {
+                            } catch(std::exception const &e) {
                                 this->sendObject(this->error(
                                 std::string("An exception occurred upon dynamic lib loading (") + e.what() + ")!"));
                                 std::cerr << "An exception occurred upon dynamic lib loading ("
@@ -305,12 +305,12 @@ namespace Petri {
                         std::string result, lib;
                         try {
                             lib = root["payload"]["lib"].asString();
-                            DynamicLib dl(lib);
+                            DynamicLib dl(false, lib);
                             dl.load();
                             auto eval = dl.loadSymbol<char const *(void *)>(
                             _petriNetFactory.prefix() + std::string("_evaluate"));
                             result = eval(static_cast<void *>(_petri.get()));
-                        } catch(std::exception &e) {
+                        } catch(std::exception const &e) {
                             result = std::string("could not evaluate the symbol, reason: ") + e.what();
                         }
                         Json::Value payload;
@@ -320,7 +320,7 @@ namespace Petri {
                         this->sendObject(this->json("evaluation", payload));
                     }
                 }
-            } catch(std::exception &e) {
+            } catch(std::exception const &e) {
                 this->sendObject(this->json("exit", e.what()));
                 std::cerr << "Caught exception, exiting debugger: " << e.what() << std::endl;
             }

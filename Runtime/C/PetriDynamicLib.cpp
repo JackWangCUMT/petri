@@ -47,7 +47,7 @@ void PetriDynamicLib_destroy(PetriDynamicLib *lib) {
 PetriNet *PetriDynamicLib_createPetriNet(PetriDynamicLib *lib) {
     try {
         return new PetriNet{lib->lib->create()};
-    } catch(std::exception &e) {
+    } catch(std::exception const &e) {
         std::cerr << e.what() << std::endl;
         return nullptr;
     }
@@ -56,7 +56,7 @@ PetriNet *PetriDynamicLib_createPetriNet(PetriDynamicLib *lib) {
 PetriNet *PetriDynamicLib_createDebugPetriNet(PetriDynamicLib *lib) {
     try {
         return new PetriNet{lib->lib->createDebug()};
-    } catch(std::exception &e) {
+    } catch(std::exception const &e) {
         std::cerr << e.what() << std::endl;
         return nullptr;
     }

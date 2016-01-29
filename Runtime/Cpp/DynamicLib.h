@@ -41,8 +41,8 @@ namespace Petri {
          * Creates the dynamic library wrapper. It still needs to be loaded to access the dylib
          * symbols.
          */
-        DynamicLib(std::string const &path = "")
-                : _path(path) {}
+        DynamicLib(bool nodelete, std::string const &path = "")
+                : _nodelete(nodelete), _path(path) {}
         DynamicLib(DynamicLib const &pn) = delete;
         DynamicLib &operator=(DynamicLib const &pn) = delete;
 
@@ -111,6 +111,8 @@ namespace Petri {
         }
 
     protected:
+        bool _nodelete;
+
         void *_loadSymbol(std::string const &name);
         void *_libHandle = nullptr;
         std::string const _path;

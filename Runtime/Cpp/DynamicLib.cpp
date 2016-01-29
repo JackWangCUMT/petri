@@ -38,9 +38,11 @@ namespace Petri {
             return;
         }
 
+        int nodeleteFlag = _nodelete ? RTLD_NODELETE : 0;
+
         std::string path = this->path();
 
-        _libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
+        _libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL | nodeleteFlag);
 
         if(_libHandle == nullptr) {
             std::cerr << "Unable to load the dynamic library at path \"" << path << "\"!\n"

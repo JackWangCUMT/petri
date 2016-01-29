@@ -31,6 +31,8 @@
 #include "../Cpp/PetriUtils.h"
 #include "PetriDynamicLib.h"
 #include "PetriUtils.h"
+#include "Types.hpp"
+#include "../Cpp/PetriDynamicLib.h"
 #include <iostream>
 
 Petri_actionResult_t PetriUtility_pause(uint64_t usdelay) {
@@ -50,14 +52,13 @@ bool PetriUtility_returnTrue(Petri_actionResult_t) {
 }
 
 PetriDynamicLib *Petri_loadPetriDynamicLib(char const *path, char const *prefix, uint16_t port) {
-    Petri::DynamicLib lib(path);
+    Petri::DynamicLib lib(true, path);
 
     try {
         lib.load();
         auto createPtr = lib.loadSymbol<PetriDynamicLib *()>(std::string{prefix} + "_createLib");
 
         return createPtr();
-
     } catch(std::exception const &e) {
         std::cerr << e.what() << std::endl;
     }

@@ -30,6 +30,9 @@ namespace Petri.Runtime
         internal PetriNet(IntPtr handle)
         {
             Handle = handle;
+            if(Handle == IntPtr.Zero) {
+                throw new Exception("The petri net could not be loaded!");
+            }
         }
 
         /**

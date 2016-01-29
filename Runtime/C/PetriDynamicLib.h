@@ -34,7 +34,6 @@
 #define DECLARE_STRUCT_EVAL(prefix, class_name, port) \
     struct class_name##_1 {};
 
-#include "PetriNet.h"
 #include <stdbool.h>
 #include <stdint.h>
 

@@ -46,7 +46,8 @@ namespace Petri {
          * create the PetriNet objects.
          */
         PetriDynamicLib(bool c_dynamicLib)
-                : _c_dynamicLib(c_dynamicLib) {}
+                : DynamicLib(false)
+                , _c_dynamicLib(c_dynamicLib) {}
         PetriDynamicLib(PetriDynamicLib const &pn) = delete;
         PetriDynamicLib &operator=(PetriDynamicLib const &pn) = delete;
 
