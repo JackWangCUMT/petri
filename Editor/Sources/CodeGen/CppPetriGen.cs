@@ -95,7 +95,6 @@ namespace Petri.Editor
             CodeGen += "#include \"Runtime/Cpp/PetriUtils.h\"";
             CodeGen += "#include \"Runtime/Cpp/Action.h\"";
             CodeGen += "#include \"Runtime/Cpp/Atomic.h\"";
-            CodeGen += "#include \"Runtime/Cpp/MemberPetriDynamicLib.h\"";
             CodeGen += "#define NO_C_PETRI_NET";
             CodeGen += "#include \"Runtime/C/Types.hpp\"";
             foreach(var s in Document.Headers) {
@@ -182,21 +181,12 @@ namespace Petri.Editor
 
             CodeGen += "";
 
-            CodeGen += "EXPORT void *" + Document.Settings.Name + "_createLib() {";
+            CodeGen += "EXPORT void *" + Document.Settings.Name + "_createLibForEditor() {";
             CodeGen += "return new ::PetriDynamicLib{std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
                 + Document.Settings.Port + ")};";
             CodeGen += "}";
 
             CodeGen += "";
-
-            CodeGen += "namespace Petri {";
-            CodeGen += "namespace Generated {";
-            CodeGen += "std::unique_ptr<::Petri::PetriDynamicLib> " + Document.Settings.Name + "_createLib() {";
-            CodeGen += "return std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
-                + Document.Settings.Port + ");";
-            CodeGen += "}";
-            CodeGen += "}";
-            CodeGen += "}";
 
             CodeGen.Format();
 
@@ -206,17 +196,20 @@ namespace Petri.Editor
             _headerGen += " */";
             _headerGen.AddLine();
 
-            _headerGen += "#ifndef PETRI_" + ClassName + "_H";
-            _headerGen += "#define PETRI_" + ClassName + "_H";
+            _headerGen += "#ifndef PETRI_GENERATED" + ClassName + "_H";
+            _headerGen += "#define PETRI_GENERATED" + ClassName + "_H";
 
             _headerGen += "";
-            _headerGen += "#include \"Runtime/Cpp/PetriDynamicLib.h\"";
+            _headerGen += "#include \"Runtime/Cpp/MemberPetriDynamicLib.h\"";
             _headerGen += "#include <memory>";
             _headerGen += "";
 
             _headerGen += "namespace Petri {";
             _headerGen += "namespace Generated {";
-            _headerGen += "std::unique_ptr<::Petri::PetriDynamicLib> " + Document.Settings.Name + "_createLib();";
+            _headerGen += "inline std::unique_ptr<::Petri::PetriDynamicLib> " + Document.Settings.Name + "_createLib() {";
+            _headerGen += "return std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
+                + Document.Settings.Port + ");";
+            _headerGen += "}";
             _headerGen += "}";
             _headerGen += "}";
 

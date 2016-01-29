@@ -28,11 +28,11 @@
 //
 
 #include "../Cpp/DynamicLib.h"
+#include "../Cpp/PetriDynamicLib.h"
 #include "../Cpp/PetriUtils.h"
 #include "PetriDynamicLib.h"
 #include "PetriUtils.h"
 #include "Types.hpp"
-#include "../Cpp/PetriDynamicLib.h"
 #include <iostream>
 
 Petri_actionResult_t PetriUtility_pause(uint64_t usdelay) {
@@ -57,7 +57,7 @@ PetriDynamicLib *Petri_loadPetriDynamicLib(char const *path, char const *prefix)
 
     try {
         lib.load();
-        auto createPtr = lib.loadSymbol<PetriDynamicLib *()>(std::string{prefix} + "_createLib");
+        auto createPtr = lib.loadSymbol<PetriDynamicLib *()>(std::string{prefix} + "_createLibForEditor");
 
         return createPtr();
     } catch(std::exception const &e) {

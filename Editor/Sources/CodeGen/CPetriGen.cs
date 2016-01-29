@@ -145,9 +145,8 @@ namespace Petri.Editor
 
             CodeGen += "";
 
-            CodeGen += "EXPORT struct PetriDynamicLib *" + Document.Settings.Name + "_createLib() {";
-            CodeGen += "return PetriDynamicLib_create(\"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
-                + Document.Settings.Port + ");";
+            CodeGen += "EXPORT struct PetriDynamicLib *" + Document.Settings.Name + "_createLibForEditor() {";
+            CodeGen += "return " + Document.Settings.Name + "_createLib();";
             CodeGen += "}";
 
             CodeGen.Format();
@@ -158,8 +157,8 @@ namespace Petri.Editor
             _headerGen += " */";
             _headerGen.AddLine();
 
-            _headerGen += "#ifndef PETRI_" + Document.Settings.Name + "_H";
-            _headerGen += "#define PETRI_" + Document.Settings.Name + "_H";
+            _headerGen += "#ifndef PETRI_GENERATED" + Document.Settings.Name + "_H";
+            _headerGen += "#define PETRI_GENERATED" + Document.Settings.Name + "_H";
 
             _headerGen += "";
             _headerGen += "#include \"Runtime/C/PetriDynamicLib.h\"";
@@ -169,7 +168,10 @@ namespace Petri.Editor
             _headerGen += "extern \"C\" {";
             _headerGen += "#endif";
             _headerGen += "";
-            _headerGen += "struct PetriDynamicLib *" + Document.Settings.Name + "_createLib();";
+            _headerGen += "inline struct PetriDynamicLib *" + Document.Settings.Name + "_createLib() {";
+            _headerGen += "return PetriDynamicLib_create(\"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
+                + Document.Settings.Port + ");";
+            _headerGen += "}";
             _headerGen += "";
             _headerGen += "#ifdef __cplusplus";
             _headerGen += "}";
