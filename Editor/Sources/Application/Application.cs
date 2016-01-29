@@ -211,6 +211,11 @@ namespace Petri.Editor
                         }
                         System.IO.File.Delete(sourcePath);
                         System.IO.File.Delete(libPath);
+                        if(document.Settings.Language == Code.Language.C || document.Settings.Language == Code.Language.Cpp) {
+                            string headerPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
+                                                                                                  document.Settings.RelativeSourceHeaderPath));
+                            System.IO.File.Delete(headerPath);
+                        }
                         if(verbose) {
                             Console.WriteLine("Done.");
                         }
