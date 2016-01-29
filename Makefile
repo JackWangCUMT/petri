@@ -1,6 +1,6 @@
 CXXSRC:=$(wildcard Runtime/Cpp/detail/*.cpp) $(wildcard Runtime/C/detail/*.cpp)
 CXXOBJ:=$(CXXSRC:%.cpp=build/%.o)
-JSONSRC:=$(wildcard Runtime/Cpp/jsoncpp/src/lib_json/*.cpp)
+JSONSRC:=$(wildcard Runtime/Cpp/detail/jsoncpp/src/lib_json/*.cpp)
 JSONOBJ:=$(JSONSRC:%.cpp=build/json/%.o)
 
 WARN:=-Wall -Wunused-value -Wuninitialized
