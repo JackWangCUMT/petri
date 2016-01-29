@@ -118,7 +118,7 @@ namespace Petri.Editor
         /// Gets the version of the debugger.
         /// </summary>
         /// <value>The version.</value>
-        public string Version {
+        public static string Version {
             get {
                 return "1.3";
             }
