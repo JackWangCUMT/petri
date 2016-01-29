@@ -202,6 +202,7 @@ namespace Petri.Editor
 
             _headerGen += "";
             _headerGen += "#include \"Runtime/Cpp/PetriDynamicLib.h\"";
+            _headerGen += "#include <memory>";
             _headerGen += "";
 
             _headerGen += "namespace Petri {";

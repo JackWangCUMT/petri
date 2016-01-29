@@ -620,10 +620,22 @@ namespace Petri.Editor
         {
             if(Path != "") {
                 if(Settings.RelativeSourceOutputPath != "") {
-                    _codeRanges = this.GenerateCodeDontAsk();
-                    _modifiedSinceGeneration = false;
-                    Window.EditorGui.Status = Configuration.GetLocalized("The <language> code has been sucessfully generated.",
+                    try {
+                        _codeRanges = this.GenerateCodeDontAsk();
+                        _modifiedSinceGeneration = false;
+                        Window.EditorGui.Status = Configuration.GetLocalized("The <language> code has been sucessfully generated.",
                                                                              Settings.LanguageName());
+                    }
+                    catch(Exception e) {
+                        MessageDialog d = new MessageDialog(Window,
+                                                            DialogFlags.Modal,
+                                                            MessageType.Error,
+                                                            ButtonsType.None,
+                                                            Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred upon code generation:") + " " + e.Message));
+                        d.AddButton(Configuration.GetLocalized("OK"), ResponseType.Cancel);
+                        d.Run();
+                        d.Destroy();
+                    }
                 }
                 else {
                     var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Save the generated code as…"), Window,
@@ -699,7 +711,8 @@ namespace Petri.Editor
         {
             string linePattern = "(?<line>(\\d+))", rowPattern = "(?<row>(\\d+))";
             string pattern = "^" + Settings.RelativeSourcePath.Replace(".", "\\.") + "((:" + linePattern + ":" + rowPattern + ")|(\\(" + linePattern + "," + rowPattern + "\\))): error:? (?<msg>(.*))$";
-            var lines = errors.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var lines = errors.Split(new string[] { Environment.NewLine },
+                                     StringSplitOptions.RemoveEmptyEntries);
 
             foreach(string line in lines) {
                 var match = System.Text.RegularExpressions.Regex.Match(line, pattern);
@@ -709,7 +722,10 @@ namespace Petri.Editor
                         // TODO: sort + binary search
                         foreach(var entry in _codeRanges) {
                             if(lineNumber >= entry.Value.FirstLine && lineNumber <= entry.Value.LastLine) {
-                                AddConflicting(entry.Key, Configuration.GetLocalized("Line {0}, Row {1}:", lineNumber, match.Groups["row"].Value) + "\n" + match.Groups["msg"].Value);
+                                AddConflicting(entry.Key,
+                                               Configuration.GetLocalized("Line {0}, Row {1}:",
+                                                                          lineNumber,
+                                                                          match.Groups["row"].Value) + "\n" + match.Groups["msg"].Value);
                                 break;
                             }
                         }
@@ -794,7 +810,7 @@ namespace Petri.Editor
         /// <summary>
         /// Show the document's headers editor, or presents an error in case the document has not been saved for the first time.
         /// </summary>
-               public void ManageHeaders()
+        public void ManageHeaders()
         {
             if(this.Path != "") {
                 if(_headersManager == null) {

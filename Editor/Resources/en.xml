@@ -313,8 +313,11 @@
 <Key>Untitled</Key>
 <Value>Untitled</Value>
 
-<Key>An error occurred upon document loading: </Key>
-<Value>An error occurred upon document loading: </Value>
+<Key>An error occurred upon document loading:</Key>
+<Value>An error occurred upon document loading:</Value>
+
+<Key>An error occurred upon code generation:</Key>
+<Value>An error occurred upon code generation:</Value>
 
 <Key>The &lt;language&gt; code has been sucessfully generated.</Key>
 <Value>The {0} code has been sucessfully generated.</Value>
