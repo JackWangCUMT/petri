@@ -34,14 +34,17 @@
 #include "../Cpp/DebugServer.h"
 #include "../Cpp/PetriNet.h"
 #include "../Cpp/Transition.h"
+#include <memory>
 
 class CPetriDynamicLib;
 
-#include <memory>
+#ifndef NO_C_PETRI_NET
 
 struct PetriNet {
     std::unique_ptr<Petri::PetriNet> petriNet;
 };
+
+#endif
 
 struct PetriAction {
     std::unique_ptr<Petri::Action> owned;
@@ -53,7 +56,6 @@ struct PetriTransition {
     Petri::Transition *notOwned;
 };
 
-
 struct PetriDynamicLib {
     std::unique_ptr<Petri::PetriDynamicLib> lib;
 };
@@ -61,7 +63,6 @@ struct PetriDynamicLib {
 struct PetriDebugServer {
     std::unique_ptr<Petri::DebugServer> server;
 };
-
 
 namespace {
 // The following #ifdef prevent unused functions warning.

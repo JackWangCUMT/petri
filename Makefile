@@ -40,9 +40,11 @@ OUTPUT:=libPetriRuntime.so
 
 all: lib editor
 
-clean:
+cleanlib:
 	rm -rf build
 	rm -f Runtime/$(OUTPUT)
+
+clean: cleanlib
 	rm -f Editor/Test/bin/$(OUTPUT)
 	rm -f Editor/bin/$(OUTPUT)
 	rm -rf Editor/Test/obj

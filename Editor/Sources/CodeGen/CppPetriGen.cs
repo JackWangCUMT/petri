@@ -89,6 +89,9 @@ namespace Petri.Editor
             CodeGen += "#include \"Runtime/Cpp/PetriUtils.h\"";
             CodeGen += "#include \"Runtime/Cpp/Action.h\"";
             CodeGen += "#include \"Runtime/Cpp/Atomic.h\"";
+            CodeGen += "#include \"Runtime/Cpp/MemberPetriDynamicLib.h\"";
+            CodeGen += "#define NO_C_PETRI_NET";
+            CodeGen += "#include \"Runtime/C/Types.hpp\"";
             foreach(var s in Document.Headers) {
                 var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
                                                 s);
@@ -104,8 +107,10 @@ namespace Petri.Editor
 
             CodeGen += "#define EXPORT extern \"C\"";
             CodeGen += "#define PETRI_PREFIX \"" + ClassName + "\"\n";
-
-            CodeGen += "using namespace Petri;";
+            CodeGen += "using Petri::PetriNet;";
+            CodeGen += "using Petri::PetriDebug;";
+            CodeGen += "using Petri::Action;";
+            CodeGen += "using Petri::actionResult_t;";
 
             CodeGen += GenerateVarEnum();
 
@@ -175,8 +180,8 @@ namespace Petri.Editor
             CodeGen += "";
 
             CodeGen += "EXPORT void *" + Document.Settings.Name + "_createLib() {";
-            CodeGen += "return std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
-                + Document.Settings.Port + ").release();";
+            CodeGen += "return new PetriDynamicLib{std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
+                + Document.Settings.Port + ")};";
             CodeGen += "}";
 
             CodeGen += "";
@@ -196,7 +201,7 @@ namespace Petri.Editor
             _headerGen += "#define PETRI_" + ClassName + "_H";
 
             _headerGen += "";
-            _headerGen += "#include \"Runtime/Cpp/MemberPetriDynamicLib.h\"";
+            _headerGen += "#include \"Runtime/Cpp/PetriDynamicLib.h\"";
             _headerGen += "";
 
             _headerGen += "namespace Petri {";
