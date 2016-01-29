@@ -51,7 +51,8 @@ bool PetriUtility_returnTrue(Petri_actionResult_t) {
     return true;
 }
 
-PetriDynamicLib *Petri_loadPetriDynamicLib(char const *path, char const *prefix, uint16_t port) {
+PetriDynamicLib *Petri_loadPetriDynamicLib(char const *path, char const *prefix) {
+    // The lib must be dlopen()ed with the RTLD_NODELETE flag, otherwise a segfault occurs after it is unloaded.
     Petri::DynamicLib lib(true, path);
 
     try {

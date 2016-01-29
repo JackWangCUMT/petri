@@ -48,7 +48,7 @@ Petri_actionResult_t PetriUtility_doNothing();
 
 bool PetriUtility_returnTrue(Petri_actionResult_t res);
 
-struct PetriDynamicLib *Petri_loadPetriDynamicLib(char const *path, char const *prefix, uint16_t port);
+struct PetriDynamicLib *Petri_loadPetriDynamicLib(char const *path, char const *prefix);
 
 #ifdef __cplusplus
 }

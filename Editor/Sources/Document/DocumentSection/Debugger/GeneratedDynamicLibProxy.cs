@@ -84,7 +84,7 @@ namespace Petri.Editor
                 string cd = System.IO.Directory.GetCurrentDirectory();
                 System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(filePath).FullName);
 
-                IntPtr handle = Runtime.Interop.PetriUtils.Petri_loadPetriDynamicLib(filePath, ClassName, 12345);
+                IntPtr handle = Runtime.Interop.PetriUtils.Petri_loadPetriDynamicLib(filePath, ClassName);
                 if(handle == IntPtr.Zero) {
                     throw new Exception("Could not load the library!");
                 }
