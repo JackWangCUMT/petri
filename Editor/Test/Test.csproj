@@ -45,7 +45,8 @@
     <Compile Include="Invocation\TestInvocation.cs" />
     <Compile Include="Runtime\TestRuntime.cs" />
     <Compile Include="Utility.cs" />
-    <Compile Include="Examples\TestExamples.cs" />
+    <Compile Include="Examples\TestCompilation.cs" />
+    <Compile Include="Examples\TestExecution.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

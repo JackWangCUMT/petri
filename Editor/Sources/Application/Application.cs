@@ -206,10 +206,14 @@ namespace Petri.Editor
                                                                                        document.Settings.RelativeLibPath));
 
                     if(clean) {
-                        Console.Write("Cleaning artifacts of petri net \"" + document.Settings.Name + "\"… ");
+                        if(verbose) {
+                            Console.Write("Cleaning artifacts of petri net \"" + document.Settings.Name + "\"… ");
+                        }
                         System.IO.File.Delete(sourcePath);
                         System.IO.File.Delete(libPath);
-                        Console.WriteLine("Done.");
+                        if(verbose) {
+                            Console.WriteLine("Done.");
+                        }
                     }
 
                     bool forceGeneration = false, forceCompilation = false;
