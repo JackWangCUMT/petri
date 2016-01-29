@@ -27,12 +27,12 @@
 //  Created by Rémi on 25/06/2015.
 //
 
-#include "../Cpp/Action.h"
-#include "../Cpp/Atomic.h"
-#include "../Cpp/PetriDebug.h"
-#include "../Cpp/PetriNet.h"
-#include "Action.h"
-#include "PetriNet.h"
+#include "../../Cpp/Action.h"
+#include "../../Cpp/Atomic.h"
+#include "../../Cpp/PetriDebug.h"
+#include "../../Cpp/PetriNet.h"
+#include "../Action.h"
+#include "../PetriNet.h"
 #include "Types.hpp"
 
 PetriNet *PetriNet_create(char const *name) {

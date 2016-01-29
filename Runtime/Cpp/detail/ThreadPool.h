@@ -30,8 +30,8 @@
 #ifndef Petri_ThreadPool_h
 #define Petri_ThreadPool_h
 
-#include "Callable.h"
-#include "Common.h"
+#include "../Callable.h"
+#include "../Common.h"
 #include <atomic>
 #include <future>
 #include <memory>

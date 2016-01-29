@@ -21,46 +21,43 @@
  */
 
 //
-//  PetriDynamicLib.cpp
-//  TestPetri
+//  PtrDynamicLib.h
+//  Petri
 //
-//  Created by Rémi on 27/01/2016.
+//  Created by Rémi on 15/01/2016.
 //
 
-#include "../C/PetriNet.h"
-#include "../C/Types.hpp"
-#include "PetriDynamicLib.h"
+#ifndef Petri_PtrPetriDynamicLib_h
+#define Petri_PtrPetriDynamicLib_h
+
+#include "../../Cpp/MemberPetriDynamicLib.h"
+#include "Types.hpp"
 
 namespace Petri {
-    PetriDynamicLib::~PetriDynamicLib() = default;
 
-    std::unique_ptr<PetriNet> PetriDynamicLib::create() {
-        if(!this->loaded()) {
-            throw std::runtime_error("PetriDynamicLib::create: Dynamic library not loaded!");
+    class PtrPetriDynamicLib : public MemberPetriDynamicLib {
+    public:
+        PtrPetriDynamicLib(void *(*createPtr)(), void *(*createDebugPtr)(), char const *(*hashPtr)(), char const *name, char const *prefix, std::uint16_t port)
+                : MemberPetriDynamicLib(true, name, prefix, port) {
+            _createPtr = createPtr;
+            _createDebugPtr = createDebugPtr;
+            _hashPtr = hashPtr;
         }
 
-        void *ptr = _createPtr();
+        PtrPetriDynamicLib(PtrPetriDynamicLib const &) = delete;
+        PtrPetriDynamicLib &operator=(PtrPetriDynamicLib const &) = delete;
 
-        if(_c_dynamicLib) {
-            ::PetriNet *cPetriNet = static_cast<::PetriNet *>(ptr);
-            ptr = cPetriNet->petriNet.release();
+        PtrPetriDynamicLib(PtrPetriDynamicLib &&) = default;
+        PtrPetriDynamicLib &operator=(PtrPetriDynamicLib &&) = default;
+        virtual ~PtrPetriDynamicLib() = default;
+
+        virtual void load() override {}
+        virtual void unload() override {}
+
+        virtual bool loaded() const override {
+            return true;
         }
-
-        return std::unique_ptr<PetriNet>(static_cast<PetriNet *>(ptr));
-    }
-
-    std::unique_ptr<PetriDebug> PetriDynamicLib::createDebug() {
-        if(!this->loaded()) {
-            throw std::runtime_error("PetriDynamicLib::createDebug: Dynamic library not loaded!");
-        }
-
-        void *ptr = _createDebugPtr();
-
-        if(_c_dynamicLib) {
-            ::PetriNet *cPetriNet = static_cast<::PetriNet *>(ptr);
-            ptr = cPetriNet->petriNet.release();
-        }
-
-        return std::unique_ptr<PetriDebug>(static_cast<PetriDebug *>(ptr));
-    }
+    };
 }
+
+#endif /* PtrDynamicLib_h */

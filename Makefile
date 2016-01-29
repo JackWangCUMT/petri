@@ -1,4 +1,4 @@
-CXXSRC:=$(wildcard Runtime/Cpp/*.cpp) $(wildcard Runtime/C/*.cpp)
+CXXSRC:=$(wildcard Runtime/Cpp/detail/*.cpp) $(wildcard Runtime/C/detail/*.cpp)
 CXXOBJ:=$(CXXSRC:%.cpp=build/%.o)
 JSONSRC:=$(wildcard Runtime/Cpp/jsoncpp/src/lib_json/*.cpp)
 JSONOBJ:=$(JSONSRC:%.cpp=build/json/%.o)
@@ -9,7 +9,7 @@ CXX:=c++
 MSBUILD:=xbuild
 CXXVERSION:=$(shell $(CXX) --version)
 
-CXXFLAGS:=-std=c++14 -I./Runtime/Cpp/jsoncpp/include
+CXXFLAGS:=-std=c++14 -I./Runtime/Cpp/detail/jsoncpp/include
 WARN_JSON:=
 LDFLAGS:=-shared
 
@@ -36,7 +36,7 @@ CXXFLAGS:=$(WARN) $(CXXFLAGS)
 
 OUTPUT:=libPetriRuntime.so
 
-.PHONY: builddir editor all clean test
+.PHONY: builddir editor all clean test examples
 
 all: lib editor
 
@@ -69,9 +69,9 @@ test: all
 	nunit-console Editor/Test/Test.csproj
 
 builddir:
-	mkdir -p build/json/Runtime/Cpp/jsoncpp/src/lib_json
-	mkdir -p build/Runtime/Cpp
-	mkdir -p build/Runtime/C
+	mkdir -p build/json/Runtime/Cpp/detail/jsoncpp/src/lib_json
+	mkdir -p build/Runtime/Cpp/detail
+	mkdir -p build/Runtime/C/detail
 	mkdir -p Editor/Test/bin
 	mkdir -p Editor/bin
 
@@ -88,3 +88,10 @@ build/%.o: %.cpp
 
 build/json/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS) $(WARN_JSON)
+
+examples:
+	find Examples -name "*.petri" -exec mono Editor/bin/Petri.exe -gcv {} \;
+
+examplesclean:
+	find Examples -name "*.petri" -exec mono Editor/bin/Petri.exe -kv {} \;
+

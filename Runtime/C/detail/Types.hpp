@@ -30,10 +30,10 @@
 #ifndef Petri_Types_hpp
 #define Petri_Types_hpp
 
-#include "../Cpp/Action.h"
-#include "../Cpp/DebugServer.h"
-#include "../Cpp/PetriNet.h"
-#include "../Cpp/Transition.h"
+#include "../../Cpp/Action.h"
+#include "../../Cpp/DebugServer.h"
+#include "../../Cpp/PetriNet.h"
+#include "../../Cpp/Transition.h"
 #include <memory>
 
 class CPetriDynamicLib;

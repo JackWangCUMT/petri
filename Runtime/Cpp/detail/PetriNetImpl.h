@@ -30,9 +30,10 @@
 #ifndef IA_Pe_tri_PetriImp_h
 #define IA_Pe_tri_PetriImp_h
 
-#include "Action.h"
-#include "Atomic.h"
-#include "Common.h"
+#include "../Action.h"
+#include "../Atomic.h"
+#include "../Common.h"
+#include "../Transition.h"
 #include "ThreadPool.h"
 #include <atomic>
 #include <cassert>
@@ -44,8 +45,6 @@
 #include <set>
 #include <thread>
 #include <unordered_map>
-
-#include "Transition.h"
 
 namespace Petri {
     enum { InitialThreadsActions = 1 };

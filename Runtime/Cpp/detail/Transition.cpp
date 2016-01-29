@@ -27,8 +27,8 @@
 //  Created by Rémi on 09/05/2015.
 //
 
-#include "Action.h"
-#include "Transition.h"
+#include "../Action.h"
+#include "../Transition.h"
 
 namespace Petri {
 

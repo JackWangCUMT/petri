@@ -27,8 +27,8 @@
 //  Created by Rémi on 04/07/2015.
 //
 
-#include "../Cpp/DebugServer.h"
-#include "DebugServer.h"
+#include "../../Cpp/DebugServer.h"
+#include "../DebugServer.h"
 #include "Types.hpp"
 
 char const *PetriDebugServer_getVersion() {

@@ -27,7 +27,7 @@
 //  Created by Rémi on 29/11/2014.
 //
 
-#include "PetriNet.h"
+#include "../PetriNet.h"
 #include "PetriNetImpl.h"
 #include "lock.h"
 

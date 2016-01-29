@@ -27,11 +27,11 @@
 //  Created by Rémi on 01/07/2015.
 //
 
-#include "../Cpp/DynamicLib.h"
-#include "../Cpp/PetriDynamicLib.h"
-#include "../Cpp/PetriUtils.h"
-#include "PetriDynamicLib.h"
-#include "PetriUtils.h"
+#include "../../Cpp/DynamicLib.h"
+#include "../../Cpp/PetriDynamicLib.h"
+#include "../../Cpp/PetriUtils.h"
+#include "../PetriDynamicLib.h"
+#include "../PetriUtils.h"
 #include "Types.hpp"
 #include <iostream>
 

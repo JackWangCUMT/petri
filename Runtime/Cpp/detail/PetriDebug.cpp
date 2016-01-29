@@ -27,9 +27,9 @@
 //  Created by Rémi on 27/11/2014.
 //
 
-#include "Action.h"
-#include "DebugServer.h"
-#include "PetriDebug.h"
+#include "../Action.h"
+#include "../DebugServer.h"
+#include "../PetriDebug.h"
 #include "PetriNetImpl.h"
 
 namespace Petri {

@@ -96,7 +96,7 @@ namespace Petri.Editor
             CodeGen += "#include \"Runtime/Cpp/Action.h\"";
             CodeGen += "#include \"Runtime/Cpp/Atomic.h\"";
             CodeGen += "#define NO_C_PETRI_NET";
-            CodeGen += "#include \"Runtime/C/Types.hpp\"";
+            CodeGen += "#include \"Runtime/C/detail/Types.hpp\"";
             foreach(var s in Document.Headers) {
                 var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
                                                 s);

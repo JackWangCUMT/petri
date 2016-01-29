@@ -27,9 +27,9 @@
 //  Created by Rémi on 23/11/2014.
 //
 
-#include "Action.h"
-#include "DebugServer.h"
-#include "PetriDynamicLib.h"
+#include "../Action.h"
+#include "../DebugServer.h"
+#include "../PetriDynamicLib.h"
 #include "Socket.h"
 #include "ThreadPool.h"
 #ifdef __clang__

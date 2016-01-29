@@ -29,7 +29,7 @@
 
 #define PETRI_NEEDS_GET_TRANSITION
 
-#include "Transition.h"
+#include "../Transition.h"
 #include "Types.hpp"
 #include <chrono>
 
