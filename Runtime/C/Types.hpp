@@ -86,5 +86,4 @@ namespace {
 #endif
 }
 
-
 #endif /* Types_h */

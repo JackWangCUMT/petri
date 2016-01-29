@@ -30,10 +30,6 @@
 #ifndef CPetriDynamicLib_c
 #define CPetriDynamicLib_c
 
-#define DECLARE_STRUCT(x) DECLARE_STRUCT_EVAL(x)
-#define DECLARE_STRUCT_EVAL(prefix, class_name, port) \
-    struct class_name##_1 {};
-
 #include <stdbool.h>
 #include <stdint.h>
 

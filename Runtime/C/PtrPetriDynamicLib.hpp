@@ -60,5 +60,4 @@ namespace Petri {
     };
 }
 
-
 #endif /* PtrDynamicLib_h */
