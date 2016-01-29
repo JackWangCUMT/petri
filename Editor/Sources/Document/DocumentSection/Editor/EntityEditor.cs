@@ -167,11 +167,11 @@ namespace Petri.Editor
                 list.Add(pauseFunction);
                 list.Add(manual);
                 foreach(var func in _document.CodeActions) {
-                    if(func.Signature != Action.DoNothingFunction(a.Document).Signature && func.Signature != Action.PrintFunction(a.Document).Signature && func.Signature != Action.PauseFunction(a.Document).Signature && func.ReturnType.Equals(_document.Settings.Enum.Type))
+                    if(func.Signature != RuntimeFunctions.DoNothingFunction(a.Document).Signature && func.Signature != RuntimeFunctions.PrintFunction(a.Document).Signature && func.Signature != RuntimeFunctions.PauseFunction(a.Document).Signature && func.ReturnType.Equals(_document.Settings.Enum.Type))
                         list.Add(func.Signature);
                 }
 
-                ActionType actionType = a.Function.Function.Signature == Action.DoNothingFunction(a.Document).Signature ? ActionType.Nothing : a.Function.Function.Signature == Action.PauseFunction(a.Document).Signature ? ActionType.Pause : a.Function.Function.Signature == Action.PrintFunction(a.Document).Signature ? ActionType.Print : !(a.Function is WrapperFunctionInvocation) && !a.Function.NeedsExpansion && list.Contains(a.Function.Function.Signature) ? ActionType.Invocation : ActionType.Manual;
+                ActionType actionType = a.Function.Function.Signature == RuntimeFunctions.DoNothingFunction(a.Document).Signature ? ActionType.Nothing : a.Function.Function.Signature == RuntimeFunctions.PauseFunction(a.Document).Signature ? ActionType.Pause : a.Function.Function.Signature == RuntimeFunctions.PrintFunction(a.Document).Signature ? ActionType.Print : !(a.Function is WrapperFunctionInvocation) && !a.Function.NeedsExpansion && list.Contains(a.Function.Function.Signature) ? ActionType.Invocation : ActionType.Manual;
                 string activeFunction = manual;
                 if(actionType == ActionType.Nothing) {
                     activeFunction = nothingFunction;
@@ -198,7 +198,7 @@ namespace Petri.Editor
                         if(val == nothingFunction) {
                             _document.CommitGuiAction(new InvocationChangeAction(a,
                                                                                  new FunctionInvocation(a.Document.Settings.Language,
-                                                                                                        Action.DoNothingFunction(a.Document))));
+                                                                                                        RuntimeFunctions.DoNothingFunction(a.Document))));
                             actionType = ActionType.Nothing;
                         }
                         else if(val == printFunction) {
@@ -209,7 +209,7 @@ namespace Petri.Editor
                         else if(val == pauseFunction) {
                             _document.CommitGuiAction(new InvocationChangeAction(a,
                                                                                  new FunctionInvocation(a.Document.Settings.Language,
-                                                                                                        Action.PauseFunction(a.Document),
+                                                                                                        RuntimeFunctions.PauseFunction(a.Document),
                                                                                                         LiteralExpression.CreateFromString("1s",
                                                                                                                                            a.Document.Settings.Language))));
                             actionType = ActionType.Pause;

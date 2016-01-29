@@ -258,7 +258,7 @@ namespace Petri.Editor
         /// Gets the current focused window.
         /// </summary>
         /// <value>The current focused window.</value>
-        static Window CurrentFocusedWindow {
+        public static Window CurrentFocusedWindow {
             get {
                 foreach(Window w in Gtk.Window.ListToplevels()) {
                     if(w.HasToplevelFocus) {

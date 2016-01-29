@@ -316,7 +316,7 @@ namespace Petri.Editor
             string enumName = Document.Settings.Enum.Name;
 
             foreach(LiteralExpression le in t.Condition.GetLiterals()) {
-                if(le.Expression == "$Res") {
+                if(le.Expression == "$Res" || le.Expression == "$Result") {
                     old.Add(le, le.Expression);
                     le.Expression = "_PETRI_PRIVATE_GET_ACTION_RESULT_";
                 }

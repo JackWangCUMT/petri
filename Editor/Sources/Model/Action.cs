@@ -42,7 +42,7 @@ namespace Petri.Editor
 
             this.Active = active;
 
-            this.Function = new FunctionInvocation(doc.Settings.Language, DoNothingFunction(doc));
+            this.Function = new FunctionInvocation(doc.Settings.Language, RuntimeFunctions.DoNothingFunction(doc));
         }
 
         public Action(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc,
@@ -98,116 +98,11 @@ namespace Petri.Editor
         public FunctionInvocation PrintAction()
         {
             return new Code.FunctionInvocation(Document.Settings.Language,
-                                               PrintFunction(Document),
+                                               RuntimeFunctions.PrintFunction(Document),
                                                LiteralExpression.CreateFromString("$Name",
                                                                                   Document.Settings.Language),
                                                LiteralExpression.CreateFromString("$ID",
                                                                                   Document.Settings.Language));
-        }
-
-        /// <summary>
-        /// Gets the function that pretty prints the petri net action at runtime.
-        /// </summary>
-        /// <returns>The print function.</returns>
-        public static Function PrintFunction(HeadlessDocument doc)
-        {
-            var lang = doc.Settings.Language;
-
-            if(lang == Language.Cpp) {
-                var f = new Code.Function(doc.Settings.Enum.Type,
-                                          Scope.MakeFromNamespace(lang, "Utility"),
-                                          "printAction",
-                                          false);
-                f.AddParam(new Param(new Code.Type(lang, "std::string const &"), "name"));
-                f.AddParam(new Param(new Code.Type(lang, "std::uint64_t"), "id"));
-
-                return f;
-            }
-            else if(lang == Language.C) {
-                var f = new Function(doc.Settings.Enum.Type,
-                                     null,
-                                     "PetriUtility_printAction",
-                                     false);
-                f.AddParam(new Param(new Code.Type(lang, "char const *"), "name"));
-                f.AddParam(new Param(new Code.Type(lang, "uint64_t"), "id"));
-
-                return f;
-            }
-            else if(lang == Language.CSharp) {
-                var f = new Function(doc.Settings.Enum.Type,
-                                     Scope.MakeFromNamespace(lang,
-                                                             "Petri.Runtime.Utility"),
-                                     "PrintAction",
-                                     false);
-                f.AddParam(new Param(new Code.Type(lang, "string"), "name"));
-                f.AddParam(new Param(new Code.Type(lang, "UInt64"), "id"));
-
-                return f;
-            }
-
-            throw new Exception("Action.PrintFunction: Should not get there !");
-        }
-
-        /// <summary>
-        /// Gets the function that does nothing at runtime.
-        /// </summary>
-        /// <returns>The do nothing function.</returns>
-        public static Function DoNothingFunction(HeadlessDocument doc)
-        {
-            var lang = doc.Settings.Language;
-            if(lang == Language.Cpp) {
-                var f = new Function(doc.Settings.Enum.Type,
-                                     Scope.MakeFromNamespace(lang,
-                                                             "Utility"),
-                                     "doNothing",
-                                     false);
-                return f;
-            }
-            else if(lang == Language.C) {
-                var f = new Function(doc.Settings.Enum.Type, null, "PetriUtility_doNothing", false);
-                return f;
-            }
-            else if(lang == Language.CSharp) {
-                var f = new Function(doc.Settings.Enum.Type,
-                                     Scope.MakeFromNamespace(lang,
-                                                             "Petri.Runtime.Utility"),
-                                     "DoNothing",
-                                     false);
-                return f;
-            }
-
-            throw new Exception("Action.DoNothingFunction: Should not get there !");
-        }
-
-        /// <summary>
-        /// Gets the function that make the calling thread to pause for the requested amount of time.
-        /// </summary>
-        /// <returns>The pause function.</returns>
-        public static Function PauseFunction(HeadlessDocument doc)
-        {
-            var lang = doc.Settings.Language;
-
-            if(lang == Language.Cpp) {
-                var f = new Function(doc.Settings.Enum.Type,
-                                     Scope.MakeFromNamespace(lang, "Utility"),
-                                     "pause", false);
-                f.AddParam(new Param(new Code.Type(lang, "std::chrono::nanoseconds"), "delay"));
-                return f;
-            }
-            else if(lang == Language.C) {
-                var f = new Function(doc.Settings.Enum.Type, null, "PetriUtility_pause", false);
-                f.AddParam(new Param(new Code.Type(lang, "uint64_t"), "delayMicroSeconds"));
-                return f;
-            }
-            else if(lang == Language.CSharp) {
-                var f = new Function(doc.Settings.Enum.Type,
-                                     Scope.MakeFromNamespace(lang, "Petri.Runtime.Utility"),
-                                     "Pause", false);
-                f.AddParam(new Param(new Code.Type(lang, "double"), "delayInSeconds"));
-                return f;
-            }
-
-            throw new Exception("Action.PauseFunction: Should not get there !");
         }
 
         /// <summary>

@@ -31,6 +31,7 @@
 #include "PetriUtils.h"
 #include <iostream>
 #include <thread>
+#include <random>
 
 namespace Petri {
     void setThreadName(char const *name) {
@@ -46,6 +47,11 @@ namespace Petri {
     }
 
     namespace Utility {
+        namespace {
+            std::random_device _rd;
+
+            std::default_random_engine _engine{_rd()};
+        }
         actionResult_t pause(std::chrono::nanoseconds const &delay) {
             std::this_thread::sleep_for(delay);
             return {};
@@ -58,6 +64,10 @@ namespace Petri {
 
         actionResult_t doNothing() {
             return {};
+        }
+
+        int64_t random(int64_t lowerBound, int64_t upperBound) {
+            return std::uniform_int_distribution<int64_t>{lowerBound, upperBound}(_engine);
         }
     }
 }

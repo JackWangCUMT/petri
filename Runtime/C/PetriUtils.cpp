@@ -51,6 +51,11 @@ bool PetriUtility_returnTrue(Petri_actionResult_t) {
     return true;
 }
 
+int64_t PetriUtility_random(int64_t lowerBound, int64_t upperBound) {
+    return Petri::Utility::random(lowerBound, upperBound);
+}
+
+
 PetriDynamicLib *Petri_loadPetriDynamicLib(char const *path, char const *prefix) {
     // The lib must be dlopen()ed with the RTLD_NODELETE flag, otherwise a segfault occurs after it is unloaded.
     Petri::DynamicLib lib(true, path);

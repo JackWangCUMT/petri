@@ -478,45 +478,56 @@ namespace Petri.Editor
         /// <returns><c>false</c>, if the process was cancelled, <c>true</c> otherwise.</returns>
         public bool SaveAs()
         {
-            string filename = null;
+            if(!_saving) {
+                try {
+                    _saving = true;
 
-            var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Save the graph as…"), Window,
-                                               FileChooserAction.Save,
-                                               new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
-                Configuration.GetLocalized("Save"), ResponseType.Accept
-            });
+                    string filename = null;
 
-            if(Configuration.SavePath.Length > 0) {
-                fc.SetCurrentFolder(System.IO.Directory.GetParent(Configuration.SavePath).FullName);
-                fc.CurrentName = System.IO.Path.GetFileName(Configuration.SavePath);
+                    var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Save the graph as…"), Window,
+                                                   FileChooserAction.Save,
+                                                   new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+                        Configuration.GetLocalized("Save"), ResponseType.Accept
+                    });
+
+                    if(Configuration.SavePath.Length > 0) {
+                        fc.SetCurrentFolder(System.IO.Directory.GetParent(Configuration.SavePath).FullName);
+                        fc.CurrentName = System.IO.Path.GetFileName(Configuration.SavePath);
+                    }
+
+                    fc.DoOverwriteConfirmation = true;
+
+                    if(fc.Run() == (int)ResponseType.Accept) {
+                        this.Path = fc.Filename;
+                        if(!this.Path.EndsWith(".petri"))
+                            this.Path += ".petri";
+
+                        filename = System.IO.Path.GetFileName(this.Path).Split(new string[]{ ".petri" },
+                                                                           StringSplitOptions.None)[0];
+
+                        fc.Destroy();
+                    }
+                    else {
+                        fc.Destroy();
+                        return false;
+                    }
+
+                    Window.Title = filename;
+                    Settings.Name = filename;
+
+                    this.Save();
+
+                    Application.RecentDocuments.Add(DateTime.UtcNow, Path);
+                    Application.UpdateRecentDocuments();
+
+                    return true;
+                }
+                finally {
+                    _saving = false;
+                }
             }
 
-            fc.DoOverwriteConfirmation = true;
-
-            if(fc.Run() == (int)ResponseType.Accept) {
-                this.Path = fc.Filename;
-                if(!this.Path.EndsWith(".petri"))
-                    this.Path += ".petri";
-
-                filename = System.IO.Path.GetFileName(this.Path).Split(new string[]{ ".petri" },
-                                                                       StringSplitOptions.None)[0];
-
-                fc.Destroy();
-            }
-            else {
-                fc.Destroy();
-                return false;
-            }
-
-            Window.Title = filename;
-            Settings.Name = filename;
-
-            this.Save();
-
-            Application.RecentDocuments.Add(DateTime.UtcNow, Path);
-            Application.UpdateRecentDocuments();
-
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -900,6 +911,7 @@ namespace Petri.Editor
         bool _modified;
         bool _modifiedSinceGeneration = true;
         Dictionary<Entity, CodeRange> _codeRanges = null;
+        bool _saving = false;
     }
 }
 

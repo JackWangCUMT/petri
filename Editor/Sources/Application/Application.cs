@@ -418,23 +418,32 @@ namespace Petri.Editor
         /// </summary>
         public static void OpenDocument()
         {
-            var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Open Petri Net…"), null,
-                                               Gtk.FileChooserAction.Open,
-                                               new object[] {Configuration.GetLocalized("Cancel"), Gtk.ResponseType.Cancel,
-                Configuration.GetLocalized("Open"), Gtk.ResponseType.Accept
-            });
+            // Prevents 2 dialogs from being opened at the same time
+            if(!_opening) {
+                try {
+                    _opening = true;
+                    var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Open Petri Net…"), null,
+                                                   Gtk.FileChooserAction.Open,
+                                                   new object[] {Configuration.GetLocalized("Cancel"), Gtk.ResponseType.Cancel,
+                        Configuration.GetLocalized("Open"), Gtk.ResponseType.Accept
+                    });
 
-            var filter = new Gtk.FileFilter();
-            filter.AddPattern("*.petri");
-            fc.AddFilter(filter);
+                    var filter = new Gtk.FileFilter();
+                    filter.AddPattern("*.petri");
+                    fc.AddFilter(filter);
 
-            if(fc.Run() == (int)Gtk.ResponseType.Accept) {
-                string filename = fc.Filename;
-                fc.Destroy();
-                OpenDocument(filename);
-            }
-            else {
-                fc.Destroy();
+                    if(fc.Run() == (int)Gtk.ResponseType.Accept) {
+                        string filename = fc.Filename;
+                        fc.Destroy();
+                        OpenDocument(filename);
+                    }
+                    else {
+                        fc.Destroy();
+                    }
+                }
+                finally {
+                    _opening = false;
+                }
             }
         }
 
@@ -602,5 +611,6 @@ namespace Petri.Editor
 
         static List<Document> _documents = new List<Document>();
         static HashSet<Entity> _clipboard = new HashSet<Entity>();
+        static bool _opening = false;
     }
 }

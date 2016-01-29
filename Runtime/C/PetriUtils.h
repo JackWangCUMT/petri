@@ -45,6 +45,7 @@ enum ActionResult { OK, NOK };
 Petri_actionResult_t PetriUtility_pause(uint64_t usdelay);
 Petri_actionResult_t PetriUtility_printAction(char const *name, uint64_t id);
 Petri_actionResult_t PetriUtility_doNothing();
+int64_t PetriUtility_random(int64_t lowerBound, int64_t upperBound);
 
 bool PetriUtility_returnTrue(Petri_actionResult_t res);
 

@@ -27,9 +27,8 @@ namespace Petri.Runtime
     public enum ActionResult
     {
         OK,
-        NOK}
-
-    ;
+        NOK
+    }
 
     public class Utility
     {
@@ -51,6 +50,11 @@ namespace Petri.Runtime
         bool ReturnTrue(Int32 res)
         {
             return true;
+        }
+
+        Int64 Random(Int64 lowerBound, Int64 upperBound)
+        {
+            return Interop.PetriUtils.PetriUtility_random(lowerBound, upperBound);
         }
     }
 }

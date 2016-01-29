@@ -40,7 +40,7 @@ namespace Petri.Editor
         /// <param name="firstID">First ID.</param>
         public IDManager(UInt64 firstID)
         {
-            ID = firstID + 1;
+            ID = firstID;
         }
 
         /// <summary>
@@ -144,12 +144,13 @@ namespace Petri.Editor
 
         public IEnumerable<Function> AllFunctions {
             get {
-                Function[] ff = new Function[AllFunctionsList.Count + 3];
-                ff[0] = Action.DoNothingFunction(this);
-                ff[1] = Action.PrintFunction(this);
-                ff[2] = Action.PauseFunction(this);
+                Function[] ff = new Function[AllFunctionsList.Count + 4];
+                ff[0] = RuntimeFunctions.DoNothingFunction(this);
+                ff[1] = RuntimeFunctions.PrintFunction(this);
+                ff[2] = RuntimeFunctions.PauseFunction(this);
+                ff[3] = RuntimeFunctions.RandomFunction(this);
                 for(int i = 0; i < AllFunctionsList.Count; ++i) {
-                    ff[i + 3] = AllFunctionsList[i];
+                    ff[i + 4] = AllFunctionsList[i];
                 }
 
                 return ff;

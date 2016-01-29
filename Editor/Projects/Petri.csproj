@@ -177,5 +177,6 @@
     <Compile Include="..\Sources\Model\State.cs" />
     <Compile Include="..\Sources\Model\Transition.cs" />
     <Compile Include="..\Sources\Application\Application.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Editor\RuntimeFunctions.cs" />
   </ItemGroup>
 </Project>
