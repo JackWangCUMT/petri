@@ -34,7 +34,7 @@
     <UseRefCounting>false</UseRefCounting>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Profiling>false</Profiling>
-    <StartupObject>Petri.Editor.OSX.OSXMain</StartupObject>
+    <StartupObject>Petri.Editor.MacApplication</StartupObject>
     <CustomCommands>
       <CustomCommands>
         <Command type="AfterBuild" command="make lib" workingdir="${ProjectFile}/../../../" />
@@ -55,7 +55,7 @@
     <UseRefCounting>false</UseRefCounting>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Profiling>false</Profiling>
-    <StartupObject>Petri.Editor.OSX.OSXMain</StartupObject>
+    <StartupObject>Petri.Editor.MacApplication</StartupObject>
     <CustomCommands>
       <CustomCommands>
         <Command type="AfterBuild" command="make lib" workingdir="${ProjectFile}/../../../" />

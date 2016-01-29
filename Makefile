@@ -45,27 +45,23 @@ cleanlib:
 	rm -f Runtime/$(OUTPUT)
 
 clean: cleanlib
-	rm -f Editor/Test/bin/$(OUTPUT)
-	rm -f Editor/bin/$(OUTPUT)
+	rm -rf Editor/Test/bin
+	rm -rf Editor/bin
 	rm -rf Editor/Test/obj
 	rm -rf Editor/obj
 	rm -rf Editor/Petri.app
 	rm -f Editor/Petri.exe
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/Petri.csproj
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/PetriMac.csproj
+	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/CSRuntime.csproj
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Test/Test.csproj
 
-editor: builddir mac
+editor: builddir
 	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/Petri.csproj
-ifeq (, $(shell which mdtool))
-mac: ;
-else
-mac: builddir
-	mdtool build -c:$(CSCONF) Editor/Petri.sln
-endif
+	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/PetriMac.csproj
 
 test: all
-	mdtool build -c:$(CSCONF) Editor/Petri.sln
+	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Test/Test.csproj
 	nunit-console Editor/Test/Test.csproj
 
 builddir:
@@ -76,6 +72,7 @@ builddir:
 	mkdir -p Editor/bin
 
 lib: builddir buildlib
+	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/CSRuntime.csproj
 
 buildlib: $(CXXOBJ) $(JSONOBJ)
 	$(CXX) -o Runtime/$(OUTPUT) $^ $(LDFLAGS)

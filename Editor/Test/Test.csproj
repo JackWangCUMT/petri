@@ -31,6 +31,9 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CSRuntime">
+      <HintPath>..\bin\CSRuntime.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="nunit.framework">
       <HintPath>nunit.framework.dll</HintPath>
