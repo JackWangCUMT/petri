@@ -14,7 +14,7 @@
     <SuppressXamMacMigration>True</SuppressXamMacMigration>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ReleaseVersion>1.2</ReleaseVersion>
+    <ReleaseVersion>1.3</ReleaseVersion>
     <BaseDirectory>..</BaseDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -35,6 +35,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Profiling>false</Profiling>
     <StartupObject>Petri.Editor.OSX.OSXMain</StartupObject>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="AfterBuild" command="make lib" workingdir="${ProjectFile}/../../../" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -51,6 +56,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Profiling>false</Profiling>
     <StartupObject>Petri.Editor.OSX.OSXMain</StartupObject>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="AfterBuild" command="make lib" workingdir="${ProjectFile}/../../../" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MonoMac" />

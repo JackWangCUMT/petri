@@ -35,8 +35,7 @@ namespace Petri.Test.Examples
         public void TestCSharpExampleExecution()
         {
             // GIVEN launch arguments requesting execution of the C#.petri example
-            string arch = IntPtr.Size == 4 ? "32" : "64";
-            string[] args = { "-k", "-r", "-a", arch, "../../../Examples/CSharp.petri" };
+            string[] args = { "-k", "-r", "../../../Examples/CSharp.petri" };
             string stdout, stderr;
 
             // WHEN the invocation is made
@@ -52,8 +51,7 @@ namespace Petri.Test.Examples
         public void TestCppExampleExecution()
         {
             // GIVEN launch arguments requesting execution of the Cpp.petri example
-            string arch = IntPtr.Size == 4 ? "32" : "64";
-            string[] args = { "-k", "-r", "-a", arch, "../../../Examples/Cpp.petri" };
+            string[] args = { "-k", "-r", "../../../Examples/Cpp.petri" };
             string stdout, stderr;
 
             // WHEN the invocation is made
@@ -69,8 +67,7 @@ namespace Petri.Test.Examples
         public void TestCExampleExecution()
         {
             // GIVEN launch arguments requesting execution of the C.petri example
-            string arch = IntPtr.Size == 4 ? "32" : "64";
-            string[] args = { "-k", "-r", "-a", arch, "../../../Examples/C.petri" };
+            string[] args = { "-k", "-r", "../../../Examples/C.petri" };
             string stdout, stderr;
 
             // WHEN the invocation is made

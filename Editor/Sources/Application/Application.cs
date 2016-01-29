@@ -195,6 +195,10 @@ namespace Petri.Editor
                 try {
                     HeadlessDocument document = new HeadlessDocument(path);
                     document.Load();
+                    if(run) {
+                        document.Settings.RunInEditor = true;
+                    }
+
                     if(verbose) {
                         Console.WriteLine("Processing petri net \"" + document.Settings.Name + "\"…");
                     }

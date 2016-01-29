@@ -51,7 +51,9 @@ namespace Petri.Runtime
 
         ~DynamicLib()
         {
-            Interop.PetriDynamicLib.PetriDynamicLib_destroy(Handle);
+            if(Handle != IntPtr.Zero) {
+                Interop.PetriDynamicLib.PetriDynamicLib_destroy(Handle);
+            }
         }
 
         /**

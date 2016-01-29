@@ -470,10 +470,10 @@ namespace Petri.Editor
                     val += "-std=c++14 ";
                 }
 
-                if(Configuration.Arch == 64) {
+                if((Configuration.Arch == 64 && !RunInEditor) || (RunInEditor && IntPtr.Size == 8)) {
                     val += "-m64 ";
                 }
-                else if(Configuration.Arch == 32) {
+                else if((Configuration.Arch == 32 && !RunInEditor) || (RunInEditor && IntPtr.Size == 4)) {
                     val += "-m32 ";
                 }
 

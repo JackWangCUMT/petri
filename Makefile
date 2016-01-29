@@ -79,8 +79,9 @@ lib: builddir buildlib
 
 buildlib: $(CXXOBJ) $(JSONOBJ)
 	$(CXX) -o Runtime/$(OUTPUT) $^ $(LDFLAGS)
-	ln -sf $(abspath Runtime/$(OUTPUT)) Editor/Test/bin/$(OUTPUT)
-	ln -sf $(abspath Runtime/$(OUTPUT)) Editor/bin/$(OUTPUT)
+	ln -sf $(abspath Runtime/$(OUTPUT)) $(abspath Editor/Test/bin/$(OUTPUT))
+	ln -sf $(abspath Runtime/$(OUTPUT)) $(abspath Editor/bin/$(OUTPUT))
+	ln -sf $(abspath Runtime/$(OUTPUT)) $(abspath Editor/Petri.app/Contents/MonoBundle/$(OUTPUT))
 
 build/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)

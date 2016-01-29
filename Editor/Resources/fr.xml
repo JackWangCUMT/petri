@@ -391,6 +391,9 @@
 <Key>An error occurred in the debugger:</Key>
 <Value>Une erreur est survenue dans le débuggueur :</Value>
 
+<Key>Unable to load the dynamic library! Try to compile it again.</Key>
+<Value>Impossible de charger la librairie dynamique. Essayez de la recompiler.</Value>
+
 <Key>Reloading the petri net…</Key>
 <Value>Rechargement du réseau de pétri…</Value>
 

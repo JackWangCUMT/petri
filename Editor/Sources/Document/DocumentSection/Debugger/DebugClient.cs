@@ -120,7 +120,7 @@ namespace Petri.Editor
         /// <value>The version.</value>
         public string Version {
             get {
-                return "0.2";
+                return "1.3";
             }
         }
 
@@ -129,17 +129,20 @@ namespace Petri.Editor
         /// </summary>
         public void Attach()
         {
+            bool success = true;
             if(_document.Settings.RunInEditor) {
-                LoadLibAndStartServer();
+                success = LoadLibAndStartServer();
             }
 
-            _sessionRunning = true;
-            _receiverThread = new Thread(this.Receiver);
-            _pause = false;
-            _receiverThread.Start();
-            DateTime time = DateTime.Now.AddSeconds(1);
-            while(_socket == null && DateTime.Now.CompareTo(time) < 0)
-                System.Threading.Thread.Sleep(20);
+            if(success) {
+                _sessionRunning = true;
+                _receiverThread = new Thread(this.Receiver);
+                _pause = false;
+                _receiverThread.Start();
+                DateTime time = DateTime.Now.AddSeconds(1);
+                while(_socket == null && DateTime.Now.CompareTo(time) < 0)
+                    System.Threading.Thread.Sleep(20);
+            }
         }
 
         /// <summary>
@@ -161,18 +164,55 @@ namespace Petri.Editor
         /// Loads the library and starts a local DebugServer.
         /// Valid only when the document is set to Run in the editor.
         /// </summary>
-        void LoadLibAndStartServer()
+        bool LoadLibAndStartServer()
         {
             UnloadLibAndStopServer();
 
             _libProxy = new GeneratedDynamicLibProxy(_document.Settings.Language, System.IO.Directory.GetParent(_document.Path).FullName,
                                                      _document.Settings.RelativeLibPath,
-                                                     _document.Settings.Name);            
-            Petri.Runtime.GeneratedDynamicLib dylib = _libProxy.Load();
+                                                     _document.Settings.Name);
+            try {
+                Petri.Runtime.GeneratedDynamicLib dylib = _libProxy.Load();
 
-            var dynamicLib = dylib.Lib;
-            _debugServer = new Runtime.DebugServer(dynamicLib);
-            _debugServer.Start();
+                if(dylib == null) {
+                    GLib.Timeout.Add(0, () => {
+                        MessageDialog d = new MessageDialog(_document.Window,
+                                                            DialogFlags.Modal,
+                                                            MessageType.Question,
+                                                            ButtonsType.None,
+                                                            Application.SafeMarkupFromString(Configuration.GetLocalized("Unable to load the dynamic library! Try to compile it again.")));
+                        d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
+                        d.Run();
+                        d.Destroy();
+
+                        return false;
+                    });
+
+                    return false;
+                }
+                var dynamicLib = dylib.Lib;
+                _debugServer = new Runtime.DebugServer(dynamicLib);
+                _debugServer.Start();
+            }
+            catch(Exception e) {
+                UnloadLibAndStopServer();
+                GLib.Timeout.Add(0, () => {
+                    MessageDialog d = new MessageDialog(_document.Window,
+                                                        DialogFlags.Modal,
+                                                        MessageType.Question,
+                                                        ButtonsType.None,
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                    d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
+                    d.Run();
+                    d.Destroy();
+
+                    return false;
+                });
+
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
