@@ -39,12 +39,19 @@ namespace Petri {
     using namespace std::chrono_literals;
 
     class Action;
+    class PetriNet;
 
     using TransitionCallableBase = CallableBase<bool, actionResult_t>;
+    using ParametrizedTransitionCallableBase = CallableBase<bool, PetriNet &, actionResult_t>;
 
     template <typename CallableType>
     auto make_transition_callable(CallableType &&c) {
         return Callable<CallableType, std::result_of_t<CallableType(actionResult_t)>, actionResult_t>(c);
+    }
+
+    template <typename CallableType>
+    auto make_param_transition_callable(CallableType &&c) {
+        return Callable<CallableType, std::result_of_t<CallableType(PetriNet &, actionResult_t)>, PetriNet &, actionResult_t>(c);
     }
 
     /**
@@ -63,19 +70,20 @@ namespace Petri {
          * @return The result of the test, true meaning that the Transition can be crossed to enable
          * the action 'next'
          */
-        bool isFulfilled(actionResult_t actionResult) const;
+        bool isFulfilled(PetriNet &petriNet, actionResult_t actionResult) const;
 
         /**
          * Returns the condition associated to the Transition
          * @return The condition associated to the Transition
          */
-        TransitionCallableBase const &condition() const noexcept;
+        ParametrizedTransitionCallableBase const &condition() const noexcept;
 
         /**
          * Changes the condition associated to the Transition
          * @param test The new condition to associate to the Transition
          */
         void setCondition(TransitionCallableBase const &test);
+        void setCondition(ParametrizedTransitionCallableBase const &test);
 
         /**
          * Gets the Action 'previous', the starting point of the Transition.
@@ -118,7 +126,7 @@ namespace Petri {
 
     private:
         Transition(Action &previous, Action &next);
-        Transition(uint64_t id, std::string const &name, Action &previous, Action &next, TransitionCallableBase const &cond);
+        Transition(uint64_t id, std::string const &name, Action &previous, Action &next, ParametrizedTransitionCallableBase const &cond);
 
         void setPrevious(Action &previous) noexcept;
         void setNext(Action &next) noexcept;

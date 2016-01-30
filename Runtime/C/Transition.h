@@ -39,6 +39,7 @@ extern "C" {
 #endif
 struct PetriTransition;
 struct PetriAction;
+struct PetriNet;
 
 // typedef struct PetriTransition PetriTransition;
 
@@ -74,7 +75,7 @@ void PetriTransition_setID(struct PetriTransition *transition, uint64_t id);
  * @return The result of the test, true meaning that the PetriTransition can be crossed to enable
  * the action 'next'
  */
-bool PetriTransition_isFulfilled(struct PetriTransition *transition, Petri_actionResult_t actionResult);
+bool PetriTransition_isFulfilled(struct PetriNet *petriNet, struct PetriTransition *transition, Petri_actionResult_t actionResult);
 
 /**
  * Changes the condition associated to the PetriTransition

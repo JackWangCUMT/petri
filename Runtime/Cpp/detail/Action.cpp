@@ -100,12 +100,25 @@ namespace Petri {
         return this->addTransition(Transition(*this, next));
     }
 
+    Transition &Action::addTransition(uint64_t id,
+                                      std::string const &name,
+                                      Action &next,
+                                      ParametrizedTransitionCallableBase const &cond) {
+        return this->addTransition(Transition(id, name, *this, next, cond));
+    }
     Transition &
     Action::addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond) {
-        return this->addTransition(Transition(id, name, *this, next, cond));
+        auto copy = cond.copy_ptr();
+        auto shared_copy = std::shared_ptr<TransitionCallableBase>(copy.release());
+        return this->addTransition(id, name, next, make_param_transition_callable([shared_copy](PetriNet &, actionResult_t a) {
+                                       return shared_copy->operator()(a);
+                                   }));
     }
     Transition &Action::addTransition(uint64_t id, std::string const &name, Action &next, bool (*cond)(actionResult_t)) {
         return addTransition(id, name, next, make_transition_callable(cond));
+    }
+    Transition &Action::addTransition(uint64_t id, std::string const &name, Action &next, bool (*cond)(PetriNet &, actionResult_t)) {
+        return addTransition(id, name, next, make_param_transition_callable(cond));
     }
 
     /**

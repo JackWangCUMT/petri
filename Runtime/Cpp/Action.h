@@ -102,9 +102,15 @@ namespace Petri {
          * @param cond the condition of the Transition to be added
          * @return The newly created transition.
          */
+        Transition &addTransition(uint64_t id,
+                                  std::string const &name,
+                                  Action &next,
+                                  ParametrizedTransitionCallableBase const &cond);
         Transition &
         addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond);
         Transition &addTransition(uint64_t id, std::string const &name, Action &next, bool (*cond)(actionResult_t));
+        Transition &
+        addTransition(uint64_t id, std::string const &name, Action &next, bool (*cond)(PetriNet &, actionResult_t));
 
         /**
          * Adds a Transition to the Action.

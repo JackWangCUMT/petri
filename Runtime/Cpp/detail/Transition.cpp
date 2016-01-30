@@ -37,7 +37,7 @@ namespace Petri {
                 : _previous(&previous)
                 , _next(&next) {}
 
-        Internals(std::string const &name, Action &previous, Action &next, TransitionCallableBase const &cond)
+        Internals(std::string const &name, Action &previous, Action &next, ParametrizedTransitionCallableBase const &cond)
                 : _name(name)
                 , _previous(&previous)
                 , _next(&next)
@@ -46,7 +46,7 @@ namespace Petri {
         std::string _name;
         Action *_previous;
         Action *_next;
-        std::unique_ptr<TransitionCallableBase> _test;
+        std::unique_ptr<ParametrizedTransitionCallableBase> _test;
 
         // Default delay between evaluation
         std::chrono::nanoseconds _delayBetweenEvaluation = 10ms;
@@ -56,7 +56,7 @@ namespace Petri {
             : Entity(0)
             , _internals(std::make_unique<Internals>(previous, next)) {}
 
-    Transition::Transition(uint64_t id, std::string const &name, Action &previous, Action &next, TransitionCallableBase const &cond)
+    Transition::Transition(uint64_t id, std::string const &name, Action &previous, Action &next, ParametrizedTransitionCallableBase const &cond)
             : Entity(id)
             , _internals(std::make_unique<Internals>(name, previous, next, cond)) {}
 
@@ -70,15 +70,22 @@ namespace Petri {
         _internals->_next = &next;
     }
 
-    bool Transition::isFulfilled(actionResult_t actionResult) const {
-        return (*_internals->_test)(actionResult);
+    bool Transition::isFulfilled(PetriNet &pn, actionResult_t actionResult) const {
+        return (*_internals->_test)(pn, actionResult);
     }
 
-    TransitionCallableBase const &Transition::condition() const noexcept {
+    ParametrizedTransitionCallableBase const &Transition::condition() const noexcept {
         return *_internals->_test;
     }
 
     void Transition::setCondition(TransitionCallableBase const &test) {
+        auto copy = test.copy_ptr();
+        auto shared_copy = std::shared_ptr<TransitionCallableBase>(copy.release());
+        this->setCondition(
+                        make_param_transition_callable([shared_copy](PetriNet &, actionResult_t a) { return shared_copy->operator()(a); }));
+    }
+
+    void Transition::setCondition(ParametrizedTransitionCallableBase const &test) {
         _internals->_test = test.copy_ptr();
     }
 

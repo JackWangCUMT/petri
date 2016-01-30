@@ -17,5 +17,10 @@ public:
                 std::cout << "Condition1!" << std::endl;
                 return true;
         }
+
+	static ActionResult outputVar(int64_t value) {
+		std::cout << "Value: " << value << std::endl;
+		return {};
+	}
 };
 

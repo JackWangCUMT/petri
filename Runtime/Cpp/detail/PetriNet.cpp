@@ -69,6 +69,7 @@ namespace Petri {
         if(it == _internals->_variables.end()) {
             throw std::runtime_error("Non existing variable requested: " + std::to_string(id));
         }
+
         return *it->second;
     }
 
@@ -144,7 +145,7 @@ namespace Petri {
 
                             lock(locks.begin(), locks.end());
 
-                            isFulfilled = (*it)->isFulfilled(res);
+                            isFulfilled = (*it)->isFulfilled(_this, res);
                         }
 
                         minDelay = std::min(minDelay, (*it)->delayBetweenEvaluation());
