@@ -69,8 +69,7 @@ namespace {
             return end;
         }
 
-        auto &guard = *begin;
-        guard.try_lock();
+        std::unique_lock<std::unique_lock<std::mutex>> guard(*begin, std::try_to_lock);
 
         if(!guard.owns_lock()) {
             return begin;
@@ -94,7 +93,7 @@ namespace {
         lockIterator_t next = second;
 
         for(;;) {
-            auto &begin_lock = *begin;
+            std::unique_lock<std::unique_lock<std::mutex>> begin_lock(*begin, std::defer_lock);
             if(start_with_begin) {
                 begin_lock.lock();
                 lockIterator_t const failed_lock = try_lock(next, end);
@@ -123,6 +122,5 @@ namespace {
         }
     }
 }
-
 
 #endif /* lock_h */
