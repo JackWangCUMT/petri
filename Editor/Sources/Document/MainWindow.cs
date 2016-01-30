@@ -725,35 +725,36 @@ namespace Petri.Editor
         /// </summary>
         public static void InitGUI()
         {
-            _staticAccelGroup = new AccelGroup();
+            if(Configuration.RunningPlatform == Platform.Mac) {
 
-            _staticQuitItem = new MenuItem(Configuration.GetLocalized("Quit"));
-            _staticQuitItem.Activated += OnClickMenuStatic;
-            _staticQuitItem.AddAccelerator("activate",
+                _staticAccelGroup = new AccelGroup();
+
+                _staticQuitItem = new MenuItem(Configuration.GetLocalized("Quit"));
+                _staticQuitItem.Activated += OnClickMenuStatic;
+                _staticQuitItem.AddAccelerator("activate",
                                            _staticAccelGroup,
                                            new AccelKey(Gdk.Key.q,
                                                         Gdk.ModifierType.ControlMask,
                                                         AccelFlags.Visible));
 
-            _staticPreferencesItem = new MenuItem(Configuration.GetLocalized("Preferences…"));
-            _staticPreferencesItem.Activated += OnClickMenuStatic;
-            _staticPreferencesItem.AddAccelerator("activate",
+                _staticPreferencesItem = new MenuItem(Configuration.GetLocalized("Preferences…"));
+                _staticPreferencesItem.Activated += OnClickMenuStatic;
+                _staticPreferencesItem.AddAccelerator("activate",
                                                   _staticAccelGroup,
                                                   new AccelKey(Gdk.Key.comma,
                                                                Gdk.ModifierType.ControlMask,
                                                                AccelFlags.Visible));
 
-            _staticAboutItem = new MenuItem(Configuration.GetLocalized("About…"));
-            _staticAboutItem.Activated += OnClickMenuStatic;
+                _staticAboutItem = new MenuItem(Configuration.GetLocalized("About…"));
+                _staticAboutItem.Activated += OnClickMenuStatic;
 
-            var aboutGroup = IgeMacMenu.AddAppMenuGroup();
-            aboutGroup.AddMenuItem(_staticAboutItem, null);
-            var prefsGroup = IgeMacMenu.AddAppMenuGroup();
-            prefsGroup.AddMenuItem(_staticPreferencesItem, null);
+                var aboutGroup = IgeMacMenu.AddAppMenuGroup();
+                aboutGroup.AddMenuItem(_staticAboutItem, null);
+                var prefsGroup = IgeMacMenu.AddAppMenuGroup();
+                prefsGroup.AddMenuItem(_staticPreferencesItem, null);
 
-            IgeMacMenu.QuitMenuItem = _staticQuitItem;
+                IgeMacMenu.QuitMenuItem = _staticQuitItem;
 
-            if(Configuration.RunningPlatform == Platform.Mac) {
                 MonoDevelop.MacInterop.ApplicationEvents.Quit += delegate (object sender,
                                                                            MonoDevelop.MacInterop.ApplicationQuitEventArgs e) {
                     Application.SaveAndQuit();
