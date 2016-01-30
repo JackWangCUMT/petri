@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Rémi Saurel
+ * Copyright (c) 2016 Rémi Saurel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,39 +21,31 @@
  */
 
 //
-//  PetriUtils.h
+//  Transition.hpp
 //  Petri
 //
-//  Created by Rémi on 01/07/2015.
+//  Created by Rémi on 30/01/2016.
 //
 
-#ifndef PetriUtils_c
-#define PetriUtils_c
+#ifndef PETRI_Transition_hpp
+#define PETRI_Transition_hpp
 
-#include "Types.h"
-#include <stdbool.h>
-#include <stdint.h>
+#include "../Transition.h"
+#include "Types.hpp"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace {
+    auto getParametrizedTransitionCallable(parametrizedTransitionCallable_t transition) {
+        return Petri::make_param_transition_callable([transition](Petri::PetriNet &pn, Petri_actionResult_t a) {
+            PetriNet petriNet{std::unique_ptr<Petri::PetriNet>(&pn)};
 
-struct PetriDynamicLib;
+            auto result = transition(&petriNet, a);
 
-enum ActionResult { OK, NOK };
+            petriNet.petriNet.release();
 
-Petri_actionResult_t PetriUtility_pause(uint64_t usdelay);
-Petri_actionResult_t PetriUtility_printAction(char const *name, uint64_t id);
-Petri_actionResult_t PetriUtility_doNothing();
-Petri_actionResult_t PetriUtility_returnDefault();
-int64_t PetriUtility_random(int64_t lowerBound, int64_t upperBound);
-
-bool PetriUtility_returnTrue(Petri_actionResult_t res);
-
-struct PetriDynamicLib *Petri_loadPetriDynamicLib(char const *path, char const *prefix);
-
-#ifdef __cplusplus
+            return result;
+        });
+    }
 }
-#endif
 
-#endif /* PetriUtils_c */
+
+#endif /* Transition_h */

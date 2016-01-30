@@ -104,6 +104,7 @@ void PetriAction_setID(struct PetriAction *action, uint64_t id);
  * @return The transition newly created.
  */
 struct PetriTransition *PetriAction_addTransition(struct PetriAction *action, uint64_t id, char const *name, struct PetriAction *next, transitionCallable_t cond);
+struct PetriTransition *PetriAction_addTransitionWithParam(struct PetriAction *action, uint64_t id, char const *name, struct PetriAction *next, parametrizedTransitionCallable_t cond);
 
 /**
  * Adds a PetriTransition to the PetriAction.

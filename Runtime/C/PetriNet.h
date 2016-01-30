@@ -111,7 +111,7 @@ void PetriNet_addVariable(struct PetriNet *pn, uint32_t id);
  * @param id The id of the new Atomic variable.
  * @return The value of the Atomic variable.
  */
-int64_t PetriNet_getVariable(struct PetriNet *pn, uint32_t id);
+volatile int64_t *PetriNet_getVariable(struct PetriNet *pn, uint32_t id);
 
 /**
  * Locks the Atomic variable designated by the specified id.

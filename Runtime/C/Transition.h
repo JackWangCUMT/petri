@@ -44,6 +44,7 @@ struct PetriNet;
 // typedef struct PetriTransition PetriTransition;
 
 typedef bool (*transitionCallable_t)(Petri_actionResult_t);
+typedef bool (*parametrizedTransitionCallable_t)(struct PetriNet *, Petri_actionResult_t);
 
 /**
  * Destroys a PetriAction instance created by one of the PetriAction_create functions.
@@ -83,6 +84,7 @@ bool PetriTransition_isFulfilled(struct PetriNet *petriNet, struct PetriTransiti
  * @param test The new condition to associate to the PetriTransition
  */
 void PetriTransition_setCondition(struct PetriTransition *transition, transitionCallable_t test);
+void PetriTransition_setConditionWithParam(struct PetriTransition *transition, parametrizedTransitionCallable_t test);
 
 /**
  * Gets the name of the PetriTransition.

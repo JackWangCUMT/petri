@@ -1,5 +1,3 @@
-//
-//  Transition.c
 /*
  * Copyright (c) 2015 Rémi Saurel
  *
@@ -22,6 +20,9 @@
  * SOFTWARE.
  */
 
+//
+//  Transition.cpp
+
 //  Petri
 //
 //  Created by Rémi on 25/06/2015.
@@ -30,6 +31,7 @@
 #define PETRI_NEEDS_GET_TRANSITION
 
 #include "../Transition.h"
+#include "Transition.hpp"
 #include "Types.hpp"
 #include <chrono>
 
@@ -59,6 +61,10 @@ bool PetriTransition_isFulfilled(PetriNet *petriNet, PetriTransition *transition
 
 void PetriTransition_setCondition(PetriTransition *transition, transitionCallable_t test) {
     getTransition(transition).setCondition(Petri::make_transition_callable(test));
+}
+
+void PetriTransition_setConditionWithParam(PetriTransition *transition, parametrizedTransitionCallable_t test) {
+    getTransition(transition).setCondition(getParametrizedTransitionCallable(test));
 }
 
 char const *PetriTransition_getName(PetriTransition *transition) {

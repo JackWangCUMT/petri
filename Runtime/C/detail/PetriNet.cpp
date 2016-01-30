@@ -77,8 +77,8 @@ void PetriNet_addVariable(PetriNet *pn, uint32_t id) {
     pn->petriNet->addVariable(id);
 }
 
-int64_t PetriNet_getVariable(PetriNet *pn, uint32_t id) {
-    return pn->petriNet->getVariable(id).value();
+volatile int64_t *PetriNet_getVariable(PetriNet *pn, uint32_t id) {
+    return &pn->petriNet->getVariable(id).value();
 }
 
 void PetriNet_lockVariable(PetriNet *pn, uint32_t id) {

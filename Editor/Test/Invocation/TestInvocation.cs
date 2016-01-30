@@ -43,7 +43,7 @@ namespace Petri.Test
             // THEN an error is returned and the expected error string is output
             Assert.AreNotEqual(0, result);
             Assert.AreEqual("", stdout);
-            Assert.IsTrue(stderr.EndsWith("\n" + Editor.Application.HelpString + "\n"));
+            Assert.IsTrue(stderr.EndsWith("\n" + Editor.CLI.HelpString + "\n"));
             Assert.IsTrue(stderr.Contains("Invalid argument"));
             Assert.IsTrue(stderr.Contains(args[0]));
         }
@@ -60,7 +60,7 @@ namespace Petri.Test
 
             // THEN no error is returned and the expected string is output
             Assert.AreEqual(0, result);
-            Assert.AreEqual(Editor.Application.HelpString + "\n", stdout);
+            Assert.AreEqual(Editor.CLI.HelpString + "\n", stdout);
             Assert.AreEqual("", stderr);
         }
 
@@ -76,7 +76,7 @@ namespace Petri.Test
 
             // THEN no error is returned and the expected string is output
             Assert.AreEqual(0, result);
-            Assert.AreEqual(Editor.Application.HelpString + "\n", stdout);
+            Assert.AreEqual(Editor.CLI.HelpString + "\n", stdout);
             Assert.AreEqual("", stderr);
         }
 
@@ -91,9 +91,9 @@ namespace Petri.Test
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN an error is returned and the expected error string is output
-            Assert.AreEqual(Editor.Application.ArgumentError, result);
+            Assert.AreEqual(Editor.CLI.ArgumentError, result);
             Assert.AreEqual("", stdout);
-            Assert.AreEqual(Editor.Application.MissingPetriDocument + "\n" + Editor.Application.HelpString + "\n", stderr);
+            Assert.AreEqual(Editor.CLI.MissingPetriDocument + "\n" + Editor.CLI.HelpString + "\n", stderr);
         }
 
         [Test()]
@@ -107,9 +107,9 @@ namespace Petri.Test
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN an error is returned and the expected error string is output
-            Assert.AreEqual(Editor.Application.ArgumentError, result);
+            Assert.AreEqual(Editor.CLI.ArgumentError, result);
             Assert.AreEqual("", stdout);
-            Assert.AreEqual(Editor.Application.MissingPetriDocument + "\n" + Editor.Application.HelpString + "\n", stderr);
+            Assert.AreEqual(Editor.CLI.MissingPetriDocument + "\n" + Editor.CLI.HelpString + "\n", stderr);
         }
 
         [Test()]
@@ -123,9 +123,9 @@ namespace Petri.Test
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN an error is returned and the expected error string is output
-            Assert.AreEqual(Editor.Application.ArgumentError, result);
+            Assert.AreEqual(Editor.CLI.ArgumentError, result);
             Assert.AreEqual("", stdout);
-            Assert.AreEqual(Editor.Application.MissingPetriDocument + "\n" + Editor.Application.HelpString + "\n", stderr);
+            Assert.AreEqual(Editor.CLI.MissingPetriDocument + "\n" + Editor.CLI.HelpString + "\n", stderr);
         }
 
         [Test()]
@@ -139,7 +139,7 @@ namespace Petri.Test
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(Editor.Application.UnexpectedError, result);
+            Assert.AreEqual(Editor.CLI.UnexpectedError, result);
             Assert.AreEqual("", stdout);
             Assert.IsTrue(stderr.StartsWith("An exception occurred: "));
         }
@@ -155,7 +155,7 @@ namespace Petri.Test
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(Editor.Application.UnexpectedError, result);
+            Assert.AreEqual(Editor.CLI.UnexpectedError, result);
             Assert.AreEqual("", stdout);
             Assert.IsTrue(stderr.StartsWith("An exception occurred: "));
         }
@@ -171,7 +171,7 @@ namespace Petri.Test
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(Editor.Application.UnexpectedError, result);
+            Assert.AreEqual(Editor.CLI.UnexpectedError, result);
             Assert.AreEqual("", stdout);
             Assert.IsTrue(stderr.StartsWith("An exception occurred: "));
         }
@@ -187,7 +187,7 @@ namespace Petri.Test
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(Editor.Application.UnexpectedError, result);
+            Assert.AreEqual(Editor.CLI.UnexpectedError, result);
             Assert.AreEqual("", stdout);
             Assert.IsTrue(stderr.StartsWith("An exception occurred: "));
         }
@@ -203,7 +203,7 @@ namespace Petri.Test
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(Editor.Application.UnexpectedError, result);
+            Assert.AreEqual(Editor.CLI.UnexpectedError, result);
             Assert.AreEqual("", stdout);
             Assert.IsTrue(stderr.StartsWith("An exception occurred: "));
         }
@@ -219,9 +219,9 @@ namespace Petri.Test
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned on the argument parsing phase
-            Assert.AreEqual(Editor.Application.ArgumentError, result);
+            Assert.AreEqual(Editor.CLI.ArgumentError, result);
             Assert.AreEqual("", stdout);
-            Assert.AreEqual(Editor.Application.WrongArchitecture + "\n" + Editor.Application.HelpString + "\n", stderr);
+            Assert.AreEqual(Editor.CLI.WrongArchitecture + "\n" + Editor.CLI.HelpString + "\n", stderr);
         }
     }
 }

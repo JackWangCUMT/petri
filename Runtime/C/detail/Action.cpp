@@ -31,6 +31,7 @@
 
 #include "../../Cpp/Action.h"
 #include "../Action.h"
+#include "Transition.hpp"
 #include "Types.hpp"
 #include <memory>
 
@@ -74,6 +75,11 @@ void PetriAction_setID(PetriAction *action, uint64_t id) {
 
 PetriTransition *PetriAction_addTransition(PetriAction *action, uint64_t id, char const *name, PetriAction *next, transitionCallable_t cond) {
     auto &t = getAction(action).addTransition(id, name, getAction(next), cond);
+    return new PetriTransition{nullptr, &t};
+}
+
+PetriTransition *PetriAction_addTransitionWithParam(struct PetriAction *action, uint64_t id, char const *name, struct PetriAction *next, parametrizedTransitionCallable_t cond) {
+    auto &t = getAction(action).addTransition(id, name, getAction(next), getParametrizedTransitionCallable(cond));
     return new PetriTransition{nullptr, &t};
 }
 

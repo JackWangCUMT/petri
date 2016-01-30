@@ -47,6 +47,10 @@ Petri_actionResult_t PetriUtility_doNothing() {
     return Petri::Utility::doNothing();
 }
 
+Petri_actionResult_t PetriUtility_returnDefault() {
+    return 0;
+}
+
 bool PetriUtility_returnTrue(Petri_actionResult_t) {
     return true;
 }

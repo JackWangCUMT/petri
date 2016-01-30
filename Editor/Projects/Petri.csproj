@@ -172,6 +172,7 @@
     <Compile Include="..\Sources\Model\Transition.cs" />
     <Compile Include="..\Sources\Application\Application.cs" />
     <Compile Include="..\Sources\Document\DocumentSection\Editor\RuntimeFunctions.cs" />
+    <Compile Include="..\Sources\Application\CLI.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="CSRuntime.csproj">
