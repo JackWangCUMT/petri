@@ -31,49 +31,10 @@ namespace Petri.Editor
 {
     public class Application
     {
-        /*
-         * The following string constants are the possible console output when invoked in compiler mode.
-         * The string are used in the units tests as well.
-         */
-        internal static readonly string HelpString = "Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--run|-r] [--clean|-k] [--arch|-a (32|64)] [--verbose|-v] [--] \"Path/To/Document.petri\"";
-
-        internal static readonly string MissingPetriDocument = "The path to the Petri document must be specified as the last program argument!";
-        internal static readonly string MissingGenerateOrCompileOrRunOrClean = "Must specify one or more of \"--generate\", \"--compile\", \"clean\", and \"--run\"!";
-
-        internal static readonly string WrongArchitecture = "Wrong architecture specified!";
-        internal static readonly string MissingArchitecture = "Missing architecture value!";
-
-        internal static readonly int ArgumentError = 4;
-        internal static readonly int CompilationFailure = 64;
-        internal static readonly int UnexpectedError = 124;
-
+        /// <summary>
+        /// The max number of recent elements in the File menu.
+        /// </summary>
         public static readonly int MaxRecentElements = 10;
-
-        /// <summary>
-        /// Prints the application's usage when invoked from a terminal, whether requested by the user with a help flag, or when a wrong flag is passed as an argument.
-        /// </summary>
-        /// <returns>The expected return code for the application</returns>
-        /// <param name="returnCode">The return code that the function must return. If ≠ 0, then the output is done on stderr. Otherwise, the output is made on stdout.</param>
-        private static int PrintUsage(int returnCode)
-        {
-            if(returnCode == 0) {
-                Console.WriteLine(HelpString);
-            }
-            else {
-                Console.Error.WriteLine(HelpString);
-            }
-            return returnCode;
-        }
-
-        /// <summary>
-        /// Returns whether the argument is a short CLI option.
-        /// </summary>
-        /// <returns><c>true</c> if opt is a short option; otherwise, <c>false</c>.</returns>
-        /// <param name="opt">Option.</param>
-        static bool IsShortOption(string opt)
-        {
-            return System.Text.RegularExpressions.Regex.Match(opt, "^-[gcrkv]+$").Success;
-        }
 
         /// <summary>
         /// The entry point of the program. Manages boths CLI and GUI, depending on whether arguments were given or not.
@@ -83,231 +44,49 @@ namespace Petri.Editor
         public static int Main(string[] args)
         {
             if(args.Length > 0) {
-                bool generate = false;
-                bool compile = false;
-                bool run = false;
-                bool clean = false;
-                bool verbose = false;
-                int arch = 0;
-                var used = new bool[args.Length];
-                used.Initialize();
-
-                if(args[0] == "--help" || args[0] == "-h") {
-                    return PrintUsage(0);
-                }
-
-                for(int i = 0; i < args.Length; ++i) {
-                    // A getopt-like options/file separator that allows the hypothetical processing of petri net files named "--arch" or "--compile" and so on.
-                    if(args[i] == "--") {
-                        used[i] = true;
-                        break;
-                    }
-                    else if(IsShortOption(args[i])) {
-                        int count = 0;
-                        if(args[i].Contains("v")) {
-                            verbose = true;
-                            ++count;
-                        }
-                        if(args[i].Contains("g")) {
-                            generate = true;
-                            ++count;
-                        }
-                        if(args[i].Contains("c")) {
-                            compile = true;
-                            ++count;
-                        }
-                        if(args[i].Contains("r")) {
-                            run = true;
-                            ++count;
-                        }
-                        if(args[i].Contains("k")) {
-                            clean = true;
-                            ++count;
-                        }
-
-                        // The argument is used if all of the short options have been consumed.
-                        used[i] = count == (args[i].Length - 1);
-                    }
-                    else if(args[i] == "--arch" || args[i] == "-a") {
-                        if(i < args.Length - 1) {
-                            if(int.TryParse(args[i + 1], out arch)) {
-                                if(arch == 32 || arch == 64) {
-                                    Configuration.Arch = arch;
-                                    Configuration.Save();
-                                }
-                                else {
-                                    Console.Error.WriteLine(WrongArchitecture);
-                                    return PrintUsage(ArgumentError);
-                                }
-                                used[i] = used[i + 1] = true;
-                                ++i;
-                            }
-                            else {
-                                Console.Error.WriteLine(WrongArchitecture);
-                                return PrintUsage(ArgumentError);
-                            }
-                        }
-                        else {
-                            Console.Error.WriteLine(MissingArchitecture);
-                            return PrintUsage(ArgumentError);
-                        }
-                    }
-                    else if(args[i] == "--verbose") {
-                        verbose = true;
-                        used[i] = true;
-                    }
-                    else if(args[i] == "--generate") {
-                        generate = true;
-                        used[i] = true;
-                    }
-                    else if(args[i] == "--compile") {
-                        compile = true;
-                        used[i] = true;
-                    }
-                    else if(args[i] == "--run") {
-                        run = true;
-                        used[i] = true;
-                    }
-                    else if(args[i] == "--clean") {
-                        clean = true;
-                        used[i] = true;
-                    }
-                }
-                for(int i = 0; i < args.Length - 1; ++i) {
-                    if(!used[i]) {
-                        Console.Error.WriteLine("Invalid argument \"" + args[i] + "\"");
-                        return PrintUsage(ArgumentError);
-                    }
-                }
-                if(used[args.Length - 1]) {
-                    // Did not specify document path
-                    Console.Error.WriteLine(MissingPetriDocument);
-                    return PrintUsage(ArgumentError);
-                }
-
-                string path = args[args.Length - 1];
-
-                if(!compile && !generate && !run && !clean) {
-                    Console.Error.WriteLine(MissingGenerateOrCompileOrRunOrClean);
-                    return PrintUsage(ArgumentError);
-                }
-
-                try {
-                    HeadlessDocument document = new HeadlessDocument(path);
-                    document.Load();
-                    if(run) {
-                        document.Settings.RunInEditor = true;
-                    }
-
-                    if(verbose) {
-                        Console.WriteLine("Processing petri net \"" + document.Settings.Name + "\"…");
-                    }
-
-                    string sourcePath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
-                                                                                          document.Settings.RelativeSourcePath));
-
-                    string libPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
-                                                                                       document.Settings.RelativeLibPath));
-
-                    if(clean) {
-                        if(verbose) {
-                            Console.Write("Cleaning artifacts of petri net \"" + document.Settings.Name + "\"… ");
-                        }
-                        System.IO.File.Delete(sourcePath);
-                        System.IO.File.Delete(libPath);
-                        if(document.Settings.Language == Code.Language.C || document.Settings.Language == Code.Language.Cpp) {
-                            string headerPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
-                                                                                                  document.Settings.RelativeSourceHeaderPath));
-                            System.IO.File.Delete(headerPath);
-                        }
-                        if(verbose) {
-                            Console.WriteLine("Done.");
-                        }
-                    }
-
-                    bool forceGeneration = false, forceCompilation = false;
-                    if(!generate && (compile || run)) {
-                        if(!System.IO.File.Exists(sourcePath)
-                           || System.IO.File.GetLastWriteTime(sourcePath) < System.IO.File.GetLastWriteTime(document.Path)) {
-                            generate = true;
-                            forceGeneration = true;
-                        }
-                        else if(verbose) {
-                            Console.WriteLine("The previously generated " + document.Settings.LanguageName() + " code is up to date, no need for code generation.");
-                        }
-                    }
-
-                    if(generate) {
-                        if(forceGeneration && verbose) {
-                            Console.WriteLine("The previously generated " + document.Settings.LanguageName() + " code is outdated or nonexistent, generating new code…");
-                        }
-                        document.GenerateCodeDontAsk();
-                        System.IO.File.SetLastWriteTime(path, DateTime.Now);
-                        if(verbose) {
-                            Console.WriteLine("Successfully generated the " + document.Settings.LanguageName() + " code.");
-                        }
-                    }
-
-                    if(!compile && run) {
-                        if(!System.IO.File.Exists(libPath) || System.IO.File.GetLastWriteTime(libPath) < System.IO.File.GetLastWriteTime(sourcePath)) {
-                            compile = true;
-                            forceCompilation = true;
-                        }
-                        else if(verbose) {
-                            Console.WriteLine("The previously compiled library is up to date, no need for recompilation.");
-                        }
-                    }
-
-                    if(compile) {
-                        if(forceCompilation && verbose) {
-                            Console.WriteLine("The previously compiled library is outdated or nonexistent, compiling…");
-                        }
-                        bool res = document.Compile(false);
-                        if(!res) {
-                            Console.Error.WriteLine("Compilation failed, aborting!");
-                            return CompilationFailure;
-                        }
-                        else if(verbose) {
-                            Console.WriteLine("Compilation successful!");
-                        }
-                    }
-
-                    if(run) {
-                        RunDocument(document, verbose);
-                    }
-                }
-                catch(Exception e) {
-                    Console.Error.WriteLine("An exception occurred: " + e + " " + e.Message);
-                    return UnexpectedError;
-                }
-
-                return 0;
-            }
+                return CLI.CLIMain(args);
+           }
             else {
-                Gtk.Application.Init();
+                return GUIMain(null);
+            }
+        }
 
-                MainWindow.InitGUI();
+        /// <summary>
+        /// The entry point of the program when in GUI mode.
+        /// </summary>
+        /// <returns>The return code of the program.</returns>
+        /// <param name="docsToOpen">An optional list of documents to open at launch. May be <c>null</c>.</param>
+        public static int GUIMain(string[] docsToOpen)
+        {
+            Gtk.Application.Init();
 
-                RecentDocumentEntry[] entries = JsonConvert.DeserializeObject<RecentDocumentEntry[]>(Configuration.RecentDocuments);
-                var result = new SortedList<DateTime, string>(Comparer<DateTime>.Create((date1,
-                                                                                         date2) => date2.CompareTo(date1)));
-                if(entries != null) {
-                    foreach(var entry in entries) {
-                        if(entry != null) {
-                            result.Add(DateTime.Parse(entry.date), entry.path);
-                        }
+            MainWindow.InitGUI();
+
+            RecentDocumentEntry[] entries = JsonConvert.DeserializeObject<RecentDocumentEntry[]>(Configuration.RecentDocuments);
+            var result = new SortedList<DateTime, string>(Comparer<DateTime>.Create((date1,
+                                                                                     date2) => date2.CompareTo(date1)));
+            if(entries != null) {
+                foreach(var entry in entries) {
+                    if(entry != null) {
+                        result.Add(DateTime.Parse(entry.date), entry.path);
                     }
                 }
-                RecentDocuments = result;
-                TrimRecentDocuments();
-
-                var document = new Document("");
-                AddDocument(document);
-
-                Gtk.Application.Run();
-
-                return 0;
             }
+            RecentDocuments = result;
+            TrimRecentDocuments();
+
+            var document = new Document("");
+            AddDocument(document);
+
+            if(docsToOpen != null) {
+                foreach(string path in docsToOpen) {
+                    OpenDocument(path);
+                }
+            }
+
+            Gtk.Application.Run();
+
+            return 0;
         }
 
         /// <summary>
@@ -423,8 +202,8 @@ namespace Petri.Editor
                 try {
                     _opening = true;
                     var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Open Petri Net…"), null,
-                                                   Gtk.FileChooserAction.Open,
-                                                   new object[] {Configuration.GetLocalized("Cancel"), Gtk.ResponseType.Cancel,
+                                                       Gtk.FileChooserAction.Open,
+                                                       new object[] {Configuration.GetLocalized("Cancel"), Gtk.ResponseType.Cancel,
                         Configuration.GetLocalized("Open"), Gtk.ResponseType.Accept
                     });
 
@@ -560,53 +339,6 @@ namespace Petri.Editor
         public static SortedList<DateTime, string> RecentDocuments {
             get;
             private set;
-        }
-
-        /// <summary>
-        /// Runs the petri net described by the document. It must have been already compiled.
-        /// </summary>
-        /// <param name="doc">The document to run.</param>
-        /// <param name="verbose">Whether some additional info is to be ouput upon execution.</param>
-        static void RunDocument(HeadlessDocument doc, bool verbose)
-        {
-            if(verbose) {
-                Console.WriteLine("Preparing for the petri net's exection…\n");
-                Console.Write("Loading the assembly… ");
-            }
-            var proxy = new GeneratedDynamicLibProxy(doc.Settings.Language, System.IO.Directory.GetParent(doc.Path).FullName,
-                                                     doc.Settings.RelativeLibPath,
-                                                     doc.Settings.Name);            
-            Petri.Runtime.GeneratedDynamicLib dylib = proxy.Load();
-
-            if(dylib == null) {
-                return;
-            }
-            if(verbose) {
-                Console.WriteLine("Assembly loaded.");
-                Console.Write("Extracting the dynamic library… ");
-            }
-
-            var dynamicLib = dylib.Lib;
-
-            if(verbose) {
-                Console.WriteLine("OK.");
-                Console.Write("Creating the petri net… ");
-            }
-            Petri.Runtime.PetriNet pn = dynamicLib.Create();
-            if(verbose) {
-                Console.WriteLine("OK.");
-                Console.WriteLine("Ready to go! The application will automatically close when/if the petri net execution completes.\n");
-            }
-            pn.Run();
-            pn.Join();
-
-            if(verbose) {
-                Console.Write("\nExecution complete. Unloading the library… ");
-            }
-            proxy.Unload();
-            if(verbose) {
-                Console.WriteLine("Done, will now exit.");
-            }
         }
 
         static List<Document> _documents = new List<Document>();

@@ -329,11 +329,11 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             t.GetVariables(cppVar);
 
-            _functionPrototypes += "static bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t);";
+            _functionPrototypes += "static bool " + t.CodeIdentifier + "_invocation(struct PetriNet *, Petri_actionResult_t);";
 
             CodeRange range = new CodeRange();
             range.FirstLine = _functionBodies.LineCount;
-            _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {";
+            _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(struct PetriNet *petriNet, Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {";
 
             if(t.Condition.NeedsReturn) {
                 _functionBodies += t.Condition.MakeCode();
@@ -355,7 +355,7 @@ namespace Petri.Editor
 
             CodeRanges[t] = range;
 
-            CodeGen += "PetriAction_addTransition(" + bName + ", " + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", "
+            CodeGen += "PetriAction_addTransitionWithParam(" + bName + ", " + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", "
             + "&" + t.CodeIdentifier + "_invocation" + ");";
 
             foreach(var tup in old) {
