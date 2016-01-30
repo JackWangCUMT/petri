@@ -50,6 +50,7 @@
     <Compile Include="Utility.cs" />
     <Compile Include="Examples\TestCompilation.cs" />
     <Compile Include="Examples\TestExecution.cs" />
+    <Compile Include="Examples\Variables\TestVariables.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -67,5 +68,6 @@
     <Folder Include="Invocation\" />
     <Folder Include="Runtime\" />
     <Folder Include="Examples\" />
+    <Folder Include="Examples\Variables\" />
   </ItemGroup>
 </Project>
