@@ -150,7 +150,7 @@ namespace Petri.Editor.Code
         {
             s = Parser.RemoveParenthesis(s.Trim()).Trim();
             var subexprs = new List<Tuple<ExprType, string>>();
-            string namePattern = Parser.NamePattern;
+            string namePattern = Parser.VariablePattern;
             namePattern = namePattern.Substring(0, namePattern.Length - 1) + "\\s*)?.*";
             var findName = new Regex(namePattern);
             var findNumber = new Regex("(" + Parser.NumberPattern + ")?.*");

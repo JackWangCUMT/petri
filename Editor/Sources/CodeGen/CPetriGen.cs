@@ -51,7 +51,8 @@ namespace Petri.Editor
 
         public override void WriteExpressionEvaluator(Expression expression, string path)
         {
-			
+			// TODO: tbd
+            throw new Exception("Not implemented yet!");
         }
 
         protected override void Begin()

@@ -74,7 +74,7 @@ namespace Petri.Editor
             generator += "auto &petriNet = *static_cast<PetriDebug *>(petriPtr);";
             generator += "static std::string result;";
             generator += "std::ostringstream oss;";
-            generator += "oss << " + cppExpr + ";";
+            generator += "oss << (" + cppExpr + ");";
             generator += "result = oss.str();";
             generator += "return result.c_str();";
             generator += "}\n";
@@ -356,11 +356,11 @@ namespace Petri.Editor
             var cppVar = new HashSet<VariableExpression>();
             t.GetVariables(cppVar);
 
-            _functionPrototypes += "bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t);";
+            _functionPrototypes += "bool " + t.CodeIdentifier + "_invocation(PetriNet &, Petri_actionResult_t);";
 
             CodeRange range = new CodeRange();
             range.FirstLine = _functionBodies.LineCount;
-            _functionBodies += "bool " + t.CodeIdentifier + "_invocation(Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
+            _functionBodies += "bool " + t.CodeIdentifier + "_invocation(PetriNet &petriNet, Petri_actionResult_t _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
             range.LastLine = _functionBodies.LineCount;
 
             CodeRanges[t] = range;

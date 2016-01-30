@@ -230,6 +230,12 @@ namespace Petri.Editor
                 }
             }
 
+            public static string VariablePattern {
+                get {
+                    return "(?<name>\\$?[a-zA-Z_][a-zA-Z0-9_]*)";
+                }
+            }
+
             public static string NumberPattern {
                 get {
                     return @"(?<number>([0-9]+\.?)|(\.[0-9]+)|([0-9]+\.[0-9]+))";

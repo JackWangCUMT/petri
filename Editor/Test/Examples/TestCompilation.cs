@@ -41,9 +41,9 @@ namespace Petri.Test.Examples
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned.
-            Assert.AreEqual(0, result);
-            Assert.AreEqual("", stdout);
             Assert.AreEqual("", stderr);
+            Assert.AreEqual("", stdout);
+            Assert.AreEqual(0, result);
         }
 
         [Test()]
@@ -57,9 +57,9 @@ namespace Petri.Test.Examples
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned.
-            Assert.AreEqual(0, result);
-            Assert.AreEqual("", stdout);
             Assert.AreEqual("", stderr);
+            Assert.AreEqual("", stdout);
+            Assert.AreEqual(0, result);
         }
 
         [Test()]
@@ -73,9 +73,9 @@ namespace Petri.Test.Examples
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned.
-            Assert.AreEqual(0, result);
-            Assert.AreEqual("", stdout);
             Assert.AreEqual("", stderr);
+            Assert.AreEqual("", stdout);
+            Assert.AreEqual(0, result);
         }
     }
 }

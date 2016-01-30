@@ -726,7 +726,6 @@ namespace Petri.Editor
         public static void InitGUI()
         {
             if(Configuration.RunningPlatform == Platform.Mac) {
-
                 _staticAccelGroup = new AccelGroup();
 
                 _staticQuitItem = new MenuItem(Configuration.GetLocalized("Quit"));
