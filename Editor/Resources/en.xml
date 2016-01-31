@@ -391,6 +391,27 @@
 <Key>An error occurred in the debugger:</Key>
 <Value>An error occurred in the debugger:</Value>
 
+<Key>An error occurred in the debugger when pausing the petri net:</Key>
+<Value>An error occurred in the debugger when pausing the petri net:</Value>
+
+<Key>An error occurred in the debugger when starting the petri net:</Key>
+<Value>An error occurred in the debugger when starting the petri net:</Value>
+
+<Key>An error occurred in the debugger when stopping the petri net:</Key>
+<Value>An error occurred in the debugger when stopping the petri net:</Value>
+
+<Key>An error occurred in the debugger when loading the lib:</Key>
+<Value>An error occurred in the debugger when loading the lib:</Value>
+
+<Key>An error occurred in the debugger when reloading the petri net:</Key>
+<Value>An error occurred in the debugger when reloading the petri net:</Value>
+
+<Key>An error occurred in the debugger during the handshake:</Key>
+<Value>An error occurred in the debugger during the handshake:</Value>
+
+<Key>An error occurred in the debugger client:</Key>
+<Value>An error occurred in the debugger client:</Value>
+
 <Key>Unable to load the dynamic library! Try to compile it again.</Key>
 <Value>Unable to load the dynamic library! Try to compile it again.</Value>
 
@@ -621,6 +642,9 @@
 
 <Key>Evaluate expression:</Key>
 <Value>Evaluate expression:</Value>
+
+<Key>With printf format:</Key>
+<Value>With printf format:</Value>
 
 <Key>Expression</Key>
 <Value>Expression</Value>

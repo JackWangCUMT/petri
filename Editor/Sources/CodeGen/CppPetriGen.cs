@@ -48,7 +48,7 @@ namespace Petri.Editor
             }
         }
 
-        public override void WriteExpressionEvaluator(Expression expression, string path)
+        public override void WriteExpressionEvaluator(Expression expression, string path, params object[] userData)
         {
             string cppExpr = expression.MakeCode();
 
@@ -70,13 +70,15 @@ namespace Petri.Editor
 
             generator += GenerateVarEnum();
 
-            generator += "extern \"C\" char const *" + Document.CodePrefix + "_evaluate(void *petriPtr) {";
+            generator += "extern \"C\" char *" + Document.CodePrefix + "_evaluate(void *petriPtr) {";
             generator += "auto &petriNet = *static_cast<PetriDebug *>(petriPtr);";
             generator += "static std::string result;";
             generator += "std::ostringstream oss;";
             generator += "oss << (" + cppExpr + ");";
             generator += "result = oss.str();";
-            generator += "return result.c_str();";
+            generator += "char const *buffer = malloc(result.size() + 1);";
+            generator += "memcpy(buffer, result.c_str(), result.size() + 1);";
+            generator += "return buffer;";
             generator += "}\n";
 
             System.IO.File.WriteAllText(path, generator.Value);

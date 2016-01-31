@@ -45,12 +45,12 @@ cleanlib:
 	rm -f Runtime/$(OUTPUT)
 
 clean: cleanlib
-	rm -f Editor/Test/bin/$(OUTPUT)
-	rm -f Editor/bin/$(OUTPUT)
-	rm -rf Editor/Test/obj
-	rm -rf Editor/obj
-	rm -rf Editor/Petri.app
-	rm -f Editor/Petri.exe
+	@rm -f Editor/Test/bin/$(OUTPUT)
+	@rm -f Editor/bin/$(OUTPUT)
+	@rm -rf Editor/Test/obj
+	@rm -rf Editor/obj
+	@rm -rf Editor/Petri.app
+	@rm -f Editor/Petri.exe
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/Petri.csproj
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/PetriMac.csproj
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Test/Test.csproj
@@ -69,19 +69,19 @@ test: all
 	nunit-console Editor/Test/Test.csproj
 
 builddir:
-	mkdir -p build/json/Runtime/Cpp/detail/jsoncpp/src/lib_json
-	mkdir -p build/Runtime/Cpp/detail
-	mkdir -p build/Runtime/C/detail
-	mkdir -p Editor/Test/bin
-	mkdir -p Editor/bin
+	@mkdir -p build/json/Runtime/Cpp/detail/jsoncpp/src/lib_json
+	@mkdir -p build/Runtime/Cpp/detail
+	@mkdir -p build/Runtime/C/detail
+	@mkdir -p Editor/Test/bin
+	@mkdir -p Editor/bin
 
 lib: builddir buildlib
 
 buildlib: $(CXXOBJ) $(JSONOBJ)
 	$(CXX) -o Runtime/$(OUTPUT) $^ $(LDFLAGS)
-	ln -sf "$(abspath Runtime/$(OUTPUT))" "$(abspath Editor/Test/bin/$(OUTPUT))" || true
-	ln -sf "$(abspath Runtime/$(OUTPUT))" "$(abspath Editor/bin/$(OUTPUT))" || true
-	ln -sf "$(abspath Runtime/$(OUTPUT))" "$(abspath Editor/Petri.app/Contents/MonoBundle/$(OUTPUT))" || true
+	@ln -sf "$(abspath Runtime/$(OUTPUT))" "$(abspath Editor/Test/bin/$(OUTPUT))" || true
+	@ln -sf "$(abspath Runtime/$(OUTPUT))" "$(abspath Editor/bin/$(OUTPUT))" || true
+	@ln -sf "$(abspath Runtime/$(OUTPUT))" "$(abspath Editor/Petri.app/Contents/MonoBundle/$(OUTPUT))" || true
 
 build/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)

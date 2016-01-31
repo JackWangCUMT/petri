@@ -49,10 +49,36 @@ namespace Petri.Editor
             }
         }
 
-        public override void WriteExpressionEvaluator(Expression expression, string path)
+        public override void WriteExpressionEvaluator(Expression expression, string path, params object[] userData)
         {
-			// TODO: tbd
-            throw new Exception("Not implemented yet!");
+            string expr = expression.MakeCode();
+
+            CodeGen generator = new CFamilyCodeGen(Language.Cpp);
+            foreach(var s in Document.Headers) {
+                var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
+                                                s);
+                var p2 = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
+                                                                           Document.Settings.RelativeSourceOutputPath));
+                generator += "#include \"" + Configuration.GetRelativePath(p1, p2) + "\"";
+            }
+
+            generator += "#include \"Runtime/C/Petri.h\"";
+            generator += "#include <stdio.h>";
+
+            generator += GenerateVarEnum();
+
+            generator += "char *" + Document.CodePrefix + "_evaluate(void *petriPtr) {";
+            generator += "struct PetriNet *petriNet = (struct PetriNet *)petriPtr;";
+
+            generator += "char *buffer;";
+            generator += "asprintf(&buffer, \"" + userData[0] + "\", (" + expr + "));";
+
+            generator += "return buffer;";
+            generator += "}\n";
+
+            Console.WriteLine(generator.Value);
+
+            System.IO.File.WriteAllText(path, generator.Value);
         }
 
         protected override void Begin()

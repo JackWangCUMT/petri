@@ -615,6 +615,8 @@ namespace Petri.Editor
 
             OnLanguageChanged();
 
+            DebugController.DebugEditor = new DebugEditor(this, null);
+
             Window.EditorGui.View.CurrentPetriNet = PetriNet;
             Window.DebugGui.View.CurrentPetriNet = PetriNet;
 

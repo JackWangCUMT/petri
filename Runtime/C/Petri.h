@@ -32,6 +32,7 @@
 
 #include "Action.h"
 #include "PetriNet.h"
+#include "PetriUtils.h"
 #include "Transition.h"
 
 #endif /* Petri_h */

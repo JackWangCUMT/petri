@@ -391,6 +391,27 @@
 <Key>An error occurred in the debugger:</Key>
 <Value>Une erreur est survenue dans le débuggueur :</Value>
 
+<Key>An error occurred in the debugger when pausing the petri net:</Key>
+<Value>Une erreur est survenue dans le débuggueur lors de la mise en pause du réseau de pétri :</Value>
+
+<Key>An error occurred in the debugger when starting the petri net:</Key>
+<Value>Une erreur est survenue dans le débuggueur lors du démarrage du réseau de pétri :</Value>
+
+<Key>An error occurred in the debugger when stopping the petri net:</Key>
+<Value>Une erreur est survenue dans le débuggueur lors de l'arrêt du réseau de pétri :</Value>
+
+<Key>An error occurred in the debugger when loading the lib:</Key>
+<Value>Une erreur est survenue dans le débuggueur lors du chargement de la librairie :</Value>
+
+<Key>An error occurred in the debugger when reloading the petri net:</Key>
+<Value>Une erreur est survenue dans le débuggueur lors du rechargement du réseau de pétri :</Value>
+
+<Key>An error occurred in the debugger during the handshake:</Key>
+<Value>Une erreur est survenue dans le débuggueur lors de la connexion:</Value>
+
+<Key>An error occurred in the debugger client:</Key>
+<Value>Une erreur est survenue dans le client du débuggueur :</Value>
+
 <Key>Unable to load the dynamic library! Try to compile it again.</Key>
 <Value>Impossible de charger la librairie dynamique. Essayez de la recompiler.</Value>
 
@@ -621,6 +642,9 @@
 
 <Key>Evaluate expression:</Key>
 <Value>Évaluer l'expression :</Value>
+
+<Key>With printf format:</Key>
+<Value>Avec le format printf:</Value>
 
 <Key>Expression</Key>
 <Value>Expression</Value>

@@ -435,7 +435,7 @@ namespace Petri.Editor
             _window.Hide();
         }
 
-        void UpdateGUIForLanguage(object sender, EventArgs e) {
+        void UpdateGUIForLanguage(object sender, LanguageChangeEventArgs e) {
             _window.ShowAll();
 
             if(_document.Settings.Language == Code.Language.CSharp) {

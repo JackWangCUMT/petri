@@ -41,7 +41,7 @@ namespace Petri.Editor
             base.WritePetriNet();
         }
 
-        public override void WriteExpressionEvaluator(Expression expression, string path)
+        public override void WriteExpressionEvaluator(Expression expression, string path, params object[] userData)
         {
             // TODO: tbd
             throw new Exception("Not implemented yet!");

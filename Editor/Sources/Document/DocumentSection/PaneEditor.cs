@@ -34,6 +34,12 @@ namespace Petri.Editor
             _view = view;
         }
 
+        /// <summary>
+        /// Creates a ComboBox with the specified text items, and selects the item that matches <paramref name="selectedItem"/>, if any.
+        /// </summary>
+        /// <returns>The new widget.</returns>
+        /// <param name="selectedItem">Selected item.</param>
+        /// <param name="items">Items.</param>
         protected ComboBox ComboHelper(string selectedItem, List<string> items)
         {
             var funcList = ComboBox.NewText();
@@ -58,6 +64,13 @@ namespace Petri.Editor
             return funcList;
         }
 
+        /// <summary>
+        /// Creates the a label widget with the given indentation (in pixels), the specified text.
+        /// The widget is added to the view unless the last parameter is set to <c>true</c>.
+        /// </summary>
+        /// <returns>The label.</returns>
+        /// <param name="indentation">The left indentation of the widget, in pixels.</param>
+        /// <param name="text">Text.</param>
         protected Label CreateLabel(int indentation, string text)
         {
             var label = new Label(text);
@@ -66,6 +79,14 @@ namespace Petri.Editor
             return label;
         }
 
+        /// <summary>
+        /// Creates a widget of the given type parameter with the given attributes, and adds it to the view.
+        /// </summary>
+        /// <returns>The widget.</returns>
+        /// <param name="resizeable">If set to <c>true</c> then the widget is resizeable.</param>
+        /// <param name="indentation">The left indentation of the widget, in pixels.</param>
+        /// <param name="widgetConstructionArgs">Widget construction arguments.</param>
+        /// <typeparam name="WidgetType">The type of the widget to be created.</typeparam>
         protected WidgetType CreateWidget<WidgetType>(bool resizeable,
                                                       int indentation,
                                                       params object[] widgetConstructionArgs) where WidgetType : Widget
@@ -76,11 +97,21 @@ namespace Petri.Editor
             return w;
         }
 
+        /// <summary>
+        /// Adds the widget to the view.
+        /// </summary>
+        /// <param name="w">The widget.</param>
+        /// <param name="resizeable">If set to <c>true</c> then the widhet is resizeable.</param>
+        /// <param name="indentation">The left indentation of the widget, in pixels.</param>
         protected void AddWidget(Widget w, bool resizeable, int indentation)
         {
             _objectList.Add(Tuple.Create(w, indentation, resizeable));
         }
 
+        /// <summary>
+        /// Resizes the view to a new width.
+        /// </summary>
+        /// <param name="width">The new width.</param>
         public void Resize(int width)
         {
             foreach(var tuple in _objectList) {
@@ -90,6 +121,9 @@ namespace Petri.Editor
             }
         }
 
+        /// <summary>
+        /// Removes all the widgets from the view, adds them again and format them against the indentation rules.
+        /// </summary>
         protected void FormatAndShow()
         {
             foreach(Widget w in _view.AllChildren) {

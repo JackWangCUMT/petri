@@ -272,7 +272,8 @@ namespace Petri.Editor
         /// </summary>
         /// <param name="expression">Expression.</param>
         /// <param name="path">Path.</param>
-        public abstract void WriteExpressionEvaluator(Expression expression, string path);
+        /// <param name="userData">Additional and optional user data that will be used to generate the code.</param>
+        public abstract void WriteExpressionEvaluator(Expression expression, string path, params object[] userData);
 
         /// <summary>
         /// Gets the absolute path of a file from its path relative to the document.

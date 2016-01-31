@@ -66,9 +66,13 @@ namespace Petri.Editor
 
             CreateLabel(0, Configuration.GetLocalized("Evaluate expression:"));
             Entry entry = CreateWidget<Entry>(true, 0, Configuration.GetLocalized("Expression"));
+            if(_document.Settings?.Language == Code.Language.C) {
+                _formatLabel = CreateLabel(0, Configuration.GetLocalized("With printf format:"));
+                _formatEntry = CreateWidget<Entry>(true, 0, "%d");
+            }
             Evaluate = CreateWidget<Button>(false, 0, Configuration.GetLocalized("Evaluate"));
             Evaluate.Sensitive = _document.DebugController != null && _document.DebugController.Client.SessionRunning && (!_document.DebugController.Client.PetriRunning || _document.DebugController.Client.Pause);
-
+           
             CreateLabel(0, Configuration.GetLocalized("Result:"));
 
             _buf = new TextBuffer(new TextTagTable());
@@ -82,8 +86,13 @@ namespace Petri.Editor
                     string str = entry.Text;
                     try {
                         Code.Expression expr = Code.Expression.CreateFromStringAndEntity<Code.Expression>(str,
-                                                                                                       _document.PetriNet);
-                        _document.DebugController.Client.Evaluate(expr);
+                                                                                                          _document.PetriNet);
+
+                        object[] userData = null;
+                        if(_document.Settings.Language == Code.Language.C) {
+                            userData = new object[] { _formatEntry.Text };
+                        }
+                        _document.DebugController.Client.Evaluate(expr, userData);
                     }
                     catch(Exception e) {
                         _buf.Text = e.Message;
@@ -105,6 +114,8 @@ namespace Petri.Editor
         }
 
         TextBuffer _buf;
+        Label _formatLabel;
+        Entry _formatEntry;
     }
 }
 
