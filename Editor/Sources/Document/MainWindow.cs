@@ -215,7 +215,7 @@ namespace Petri.Editor
             var recentItems = Application.RecentDocuments;
 
             foreach(var pair in recentItems) {
-                MenuItem item = new MenuItem(pair.Value);
+                MenuItem item = new MenuItem(pair.Path);
                 item.Activated += OnClickRecentMenu;
                 _openRecentMenu.Append(item);
                 item.Show();
@@ -369,8 +369,7 @@ namespace Petri.Editor
                 Application.OpenDocument();
             }
             else if(sender == _clearRecentItems) {
-                Application.RecentDocuments.Clear();
-                Application.UpdateRecentDocuments();
+                Application.ClearRecentDocuments();
             }
             else if(sender == _newItem) {
                 var doc = new Document("");
