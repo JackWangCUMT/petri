@@ -73,7 +73,11 @@ namespace Petri.Editor
                 }
 
                 string[] docs = new string[args.Length - 1];
-                Array.Copy(args, 1, docs, 0, args.Length - 1);
+
+                for(int i = 1; i < args.Length; ++i) {
+                    // Registering the full path of the document, so that we cannot open twice the same document later.
+                    docs[i - 1] = System.IO.Path.GetFullPath(args[i]);
+                }
                 return Application.GUIMain(docs);
             }
 
