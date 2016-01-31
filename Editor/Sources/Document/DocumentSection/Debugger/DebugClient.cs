@@ -96,7 +96,7 @@ namespace Petri.Editor
                                                                 DialogFlags.Modal,
                                                                 MessageType.Question,
                                                                 ButtonsType.None,
-                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger when pausing the petri net:") + " " + e.Message));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             d.Run();
                             d.Destroy();
@@ -120,7 +120,7 @@ namespace Petri.Editor
         /// <value>The version.</value>
         public static string Version {
             get {
-                return "1.3";
+                return "1.3.1";
             }
         }
 
@@ -201,7 +201,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger when loading the lib:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -295,7 +295,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger when starting the petri net:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -323,7 +323,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger when stopping the petri net:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -379,7 +379,7 @@ namespace Petri.Editor
                                                                 DialogFlags.Modal,
                                                                 MessageType.Question,
                                                                 ButtonsType.None,
-                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger when reloading the petri net:") + " " + e.Message));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             d.Run();
                             d.Destroy();
@@ -414,7 +414,8 @@ namespace Petri.Editor
         /// Triggers an asynchronous evaluation of a code expression.
         /// </summary>
         /// <param name="expression">The expression to evaluate.</param>
-        public void Evaluate(Code.Expression expression)
+        /// <param name="userData">Additional and optional user data that will be used to generate the code.</param>
+        public void Evaluate(Code.Expression expression, params object[] userData)
         {
             if(!PetriRunning) {
                 var literals = expression.GetLiterals();
@@ -428,7 +429,7 @@ namespace Petri.Editor
             string sourceName = System.IO.Path.GetTempFileName();
 
             var petriGen = PetriGen.PetriGenFromLanguage(_document.Settings.Language, _document);
-            petriGen.WriteExpressionEvaluator(expression, sourceName);
+            petriGen.WriteExpressionEvaluator(expression, sourceName, userData);
 
             string libName = System.IO.Path.GetTempFileName();
 
@@ -442,7 +443,9 @@ namespace Petri.Editor
                     this.SendObject(new JObject(new JProperty("type", "evaluate"),
                                                 new JProperty("payload",
                                                               new JObject(new JProperty("lib",
-                                                                                        libName)))));
+                                                                                        libName),
+                                                                          new JProperty("language",
+                                                                                        _document.Settings.LanguageName())))));
                 }
                 catch(Exception e) {
                     this.Detach();
@@ -484,7 +487,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger during the handshake:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
@@ -650,7 +653,7 @@ namespace Petri.Editor
                                                         DialogFlags.Modal,
                                                         MessageType.Question,
                                                         ButtonsType.None,
-                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + e.Message));
+                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger client:") + " " + e.Message));
                     d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                     d.Run();
                     d.Destroy();
