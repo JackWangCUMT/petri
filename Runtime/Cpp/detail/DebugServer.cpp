@@ -27,6 +27,7 @@
 //  Created by Rémi on 23/11/2014.
 //
 
+#include "../../C/detail/Types.hpp"
 #include "../Action.h"
 #include "../DebugServer.h"
 #include "../PetriDynamicLib.h"
@@ -195,7 +196,7 @@ namespace Petri {
 
             std::this_thread::sleep_for(1s);
             std::cerr << "Could not bind socket to requested port (attempt " << ++attempts << ")" << std::endl;
-            if(attempts > 20) {
+            if(attempts > 5) {
                 _running = false;
                 std::cerr << "Too many attemps, aborting." << std::endl;
                 break;
@@ -305,13 +306,41 @@ namespace Petri {
                         std::string result, lib;
                         try {
                             lib = root["payload"]["lib"].asString();
+                            std::string language = root["payload"]["language"].asString();
                             DynamicLib dl(false, lib);
                             dl.load();
-                            auto eval = dl.loadSymbol<char const *(void *)>(
-                            _petriNetFactory.prefix() + std::string("_evaluate"));
-                            result = eval(static_cast<void *>(_petri.get()));
+                            auto eval = dl.loadSymbol<char *(void *)>(_petriNetFactory.prefix() +
+                                                                      std::string("_evaluate"));
+
+                            void *petriNet = nullptr;
+                            if(language == "C") {
+                                // Some circumvolutions required to pass a C petri net handle to the
+                                // evaluate function.
+                                ::PetriNet *pn = new ::PetriNet;
+                                pn->petriNet = std::unique_ptr<Petri::PetriNet>(_petri.get());
+                                petriNet = pn;
+                            }
+
+                            else {
+                                petriNet = _petri.get();
+                            }
+                            char *evalBuffer = eval(petriNet);
+
+                            if(language == "C") {
+                                // Some circumvolutions required to pass a C petri net handle to the
+                                // evaluate function.
+                                ::PetriNet *pn = static_cast<::PetriNet *>(petriNet);
+                                pn->petriNet.release();
+                                delete pn;
+                            }
+
+                            if(evalBuffer == nullptr) {
+                                throw std::runtime_error("Invalid evaluation result");
+                            }
+                            result = evalBuffer;
+                            free(evalBuffer);
                         } catch(std::exception const &e) {
-                            result = std::string("could not evaluate the symbol, reason: ") + e.what();
+                            result = std::string("Could not evaluate the symbol, reason: ") + e.what();
                         }
                         Json::Value payload;
                         payload["eval"] = result;
@@ -417,7 +446,7 @@ namespace Petri {
         Json::Value root;
         Json::Reader reader;
         if(!reader.parse(&msg.data()[0], &msg.data()[msg.length()], root)) {
-            std::cerr << "Invalid debug message received from server: " << msg << std::endl;
+            std::cerr << "Invalid debug message received from client: \"" << msg << "\"" << std::endl;
             throw std::runtime_error("Invalid debug message received!");
         }
 
