@@ -45,7 +45,7 @@ namespace Petri.Editor
         {
             if(args.Length > 0) {
                 return CLI.CLIMain(args);
-           }
+            }
             else {
                 return GUIMain(null);
             }
@@ -62,17 +62,18 @@ namespace Petri.Editor
 
             MainWindow.InitGUI();
 
-            RecentDocumentEntry[] entries = JsonConvert.DeserializeObject<RecentDocumentEntry[]>(Configuration.RecentDocuments);
-            var result = new SortedList<DateTime, string>(Comparer<DateTime>.Create((date1,
-                                                                                     date2) => date2.CompareTo(date1)));
+            var entries = JsonConvert.DeserializeObject<SerializableRecentDocumentEntry[]>(Configuration.RecentDocuments);
             if(entries != null) {
                 foreach(var entry in entries) {
                     if(entry != null) {
-                        result.Add(DateTime.Parse(entry.date), entry.path);
+                        var e = new RecentDocumentEntry();
+                        e.Date = DateTime.Parse(entry.Date);
+                        e.Path = entry.Path;
+                        _recentDocuments.Add(e);
                     }
                 }
             }
-            RecentDocuments = result;
+            _recentDocuments.Sort((doc1, doc2) => doc2.Date.CompareTo(doc1.Date));
             TrimRecentDocuments();
 
             var document = new Document("");
@@ -232,15 +233,14 @@ namespace Petri.Editor
         /// <param name="filename">Filename.</param>
         public static void OpenDocument(string filename)
         {
-            int index = RecentDocuments.IndexOfValue(filename);
+            int index = _recentDocuments.FindIndex((RecentDocumentEntry obj) => obj.Path == filename);
             if(index != -1) {
-                RecentDocuments.RemoveAt(index);
+                _recentDocuments.RemoveAt(index);
             }
 
             foreach(var d in _documents) {
                 if(d.Path == filename) {
-                    RecentDocuments.Add(DateTime.UtcNow, filename);
-                    UpdateRecentDocuments();
+                    AddRecentDocument(filename);
                     d.Window.Present();
                     return;
                 }
@@ -257,8 +257,7 @@ namespace Petri.Editor
                 Application.AddDocument(doc);
             }
 
-            RecentDocuments.Add(DateTime.UtcNow, filename);
-            UpdateRecentDocuments();
+            AddRecentDocument(filename);
         }
 
         /// <summary>
@@ -286,11 +285,16 @@ namespace Petri.Editor
         /// <summary>
         /// Recent document entry.
         /// </summary>
-        private class RecentDocumentEntry
+        public class RecentDocumentEntry
         {
-            public string date { get; set; }
+            public DateTime Date;
+            public string Path;
+        }
 
-            public string path { get; set; }
+        class SerializableRecentDocumentEntry
+        {
+            public string Date;
+            public string Path;
         }
 
         /// <summary>
@@ -298,37 +302,15 @@ namespace Petri.Editor
         /// </summary>
         public static void TrimRecentDocuments()
         {
-            var recentDocuments = RecentDocuments;
-            var dict = new SortedList<DateTime, string>(recentDocuments);
+            var dict = new List<RecentDocumentEntry>(_recentDocuments);
 
-            foreach(var doc in dict) {
-                if(!System.IO.File.Exists(doc.Value)) {
-                    recentDocuments.Remove(doc.Key);
+            for(int i = 0, j = 0; i < dict.Count; ++i) {
+                if(!System.IO.File.Exists(dict[i].Path)) {
+                    _recentDocuments.RemoveAt(j);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Updates the recent documents menu items in the opened documents.
-        /// </summary>
-        public static void UpdateRecentDocuments()
-        {
-            while(RecentDocuments.Count > MaxRecentElements) {
-                RecentDocuments.Remove(RecentDocuments.Keys[RecentDocuments.Keys.Count - 1]);
-            }
-            var entries = new RecentDocumentEntry[RecentDocuments.Count];
-            int i = 0;
-            foreach(var v in RecentDocuments) {
-                var entry = new RecentDocumentEntry();
-                entry.date = v.Key.ToString();
-                entry.path = v.Value;
-                entries[i++] = entry;
-            }
-
-            Configuration.RecentDocuments = JsonConvert.SerializeObject(entries);
-
-            foreach(var doc in Documents) {
-                doc.Window.UpdateRecentDocuments();
+                else {
+                    ++j;
+                }
             }
         }
 
@@ -336,12 +318,50 @@ namespace Petri.Editor
         /// Gets the list of recent documents, indexed by their last opening date (UTC).
         /// </summary>
         /// <value>The recent documents.</value>
-        public static SortedList<DateTime, string> RecentDocuments {
-            get;
-            private set;
+        public static IReadOnlyList<RecentDocumentEntry> RecentDocuments {
+            get {
+                return _recentDocuments;
+            }
+        }
+
+        /// <summary>
+        /// Adds a path to the current documents list and updates the recent documents menu item of the opened documents.
+        /// </summary>
+        /// <param name="path">Path.</param>
+        public static void AddRecentDocument(string path)
+        {
+            var entry = new RecentDocumentEntry();
+            entry.Date = DateTime.UtcNow;
+            entry.Path = path;
+            _recentDocuments.Insert(0, entry);
+
+            while(_recentDocuments.Count > MaxRecentElements) {
+                _recentDocuments.RemoveAt(_recentDocuments.Count - 1);
+            }
+
+            Configuration.RecentDocuments = JsonConvert.SerializeObject(_recentDocuments.ToArray());
+
+            foreach(var doc in Documents) {
+                doc.Window.UpdateRecentDocuments();
+            }
+        }
+
+        /// <summary>
+        /// Clears the list of recent documents.
+        /// </summary>
+        public static void ClearRecentDocuments()
+        {
+            _recentDocuments.Clear();
+
+            Configuration.RecentDocuments = JsonConvert.SerializeObject(_recentDocuments.ToArray());
+
+            foreach(var doc in Documents) {
+                doc.Window.UpdateRecentDocuments();
+            }
         }
 
         static List<Document> _documents = new List<Document>();
+        static List<RecentDocumentEntry> _recentDocuments = new List<RecentDocumentEntry>();
         static HashSet<Entity> _clipboard = new HashSet<Entity>();
         static bool _opening = false;
     }
