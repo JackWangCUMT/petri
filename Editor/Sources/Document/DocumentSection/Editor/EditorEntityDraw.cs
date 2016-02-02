@@ -210,7 +210,8 @@ namespace Petri.Editor
             PointD direction = PetriView.Normalized(t.Position.X - t.Before.Position.X,
                                                     t.Position.Y - t.Before.Position.Y);
 
-            return new PointD(origin.X + TransitionHandleRadius * direction.X, origin.Y + TransitionHandleRadius * direction.Y);
+            return new PointD(origin.X + TransitionHandleRadius * direction.X,
+                              origin.Y + TransitionHandleRadius * direction.Y);
         }
 
         static public PointD GetDestinationHandle(Transition t)
@@ -222,13 +223,15 @@ namespace Petri.Editor
                                            destination.Y - t.Position.Y);
             direction2 = PetriView.Normalized(direction2);
 
-            return new PointD(destination.X - TransitionHandleRadius * direction2.X, destination.Y - TransitionHandleRadius * direction2.Y);
+            return new PointD(destination.X - TransitionHandleRadius * direction2.X,
+                              destination.Y - TransitionHandleRadius * direction2.Y);
         }
 
         static public bool IsOnOriginHandle(double x, double y, Entity e)
         {
-            if(!(e is Transition))
+            if(!(e is Transition)) {
                 return false;
+            }
 
             var pos = GetOriginHandle((Transition)e);
             if(Math.Abs(x - pos.X) < TransitionHandleRadius && Math.Abs(y - pos.Y) < TransitionHandleRadius) {
@@ -240,11 +243,12 @@ namespace Petri.Editor
 
         static public bool IsOnDestinationHandle(double x, double y, Entity e)
         {
-            if(!(e is Transition))
+            if(!(e is Transition)) {
                 return false;
+            }
 
             var pos = GetDestinationHandle((Transition)e);
-            if(Math.Abs(x - pos.X) < 10.0 / 2 && Math.Abs(y - pos.Y) < 10.0 / 2) {
+            if(Math.Abs(x - pos.X) < TransitionHandleRadius / 2 && Math.Abs(y - pos.Y) < TransitionHandleRadius / 2) {
                 return true;
             }
 
