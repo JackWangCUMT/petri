@@ -190,8 +190,9 @@ namespace Petri.Editor
 
                     return false;
                 }
-                var dynamicLib = dylib.Lib;
-                _debugServer = new Runtime.DebugServer(dynamicLib);
+
+                _dynamicLib = dylib.Lib;
+                _debugServer = new Runtime.DebugServer(_dynamicLib);
                 _debugServer.Start();
             }
             catch(Exception e) {
@@ -772,6 +773,7 @@ namespace Petri.Editor
 
         GeneratedDynamicLibProxy _libProxy;
         Runtime.DebugServer _debugServer;
+        Runtime.DynamicLib _dynamicLib;
 
         bool _startAfterFix = false;
         bool _petriRunning, _pause;

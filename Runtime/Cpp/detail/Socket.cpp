@@ -29,8 +29,9 @@ namespace Petri {
     }
 
     Socket::~Socket() {
-        if(_fd <= 0)
+        if(_fd <= 0) {
             return;
+        }
 
         shutdown();
         close(_fd);
@@ -59,8 +60,9 @@ namespace Petri {
         // Recupere l'adresse ip correspond a l'adresse du serveur
         hostinfo = gethostbyname(server_name);
         // Impossible de recuperer l'addresse IP <=> impossible de se connecter, on sort
-        if(hostinfo == nullptr)
+        if(hostinfo == nullptr) {
             return false;
+        }
 
 
         // On remplit la structure _addr
@@ -69,26 +71,29 @@ namespace Petri {
         _addr.sin_addr = *(struct in_addr *)hostinfo->h_addr; // Adresse IP du serveur
         memset(&(_addr.sin_zero), 0, 8);                      // On met le reste (8 octets) a 0
 
-        if(::connect(_fd, (struct sockaddr *)&_addr, sizeof(struct sockaddr_in)) < 0)
+        if(::connect(_fd, (struct sockaddr *)&_addr, sizeof(struct sockaddr_in)) < 0) {
             _state = SOCK_FREE;
-        else
+        } else {
             _state = SOCK_CONNECTED;
+        }
 
         return _state == SOCK_CONNECTED;
     }
 
     // Envoi de donnees (d'un serveur vers un client) :
     ssize_t Socket::send(Socket &client_socket, const void *data, size_t nb_bytes) {
-        if(_state != SOCK_LISTENING)
+        if(_state != SOCK_LISTENING) {
             return -1;
+        }
 
         return ::send(client_socket._fd, data, nb_bytes, 0);
     }
 
     // Reception de donnees (donnees allant d'un client vers un serveur) :
     ssize_t Socket::receive(Socket &client_socket, void *buffer, size_t max_bytes) {
-        if(_state != SOCK_LISTENING)
+        if(_state != SOCK_LISTENING) {
             return -1;
+        }
 
         return recv(client_socket._fd, buffer, max_bytes, 0);
     }
@@ -105,13 +110,15 @@ namespace Petri {
         ssize_t remaining = nb_bytes;
 
         ssize_t n = 0;
-        if((n = this->send(client_socket, (const void *)header, 4)) <= 0)
+        if((n = this->send(client_socket, (const void *)header, 4)) <= 0) {
             return false;
+        }
 
         while(remaining != 0) {
             n = this->send(client_socket, (void *)(&((uint8_t *)data)[nb_bytes - remaining]), remaining);
-            if(n <= 0)
+            if(n <= 0) {
                 return false;
+            }
 
             remaining = remaining - n;
         }
@@ -128,8 +135,9 @@ namespace Petri {
         ssize_t received = this->receive(client_socket, (void *)header, 4); // Lecture du header
 
         // Cas ou l'on n'a pas recu assez d'octets pour avoir un header complet :
-        if(received < 4)
+        if(received < 4) {
             return {};
+        }
 
         nb_bytes = ((int)(header[0]) << 0 * 8) + ((int)(header[1]) << 1 * 8) +
                    ((int)(header[2]) << 2 * 8) + ((int)(header[3]) << 3 * 8);
@@ -139,9 +147,10 @@ namespace Petri {
 
         // On lit les octets qui doivent etre lus :
         remaining = nb_bytes;
-        while(remaining != 0)
+        while(remaining != 0) {
             remaining =
             remaining - this->receive(client_socket, (void *)(&data[nb_bytes - remaining]), remaining);
+        }
 
         return data;
     }
@@ -166,8 +175,9 @@ namespace Petri {
                 perror("SockErr");
                 fprintf(stderr, "Erreur lors de la mise sur écoute\n");
                 _state = SOCK_FREE;
-            } else
+            } else {
                 _state = SOCK_LISTENING;
+            }
         }
 
         return _state == SOCK_LISTENING;
@@ -197,7 +207,7 @@ namespace Petri {
     // Ferme la connexion
     void Socket::shutdown() {
         if(_state != SOCK_FREE) {
-            ::shutdown(_fd, 2);
+            ::shutdown(_fd, SHUT_RDWR);
             _state = SOCK_FREE;
         }
     }

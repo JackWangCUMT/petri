@@ -20,7 +20,7 @@
       <Comment ID="9" Name="This petri net loops 10 times and outputs the value of an incrementing counter before stopping." X="120" Y="200" Width="178" Height="64" R="1" G="1" B="0.7" A="1" />
     </Comments>
     <States>
-      <Action ID="1" Name="1" X="200" Y="90" Active="true" RequiredTokens="0" Radius="20" Function="Utility::doNothing()" />
+      <Action ID="1" Name="1" X="200" Y="90" Active="true" RequiredTokens="0" Radius="20" Function="$count = 10" />
       <Action ID="2" Name="2" X="380" Y="140" Active="false" RequiredTokens="1" Radius="20" Function="TestNS::outputVar($var)" />
       <Action ID="4" Name="4" X="380" Y="320" Active="false" RequiredTokens="1" Radius="20" Function="$var = $var + 1" />
       <Action ID="7" Name="7" X="360" Y="440" Active="false" RequiredTokens="1" Radius="20" Function="Utility::doNothing()" />
@@ -28,8 +28,8 @@
     <Transitions>
       <Transition ID="3" Name="3" X="290" Y="115" BeforeID="1" AfterID="2" Condition="true" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="186.81541692269406" />
       <Transition ID="5" Name="5" X="437.99999999999994" Y="228" BeforeID="2" AfterID="4" Condition="true" W="50" H="30" ShiftX="57.999999999999943" ShiftY="-2" ShiftAmplitude="180" />
-      <Transition ID="6" Name="6" X="286.99999999999994" Y="230" BeforeID="4" AfterID="2" Condition="$var &lt; 10" W="50" H="30" ShiftX="-93.000000000000057" ShiftY="0" ShiftAmplitude="180" />
-      <Transition ID="8" Name="8" X="370" Y="380" BeforeID="4" AfterID="7" Condition="$var == 10" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="121.6552506059644" />
+      <Transition ID="6" Name="6" X="286.99999999999994" Y="230" BeforeID="4" AfterID="2" Condition="$var &lt; $count" W="50" H="30" ShiftX="-93.000000000000057" ShiftY="0" ShiftAmplitude="180" />
+      <Transition ID="8" Name="8" X="370" Y="380" BeforeID="4" AfterID="7" Condition="$var == $count" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="121.6552506059644" />
     </Transitions>
   </PetriNet>
 </Document>
