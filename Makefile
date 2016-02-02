@@ -47,9 +47,12 @@ cleanlib:
 
 clean: cleanlib
 	@rm -rf Editor/Test/bin/
-	@rm -f Editor/bin/*.{dll,mdb,exe}
+	@rm -f Editor/bin/*.dll
+	@rm -f Editor/bin/*.mdb
+	@rm -f Editor/bin/*.exe
 	@rm -rf Editor/Test/obj
 	@rm -rf Editor/obj
+	@rm -rf Editor/Projects/obj
 	@rm -rf Editor/Petri.app
 	@rm -f Editor/Petri.exe
 	@rm -f Examples/CSRuntime.dll
@@ -58,9 +61,20 @@ clean: cleanlib
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/CSRuntime.csproj
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Test/Test.csproj
 
-editor: builddir
+editor: builddir mac
 	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/Petri.csproj
+
+ifeq ($(shell uname -s),Darwin)
+
+mac:
 	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/PetriMac.csproj
+
+else
+
+mac:
+
+endif
+
 
 test: all
 	@ln -sf "$(abspath Editor/bin/CSRuntime.dll)" "$(abspath Examples/)" || true
@@ -94,3 +108,4 @@ examples: editor
 
 examplesclean: editor
 	@find Examples -name "*.petri" -exec mono Editor/bin/Petri.exe -kv {} \;
+
