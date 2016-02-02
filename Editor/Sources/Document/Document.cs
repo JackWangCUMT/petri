@@ -485,8 +485,8 @@ namespace Petri.Editor
                     string filename = null;
 
                     var fc = new Gtk.FileChooserDialog(Configuration.GetLocalized("Save the graph as…"), Window,
-                                                   FileChooserAction.Save,
-                                                   new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+                                                       FileChooserAction.Save,
+                                                       new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
                         Configuration.GetLocalized("Save"), ResponseType.Accept
                     });
 
@@ -503,7 +503,7 @@ namespace Petri.Editor
                             this.Path += ".petri";
 
                         filename = System.IO.Path.GetFileName(this.Path).Split(new string[]{ ".petri" },
-                                                                           StringSplitOptions.None)[0];
+                                                                               StringSplitOptions.None)[0];
 
                         fc.Destroy();
                     }
@@ -695,11 +695,11 @@ namespace Petri.Editor
                     GenerateCode();
                 }
                 Window.Gui.Status = Configuration.GetLocalized("Compiling…");
-                Task t = Task.Run((System.Action)CompileTask);
+                Task<bool> t = Task.Run((System.Func<bool>)CompileTask);
                 if(wait) {
                     t.Wait();
                 }
-                return true;
+                return t.Result;
             }
             else {
                 MessageDialog d = new MessageDialog(Window,
@@ -711,7 +711,7 @@ namespace Petri.Editor
                 d.Run();
                 d.Destroy();
 
-                return true;
+                return false;
             }
         }
 
@@ -762,49 +762,56 @@ namespace Petri.Editor
         /// <summary>
         /// An method that is meant to be called asynchronously and that compiles the document's generated code.
         /// </summary>
-        private void CompileTask()
+        private bool CompileTask()
         {
             Window.EditorGui.Compilation = true;
             Window.DebugGui.Compilation = true;
 
-            var c = new Compiler(this);
-            var o = c.CompileSource(Settings.RelativeSourcePath, Settings.RelativeLibPath);
-            if(o != "") {
-                GLib.Timeout.Add(0, () => {
-                    ParseCompilationErrors(o);
+            try {
+                var c = new Compiler(this);
+                var o = c.CompileSource(Settings.RelativeSourcePath, Settings.RelativeLibPath);
+                if(o != "") {
+                    GLib.Timeout.Add(0, () => {
+                        ParseCompilationErrors(o);
 
-                    MessageDialog d = new MessageDialog(Window,
+                        MessageDialog d = new MessageDialog(Window,
                                                         DialogFlags.Modal,
                                                         MessageType.Warning,
                                                         ButtonsType.None,
                                                         Configuration.GetLocalized("The compilation has failed. Do you want to see the generated errors?"));
-                    d.AddButton(Configuration.GetLocalized("No"), ResponseType.Cancel);
-                    d.AddButton(Configuration.GetLocalized("Yes"), ResponseType.Accept);
-                    d.DefaultResponse = ResponseType.Accept;
+                        d.AddButton(Configuration.GetLocalized("No"), ResponseType.Cancel);
+                        d.AddButton(Configuration.GetLocalized("Yes"), ResponseType.Accept);
+                        d.DefaultResponse = ResponseType.Accept;
 
-                    ResponseType result = (ResponseType)d.Run();
+                        ResponseType result = (ResponseType)d.Run();
 
-                    d.Destroy();
-                    if(result == ResponseType.Accept) {
-                        o = Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
+                        d.Destroy();
+                        if(result == ResponseType.Accept) {
+                            o = Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
                                                                                                                                              Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Compilation errors:") + "\n" + o;
-                        new CompilationErrorPresenter(this, o).Show();
-                    }
+                            new CompilationErrorPresenter(this, o).Show();
+                        }
 
-                    Window.Gui.Status = Configuration.GetLocalized("The compilation has failed.");
+                        Window.Gui.Status = Configuration.GetLocalized("The compilation has failed.");
+
+                        return false;
+                    });
 
                     return false;
-                });
-            }
-            else {
-                GLib.Timeout.Add(0, () => { 
-                    Window.Gui.Status = Configuration.GetLocalized("The compilation has been successful.");
-                    return false;
-                });
-            }
+                }
+                else {
+                    GLib.Timeout.Add(0, () => { 
+                        Window.Gui.Status = Configuration.GetLocalized("The compilation has been successful.");
+                        return false;
+                    });
 
-            Window.EditorGui.Compilation = false;
-            Window.DebugGui.Compilation = false;
+                    return true;
+                }
+            }
+            finally {
+                Window.EditorGui.Compilation = false;
+                Window.DebugGui.Compilation = false;
+            }
         }
 
         /// <summary>

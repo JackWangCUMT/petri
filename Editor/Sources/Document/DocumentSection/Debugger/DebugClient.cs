@@ -349,21 +349,7 @@ namespace Petri.Editor
             });
             GLib.Timeout.Add(1, () => {
                 this.StopPetri();
-                if(!_document.Compile(true)) {
-                    GLib.Timeout.Add(0, () => {
-                        MessageDialog d = new MessageDialog(_document.Window,
-                                                            DialogFlags.Modal,
-                                                            MessageType.Question,
-                                                            ButtonsType.None,
-                                                            Application.SafeMarkupFromString(Configuration.GetLocalized("The compilation has failed.")));
-                        d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                        d.Run();
-                        d.Destroy();
-
-                        return false;
-                    });
-                }
-                else {
+                if(_document.Compile(true)) {
                     try {
                         _startAfterFix = startAfterReload;
                         this.SendObject(new JObject(new JProperty("type", "reload")));
