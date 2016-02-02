@@ -35,14 +35,6 @@ char const *PetriDebugServer_getVersion() {
     return Petri::DebugServer::getVersion().c_str();
 }
 
-int64_t PetriDebugServer_getAPIdate() {
-    return Petri::DebugServer::getAPIdate().time_since_epoch().count();
-}
-
-int64_t PetriDebugServer_getDateFromTimestamp(char const *timestamp) {
-    return Petri::DebugServer::getDateFromTimestamp(timestamp).time_since_epoch().count();
-}
-
 PetriDebugServer *PetriDebugServer_create(PetriDynamicLib *petri) {
     return new PetriDebugServer{std::make_unique<Petri::DebugServer>(*petri->lib)};
 }

@@ -102,19 +102,6 @@ namespace Petri {
         return version;
     }
 
-    std::chrono::system_clock::time_point DebugServer::getAPIdate() {
-        return DebugServer::getDateFromTimestamp(__TIMESTAMP__);
-    }
-
-    std::chrono::system_clock::time_point DebugServer::getDateFromTimestamp(char const *timestamp) {
-        char const *format = "%a %b %d %H:%M:%S %Y";
-        std::tm tm;
-        std::memset(&tm, 0, sizeof(tm));
-
-        strptime(timestamp, format, &tm);
-        return std::chrono::system_clock::from_time_t(std::mktime(&tm));
-    }
-
     DebugServer::DebugServer(PetriDynamicLib &petri)
             : _internals(std::make_unique<Internals>(*this, petri)) {}
 

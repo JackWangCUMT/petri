@@ -53,19 +53,6 @@ namespace Petri {
         static std::string const &getVersion();
 
         /**
-         * Returns the date on which the API was compiled.
-         * @return The API compilation date.
-         */
-        static std::chrono::system_clock::time_point getAPIdate();
-
-        /*
-         * Converts a timestamp string to a date.
-         * @param timestamp The timestamp to convert.
-         * @return The conversion result.
-         */
-        static std::chrono::system_clock::time_point getDateFromTimestamp(char const *timestamp);
-
-        /**
          * Creates the DebugServer and binds it to the provided dynamic library.
          * @param petri The dynamic lib from which the debug server operates.
          */

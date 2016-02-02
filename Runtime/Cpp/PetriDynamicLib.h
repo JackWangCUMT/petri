@@ -112,20 +112,6 @@ namespace Petri {
             _createPtr = this->loadSymbol<void *()>((prefix + "_create").c_str());
             _createDebugPtr = this->loadSymbol<void *()>((prefix + "_createDebug").c_str());
             _hashPtr = this->loadSymbol<char const *()>((prefix + "_getHash").c_str());
-
-            // Checks that the dylib is more recent than the last change to the debug server
-            /*auto APIDatePtr = reinterpret_cast<char const *(*)()>(dlsym(_libHandle, (prefix +
-             "_getAPIDate").c_str()));
-             auto libDate = DebugServer::getDateFromTimestamp(APIDatePtr());
-             auto serverDate = DebugServer::getAPIdate();
-
-             if(serverDate > libDate) {
-             this->unload();
-
-             std::cerr << "The dynamic library for Petri net " << prefix << " is out of date and
-             must be recompiled!" << std::endl;
-             throw std::runtime_error("The dynamic library is out of date and must be recompiled!");
-             }*/
         }
 
         /**

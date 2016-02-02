@@ -44,9 +44,9 @@ namespace Petri.Runtime
          * @param actionResult The result of the Action 'previous'. This is useful when the Transition's test uses this value.
          * @return The result of the test, true meaning that the Transition can be crossed to enable the action 'next'
          */
-        public bool IsFulfilled(Int32 actionResult)
+        public bool IsFulfilled(PetriNet petriNet, Int32 actionResult)
         {
-            return Interop.Transition.PetriTransition_isFulfilled(Handle, actionResult);
+            return Interop.Transition.PetriTransition_isFulfilled(Handle, petriNet.Handle, actionResult);
         }
 
         /**

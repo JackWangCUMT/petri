@@ -28,6 +28,9 @@ namespace Petri.Runtime.Interop {
         public static extern IntPtr PetriAction_addTransition(IntPtr action, UInt64 id, [MarshalAs(UnmanagedType.LPTStr)] string name, IntPtr next, TransitionCallableDel cond);
 
         [DllImport("PetriRuntime")]
+        public static extern IntPtr PetriAction_addTransitionWithParam(IntPtr action, UInt64 id, [MarshalAs(UnmanagedType.LPTStr)] string name, IntPtr next, ParametrizedTransitionCallableDel cond);
+
+        [DllImport("PetriRuntime")]
         public static extern IntPtr PetriAction_addEmptyTransition(IntPtr action, IntPtr next);
 
         [DllImport("PetriRuntime")]

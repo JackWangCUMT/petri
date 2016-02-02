@@ -177,12 +177,6 @@ namespace Petri.Editor
 
             CodeGen += "";
 
-            CodeGen += "EXPORT char const *" + ClassName + "_getAPIDate() {";
-            CodeGen += "return __TIMESTAMP__;";
-            CodeGen += "}";
-
-            CodeGen += "";
-
             CodeGen += "EXPORT void *" + Document.Settings.Name + "_createLibForEditor() {";
             CodeGen += "return new ::PetriDynamicLib{std::make_unique<::Petri::MemberPetriDynamicLib>(false, \"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", "
                 + Document.Settings.Port + ")};";

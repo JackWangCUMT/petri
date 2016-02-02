@@ -31,6 +31,7 @@ namespace Petri.Runtime
     public delegate Int32 ActionCallableDel();
     public delegate Int32 ParametrizedActionCallableDel(PetriNet petriNet);
     public delegate bool TransitionCallableDel(Int32 result);
+    public delegate Int32 ParametrizedTransitionCallableDel(PetriNet petriNet, Int32 result);
 
     public class WrapForNative
     {

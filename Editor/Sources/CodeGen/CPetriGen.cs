@@ -166,12 +166,6 @@ namespace Petri.Editor
 
             CodeGen += "";
 
-            CodeGen += "EXPORT char const *" + Document.Settings.Name + "_getAPIDate() {";
-            CodeGen += "return __TIMESTAMP__;";
-            CodeGen += "}";
-
-            CodeGen += "";
-
             CodeGen += "EXPORT struct PetriDynamicLib *" + Document.Settings.Name + "_createLibForEditor() {";
             CodeGen += "return PetriDynamicLib_create(\"" + Document.CodePrefix + "\", \"" + Document.CodePrefix + "\", " + Document.Settings.Port + ");";
             CodeGen += "}";

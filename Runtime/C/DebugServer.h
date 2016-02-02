@@ -47,19 +47,6 @@ extern "C" {
 char const *PetriDebugServer_getVersion();
 
 /**
- * Returns the date on which the API was compiled.
- * @return The API compilation date, expressed in seconds since the UNIX epoch.
- */
-int64_t PetriDebugServer_getAPIdate();
-
-/*
- * Converts a timestamp string to a number of seconds since the UNIX epoch..
- * @param timestamp The timestamp to convert.
- * @return The conversion result, expressed in seconds since the UNIX epoch.
- */
-int64_t PetriDebugServer_getDateFromTimestamp(char const *timestamp);
-
-/**
  * Creates the DebugServer and binds it to the provided dynamic library.
  * @param petri The dynamic lib from which the debug server operates.
  */

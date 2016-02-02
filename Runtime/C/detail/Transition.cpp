@@ -55,7 +55,7 @@ void PetriTransition_setID(PetriTransition *transition, uint64_t id) {
     return getTransition(transition).setID(id);
 }
 
-bool PetriTransition_isFulfilled(PetriNet *petriNet, PetriTransition *transition, Petri_actionResult_t actionResult) {
+bool PetriTransition_isFulfilled(PetriTransition *transition, PetriNet *petriNet, Petri_actionResult_t actionResult) {
     return getTransition(transition).isFulfilled(*petriNet->petriNet, actionResult);
 }
 

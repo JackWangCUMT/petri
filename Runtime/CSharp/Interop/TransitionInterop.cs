@@ -22,10 +22,13 @@ namespace Petri.Runtime.Interop {
         public static extern void PetriTransition_setID(IntPtr transition, UInt64 id);
 
         [DllImport("PetriRuntime")]
-        public static extern bool PetriTransition_isFulfilled(IntPtr transition, Int32 actionResult);
+        public static extern bool PetriTransition_isFulfilled(IntPtr transition, IntPtr petriNet, Int32 actionResult);
 
         [DllImport("PetriRuntime")]
         public static extern void PetriTransition_setCondition(IntPtr transition, TransitionCallableDel test);
+
+        [DllImport("PetriRuntime")]
+        public static extern void PetriTransition_setConditionWithParam(IntPtr transition, ParametrizedTransitionCallableDel test);
 
         [DllImport("PetriRuntime")]
         public static extern IntPtr PetriTransition_getName(IntPtr transition);

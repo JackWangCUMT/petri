@@ -107,7 +107,7 @@ namespace Petri.Runtime
          * Gets an atomic variable previously added to the Petri net. Trying to retrieve a non existing variable will throw an exception.
          * @param the id of the Atomic to retrieve.
          */
-        public Int64 GetVariable(UInt32 id)
+        public IntPtr GetVariable(UInt32 id)
         {
             return Interop.PetriNet.PetriNet_getVariable(Handle, id);
         }

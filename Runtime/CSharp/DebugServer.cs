@@ -38,19 +38,6 @@ namespace Petri.Runtime
         }
 
         /**
-         * Returns the date on which the API was compiled.
-         * @return The API compilation date.
-         */
-        public static DateTime APIdate {
-            get {
-                var date = new DateTime(1970, 1, 1, 0, 0, 0, 0,
-                                        System.DateTimeKind.Utc);
-                date = date.AddSeconds(Interop.DebugServer.PetriDebugServer_getAPIdate()).ToLocalTime();
-                return date;
-            }
-        }
-
-        /**
          * Creates the DebugServer and binds it to the provided dynamic library.
          * @param petri The dynamic lib from which the debug server operates.
          */

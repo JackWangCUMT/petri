@@ -10,12 +10,6 @@ namespace Petri.Runtime.Interop {
         public static extern IntPtr PetriDebugServer_getVersion();
 
         [DllImport("PetriRuntime")]
-        public static extern Int64 PetriDebugServer_getAPIdate();
-
-        [DllImport("PetriRuntime")]
-        public static extern Int64 PetriDebugServer_getDateFromTimestamp([MarshalAs(UnmanagedType.LPTStr)] string timestamp);
-
-        [DllImport("PetriRuntime")]
         public static extern IntPtr PetriDebugServer_create(IntPtr petri);
 
         [DllImport("PetriRuntime")]
