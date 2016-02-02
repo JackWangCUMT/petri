@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Document>
+  <Settings Name="CSharpVar" Enum="ActionResult,OK,NOK" SourceOutputPath="../Examples" LibOutputPath="../Examples" Hostname="localhost" Port="12345" Language="CSharp" RunInEditor="False">
+    <Compiler Invocation="mcs" />
+    <IncludePaths>
+      <IncludePath Path="../" Recursive="false" />
+    </IncludePaths>
+    <LibPaths>
+      <LibPath Path="../Editor/bin" Recursive="false" />
+    </LibPaths>
+    <Libs />
+  </Settings>
+  <Window X="116" Y="23" W="920" H="640" />
+  <Headers>
+    <Header File="Test.cs" />
+  </Headers>
+  <Macros />
+  <PetriNet ID="0" Name="Root" X="0" Y="0" Active="true" RequiredTokens="0" Radius="30">
+    <Comments>
+      <Comment ID="9" Name="This petri net loops 10 times and outputs the value of an incrementing counter before stopping." X="120" Y="200" Width="178" Height="64" R="1" G="1" B="0.7" A="1" />
+    </Comments>
+    <States>
+      <Action ID="1" Name="1" X="200" Y="90" Active="true" RequiredTokens="0" Radius="20" Function="$count = 10" />
+      <Action ID="2" Name="2" X="380" Y="140" Active="false" RequiredTokens="1" Radius="20" Function="TestNS.OutputVar($var)" />
+      <Action ID="4" Name="4" X="380" Y="320" Active="false" RequiredTokens="1" Radius="20" Function="$var = $var + 1" />
+      <Action ID="7" Name="7" X="360" Y="440" Active="false" RequiredTokens="1" Radius="20" Function="Petri.Runtime.Utility.DoNothing()" />
+    </States>
+    <Transitions>
+      <Transition ID="3" Name="3" X="290" Y="115" BeforeID="1" AfterID="2" Condition="true" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="186.81541692269406" />
+      <Transition ID="5" Name="5" X="437.99999999999994" Y="228" BeforeID="2" AfterID="4" Condition="true" W="50" H="30" ShiftX="57.999999999999943" ShiftY="-2" ShiftAmplitude="180" />
+      <Transition ID="6" Name="6" X="286.99999999999994" Y="230" BeforeID="4" AfterID="2" Condition="$var &lt; $count" W="50" H="30" ShiftX="-93.000000000000057" ShiftY="0" ShiftAmplitude="180" />
+      <Transition ID="8" Name="8" X="370" Y="380" BeforeID="4" AfterID="7" Condition="$var == $count" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="121.6552506059644" />
+    </Transitions>
+  </PetriNet>
+</Document>

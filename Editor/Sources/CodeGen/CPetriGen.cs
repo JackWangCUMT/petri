@@ -272,8 +272,10 @@ namespace Petri.Editor
             CodeGen += "struct PetriAction *" + a.CodeIdentifier + " = PetriAction_createWithParam(" + a.ID.ToString() + ", \""
             + a.Parent.Name + "_" + a.Name + "\", &" + a.CodeIdentifier + "_invocation, " + a.RequiredTokens.ToString() + ");";
             CodeGen += "PetriNet_addAction(petriNet, " + a.CodeIdentifier + ", " + ((a.Active && (a.Parent is RootPetriNet)) ? "true" : "false") + ");";
-
-            foreach(var tup in old) {
+            foreach(var v in cppVar) {
+                CodeGen += "PetriAction_addVariable(" + a.CodeIdentifier + ", (uint32_t)(" + v.Prefix + v.Expression + "));";
+            }
+                      foreach(var tup in old) {
                 tup.Key.Expression = tup.Value;
             }
         }
@@ -375,8 +377,12 @@ namespace Petri.Editor
 
             CodeRanges[t] = range;
 
-            CodeGen += "PetriAction_addTransitionWithParam(" + bName + ", " + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", "
+            var decl = cppVar.Count > 0 ? "struct PetriTransition *" + t.CodeIdentifier + " = " : "";
+            CodeGen += decl + "PetriAction_addTransitionWithParam(" + bName + ", " + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", "
             + "&" + t.CodeIdentifier + "_invocation" + ");";
+            foreach(var v in cppVar) {
+                CodeGen += "PetriTransition_addVariable(" + t.CodeIdentifier + ", (uint32_t)(" + v.Prefix + v.Expression + "));";
+            }
 
             foreach(var tup in old) {
                 tup.Key.Expression = tup.Value;

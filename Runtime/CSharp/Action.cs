@@ -64,12 +64,15 @@ namespace Petri.Runtime
          * @param action The Callable which will be called when the action is run.
          * @param requiredTokens The number of tokens that must be inside the active action for it to execute.
          */
-        /*public Action(UInt64 id, string name, ParametrizedActionCallableDel action, UInt64 requiredTokens)
+        public Action(UInt64 id,
+                      string name,
+                      ParametrizedActionCallableDel action,
+                      UInt64 requiredTokens)
         {
             var c = WrapForNative.Wrap(action, name);
             _parametrizedCallback = action;
             Handle = Interop.Action.PetriAction_createWithParam(id, name, c, requiredTokens);
-        }*/
+        }
 
         ~Action()
         {
@@ -100,6 +103,19 @@ namespace Petri.Runtime
                                                                   name,
                                                                   next.Handle,
                                                                   cond);
+            return new Transition(handle);
+        }
+
+        public Transition AddTransition(UInt64 id,
+                                        string name,
+                                        Action next,
+                                        ParametrizedTransitionCallableDel cond)
+        {
+            var handle = Interop.Action.PetriAction_addTransitionWithParam(Handle,
+                                                                           id,
+                                                                           name,
+                                                                           next.Handle,
+                                                                           cond);
             return new Transition(handle);
         }
 
@@ -164,6 +180,11 @@ namespace Petri.Runtime
             set {
                 Interop.Action.PetriAction_setID(Handle, value);
             }
+        }
+
+        public void AddVariable(UInt32 id)
+        {
+            Interop.Action.PetriAction_addVariable(Handle, id);
         }
 
         // Ensures the callback's lifetime is the same as the instance's one to avoid unexpected GC during native code invocation.

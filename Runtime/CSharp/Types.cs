@@ -29,9 +29,9 @@ namespace Petri.Runtime
     public delegate IntPtr PtrCallableDel();
 
     public delegate Int32 ActionCallableDel();
-    public delegate Int32 ParametrizedActionCallableDel(PetriNet petriNet);
+    public delegate Int32 ParametrizedActionCallableDel(IntPtr petriNet);
     public delegate bool TransitionCallableDel(Int32 result);
-    public delegate Int32 ParametrizedTransitionCallableDel(PetriNet petriNet, Int32 result);
+    public delegate bool ParametrizedTransitionCallableDel(IntPtr petriNet, Int32 result);
 
     public class WrapForNative
     {
@@ -53,7 +53,7 @@ namespace Petri.Runtime
         public static ParametrizedActionCallableDel Wrap(ParametrizedActionCallableDel callable,
                                                          string actionName)
         {
-            return (PetriNet pn) => {
+            return (IntPtr pn) => {
                 try {
                     return callable(pn);
                 }
@@ -76,6 +76,22 @@ namespace Petri.Runtime
                 catch(Exception e) {
                     Console.Error.WriteLine("The condition testing of the condition {0} failed with the exception \"{1}\"",
                                             transitionName,
+                                            e.Message);
+                    return default(bool);
+                }
+            };
+        }
+
+        public static ParametrizedTransitionCallableDel Wrap(ParametrizedTransitionCallableDel callable,
+                                                             string actionName)
+        {
+            return (IntPtr pn, Int32 result) => {
+                try {
+                    return callable(pn, result);
+                }
+                catch(Exception e) {
+                    Console.Error.WriteLine("The execution of the action {0} failed with the exception \"{1}\"",
+                                            actionName,
                                             e.Message);
                     return default(bool);
                 }

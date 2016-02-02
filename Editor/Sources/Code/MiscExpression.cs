@@ -121,25 +121,25 @@ namespace Petri.Editor.Code
                                                              lastIndex - (index + 1)));
                     if(tup.Item2[expr].Item1 == ExprType.Brackets) {
                         return new BracketedExpression(Code.Expression.CreateFromPreprocessedString(tup.Item1.Substring(0,
-                                                                                                                       index),
-                                                                                                   language,
-                                                                                                   null,
-                                                                                                   null,
-                                                                                                   tup.Item2,
-                                                                                                   true),
+                                                                                                                        index),
+                                                                                                    language,
+                                                                                                    null,
+                                                                                                    null,
+                                                                                                    tup.Item2,
+                                                                                                    true),
                                                        Code.Expression.CreateFromPreprocessedString(tup.Item2[expr].Item2.Substring(1,
-                                                                                                                                   tup.Item2[expr].Item2.Length - 2),
-                                                                                                   language,
-                                                                                                   null,
-                                                                                                   null,
-                                                                                                   tup.Item2,
-                                                                                                   true),
+                                                                                                                                    tup.Item2[expr].Item2.Length - 2),
+                                                                                                    language,
+                                                                                                    null,
+                                                                                                    null,
+                                                                                                    tup.Item2,
+                                                                                                    true),
                                                        Code.Expression.CreateFromPreprocessedString(tup.Item1.Substring(lastIndex + 1),
-                                                                                                   language,
-                                                                                                   null,
-                                                                                                   null,
-                                                                                                   tup.Item2,
-                                                                                                   true));
+                                                                                                    language,
+                                                                                                    null,
+                                                                                                    null,
+                                                                                                    tup.Item2,
+                                                                                                    true));
                     }
                     else {
                         currentIndex = lastIndex + 1;
@@ -202,7 +202,7 @@ namespace Petri.Editor.Code
                 return "petriNet.getVariable(static_cast<std::uint_fast32_t>(" + Prefix + Expression + ")).value()";
             }
             else if(Language == Language.CSharp) {
-                return "PetriNet.GetVariable((UInt32)(" + Prefix + Expression + "))";
+                return "petriNet.GetVariable((UInt32)(" + Prefix + Expression + ")).Value";
             }
             throw new Exception("VariableExpression.MakeCode: Should not get there!");
         }

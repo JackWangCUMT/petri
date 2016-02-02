@@ -115,6 +115,10 @@ namespace Petri.Runtime
             }
         }
 
+        public void AddVariable(UInt32 id) {
+            Interop.Transition.PetriTransition_addVariable(Handle, id);
+        }
+
         // Ensures the callback's lifetime is the same as the instance's one to avoid unexpected GC during native code invocation.
         // The warning CS0414 states that the value is never read from, and that's true.
         // But the rationale here is to always keep a reference to the callback so that it is not GC'ed.

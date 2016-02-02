@@ -118,6 +118,13 @@ uint64_t PetriTransition_getDelayBetweenEvaluation(struct PetriTransition *trans
  */
 void PetriTransition_setDelayBetweenEvaluation(struct PetriTransition *transition, uint64_t usDelay);
 
+/**
+ * References the variable in the transition
+ * @param transition The transition
+ * @param id The identifier of the variable
+ */
+void PetriTransition_addVariable(struct PetriTransition *transition, uint32_t id);
+
 #ifdef __cplusplus
 }
 #endif

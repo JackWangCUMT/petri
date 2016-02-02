@@ -251,7 +251,7 @@ namespace Petri.Editor.Code
                 return "([&petriNet]() -> " + Function.ReturnType.Name + " { " + Arguments[0].MakeCode() + "; return {}; })()";
             }
             else if(Language == Language.CSharp) {
-                return "(() => { " + Arguments[0].MakeCode() + "; return default(" + Function.ReturnType.Name + "})()";
+                return "new System.Func<ActionResult>(() => { " + Arguments[0].MakeCode() + "; return default(" + Function.ReturnType.Name + "); }).Invoke()";
             }
 
             throw new Exception("WrapperFunctionInvocation.MakeCode: Should not get there!");

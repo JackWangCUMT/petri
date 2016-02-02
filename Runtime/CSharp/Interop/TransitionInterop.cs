@@ -41,6 +41,9 @@ namespace Petri.Runtime.Interop {
 
         [DllImport("PetriRuntime")]
         public static extern void PetriTransition_setDelayBetweenEvaluation(IntPtr transition, UInt64 usDelay);
+
+        [DllImport("PetriRuntime")]
+        public static extern void PetriTransition_addVariable(IntPtr transition, UInt32 id);
     }
 }
 

@@ -82,3 +82,7 @@ uint64_t PetriTransition_getDelayBetweenEvaluation(PetriTransition *transition) 
 void PetriTransition_setDelayBetweenEvaluation(PetriTransition *transition, uint64_t usDelay) {
     getTransition(transition).setDelayBetweenEvaluation(std::chrono::microseconds(usDelay));
 }
+
+void PetriTransition_addVariable(struct PetriTransition *transition, uint32_t id) {
+    getTransition(transition).addVariable(id);
+}

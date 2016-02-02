@@ -115,3 +115,8 @@ char const *PetriAction_getName(PetriAction *action) {
 void PetriAction_setName(PetriAction *action, char const *name) {
     getAction(action).setName(name);
 }
+
+void PetriAction_addVariable(PetriAction *action, uint32_t id) {
+    getAction(action).addVariable(id);
+}
+

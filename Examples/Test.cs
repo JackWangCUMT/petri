@@ -16,6 +16,11 @@ class TestNS {
                 Console.WriteLine("Condition1!");
                 return true;
         }
+
+	public static ActionResult OutputVar(Int64 var) {
+		Console.WriteLine("Value: " + var);
+		return 0;
+	}
 }
 		
 

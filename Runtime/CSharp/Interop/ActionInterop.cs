@@ -53,6 +53,9 @@ namespace Petri.Runtime.Interop {
 
         [DllImport("PetriRuntime")]
         public static extern void PetriAction_setName(IntPtr action, [MarshalAs(UnmanagedType.LPTStr)] string name);
+
+        [DllImport("PetriRuntime")]
+        public static extern void PetriAction_addVariable(IntPtr action, UInt32 id);
     }
 }
 

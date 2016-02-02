@@ -37,6 +37,12 @@ namespace Petri.Runtime.Interop {
         public static extern IntPtr PetriNet_getVariable(IntPtr pn, UInt32 id);
 
         [DllImport("PetriRuntime")]
+        public static extern Int64 PetriNet_getVariableValue(IntPtr pn, UInt32 id);
+
+        [DllImport("PetriRuntime")]
+        public static extern void PetriNet_setVariableValue(IntPtr pn, UInt32 id, Int64 value);
+
+        [DllImport("PetriRuntime")]
         public static extern void PetriNet_lockVariable(IntPtr pn, UInt32 id);
 
         [DllImport("PetriRuntime")]

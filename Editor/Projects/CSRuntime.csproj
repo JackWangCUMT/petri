@@ -53,6 +53,7 @@
     <Compile Include="..\..\Runtime\CSharp\CInterop.cs" />
     <Compile Include="..\..\Runtime\CSharp\DynamicLib.cs" />
     <Compile Include="..\..\Runtime\CSharp\GeneratedDynamicLib.cs" />
+    <Compile Include="..\..\Runtime\CSharp\Atomic.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

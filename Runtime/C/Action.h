@@ -159,6 +159,13 @@ char const *PetriAction_getName(struct PetriAction *action);
  */
 void PetriAction_setName(struct PetriAction *action, char const *name);
 
+/**
+ * References the variable in the action
+ * @param action The action
+ * @param id The identifier of the variable
+ */
+void PetriAction_addVariable(struct PetriAction *action, uint32_t id);
+
 #ifdef __cplusplus
 }
 #endif

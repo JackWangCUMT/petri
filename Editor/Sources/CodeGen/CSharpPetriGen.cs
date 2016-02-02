@@ -159,7 +159,12 @@ namespace Petri.Editor
 
             CodeRange range = new CodeRange();
             range.FirstLine = _functionBodies.LineCount;
-            _functionBodies += "static Int32 " + a.CodeIdentifier + "_invocation(" + /*"PetriNet petriNet" + */") {\nreturn " + cpp + ";\n}\n";
+            if(cppVar.Count == 0) { 
+                _functionBodies += "static Int32 " + a.CodeIdentifier + "_invocation() {\nreturn " + cpp + ";\n}\n";
+            }
+            else {
+                _functionBodies += "static Int32 " + a.CodeIdentifier + "_invocation(IntPtr ptr) {\nPetriNet petriNet = new PetriNet(ptr);\ntry {\nreturn " + cpp + ";\n} finally {\npetriNet.Release();\n}\n}\n";
+            }
             range.LastLine = _functionBodies.LineCount;
 
             CodeRanges[a] = range;
@@ -249,14 +254,20 @@ namespace Petri.Editor
 
             CodeRange range = new CodeRange();
             range.FirstLine = _functionBodies.LineCount;
-            _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
+            if(cppVar.Count == 0) {
+                _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
+            }
+            else {
+                _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(IntPtr ptr, Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\nPetriNet petriNet = new PetriNet(ptr);\ntry {\n" + cpp + "\n} finally {\npetriNet.Release();\n}\n}\n";
+            }
             range.LastLine = _functionBodies.LineCount;
   
             CodeRanges[t] = range;
 
             cpp = t.CodeIdentifier + "_invocation";
 
-            CodeGen += bName + ".AddTransition(" + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", " + cpp + ");";
+            var decl = cppVar.Count > 0 ? "var " + t.CodeIdentifier + " = " : "";
+            CodeGen += decl + bName + ".AddTransition(" + t.ID.ToString() + ", \"" + t.Name + "\", " + aName + ", " + cpp + ");";
             foreach(var v in cppVar) {
                 CodeGen += t.CodeIdentifier + ".AddVariable(" + "(UInt32)(" + v.Prefix + v.Expression + "));";
             }

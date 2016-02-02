@@ -27,7 +27,7 @@ namespace Petri.Runtime
 {
     public class PetriNet : CInterop
     {
-        internal PetriNet(IntPtr handle)
+        public PetriNet(IntPtr handle)
         {
             Handle = handle;
             if(Handle == IntPtr.Zero) {
@@ -107,9 +107,9 @@ namespace Petri.Runtime
          * Gets an atomic variable previously added to the Petri net. Trying to retrieve a non existing variable will throw an exception.
          * @param the id of the Atomic to retrieve.
          */
-        public IntPtr GetVariable(UInt32 id)
+        public Atomic GetVariable(UInt32 id)
         {
-            return Interop.PetriNet.PetriNet_getVariable(Handle, id);
+            return new Atomic(this, id);
         }
 
         public string Name {
