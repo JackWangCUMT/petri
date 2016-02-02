@@ -41,16 +41,13 @@ namespace Petri {
          * Creates the dynamic library wrapper. It still needs to be loaded to access the dylib
          * symbols.
          */
-        DynamicLib(bool nodelete, std::string const &path = "")
-                : _nodelete(nodelete), _path(path) {}
+        DynamicLib(bool nodelete, std::string const &path = "");
         DynamicLib(DynamicLib const &pn) = delete;
         DynamicLib &operator=(DynamicLib const &pn) = delete;
 
         DynamicLib(DynamicLib &&pn) = default;
         DynamicLib &operator=(DynamicLib &&pn) = default;
-        virtual ~DynamicLib() {
-            this->unload();
-        }
+        virtual ~DynamicLib();
 
         /**
          * Returns whether the dylib code resides in memory or not
@@ -116,6 +113,7 @@ namespace Petri {
         void *_loadSymbol(std::string const &name);
         void *_libHandle = nullptr;
         std::string const _path;
+        int _wd;
     };
 }
 

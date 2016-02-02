@@ -29,27 +29,66 @@
 
 #include "../DynamicLib.h"
 #include <dlfcn.h>
+#include <fcntl.h>
 #include <iostream>
 
 namespace Petri {
+
+    DynamicLib::DynamicLib(bool nodelete, std::string const &path)
+            : _nodelete(nodelete)
+            , _path(path) {
+        _wd = ::open(".", O_RDONLY);
+        if(_wd < 0) {
+            std::cerr << "DynamicLib::DynamicLib(): Could not open the current directory ("
+                      << strerror(errno) << ")!" << std::endl;
+        }
+    }
+
+    DynamicLib::~DynamicLib() {
+        this->unload();
+        if(_wd >= 0) {
+            ::close(_wd);
+        }
+    }
 
     void DynamicLib::load() {
         if(this->loaded()) {
             return;
         }
 
-        int nodeleteFlag = _nodelete ? RTLD_NODELETE : 0;
+        int oldwd = ::open(".", O_RDONLY);
+        try {
+            if(oldwd < 0) {
+                std::cerr << "DynamicLib::load(): Could not open the current directory ("
+                          << strerror(errno) << ")!" << std::endl;
+            }
 
-        std::string path = this->path();
+            fchdir(_wd);
 
-        _libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL | nodeleteFlag);
+            int nodeleteFlag = _nodelete ? RTLD_NODELETE : 0;
 
-        if(_libHandle == nullptr) {
-            std::cerr << "Unable to load the dynamic library at path \"" << path << "\"!\n"
-                      << "Reason: " << dlerror() << std::endl;
+            std::string path = this->path();
 
-            throw std::runtime_error("Unable to load the dynamic library at path \"" + path +
-                                     "\"!");
+            _libHandle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL | nodeleteFlag);
+
+            if(_libHandle == nullptr) {
+                std::cerr << "Unable to load the dynamic library at path \"" << path << "\"!\n"
+                          << "Reason: " << dlerror() << std::endl;
+
+                throw std::runtime_error("Unable to load the dynamic library at path \"" + path + "\"!");
+            }
+
+            fchdir(oldwd);
+            if(oldwd >= 0) {
+                close(oldwd);
+            }
+        }
+        catch(...) {
+            if(oldwd >= 0) {
+                close(oldwd);
+            }
+
+            throw;
         }
     }
 

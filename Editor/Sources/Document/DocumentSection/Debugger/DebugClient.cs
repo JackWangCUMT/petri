@@ -283,11 +283,12 @@ namespace Petri.Editor
         {
             _pause = false;
             try {
-                if(!_petriRunning)
+                if(!_petriRunning) {
                     this.SendObject(new JObject(new JProperty("type", "start"),
                                                 new JProperty("payload",
                                                               new JObject(new JProperty("hash",
                                                                                         _document.GetHash())))));
+                }
             }
             catch(Exception e) {
                 GLib.Timeout.Add(0, () => {
@@ -314,8 +315,9 @@ namespace Petri.Editor
         {
             _pause = false;
             try {
-                if(_petriRunning)
+                if(_petriRunning) {
                     this.SendObject(new JObject(new JProperty("type", "stop")));
+                }
             }
             catch(Exception e) {
                 GLib.Timeout.Add(0, () => {
@@ -338,7 +340,7 @@ namespace Petri.Editor
         /// <summary>
         /// Stops the petri net execution, generate and compile the new petri net and load it into the DebugServer.
         /// </summary>
-        public void ReloadPetri()
+        public void ReloadPetri(bool startAfterReload = false)
         {
             GLib.Timeout.Add(0, () => {
                 _document.Window.DebugGui.Status = Configuration.GetLocalized("Reloading the petri net…");
@@ -362,16 +364,8 @@ namespace Petri.Editor
                 }
                 else {
                     try {
-                        if(_document.Settings.RunInEditor) {
-                            _pause = false;
-                            if(_petriRunning)
-                                this.SendObject(new JObject(new JProperty("type", "stop")));
-                            UnloadLibAndStopServer();
-                            LoadLibAndStartServer();
-                        }
-                        else {
-                            this.SendObject(new JObject(new JProperty("type", "reload")));
-                        }
+                        _startAfterFix = startAfterReload;
+                        this.SendObject(new JObject(new JProperty("type", "reload")));
                     }
                     catch(Exception e) {
                         GLib.Timeout.Add(0, () => {
@@ -569,6 +563,9 @@ namespace Petri.Editor
                             _document.Window.DebugGui.UpdateToolbar();
                             GLib.Timeout.Add(0, () => {
                                 _document.Window.DebugGui.Status = Configuration.GetLocalized("The Petri net has been successfully reloaded.");
+                                if(_startAfterFix) {
+                                    StartPetri();
+                                }
                                 return false;
                             });
                         }
@@ -590,6 +587,7 @@ namespace Petri.Editor
                         }
                     }
                     else if(msg["type"].ToString() == "error") {
+                        _startAfterFix = false;
                         GLib.Timeout.Add(0, () => {
                             MessageDialog d = new MessageDialog(_document.Window,
                                                                 DialogFlags.Modal,
@@ -598,10 +596,10 @@ namespace Petri.Editor
                                                                 Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + msg["payload"].ToString()));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             if(msg["payload"].ToString() == "You are trying to run a Petri net that is different from the one which is compiled!") {
-                                d.AddButton(Configuration.GetLocalized("Fix"), ResponseType.Apply);
+                                d.AddButton(Configuration.GetLocalized("Fix and run"), ResponseType.Apply);
                             }
                             if((ResponseType)d.Run() == ResponseType.Apply) {
-                                ReloadPetri();
+                                ReloadPetri(true);
                             }
                             d.Destroy();
 
@@ -771,6 +769,7 @@ namespace Petri.Editor
         GeneratedDynamicLibProxy _libProxy;
         Runtime.DebugServer _debugServer;
 
+        bool _startAfterFix = false;
         bool _petriRunning, _pause;
         volatile bool _sessionRunning;
         Thread _receiverThread;

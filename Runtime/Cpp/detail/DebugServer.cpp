@@ -208,6 +208,7 @@ namespace Petri {
                 std::this_thread::sleep_for(20ms);
             }
             _socket->setBlocking(true);
+            _client.setBlocking(true);
 
             if(!_running) {
                 break;
@@ -248,9 +249,6 @@ namespace Petri {
                         }
                         if(_petriNetFactory.loaded()) {
                             if(root["payload"]["hash"].asString() != _petriNetFactory.hash()) {
-                                std::cerr << "Requested hash: " << root["payload"]["hash"].asString()
-                                          << std::endl;
-                                std::cerr << "Got hash: " << _petriNetFactory.hash() << std::endl;
                                 std::cout << root["payload"]["hash"].asString() << " "
                                           << _petriNetFactory.hash() << std::endl;
                                 this->sendObject(
@@ -303,7 +301,7 @@ namespace Petri {
                         _petri = _petriNetFactory.createDebug();
                         _petri->setObserver(&_that);
                         std::cout << "Reloaded Petri Net." << std::endl;
-                        std::cout << "Got hash: " << _petriNetFactory.hash() << std::endl;
+                        std::cout << "New hash: " << _petriNetFactory.hash() << std::endl;
                         this->sendObject(this->json("ack", "reload"));
                     } else if(type == "breakpoints") {
                         this->updateBreakpoints(root["payload"]);
