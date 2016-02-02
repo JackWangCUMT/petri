@@ -31,6 +31,7 @@
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <iostream>
+#include <unistd.h>
 
 namespace Petri {
 
@@ -39,7 +40,8 @@ namespace Petri {
             , _path(path) {
 
         // Keeping the working directory to cd into it when load() is invoked.
-        // This allows libs specified with a relative path to be loaded when the working directory has been changed.
+        // This allows libs specified with a relative path to be loaded when the working directory
+        // has been changed.
         _wd = open(".", O_RDONLY);
         if(_wd < 0) {
             std::cerr << "DynamicLib::DynamicLib(): Could not open the current directory ("
@@ -88,8 +90,7 @@ namespace Petri {
             if(oldwd >= 0) {
                 close(oldwd);
             }
-        }
-        catch(...) {
+        } catch(...) {
             fchdir(oldwd);
             if(oldwd >= 0) {
                 close(oldwd);
