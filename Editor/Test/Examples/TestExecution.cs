@@ -30,12 +30,11 @@ namespace Petri.Test.Examples
     [TestFixture()]
     public class TestExecution
     {
-        // Fails within the IDE as well as with NUnit, even if the execution in a terminal actually works.
-        /*[Test()]
+        [Test()]
         public void TestCSharpExampleExecution()
         {
             // GIVEN launch arguments requesting execution of the C#.petri example
-            string[] args = { "-k", "-r", "../../../Examples/CSharp.petri" };
+            string[] args = { "-r", "../../../Examples/CSharp.petri" };
             string stdout, stderr;
 
             // WHEN the invocation is made
@@ -45,13 +44,13 @@ namespace Petri.Test.Examples
             Assert.AreEqual(0, result);
             Assert.AreEqual("", stdout);
             Assert.AreEqual("", stderr);
-        }*/
+        }
 
         [Test()]
         public void TestCppExampleExecution()
         {
             // GIVEN launch arguments requesting execution of the Cpp.petri example
-            string[] args = { "-k", "-r", "../../../Examples/Cpp.petri" };
+            string[] args = { "-kr", "../../../Examples/Cpp.petri" };
             string stdout, stderr;
 
             // WHEN the invocation is made
@@ -67,7 +66,7 @@ namespace Petri.Test.Examples
         public void TestCExampleExecution()
         {
             // GIVEN launch arguments requesting execution of the C.petri example
-            string[] args = { "-k", "-r", "../../../Examples/C.petri" };
+            string[] args = { "-kr", "../../../Examples/C.petri" };
             string stdout, stderr;
 
             // WHEN the invocation is made

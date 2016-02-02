@@ -34,7 +34,6 @@ namespace Petri.Test
 
             // THEN no error is returned.
             Assert.AreEqual("", stderr);
-            Assert.AreEqual("", stdout);
             Assert.AreEqual(0, result);
         }
 
@@ -66,9 +65,8 @@ namespace Petri.Test
 
             // THEN no error is returned.
             Assert.AreEqual("", stderr);
-            Assert.AreEqual("", stdout);
             Assert.AreEqual(0, result);
         }
-        }
+    }
 }
 

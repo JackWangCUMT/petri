@@ -202,7 +202,7 @@ namespace Petri.Editor
                     System.IO.File.Delete(libPath);
                     if(document.Settings.Language == Code.Language.C || document.Settings.Language == Code.Language.Cpp) {
                         string headerPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Directory.GetParent(document.Path).FullName,
-                                                                                      document.Settings.RelativeSourceHeaderPath));
+                                                                                              document.Settings.RelativeSourceHeaderPath));
                         System.IO.File.Delete(headerPath);
                     }
                     if(verbose) {
@@ -292,17 +292,13 @@ namespace Petri.Editor
 
             if(dylib == null) {
                 if(allowRetry) {
-                    if(verbose) {
-                        Console.Write("Could not load the dynamic lib. Attempting recompilation… ");
-                    }
+                    Console.Write("Could not load the dynamic lib. Attempting recompilation… ");
                     bool res = doc.Compile(false);
                     if(!res) {
                         throw new Exception("Compilation failure!");
                     }
-                    if(verbose) {
-                        Console.WriteLine("Done.");
-                        Console.WriteLine("Attempting execution again…");
-                    }
+                    Console.WriteLine("Done.");
+                    Console.WriteLine("Attempting execution again…");
                     return RunDocument(doc, verbose, false);
                 }
 

@@ -43,29 +43,28 @@ all: lib editor
 cleanlib:
 	@rm -rf build
 	@rm -f Runtime/$(OUTPUT)
+	@rm -f Editor/bin/$(OUTPUT)
 
 clean: cleanlib
-	@rm -f Editor/Test/bin/$(OUTPUT)
-	@rm -f Editor/bin/$(OUTPUT)
+	@rm -rf Editor/Test/bin/
+	@rm -f Editor/bin/*.{dll,mdb,exe}
 	@rm -rf Editor/Test/obj
 	@rm -rf Editor/obj
 	@rm -rf Editor/Petri.app
 	@rm -f Editor/Petri.exe
+	@rm -f Examples/CSRuntime.dll
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/Petri.csproj
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/PetriMac.csproj
+	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Projects/CSRuntime.csproj
 	$(MSBUILD) /nologo /verbosity:minimal /target:Clean Editor/Test/Test.csproj
 
-editor: builddir mac
+editor: builddir
 	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/Petri.csproj
-ifeq (, $(shell which mdtool))
-mac: ;
-else
-mac: builddir
-	mdtool build -c:$(CSCONF) Editor/Petri.sln
-endif
+	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/PetriMac.csproj
 
 test: all
-	mdtool build -c:$(CSCONF) Editor/Petri.sln
+	@ln -sf "$(abspath Editor/bin/CSRuntime.dll)" "$(abspath Examples/)" || true
+	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Test/Test.csproj
 	nunit-console Editor/Test/Test.csproj
 
 builddir:
@@ -76,6 +75,7 @@ builddir:
 	@mkdir -p Editor/bin
 
 lib: builddir buildlib
+	$(MSBUILD) /nologo /verbosity:minimal /property:Configuration=$(CSCONF) Editor/Projects/CSRuntime.csproj
 
 buildlib: $(CXXOBJ) $(JSONOBJ)
 	$(CXX) -o Runtime/$(OUTPUT) $^ $(LDFLAGS)
@@ -89,9 +89,8 @@ build/%.o: %.cpp
 build/json/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS) $(WARN_JSON)
 
-examples:
-	find Examples -name "*.petri" -exec mono Editor/bin/Petri.exe -gcv {} \;
+examples: editor
+	@find Examples -name "*.petri" -exec mono Editor/bin/Petri.exe -gcv {} \;
 
-examplesclean:
-	find Examples -name "*.petri" -exec mono Editor/bin/Petri.exe -kv {} \;
-
+examplesclean: editor
+	@find Examples -name "*.petri" -exec mono Editor/bin/Petri.exe -kv {} \;
