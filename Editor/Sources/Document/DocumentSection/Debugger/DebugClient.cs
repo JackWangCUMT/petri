@@ -479,7 +479,7 @@ namespace Petri.Editor
                 else if(ehlo != null && ehlo["type"].ToString() == "error") {
                     throw new Exception(Configuration.GetLocalized("An error was returned by the debugger:") + " " + ehlo["payload"]);
                 }
-                throw new Exception(Configuration.GetLocalized("Invalid message received from debugger (expected ehlo)."));
+                throw new Exception(Configuration.GetLocalized("Invalid message received from debugger (expected ehlo).") + " " + ehlo);
             }
             catch(Exception e) {
                 GLib.Timeout.Add(0, () => {
@@ -505,7 +505,17 @@ namespace Petri.Editor
         void Receiver()
         {
             try {
-                _socket = new TcpClient(_document.Settings.Hostname, _document.Settings.Port);
+                _socket = new TcpClient();
+                var result = _socket.BeginConnect(_document.Settings.Hostname,
+                                                  _document.Settings.Port,
+                                                  null,
+                                                  null);
+              
+                if(!result.AsyncWaitHandle.WaitOne(1000)) {
+                    throw new Exception("Timeout!");
+                }
+
+                _socket.EndConnect(result);
             }
             catch(Exception e) {
                 this.Detach();
@@ -587,7 +597,12 @@ namespace Petri.Editor
                                                                 ButtonsType.None,
                                                                 Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + msg["payload"].ToString()));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                            d.Run();
+                            if(msg["payload"].ToString() == "You are trying to run a Petri net that is different from the one which is compiled!") {
+                                d.AddButton(Configuration.GetLocalized("Fix"), ResponseType.Apply);
+                            }
+                            if((ResponseType)d.Run() == ResponseType.Apply) {
+                                ReloadPetri();
+                            }
                             d.Destroy();
 
                             return false;

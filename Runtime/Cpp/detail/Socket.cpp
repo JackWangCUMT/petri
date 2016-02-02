@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <fcntl.h>
 #include <memory>
 #include <stdexcept>
 
@@ -33,6 +34,20 @@ namespace Petri {
 
         shutdown();
         close(_fd);
+    }
+
+    bool Socket::setBlocking(bool blocking) {
+        bool ok = true;
+        int flags = fcntl(_fd, F_GETFL, 0);
+        if(flags < 0) {
+            ok = false;
+        }
+        if(ok) {
+            flags = blocking ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
+            ok = fcntl(_fd, F_SETFL, flags) == 0;
+        }
+
+        return ok;
     }
 
     // Connexion au serveur

@@ -99,6 +99,11 @@ namespace Petri {
          */
         bool running() const;
 
+        /**
+         * Waits for the debug server session to end.
+         */
+        void join() const;
+
     protected:
         void addActiveState(Action &a);
         void removeActiveState(Action &a);

@@ -75,6 +75,8 @@ namespace Petri {
         // Ferme la connexion
         void shutdown();
 
+        bool setBlocking(bool blocking);
+
     private:
         Socket(const Socket &ref) = delete;
         Socket &operator=(Socket ref) = delete;

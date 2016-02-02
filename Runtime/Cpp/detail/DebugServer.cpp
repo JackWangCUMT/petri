@@ -86,7 +86,7 @@ namespace Petri {
 
         std::thread _receptionThread;
         std::thread _heartBeat;
-        Petri::Socket _socket;
+        std::unique_ptr<Petri::Socket> _socket;
         Petri::Socket _client;
         std::atomic_bool _running = {false};
 
@@ -98,7 +98,7 @@ namespace Petri {
     };
 
     std::string const &DebugServer::getVersion() {
-        static auto const version = "1.3"s;
+        static auto const version = "1.3.1"s;
         return version;
     }
 
@@ -119,10 +119,7 @@ namespace Petri {
             : _internals(std::make_unique<Internals>(*this, petri)) {}
 
     DebugServer::~DebugServer() {
-        if(_internals->_receptionThread.joinable())
-            _internals->_receptionThread.join();
-        if(_internals->_heartBeat.joinable())
-            _internals->_heartBeat.join();
+        this->join();
     }
 
     void DebugServer::start() {
@@ -132,17 +129,22 @@ namespace Petri {
 
     void DebugServer::stop() {
         _internals->_running = false;
+        _internals->_client.shutdown();
+        this->join();
+    }
 
-        if(_internals->_receptionThread.joinable())
+    void DebugServer::join() const {
+        if(_internals->_receptionThread.joinable()) {
             _internals->_receptionThread.join();
-        if(_internals->_heartBeat.joinable())
+        }
+        if(_internals->_heartBeat.joinable()) {
             _internals->_heartBeat.join();
+        }
     }
 
     bool DebugServer::running() const {
         return _internals->_running;
     }
-
 
     void DebugServer::addActiveState(Action &a) {
         _internals->addActiveState(a);
@@ -174,8 +176,9 @@ namespace Petri {
     void DebugServer::Internals::removeActiveState(Action &a) {
         std::lock_guard<std::mutex> lk(_stateChangeMutex);
         auto it = _activeStates.find(&a);
-        if(it == _activeStates.end() || it->second == 0)
+        if(it == _activeStates.end() || it->second == 0) {
             throw std::runtime_error("Trying to remove an inactive state!");
+        }
         --it->second;
 
         _stateChange = true;
@@ -189,25 +192,27 @@ namespace Petri {
     void DebugServer::Internals::serverCommunication() {
         setThreadName(std::string("DebugServer ") + _petriNetFactory.name());
 
-        int attempts = 0;
-        while(true) {
-            if(_socket.listen(_petriNetFactory.port()))
-                break;
-
-            std::this_thread::sleep_for(1s);
-            std::cerr << "Could not bind socket to requested port (attempt " << ++attempts << ")" << std::endl;
-            if(attempts > 5) {
-                _running = false;
-                std::cerr << "Too many attemps, aborting." << std::endl;
-                break;
-            }
+        _socket = std::make_unique<Socket>();
+        if(!_socket->listen(_petriNetFactory.port())) {
+            _running = false;
         }
 
-        std::cout << "Debug session for Petri net " << _petriNetFactory.name() << " started." << std::endl;
+        if(_running) {
+            std::cout << "Debug session for Petri net " << _petriNetFactory.name() << " started." << std::endl;
+        }
 
         while(_running) {
             std::cout << "Waiting for the debugger to attach…" << std::endl;
-            _socket.accept(_client);
+            _socket->setBlocking(false);
+            while(_running && !_socket->accept(_client)) {
+                std::this_thread::sleep_for(20ms);
+            }
+            _socket->setBlocking(true);
+
+            if(!_running) {
+                break;
+            }
+
             std::cout << "Debugger connected!" << std::endl;
 
             try {
@@ -364,11 +369,12 @@ namespace Petri {
         }
 
         _running = false;
-        _socket.shutdown();
+        _socket = nullptr;
         _stateChangeCondition.notify_all();
 
-        if(_petri)
+        if(_petri) {
             _petri->stop();
+        }
     }
 
     void DebugServer::Internals::updateBreakpoints(Json::Value const &breakpoints) {
@@ -439,7 +445,7 @@ namespace Petri {
     }
 
     Json::Value DebugServer::Internals::receiveObject() {
-        std::vector<uint8_t> vect = _socket.receiveNewMsg(_client);
+        std::vector<uint8_t> vect = _socket->receiveNewMsg(_client);
 
         std::string msg(vect.begin(), vect.end());
 
@@ -461,7 +467,7 @@ namespace Petri {
 
         std::string s = writer.write(o);
 
-        _socket.sendMsg(_client, s.c_str(), s.size());
+        _socket->sendMsg(_client, s.c_str(), s.size());
     }
 
     Json::Value DebugServer::Internals::json(std::string const &type, Json::Value const &payload) {
