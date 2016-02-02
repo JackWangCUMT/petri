@@ -81,7 +81,7 @@ buildlib: $(CXXOBJ) $(JSONOBJ)
 	$(CXX) -o Runtime/$(OUTPUT) $^ $(LDFLAGS)
 	@ln -sf "$(abspath Runtime/$(OUTPUT))" "$(abspath Editor/Test/bin/$(OUTPUT))" || true
 	@ln -sf "$(abspath Runtime/$(OUTPUT))" "$(abspath Editor/bin/$(OUTPUT))" || true
-	@ln -sf "$(abspath Runtime/$(OUTPUT))" "$(abspath Editor/Petri.app/Contents/MonoBundle/$(OUTPUT))" || true
+	@ln -sf "$(abspath Runtime/$(OUTPUT))" "$(abspath Editor/Petri.app/Contents/MonoBundle/$(OUTPUT))" 2>/dev/null || true
 
 build/%.o: %.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)

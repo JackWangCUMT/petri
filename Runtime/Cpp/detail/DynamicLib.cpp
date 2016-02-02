@@ -31,6 +31,8 @@
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <iostream>
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 namespace Petri {
