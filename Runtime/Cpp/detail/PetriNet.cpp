@@ -91,7 +91,7 @@ namespace Petri {
             _internals->_running = false;
             _internals->_activationCondition.notify_all();
         }
-        _internals->_actionsPool.cancel();
+        _internals->_actionsPool.stop();
     }
 
     void PetriNet::join() {
@@ -231,6 +231,7 @@ namespace Petri {
 
         this->stateDisabled(a);
         if(_activeStates.size() == 0 && _running) {
+            std::cout << "End of execution." << std::endl;
             _this.stop();
         }
     }

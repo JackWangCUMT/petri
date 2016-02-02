@@ -217,11 +217,10 @@ namespace Petri {
         }
 
         /**
-         * Stops the execution of the thread pool. Pauses the calling thread until each running task
-         * is completed.
-         * Does not run any of the currently pending taks, simply discards them.
+         * Clears all of the pensing tasks and shuts down all the working threads.
+         * The thread pool will be ineffective after that.
          */
-        void cancel() {
+        void stop() {
             _alive = false;
             _taskAvailable.notify_all();
 

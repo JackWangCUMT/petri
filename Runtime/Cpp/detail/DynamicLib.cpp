@@ -37,7 +37,10 @@ namespace Petri {
     DynamicLib::DynamicLib(bool nodelete, std::string const &path)
             : _nodelete(nodelete)
             , _path(path) {
-        _wd = ::open(".", O_RDONLY);
+
+        // Keeping the working directory to cd into it when load() is invoked.
+        // This allows libs specified with a relative path to be loaded when the working directory has been changed.
+        _wd = open(".", O_RDONLY);
         if(_wd < 0) {
             std::cerr << "DynamicLib::DynamicLib(): Could not open the current directory ("
                       << strerror(errno) << ")!" << std::endl;
@@ -47,7 +50,7 @@ namespace Petri {
     DynamicLib::~DynamicLib() {
         this->unload();
         if(_wd >= 0) {
-            ::close(_wd);
+            close(_wd);
         }
     }
 
@@ -56,13 +59,15 @@ namespace Petri {
             return;
         }
 
-        int oldwd = ::open(".", O_RDONLY);
+        // Keeping the previous working directory…
+        int oldwd = open(".", O_RDONLY);
         try {
             if(oldwd < 0) {
                 std::cerr << "DynamicLib::load(): Could not open the current directory ("
                           << strerror(errno) << ")!" << std::endl;
             }
 
+            // … changing to the saved one…
             fchdir(_wd);
 
             int nodeleteFlag = _nodelete ? RTLD_NODELETE : 0;
@@ -78,12 +83,14 @@ namespace Petri {
                 throw std::runtime_error("Unable to load the dynamic library at path \"" + path + "\"!");
             }
 
+            // … and restoring the previous working directory.
             fchdir(oldwd);
             if(oldwd >= 0) {
                 close(oldwd);
             }
         }
         catch(...) {
+            fchdir(oldwd);
             if(oldwd >= 0) {
                 close(oldwd);
             }

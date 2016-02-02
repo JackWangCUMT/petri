@@ -439,8 +439,8 @@
 <Key>Unable to connect to the server:</Key>
 <Value>Unable to connect to the server:</Value>
 
-<Key>The petri net is running.</Key>
-<Value>The petri net is running.</Value>
+<Key>The petri net is running…</Key>
+<Value>The petri net is running…</Value>
 
 <Key>The petri net execution has ended.</Key>
 <Value>The petri net execution has ended.</Value>

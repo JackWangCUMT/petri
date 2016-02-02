@@ -49,6 +49,8 @@
 #include <string>
 #include <thread>
 
+using namespace std::string_literals;
+
 namespace Petri {
 
     struct DebugServer::Internals {
@@ -67,6 +69,8 @@ namespace Petri {
         void serverCommunication();
         void heartBeat();
 
+        void startPetri(Json::Value const &paylod);
+        void evaluate(Json::Value const &payload);
         void clearPetri();
 
         void setPause(bool pause);
@@ -173,11 +177,11 @@ namespace Petri {
     }
 
     void DebugServer::Internals::notifyStop() {
-        this->sendObject(this->json("ack", "stop"));
+        this->sendObject(this->json("ack", "end_exec"));
     }
 
     void DebugServer::Internals::serverCommunication() {
-        setThreadName(std::string("DebugServer ") + _petriNetFactory.name());
+        setThreadName("DebugServer " + _petriNetFactory.name());
 
         _socket = std::make_unique<Socket>();
         if(!_socket->listen(_petriNetFactory.port())) {
@@ -210,12 +214,10 @@ namespace Petri {
 
                     if(type == "hello") {
                         if(root["payload"]["version"] != DebugServer::getVersion()) {
-                            this->sendObject(
-                            this->error(std::string("The server (version ") + DebugServer::getVersion() +
-                                        std::string(") is incompatible with your client!")));
-                            throw std::runtime_error(
-                            std::string("The server (version ") + DebugServer::getVersion() +
-                            std::string(") is incompatible with your client!"));
+                            this->sendObject(this->error("The server (version " + DebugServer::getVersion() +
+                                                         ") is incompatible with your client!"));
+                            throw std::runtime_error("The server (version " + DebugServer::getVersion() +
+                                                     ") is incompatible with your client!");
                         } else {
                             Json::Value ehlo;
                             ehlo["type"] = "ehlo";
@@ -224,43 +226,7 @@ namespace Petri {
                             _heartBeat = std::thread(&DebugServer::Internals::heartBeat, this);
                         }
                     } else if(type == "start") {
-                        if(!_petriNetFactory.loaded()) {
-                            try {
-                                _petriNetFactory.load();
-                            } catch(std::exception const &e) {
-                                this->sendObject(this->error(
-                                std::string("An exception occurred upon dynamic lib loading (") + e.what() + ")!"));
-                                std::cerr << "An exception occurred upon dynamic lib loading ("
-                                          << e.what() << ")!" << std::endl;
-                            }
-                        }
-                        if(_petriNetFactory.loaded()) {
-                            if(root["payload"]["hash"].asString() != _petriNetFactory.hash()) {
-                                std::cout << root["payload"]["hash"].asString() << " "
-                                          << _petriNetFactory.hash() << std::endl;
-                                this->sendObject(
-                                this->error("You are trying to run a Petri net that is different "
-                                            "from the one which is compiled!"));
-                                std::cerr << "You are trying to run a Petri net that is different "
-                                             "from the one which is compiled!"
-                                          << std::endl;
-                                _petriNetFactory.unload();
-                            } else {
-                                if(!_petri) {
-                                    _petri = _petriNetFactory.createDebug();
-                                    _petri->setObserver(&_that);
-                                } else if(_petri->running()) {
-                                    throw std::runtime_error("Petri net is already running!");
-                                }
-
-                                this->sendObject(this->json("ack", "start"));
-
-                                auto const obj = this->receiveObject();
-                                this->updateBreakpoints(obj["payload"]);
-
-                                _petri->run();
-                            }
-                        }
+                        this->startPetri(root["payload"]);
                     } else if(type == "exit") {
                         this->clearPetri();
                         this->sendObject(this->json("exit", "kbye"));
@@ -293,50 +259,7 @@ namespace Petri {
                     } else if(type == "breakpoints") {
                         this->updateBreakpoints(root["payload"]);
                     } else if(type == "evaluate") {
-                        std::string result, lib;
-                        try {
-                            lib = root["payload"]["lib"].asString();
-                            std::string language = root["payload"]["language"].asString();
-                            DynamicLib dl(false, lib);
-                            dl.load();
-                            auto eval = dl.loadSymbol<char *(void *)>(_petriNetFactory.prefix() +
-                                                                      std::string("_evaluate"));
-
-                            void *petriNet = nullptr;
-                            if(language == "C") {
-                                // Some circumvolutions required to pass a C petri net handle to the
-                                // evaluate function.
-                                ::PetriNet *pn = new ::PetriNet;
-                                pn->petriNet = std::unique_ptr<Petri::PetriNet>(_petri.get());
-                                petriNet = pn;
-                            }
-
-                            else {
-                                petriNet = _petri.get();
-                            }
-                            char *evalBuffer = eval(petriNet);
-
-                            if(language == "C") {
-                                // Some circumvolutions required to pass a C petri net handle to the
-                                // evaluate function.
-                                ::PetriNet *pn = static_cast<::PetriNet *>(petriNet);
-                                pn->petriNet.release();
-                                delete pn;
-                            }
-
-                            if(evalBuffer == nullptr) {
-                                throw std::runtime_error("Invalid evaluation result");
-                            }
-                            result = evalBuffer;
-                            free(evalBuffer);
-                        } catch(std::exception const &e) {
-                            result = std::string("Could not evaluate the symbol, reason: ") + e.what();
-                        }
-                        Json::Value payload;
-                        payload["eval"] = result;
-                        payload["lib"] = lib;
-
-                        this->sendObject(this->json("evaluation", payload));
+                        this->evaluate(root["payload"]);
                     }
                 }
             } catch(std::exception const &e) {
@@ -376,8 +299,7 @@ namespace Petri {
     }
 
     void DebugServer::Internals::heartBeat() {
-        setThreadName(std::string("DebugServer ") + _petriNetFactory.name() +
-                      std::string(" heart beat"));
+        setThreadName("DebugServer " + _petriNetFactory.name() + " heart beat");
         auto lastSendDate = std::chrono::system_clock::now();
         auto const minDelayBetweenSend = 100ms;
 
@@ -409,6 +331,90 @@ namespace Petri {
             this->sendObject(this->json("states", states));
             _stateChange = false;
         }
+    }
+
+    void DebugServer::Internals::startPetri(Json::Value const &payload) {
+        if(!_petriNetFactory.loaded()) {
+            try {
+                _petriNetFactory.load();
+            } catch(std::exception const &e) {
+                this->sendObject(
+                this->error("An exception occurred upon dynamic lib loading ("s + e.what() + ")!"));
+                std::cerr << "An exception occurred upon dynamic lib loading (" << e.what() << ")!"
+                          << std::endl;
+            }
+        }
+        if(_petriNetFactory.loaded()) {
+            if(payload["hash"].asString() != _petriNetFactory.hash()) {
+                std::cout << payload["hash"].asString() << " " << _petriNetFactory.hash() << std::endl;
+                this->sendObject(this->error("You are trying to run a Petri net that is different "
+                                             "from the one which is compiled!"));
+                std::cerr << "You are trying to run a Petri net that is different "
+                             "from the one which is compiled!"
+                          << std::endl;
+                _petriNetFactory.unload();
+            } else {
+                if(!_petri) {
+                    _petri = _petriNetFactory.createDebug();
+                    _petri->setObserver(&_that);
+                } else if(_petri->running()) {
+                    throw std::runtime_error("The petri net is already running!");
+                }
+
+                this->sendObject(this->json("ack", "start"));
+
+                auto const obj = this->receiveObject();
+                this->updateBreakpoints(obj["payload"]);
+
+                _petri->run();
+            }
+        }
+    }
+
+    void DebugServer::Internals::evaluate(Json::Value const &payload) {
+        std::string result, lib;
+        try {
+            lib = payload["lib"].asString();
+            std::string language = payload["language"].asString();
+            DynamicLib dl(false, lib);
+            dl.load();
+            auto eval = dl.loadSymbol<char *(void *)>(_petriNetFactory.prefix() + "_evaluate"s);
+
+            void *petriNet = nullptr;
+            if(language == "C") {
+                // Some circumvolutions required to pass a C petri net handle to the
+                // evaluate function.
+                ::PetriNet *pn = new ::PetriNet;
+                pn->petriNet = std::unique_ptr<Petri::PetriNet>(_petri.get());
+                petriNet = pn;
+            }
+
+            else {
+                petriNet = _petri.get();
+            }
+            char *evalBuffer = eval(petriNet);
+
+            if(language == "C") {
+                // Some circumvolutions required to pass a C petri net handle to the
+                // evaluate function.
+                ::PetriNet *pn = static_cast<::PetriNet *>(petriNet);
+                pn->petriNet.release();
+                delete pn;
+            }
+
+            if(evalBuffer == nullptr) {
+                throw std::runtime_error("Invalid evaluation result");
+            }
+            result = evalBuffer;
+            free(evalBuffer);
+        } catch(std::exception const &e) {
+            result = "Could not evaluate the symbol, reason: "s + e.what();
+        }
+        Json::Value answer;
+        answer["eval"] = result;
+        answer["lib"] = lib;
+
+        this->sendObject(this->json("evaluation", answer));
     }
 
     void DebugServer::Internals::clearPetri() {

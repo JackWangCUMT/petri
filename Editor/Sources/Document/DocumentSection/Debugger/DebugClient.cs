@@ -543,9 +543,12 @@ namespace Petri.Editor
                             _document.Window.DebugGui.UpdateToolbar();
                             this.UpdateBreakpoints();
                             GLib.Timeout.Add(0, () => {
-                                _document.Window.DebugGui.Status = Configuration.GetLocalized("The petri net is running.");
+                                _document.Window.DebugGui.Status = Configuration.GetLocalized("The petri net is running…");
                                 return false;
                             });
+                        }
+                        else if(msg["payload"].ToString() == "end_exec") {
+                            StopPetri();
                         }
                         else if(msg["payload"].ToString() == "stop") {
                             _petriRunning = false;
@@ -581,7 +584,7 @@ namespace Petri.Editor
                             _pause = false;
                             _document.Window.DebugGui.UpdateToolbar();
                             GLib.Timeout.Add(0, () => {
-                                _document.Window.DebugGui.Status = Configuration.GetLocalized("The petri net is running.");
+                                _document.Window.DebugGui.Status = Configuration.GetLocalized("The petri net is running…");
                                 return false;
                             });
                         }
@@ -596,7 +599,8 @@ namespace Petri.Editor
                                                                 Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger:") + " " + msg["payload"].ToString()));
                             d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                             if(msg["payload"].ToString() == "You are trying to run a Petri net that is different from the one which is compiled!") {
-                                d.AddButton(Configuration.GetLocalized("Fix and run"), ResponseType.Apply);
+                                d.AddButton(Configuration.GetLocalized("Fix and run"),
+                                            ResponseType.Apply);
                             }
                             if((ResponseType)d.Run() == ResponseType.Apply) {
                                 ReloadPetri(true);
