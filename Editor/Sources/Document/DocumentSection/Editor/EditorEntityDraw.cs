@@ -32,6 +32,12 @@ namespace Petri.Editor
             _editor = editor;
         }
 
+        public static int TransitionHandleRadius {
+            get {
+                return 7;
+            }
+        }
+
         protected override void InitContextForBorder(Comment c, Context context)
         {
             base.InitContextForBorder(c, context);
@@ -178,18 +184,18 @@ namespace Petri.Editor
                     direction = PetriView.Normalized(t.Position.X - t.Before.Position.X,
                                                      t.Position.Y - t.Before.Position.Y);
 
-                    context.Arc(origin.X + 5 * direction.X,
-                                origin.Y + 5 * direction.Y,
-                                5,
+                    context.Arc(origin.X + TransitionHandleRadius * direction.X,
+                                origin.Y + TransitionHandleRadius * direction.Y,
+                                TransitionHandleRadius,
                                 0,
                                 2 * Math.PI);
 
                     PointD direction2 = new PointD(destination.X - t.Position.X,
                                                    destination.Y - t.Position.Y);
                     direction2 = PetriView.Normalized(direction2);
-                    context.Arc(destination.X - 5 * direction2.X,
-                                destination.Y - 5 * direction2.Y,
-                                5,
+                    context.Arc(destination.X - TransitionHandleRadius * direction2.X,
+                                destination.Y - TransitionHandleRadius * direction2.Y,
+                                TransitionHandleRadius,
                                 0,
                                 2 * Math.PI);
 
@@ -204,7 +210,7 @@ namespace Petri.Editor
             PointD direction = PetriView.Normalized(t.Position.X - t.Before.Position.X,
                                                     t.Position.Y - t.Before.Position.Y);
 
-            return new PointD(origin.X + 5 * direction.X, origin.Y + 5 * direction.Y);
+            return new PointD(origin.X + TransitionHandleRadius * direction.X, origin.Y + TransitionHandleRadius * direction.Y);
         }
 
         static public PointD GetDestinationHandle(Transition t)
@@ -216,7 +222,7 @@ namespace Petri.Editor
                                            destination.Y - t.Position.Y);
             direction2 = PetriView.Normalized(direction2);
 
-            return new PointD(destination.X - 5 * direction2.X, destination.Y - 5 * direction2.Y);
+            return new PointD(destination.X - TransitionHandleRadius * direction2.X, destination.Y - TransitionHandleRadius * direction2.Y);
         }
 
         static public bool IsOnOriginHandle(double x, double y, Entity e)
@@ -225,7 +231,7 @@ namespace Petri.Editor
                 return false;
 
             var pos = GetOriginHandle((Transition)e);
-            if(Math.Abs(x - pos.X) < 10.0 / 2 && Math.Abs(y - pos.Y) < 10.0 / 2) {
+            if(Math.Abs(x - pos.X) < TransitionHandleRadius && Math.Abs(y - pos.Y) < TransitionHandleRadius) {
                 return true;
             }
 
