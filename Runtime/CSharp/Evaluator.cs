@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2015 Rémi Saurel
+﻿/*
+ * Copyright (c) 2016 Rémi Saurel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,47 +20,13 @@
  * SOFTWARE.
  */
 
-//
-//  DebugServer.c
-//  Petri
-//
-//  Created by Rémi on 04/07/2015.
-//
+using System;
 
-#include "../../Cpp/DebugServer.h"
-#include "../../Cpp/PetriDebug.h"
-#include "../DebugServer.h"
-#include "Types.hpp"
-
-char const *PetriDebugServer_getVersion() {
-    return Petri::DebugServer::getVersion().c_str();
-}
-
-PetriDebugServer *PetriDebugServer_create(PetriDynamicLib *petri) {
-    return new PetriDebugServer{std::make_unique<Petri::DebugServer>(*petri->lib)};
-}
-
-void PetriDebugServer_destroy(PetriDebugServer *server) {
-    delete server;
-}
-
-void PetriDebugServer_start(PetriDebugServer *server) {
-    server->server->start();
-}
-
-void PetriDebugServer_stop(PetriDebugServer *server) {
-    server->server->stop();
-}
-
-bool PetriDebugServer_isRunning(PetriDebugServer *server) {
-    return server->server->running();
-}
-
-PetriNet *PetriDebugServer_currentPetriNet(PetriDebugServer *server) {
-    if(server->server->currentPetriNet()) {
-        server->cHandle.notOwned = server->server->currentPetriNet();
-        return &server->cHandle;
+namespace Petri.Runtime
+{
+    public interface Evaluator
+    {
+        string Evaluate(PetriNet petriNet);
     }
-
-    return nullptr;
 }
+

@@ -91,6 +91,12 @@ namespace Petri {
          */
         void join() const;
 
+        /**
+         * Retrieves the currently running petri net, if any, and nullptr otherwise.
+         * @return The currently running petri net.
+         */
+        PetriDebug *currentPetriNet();
+
     protected:
         void addActiveState(Action &a);
         void removeActiveState(Action &a);

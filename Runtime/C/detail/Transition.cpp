@@ -29,6 +29,7 @@
 //
 
 #define PETRI_NEEDS_GET_TRANSITION
+#define PETRI_NEEDS_GET_PETRINET
 
 #include "../Transition.h"
 #include "Transition.hpp"
@@ -56,7 +57,7 @@ void PetriTransition_setID(PetriTransition *transition, uint64_t id) {
 }
 
 bool PetriTransition_isFulfilled(PetriTransition *transition, PetriNet *petriNet, Petri_actionResult_t actionResult) {
-    return getTransition(transition).isFulfilled(*petriNet->petriNet, actionResult);
+    return getTransition(transition).isFulfilled(getPetriNet(petriNet), actionResult);
 }
 
 void PetriTransition_setCondition(PetriTransition *transition, transitionCallable_t test) {

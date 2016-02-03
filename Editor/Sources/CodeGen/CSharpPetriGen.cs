@@ -41,10 +41,28 @@ namespace Petri.Editor
             base.WritePetriNet();
         }
 
-        public override void WriteExpressionEvaluator(Expression expression, string path, params object[] userData)
+        public override void WriteExpressionEvaluator(Expression expression,
+                                                      string path,
+                                                      params object[] userData)
         {
-            // TODO: tbd
-            throw new Exception("Not implemented yet!");
+            string expr = expression.MakeCode();
+
+            CodeGen generator = new CFamilyCodeGen(Language.CSharp);
+
+            generator += "using Petri.Runtime;";
+            generator += "using System;";
+
+            generator += GenerateVarEnum();
+
+            generator += "namespace Petri.Generated {";
+            generator += "public class " + Document.CodePrefix + "Evaluator : MarshalByRefObject, Petri.Runtime.Evaluator {";
+            generator += "public string Evaluate(PetriNet petriNet) {";
+            generator += "return (" + expr + ").ToString();";
+            generator += "}";
+            generator += "}";
+            generator += "}\n";
+
+            System.IO.File.WriteAllText(path, generator.Value);
         }
 
         protected override void Begin()
@@ -163,7 +181,7 @@ namespace Petri.Editor
                 _functionBodies += "static Int32 " + a.CodeIdentifier + "_invocation() {\nreturn " + cpp + ";\n}\n";
             }
             else {
-                _functionBodies += "static Int32 " + a.CodeIdentifier + "_invocation(IntPtr ptr) {\nPetriNet petriNet = new PetriNet(ptr);\ntry {\nreturn " + cpp + ";\n} finally {\npetriNet.Release();\n}\n}\n";
+                _functionBodies += "static Int32 " + a.CodeIdentifier + "_invocation(IntPtr ptr) {\nPetriNet petriNet = new PetriNet(ptr, false);\nreturn " + cpp + ";\n}\n";
             }
             range.LastLine = _functionBodies.LineCount;
 
@@ -258,7 +276,7 @@ namespace Petri.Editor
                 _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\n" + cpp + "\n}\n";
             }
             else {
-                _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(IntPtr ptr, Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\nPetriNet petriNet = new PetriNet(ptr);\ntry {\n" + cpp + "\n} finally {\npetriNet.Release();\n}\n}\n";
+                _functionBodies += "static bool " + t.CodeIdentifier + "_invocation(IntPtr ptr, Int32 _PETRI_PRIVATE_GET_ACTION_RESULT_) {\nPetriNet petriNet = new PetriNet(ptr, false);\n" + cpp + "\n}\n";
             }
             range.LastLine = _functionBodies.LineCount;
   

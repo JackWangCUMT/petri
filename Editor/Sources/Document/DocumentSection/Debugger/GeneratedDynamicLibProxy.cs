@@ -64,11 +64,11 @@ namespace Petri.Editor
         /// <summary>
         /// Loads the assembly and extracts the <see cref="Petri.Runtime.GeneratedDynamicLib"/> instance it encloses.
         /// </summary>
-        public Runtime.GeneratedDynamicLib Load()
+        public LibType Load<LibType>() where LibType : class
         {
             var filePath = System.IO.Path.Combine(LibPath, LibName);
 
-            Runtime.GeneratedDynamicLib dylib = null;
+            LibType dylib = null;
 
             if(_language == Editor.Code.Language.CSharp) {
                 if(_domain == null) {
@@ -76,29 +76,32 @@ namespace Petri.Editor
                 }
 
                 try {
-                    dylib = (Runtime.GeneratedDynamicLib)_domain.CreateInstanceFromAndUnwrap(filePath,
-                                                                                             "Petri.Generated." + ClassName);
+                    dylib = (LibType)_domain.CreateInstanceFromAndUnwrap(filePath,
+                                                                         "Petri.Generated." + ClassName);
                 }
                 catch(Exception e) {
                     Console.Error.WriteLine("Exception when loading assembly " + filePath + ": " + e);
                 }
             }
             else {
-                string cd = System.IO.Directory.GetCurrentDirectory();
-                System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(filePath).FullName);
+                if(typeof(LibType).IsAssignableFrom(typeof(Runtime.CGeneratedDynamicLib))) {
+                    string cd = System.IO.Directory.GetCurrentDirectory();
+                    System.IO.Directory.SetCurrentDirectory(System.IO.Directory.GetParent(filePath).FullName);
 
-                IntPtr handle = IntPtr.Zero;
-                try {
-                    handle = Runtime.Interop.PetriUtils.Petri_loadPetriDynamicLib(filePath, ClassName);
-                }
-                catch(Exception e) {
-                    Console.Error.WriteLine("Exception when loading assembly " + filePath + ": " + e);
-                }
-                if(handle != IntPtr.Zero) {
-                    dylib = new Runtime.CGeneratedDynamicLib(handle);
-                }
+                    IntPtr handle = IntPtr.Zero;
+                    try {
+                        handle = Runtime.Interop.PetriUtils.Petri_loadPetriDynamicLib(filePath,
+                                                                                  ClassName);
+                    }
+                    catch(Exception e) {
+                        Console.Error.WriteLine("Exception when loading assembly " + filePath + ": " + e);
+                    }
+                    if(handle != IntPtr.Zero) {
+                        dylib = (LibType)(object)new Runtime.CGeneratedDynamicLib(handle);
+                    }
 
-                System.IO.Directory.SetCurrentDirectory(cd);
+                    System.IO.Directory.SetCurrentDirectory(cd);
+                }
             }
 
             return dylib;

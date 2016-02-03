@@ -27,9 +27,10 @@ namespace Petri.Runtime
 {
     public class PetriNet : CInterop
     {
-        public PetriNet(IntPtr handle)
+        public PetriNet(IntPtr handle, bool owns = true)
         {
             Handle = handle;
+            _owns = owns;
             if(Handle == IntPtr.Zero) {
                 throw new Exception("The petri net could not be loaded!");
             }
@@ -46,7 +47,9 @@ namespace Petri.Runtime
 
         ~PetriNet()
         {
-            Interop.PetriNet.PetriNet_destroy(Handle);
+            if(_owns) {
+                Interop.PetriNet.PetriNet_destroy(Handle);
+            }
         }
 
         /**
@@ -117,6 +120,8 @@ namespace Petri.Runtime
                 return System.Runtime.InteropServices.Marshal.PtrToStringAuto(Interop.PetriNet.PetriNet_getName(Handle));
             }
         }
+
+        bool _owns = true;
     }
 }
 

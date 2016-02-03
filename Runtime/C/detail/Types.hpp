@@ -41,7 +41,8 @@ class CPetriDynamicLib;
 #ifndef NO_C_PETRI_NET
 
 struct PetriNet {
-    std::unique_ptr<Petri::PetriNet> petriNet;
+    std::unique_ptr<Petri::PetriNet> owned;
+    Petri::PetriNet *notOwned;
 };
 
 #endif
@@ -62,6 +63,7 @@ struct PetriDynamicLib {
 
 struct PetriDebugServer {
     std::unique_ptr<Petri::DebugServer> server;
+    ::PetriNet cHandle;
 };
 
 namespace {
@@ -81,6 +83,15 @@ namespace {
             return *transition->owned;
         } else {
             return *transition->notOwned;
+        }
+    }
+#endif
+#ifdef PETRI_NEEDS_GET_PETRINET
+    Petri::PetriNet &getPetriNet(PetriNet *pn) {
+        if(pn->owned) {
+            return *pn->owned;
+        } else {
+            return *pn->notOwned;
         }
     }
 #endif

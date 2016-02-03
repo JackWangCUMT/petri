@@ -43,7 +43,7 @@ namespace Petri {
 
         if(_c_dynamicLib) {
             ::PetriNet *cPetriNet = static_cast<::PetriNet *>(ptr);
-            ptr = cPetriNet->petriNet.release();
+            ptr = cPetriNet->owned.release();
         }
 
         return std::unique_ptr<PetriNet>(static_cast<PetriNet *>(ptr));
@@ -58,7 +58,7 @@ namespace Petri {
 
         if(_c_dynamicLib) {
             ::PetriNet *cPetriNet = static_cast<::PetriNet *>(ptr);
-            ptr = cPetriNet->petriNet.release();
+            ptr = cPetriNet->owned.release();
         }
 
         return std::unique_ptr<PetriDebug>(static_cast<PetriDebug *>(ptr));

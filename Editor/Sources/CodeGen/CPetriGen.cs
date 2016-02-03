@@ -53,7 +53,7 @@ namespace Petri.Editor
         {
             string expr = expression.MakeCode();
 
-            CodeGen generator = new CFamilyCodeGen(Language.Cpp);
+            CodeGen generator = new CFamilyCodeGen(Language.C);
             foreach(var s in Document.Headers) {
                 var p1 = System.IO.Path.Combine(System.IO.Directory.GetParent(Document.Path).FullName,
                                                 s);
@@ -75,8 +75,6 @@ namespace Petri.Editor
 
             generator += "return buffer;";
             generator += "}\n";
-
-            Console.WriteLine(generator.Value);
 
             System.IO.File.WriteAllText(path, generator.Value);
         }

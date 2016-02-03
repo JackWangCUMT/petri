@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-// typedef struct PetriDebugServer PetriDebugServer;
+struct PetriNet;
 
 /**
  * Returns the DebugServer API's version
@@ -78,6 +78,13 @@ void PetriDebugServer_stop(struct PetriDebugServer *server);
  * @return true if the server is running, false otherwise.
  */
 bool PetriDebugServer_isRunning(struct PetriDebugServer *server);
+
+/**
+ * Returns the currently running petri net, or NULL otherwise.
+ * @param server The debug server to operate on.
+ * @return The currently running petri net.
+ */
+struct PetriNet *PetriDebugServer_currentPetriNet(struct PetriDebugServer *server);
 
 #ifdef __cplusplus
 }

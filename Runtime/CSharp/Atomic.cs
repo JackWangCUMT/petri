@@ -27,7 +27,7 @@ namespace Petri.Runtime
     /// <summary>
     /// A wrapper to a petri net variable.
     /// </summary>
-    public class Atomic
+    public class Atomic : MarshalByRefObject
     {
         internal Atomic(PetriNet pn, UInt32 id)
         {

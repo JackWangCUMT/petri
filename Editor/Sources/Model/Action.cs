@@ -42,7 +42,8 @@ namespace Petri.Editor
 
             this.Active = active;
 
-            this.Function = new FunctionInvocation(doc.Settings.Language, RuntimeFunctions.DoNothingFunction(doc));
+            this.Function = new FunctionInvocation(doc.Settings.Language,
+                                                   RuntimeFunctions.DoNothingFunction(doc));
         }
 
         public Action(HeadlessDocument doc, PetriNet parent, XElement descriptor) : base(doc,
@@ -60,9 +61,10 @@ namespace Petri.Editor
                 if(exp is FunctionInvocation) {
                     var f = (FunctionInvocation)exp;
                     if(!f.Function.ReturnType.Equals(Code.Type.UnknownType(Document.Settings.Language)) && !f.Function.ReturnType.Equals(Document.Settings.Enum.Type)) {
-                        Document.AddConflicting(this, Configuration.GetLocalized("Incorrect return type for the function: {0} expected, {1} found.",
-                                                                                  Document.Settings.Enum.Name,
-                                                                                  f.Function.ReturnType.ToString()));
+                        Document.AddConflicting(this,
+                                                Configuration.GetLocalized("Incorrect return type for the function: {0} expected, {1} found.",
+                                                                           Document.Settings.Enum.Name,
+                                                                           f.Function.ReturnType.ToString()));
                     }
                     Function = f;
                 }
@@ -125,11 +127,9 @@ namespace Petri.Editor
         /// <param name="result">Result.</param>
         public void GetVariables(HashSet<VariableExpression> res)
         {				
-            var l = Function.GetLiterals();
+            var l = Function.GetVariables();
             foreach(var ll in l) {
-                if(ll is VariableExpression) {
-                    res.Add(ll as VariableExpression);
-                }
+                res.Add(ll);
             }
         }
     }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Document>
-  <Settings Name="CSharpVar" Enum="ActionResult,OK,NOK" SourceOutputPath="../Examples" LibOutputPath="../Examples" Hostname="localhost" Port="12345" Language="CSharp" RunInEditor="False">
+  <Settings Name="CSharpVar" Enum="ActionResult,OK,NOK" SourceOutputPath="../Examples" LibOutputPath="../Examples" Hostname="localhost" Port="12345" Language="CSharp" RunInEditor="True">
     <Compiler Invocation="mcs" />
     <IncludePaths>
       <IncludePath Path="../" Recursive="false" />

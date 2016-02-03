@@ -36,13 +36,8 @@
 namespace {
     auto getParametrizedTransitionCallable(parametrizedTransitionCallable_t transition) {
         return Petri::make_param_transition_callable([transition](Petri::PetriNet &pn, Petri_actionResult_t a) {
-            PetriNet petriNet{std::unique_ptr<Petri::PetriNet>(&pn)};
-
-            auto result = transition(&petriNet, a);
-
-            petriNet.petriNet.release();
-
-            return result;
+            PetriNet petriNet{nullptr, &pn};
+            return transition(&petriNet, a);
         });
     }
 }

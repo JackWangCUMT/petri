@@ -259,11 +259,9 @@ namespace Petri.Editor
         /// <param name="result">Result.</param>
         public void GetVariables(HashSet<VariableExpression> result)
         {
-            var l = Condition.GetLiterals();
+            var l = Condition.GetVariables();
             foreach(var ll in l) {
-                if(ll is VariableExpression) {
-                    result.Add(ll as VariableExpression);
-                }
+                result.Add(ll);
             }
         }
     }

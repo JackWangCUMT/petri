@@ -23,6 +23,9 @@ namespace Petri.Runtime.Interop {
 
         [DllImport("PetriRuntime")]
         public static extern bool PetriDebugServer_isRunning(IntPtr server);
+
+        [DllImport("PetriRuntime")]
+        public static extern IntPtr PetriDebugServer_currentPetriNet(IntPtr server);
     }
 }
 

@@ -293,8 +293,12 @@ namespace Petri.Editor
 
         class SerializableRecentDocumentEntry
         {
+            // This disables false positves: the compiler believes that these fields are never assigned to and will always be null.
+            // They are assigned by the JSON deserialization process.
+            #pragma warning disable 0649
             public string Date;
             public string Path;
+            #pragma warning disable 0649
         }
 
         /// <summary>

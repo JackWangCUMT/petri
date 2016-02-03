@@ -82,6 +82,17 @@ namespace Petri.Runtime
         {
             return Interop.DebugServer.PetriDebugServer_isRunning(Handle);
         }
+
+        public PetriDebug CurrentPetriNet {
+            get {
+                IntPtr handle = Interop.DebugServer.PetriDebugServer_currentPetriNet(Handle);
+                if(handle != null) {
+                    return new PetriDebug(handle, false);
+                }
+
+                return null;
+            }
+        }
     }
 }
 

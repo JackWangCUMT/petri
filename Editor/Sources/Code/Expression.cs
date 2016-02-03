@@ -65,6 +65,18 @@ namespace Petri.Editor.Code
 
         public abstract List<LiteralExpression> GetLiterals();
 
+        public List<VariableExpression> GetVariables() {
+            var result = new List<VariableExpression>();
+            var l = GetLiterals();
+            foreach(var ll in l) {
+                if(ll is VariableExpression) {
+                    result.Add(ll as VariableExpression);
+                }
+            }
+
+            return result;
+        }
+
         public virtual bool NeedsReturn { get { return false; } }
 
         public static Expression CreateFromStringAndEntity(string s,

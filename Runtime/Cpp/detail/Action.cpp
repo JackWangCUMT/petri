@@ -170,7 +170,7 @@ namespace Petri {
      * @param requiredTokens The new required tokens count
      * @return The required tokens of the Action
      */
-    void Action::setRequiredTokens(std::size_t requiredTokens) noexcept {
+    void Action::setRequiredTokens(size_t requiredTokens) noexcept {
         _internals->_requiredTokens = requiredTokens;
     }
 

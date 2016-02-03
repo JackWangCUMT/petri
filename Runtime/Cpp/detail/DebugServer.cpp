@@ -137,6 +137,10 @@ namespace Petri {
         return _internals->_running;
     }
 
+    PetriDebug *DebugServer::currentPetriNet() {
+        return _internals->_petri.get();
+    }
+
     void DebugServer::addActiveState(Action &a) {
         _internals->addActiveState(a);
     }
@@ -385,7 +389,7 @@ namespace Petri {
                 // Some circumvolutions required to pass a C petri net handle to the
                 // evaluate function.
                 ::PetriNet *pn = new ::PetriNet;
-                pn->petriNet = std::unique_ptr<Petri::PetriNet>(_petri.get());
+                pn->notOwned = _petri.get();
                 petriNet = pn;
             }
 
@@ -398,7 +402,6 @@ namespace Petri {
                 // Some circumvolutions required to pass a C petri net handle to the
                 // evaluate function.
                 ::PetriNet *pn = static_cast<::PetriNet *>(petriNet);
-                pn->petriNet.release();
                 delete pn;
             }
 

@@ -172,7 +172,7 @@ namespace Petri.Editor
                                                      _document.Settings.RelativeLibPath,
                                                      _document.Settings.Name);
             try {
-                Petri.Runtime.GeneratedDynamicLib dylib = _libProxy.Load();
+                var dylib = _libProxy.Load<Petri.Runtime.GeneratedDynamicLib>();
 
                 if(dylib == null) {
                     GLib.Timeout.Add(0, () => {
@@ -428,18 +428,58 @@ namespace Petri.Editor
                 throw new Exception(Configuration.GetLocalized("Compilation error:") + " " + o);
             }
             else {
-                try {
-                    this.SendObject(new JObject(new JProperty("type", "evaluate"),
-                                                new JProperty("payload",
+                if(_document.Settings.Language == Code.Language.CSharp) {
+                    try {
+                        if(_debugServer == null && expression.GetVariables().Count > 0) {
+                            throw new Exception("Expressions containing variables can only evaluated when the petri net is running in the editor.");
+                        }
+                        var libProxy = new GeneratedDynamicLibProxy(_document.Settings.Language, System.IO.Directory.GetParent(libName).FullName,
+                                                                    System.IO.Path.GetFileName(libName),
+                                                                    _document.CodePrefix + "Evaluator");
+                        var dylib = libProxy.Load<Runtime.Evaluator>();
+
+                        if(dylib == null) {
+                            throw new Exception("Unable to load the evaluator!");
+                        }
+                        string value = dylib.Evaluate(/*_debugServer.CurrentPetriNet*/null);
+                        libProxy.Unload();
+                        GLib.Timeout.Add(0, () => {
+                            _document.Window.DebugGui.OnEvaluate(value);
+                            return false;
+                        });
+                    }
+                    catch(Exception e) {
+                        GLib.Timeout.Add(0, () => {
+                            MessageDialog d = new MessageDialog(_document.Window,
+                                                                DialogFlags.Modal,
+                                                                MessageType.Question,
+                                                                ButtonsType.None,
+                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("Evaluation error:") + " " + e.Message));
+                            d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
+                            d.Run();
+                            d.Destroy();
+
+                            return false;
+                        });
+                    }
+                    if(libName != "") {
+                        System.IO.File.Delete(libName);
+                    }
+                }
+                else {
+                    try {
+                        this.SendObject(new JObject(new JProperty("type", "evaluate"),
+                                                    new JProperty("payload",
                                                               new JObject(new JProperty("lib",
                                                                                         libName),
                                                                           new JProperty("language",
                                                                                         _document.Settings.LanguageName())))));
-                }
-                catch(Exception e) {
-                    this.Detach();
-                    _document.Window.DebugGui.UpdateToolbar();
-                    throw e;
+                    }
+                    catch(Exception e) {
+                        this.Detach();
+                        _document.Window.DebugGui.UpdateToolbar();
+                        throw e;
+                    }
                 }
             }
             System.IO.File.Delete(sourceName);

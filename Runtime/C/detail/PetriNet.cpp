@@ -33,6 +33,9 @@
 #include "../../Cpp/PetriNet.h"
 #include "../Action.h"
 #include "../PetriNet.h"
+
+#define PETRI_NEEDS_GET_PETRINET
+
 #include "Types.hpp"
 
 PetriNet *PetriNet_create(char const *name) {
@@ -51,34 +54,34 @@ void PetriNet_addAction(PetriNet *pn, PetriAction *action, bool active) {
     if(!action->owned) {
         std::cerr << "The action has already been added to a petri net!" << std::endl;
     } else {
-        auto &a = pn->petriNet->addAction(std::move(*action->owned), active);
+        auto &a = getPetriNet(pn).addAction(std::move(*action->owned), active);
         action->owned.reset();
         action->notOwned = &a;
     }
 }
 
 bool PetriNet_isRunning(PetriNet *pn) {
-    return pn->petriNet->running();
+    return getPetriNet(pn).running();
 }
 
 void PetriNet_run(PetriNet *pn) {
-    pn->petriNet->run();
+    getPetriNet(pn).run();
 }
 
 void PetriNet_stop(PetriNet *pn) {
-    pn->petriNet->stop();
+    getPetriNet(pn).stop();
 }
 
 void PetriNet_join(PetriNet *pn) {
-    pn->petriNet->join();
+    getPetriNet(pn).join();
 }
 
 void PetriNet_addVariable(PetriNet *pn, uint32_t id) {
-    pn->petriNet->addVariable(id);
+    getPetriNet(pn).addVariable(id);
 }
 
 volatile int64_t *PetriNet_getVariable(PetriNet *pn, uint32_t id) {
-    return &pn->petriNet->getVariable(id).value();
+    return &getPetriNet(pn).getVariable(id).value();
 }
 
 int64_t PetriNet_getVariableValue(struct PetriNet *pn, uint32_t id) {
@@ -90,13 +93,13 @@ void PetriNet_setVariableValue(struct PetriNet *pn, uint32_t id, int64_t value) 
 }
 
 void PetriNet_lockVariable(PetriNet *pn, uint32_t id) {
-    pn->petriNet->getVariable(id).getMutex().lock();
+    getPetriNet(pn).getVariable(id).getMutex().lock();
 }
 
 void PetriNet_unlockVariable(PetriNet *pn, uint32_t id) {
-    pn->petriNet->getVariable(id).getMutex().unlock();
+    getPetriNet(pn).getVariable(id).getMutex().unlock();
 }
 
 char const *PetriNet_getName(PetriNet *pn) {
-    return pn->petriNet->name().c_str();
+    return getPetriNet(pn).name().c_str();
 }
