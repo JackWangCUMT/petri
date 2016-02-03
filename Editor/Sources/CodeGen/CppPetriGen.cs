@@ -65,6 +65,7 @@ namespace Petri.Editor
             generator += "#include \"Runtime/Cpp/Atomic.h\"";
             generator += "#include <string>";
             generator += "#include <sstream>";
+            generator += "#include <cstring>";
 
             generator += "using namespace Petri;";
 
@@ -76,7 +77,7 @@ namespace Petri.Editor
             generator += "std::ostringstream oss;";
             generator += "oss << (" + cppExpr + ");";
             generator += "result = oss.str();";
-            generator += "char const *buffer = malloc(result.size() + 1);";
+            generator += "char *buffer = static_cast<char *>(malloc(result.size() + 1));";
             generator += "memcpy(buffer, result.c_str(), result.size() + 1);";
             generator += "return buffer;";
             generator += "}\n";
