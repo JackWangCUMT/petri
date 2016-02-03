@@ -34,7 +34,7 @@ namespace Petri.Test
         {
             // GIVEN a petri net created with a custom name
             string name = "Test12345";
-            PetriNet pn =       new PetriNet(name);
+            PetriNet pn = new PetriNet(name);
 
             // WHEN we read the name of the petri net
             string actual = pn.Name;

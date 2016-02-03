@@ -82,7 +82,7 @@ namespace Petri.Runtime
         Transition AddTransition(Action next)
         {
             IntPtr handle = Interop.Action.PetriAction_addEmptyTransition(Handle, next.Handle);
-            return new Transition(handle);
+            return new Transition(handle, (TransitionCallableDel)null);
         }
 
         /**
@@ -98,12 +98,14 @@ namespace Petri.Runtime
                                         Action next,
                                         TransitionCallableDel cond)
         {
+            var c = WrapForNative.Wrap(cond, Name);
+
             var handle = Interop.Action.PetriAction_addTransition(Handle,
                                                                   id,
                                                                   name,
                                                                   next.Handle,
-                                                                  cond);
-            return new Transition(handle);
+                                                                  c);
+            return new Transition(handle, c);
         }
 
         public Transition AddTransition(UInt64 id,
@@ -111,12 +113,14 @@ namespace Petri.Runtime
                                         Action next,
                                         ParametrizedTransitionCallableDel cond)
         {
+            var c = WrapForNative.Wrap(cond, Name);
+
             var handle = Interop.Action.PetriAction_addTransitionWithParam(Handle,
                                                                            id,
                                                                            name,
                                                                            next.Handle,
-                                                                           cond);
-            return new Transition(handle);
+                                                                           c);
+            return new Transition(handle, c);
         }
 
         /**

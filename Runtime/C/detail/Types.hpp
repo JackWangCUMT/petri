@@ -40,6 +40,8 @@ class CPetriDynamicLib;
 
 #ifndef NO_C_PETRI_NET
 
+#include "../PetriNet.h"
+
 struct PetriNet {
     std::unique_ptr<Petri::PetriNet> owned;
     Petri::PetriNet *notOwned;

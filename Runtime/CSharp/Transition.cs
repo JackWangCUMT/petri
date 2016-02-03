@@ -29,9 +29,16 @@ namespace Petri.Runtime
      */
     public class Transition : CInterop
     {
-        internal Transition(IntPtr handle)
+        internal Transition(IntPtr handle, TransitionCallableDel del)
         {
             Handle = handle;
+            _callback = del;
+        }
+
+        internal Transition(IntPtr handle, ParametrizedTransitionCallableDel del)
+        {
+            Handle = handle;
+            _parametrizedCallback = del;
         }
 
         ~Transition()
@@ -58,6 +65,13 @@ namespace Petri.Runtime
             var c = WrapForNative.Wrap(condition, Name);
             _callback = c;
             Interop.Transition.PetriTransition_setCondition(Handle, c);
+        }
+
+        public void SetCondition(ParametrizedTransitionCallableDel condition)
+        {
+            var c = WrapForNative.Wrap(condition, Name);
+            _parametrizedCallback = c;
+            Interop.Transition.PetriTransition_setConditionWithParam(Handle, c);
         }
 
         /**
@@ -124,6 +138,7 @@ namespace Petri.Runtime
         // But the rationale here is to always keep a reference to the callback so that it is not GC'ed.
         #pragma warning disable 0414
         private TransitionCallableDel _callback;
+        private ParametrizedTransitionCallableDel _parametrizedCallback;
         #pragma warning restore 0414
     }
 }

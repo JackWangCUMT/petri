@@ -441,7 +441,7 @@ namespace Petri.Editor
                         if(dylib == null) {
                             throw new Exception("Unable to load the evaluator!");
                         }
-                        string value = dylib.Evaluate(/*_debugServer.CurrentPetriNet*/null);
+                        string value = dylib.Evaluate(_debugServer.CurrentPetriNet);
                         libProxy.Unload();
                         GLib.Timeout.Add(0, () => {
                             _document.Window.DebugGui.OnEvaluate(value);

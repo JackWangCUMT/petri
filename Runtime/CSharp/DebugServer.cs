@@ -86,7 +86,7 @@ namespace Petri.Runtime
         public PetriDebug CurrentPetriNet {
             get {
                 IntPtr handle = Interop.DebugServer.PetriDebugServer_currentPetriNet(Handle);
-                if(handle != null) {
+                if(handle != IntPtr.Zero) {
                     return new PetriDebug(handle, false);
                 }
 
