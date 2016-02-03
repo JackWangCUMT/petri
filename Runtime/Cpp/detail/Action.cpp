@@ -44,7 +44,7 @@ namespace Petri {
         std::string _name;
         std::size_t _requiredTokens = 1;
 
-        std::size_t _currentTokens;
+        std::size_t _currentTokens = 0;
         std::mutex _tokensMutex;
     };
 
@@ -117,7 +117,8 @@ namespace Petri {
     Transition &Action::addTransition(uint64_t id, std::string const &name, Action &next, bool (*cond)(actionResult_t)) {
         return addTransition(id, name, next, make_transition_callable(cond));
     }
-    Transition &Action::addTransition(uint64_t id, std::string const &name, Action &next, bool (*cond)(PetriNet &, actionResult_t)) {
+    Transition &
+    Action::addTransition(uint64_t id, std::string const &name, Action &next, bool (*cond)(PetriNet &, actionResult_t)) {
         return addTransition(id, name, next, make_param_transition_callable(cond));
     }
 
