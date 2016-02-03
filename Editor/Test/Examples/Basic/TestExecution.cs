@@ -25,57 +25,57 @@ using System;
 using Petri;
 using System.IO;
 
-namespace Petri.Test.Examples
+namespace Petri.Test.Examples.Basic
 {
     [TestFixture()]
-    public class TestCompilation
+    public class TestExecution
     {
         [Test()]
-        public void TestCSharpExampleCompilation()
+        public void TestCSharpExampleExecution()
         {
-            // GIVEN launch arguments requesting code generation and compilation of the C#.petri example
-            string[] args = { "-k", "-g", "-c", "../../../Examples/CSharp.petri" };
+            // GIVEN launch arguments requesting execution of the C#.petri example
+            string[] args = { "-r", "../../../Examples/CSharp.petri" };
             string stdout, stderr;
 
             // WHEN the invocation is made
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned.
-            Assert.AreEqual("", stderr);
-            Assert.AreEqual("", stdout);
             Assert.AreEqual(0, result);
+            Assert.AreEqual("", stdout);
+            Assert.AreEqual("", stderr);
         }
 
         [Test()]
-        public void TestCppExampleCompilation()
+        public void TestCppExampleExecution()
         {
-            // GIVEN launch arguments requesting code generation and compilation of the Cpp.petri example
-            string[] args = { "-k", "-g", "-c", "../../../Examples/Cpp.petri" };
+            // GIVEN launch arguments requesting execution of the Cpp.petri example
+            string[] args = { "-kr", "../../../Examples/Cpp.petri" };
             string stdout, stderr;
 
             // WHEN the invocation is made
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned.
-            Assert.AreEqual("", stderr);
-            Assert.AreEqual("", stdout);
             Assert.AreEqual(0, result);
+            Assert.AreEqual("", stdout);
+            Assert.AreEqual("", stderr);
         }
 
         [Test()]
-        public void TestCExampleCompilation()
+        public void TestCExampleExecution()
         {
-            // GIVEN launch arguments requesting code generation and compilation of the Cpp.petri example
-            string[] args = { "-k", "-g", "-c", "../../../Examples/C.petri" };
+            // GIVEN launch arguments requesting execution of the C.petri example
+            string[] args = { "-kr", "../../../Examples/C.petri" };
             string stdout, stderr;
 
             // WHEN the invocation is made
             int result = Utility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned.
-            Assert.AreEqual("", stderr);
-            Assert.AreEqual("", stdout);
             Assert.AreEqual(0, result);
+            Assert.AreEqual("", stdout);
+            Assert.AreEqual("", stderr);
         }
     }
 }

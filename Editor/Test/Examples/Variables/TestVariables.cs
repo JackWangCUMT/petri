@@ -1,7 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 
-namespace Petri.Test
+namespace Petri.Test.Examples.Variables
 {
     [TestFixture()]
     public class TestVariables
