@@ -182,8 +182,16 @@ namespace Petri.Editor
                                                             ButtonsType.None,
                                                             Application.SafeMarkupFromString(Configuration.GetLocalized("Unable to load the dynamic library! Try to compile it again.")));
                         d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                        d.Run();
-                        d.Destroy();
+                        d.AddButton(Configuration.GetLocalized("Fix"), ResponseType.Apply);
+
+                        if((ResponseType)d.Run() == ResponseType.Apply) {
+                            d.Destroy();
+                            _document.Compile(true);
+                            Attach();
+                        }
+                        else {
+                            d.Destroy();
+                        }
 
                         return false;
                     });

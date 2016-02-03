@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Document>
+  <Settings Name="CppSync" Enum="ActionResult,OK,NOK" SourceOutputPath="../Examples" LibOutputPath="../Examples" Hostname="localhost" Port="12345" Language="Cpp" RunInEditor="True">
+    <Compiler Invocation="c++" />
+    <IncludePaths>
+      <IncludePath Path="../" Recursive="false" />
+    </IncludePaths>
+    <LibPaths>
+      <LibPath Path="../Editor/bin" Recursive="false" />
+    </LibPaths>
+    <Libs />
+  </Settings>
+  <Window X="415" Y="23" W="920" H="636" />
+  <Headers>
+    <Header File="TestCpp.h" />
+  </Headers>
+  <Macros />
+  <PetriNet ID="0" Name="Root" X="0" Y="0" Active="true" RequiredTokens="0" Radius="30">
+    <Comments />
+    <States>
+      <Action ID="1" Name="1" X="280" Y="130" Active="false" RequiredTokens="1" Radius="20" Function="TestNS::outputVar(&quot;Iter: &quot;, $i); TestNS::outputVar(&quot;left:&quot;, $left); TestNS::outputVar(&quot;right:&quot;, $right)" />
+      <Action ID="2" Name="6" X="280" Y="370" Active="false" RequiredTokens="2" Radius="20" Function="++$i" />
+      <Action ID="3" Name="7" X="180" Y="250" Active="false" RequiredTokens="1" Radius="20" Function="++$left" />
+      <Action ID="4" Name="8" X="380" Y="250" Active="false" RequiredTokens="1" Radius="20" Function="++$right" />
+      <Action ID="9" Name="13" X="280" Y="30" Active="true" RequiredTokens="0" Radius="20" Function="$count = 10000; $i = 1; $left = 0; $right = 0" />
+      <Action ID="11" Name="End" X="280" Y="490" Active="false" RequiredTokens="1" Radius="20" Function="Utility::printAction($Name, $ID)" />
+    </States>
+    <Transitions>
+      <Transition ID="5" Name="9" X="330" Y="190" BeforeID="1" AfterID="4" Condition="true" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="156.20499351813308" />
+      <Transition ID="6" Name="10" X="330" Y="310" BeforeID="4" AfterID="2" Condition="true" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="156.20499351813308" />
+      <Transition ID="7" Name="11" X="230" Y="190" BeforeID="1" AfterID="3" Condition="true" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="156.20499351813308" />
+      <Transition ID="8" Name="12" X="230" Y="310" BeforeID="3" AfterID="2" Condition="true" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="156.20499351813308" />
+      <Transition ID="10" Name="14" X="280" Y="80" BeforeID="9" AfterID="1" Condition="true" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="100" />
+      <Transition ID="12" Name="16" X="280" Y="430" BeforeID="2" AfterID="11" Condition="$i &gt; $count" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="120" />
+      <Transition ID="13" Name="18" X="280" Y="250" BeforeID="2" AfterID="1" Condition="$i &lt;= $count" W="50" H="30" ShiftX="0" ShiftY="0" ShiftAmplitude="240" />
+    </Transitions>
+  </PetriNet>
+</Document>
