@@ -19,17 +19,14 @@ Although you can get the running executables at https://github.com/rems4e/petri/
 #### Linux
 The mono distribution that comes with Debian (tested on Debian 8) or Ubuntu (tested on 15.10) is somewhat outdated and may fail to compile the source code.
 
-I recommend that you follow the instructions found at http://www.mono-project.com/docs/getting-started/install/linux/, and then install the `monodevelop` package (at least on Debian based distros, the actual package may be different for others).
+I recommend that you follow the instructions found at http://www.mono-project.com/docs/getting-started/install/linux/, and then install the `mono-devel` and `gtk-sharp2` packages (at least on Debian based distros, the actual package may be different for others).
+
+Alternatively, you can install the `monodevelop` package that will give you a full fledged IDE.
 
 #### OS X
-First, download the binary release of Xamarin Studio for OS X, found here: http://www.monodevelop.com/download/.
+The simplest method to install mono is by first installing Homebrew, the awesome package manager. For that, just follow the instructions at http://brew.sh, and then run the command `brew install mono`.
 
-The `mdtool` utility used for compiling a .csproj or .sln file is only bundled within the `Xamarin Studio` application. For some reason, adding the `/Application/Xamarin Studio.app/Contents/MacOS` path, where the tool is located, to the $PATH environment variable did not do the job for me, neither aliasses in my shell. So, the dumb solution I employed was to put the following script somewhere my $PATH points on:
-``` bash
-#!/bin/bash
-/Applications/Xamarin\ Studio.app/Contents/MacOS/mdtool "$@"
-```
-
+Alternatively, you can install the binary release of Xamarin Studio for OS X, found here: http://www.monodevelop.com/download/. This will give you a complete IDE.
 
 ### The compilation process
 ``` bash
@@ -40,7 +37,7 @@ This command will compile the editor.
 ``` bash
 make test
 ```
-This command will run the unit tests.
+This command will run the unit tests. It requires the `nunit-console` package.
 
 ### Running the editor/compiler
 Once compiled, the editor is available in the Editor/bin directory, for command-line invocation and GUI on Linux.
@@ -59,7 +56,7 @@ On Linux, you can simply double click on the `Petri.exe` file, whereas on OS X s
 The compiler is the same executable as before, simply invoked with additional arguments.
 ``` bash
 path_to/_repo/petri/Editor $ mono bin/Petri.exe --help
-Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--arch|-a (32|64)] [--verbose|-v] [--] "Path/To/Document.petri"
+Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--run|-r] [--clean|-k] [--arch|-a (32|64)] [--verbose|-v] [--open|-o] [--] "Path/To/Document.petri"
 ```
 
 ## Compilation of the runtime
@@ -69,4 +66,4 @@ Run the following commands:
 ``` bash
 make lib
 ```
-They will give you a shared library, libPetriRuntime.so, that contains both the C and C++ runtimes.
+They will give you a shared library, libPetriRuntime.so, that contains both the C and C++ runtimes, and a C# dll for the C# runtime.
