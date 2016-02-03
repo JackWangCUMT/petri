@@ -192,13 +192,12 @@ namespace Petri.Editor.Code
                     break;
                 case ')':
                     if(nesting.Count > 0 && (nesting.Peek().Item1 == ExprType.Invocation || nesting.Peek().Item1 == ExprType.Parenthesis)) {
+                        int length = i - nesting.Peek().Item2 + 1;
                         subexprs.Add(Tuple.Create(nesting.Peek().Item1,
-                                                  s.Substring(nesting.Peek().Item2,
-                                                              i - nesting.Peek().Item2 + 1)));
+                                                  s.Substring(nesting.Peek().Item2, length)));
                         var newstr = "@" + (subexprs.Count - 1).ToString() + "@" + (nesting.Peek().Item1 == ExprType.Invocation ? "()" : "");
-                        s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2,
-                                                                                                newstr);
-                        i += newstr.Length;
+                        s = s.Remove(nesting.Peek().Item2, length).Insert(nesting.Peek().Item2, newstr);
+                        i += newstr.Length - length;
                         nesting.Pop();
                     }
                     else
@@ -209,13 +208,12 @@ namespace Petri.Editor.Code
                     break;
                 case '}':
                     if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Brackets) {
+                        int length = i - nesting.Peek().Item2 + 1;
                         subexprs.Add(Tuple.Create(ExprType.Brackets,
-                                                  s.Substring(nesting.Peek().Item2,
-                                                              i - nesting.Peek().Item2 + 1)));
+                                                  s.Substring(nesting.Peek().Item2, length)));
                         var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
-                        s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2,
-                                                                                                newstr);
-                        i += newstr.Length;
+                        s = s.Remove(nesting.Peek().Item2, length).Insert(nesting.Peek().Item2, newstr);
+                        i += newstr.Length - length;
                         nesting.Pop();
                     }
                     else
@@ -226,13 +224,12 @@ namespace Petri.Editor.Code
                     break;
                 case ']':
                     if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Subscript) {
+                        int length = i - nesting.Peek().Item2 + 1;
                         subexprs.Add(Tuple.Create(nesting.Peek().Item1,
-                                                  s.Substring(nesting.Peek().Item2,
-                                                              i - nesting.Peek().Item2 + 1)));
+                                                  s.Substring(nesting.Peek().Item2, length)));
                         var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
-                        s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2,
-                                                                                                newstr);
-                        i += newstr.Length;
+                        s = s.Remove(nesting.Peek().Item2, length).Insert(nesting.Peek().Item2, newstr);
+                        i += newstr.Length - length;
                         nesting.Pop();
                     }
                     else
@@ -244,13 +241,12 @@ namespace Petri.Editor.Code
                     }
                     // Second quote
                     else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.DoubleQuote && s[i - 1] != '\\') {
+                        int length = i - nesting.Peek().Item2 + 1;
                         subexprs.Add(Tuple.Create(ExprType.DoubleQuote,
-                                                  s.Substring(nesting.Peek().Item2,
-                                                              i - nesting.Peek().Item2 + 1)));
+                                                  s.Substring(nesting.Peek().Item2, length)));
                         var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
-                        s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2,
-                                                                                                newstr);
-                        i += newstr.Length;
+                        s = s.Remove(nesting.Peek().Item2, length).Insert(nesting.Peek().Item2, newstr);
+                        i += newstr.Length - length;
                         nesting.Pop();
                     }
                     else {
@@ -264,13 +260,12 @@ namespace Petri.Editor.Code
                     }
                     // Second quote
                     else if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Quote && s[i - 1] != '\\') {
+                        int length = i - nesting.Peek().Item2 + 1;
                         subexprs.Add(Tuple.Create(ExprType.Quote,
-                                                  s.Substring(nesting.Peek().Item2,
-                                                              i - nesting.Peek().Item2 + 1)));
+                                                  s.Substring(nesting.Peek().Item2, length)));
                         var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
-                        s = s.Remove(nesting.Peek().Item2, i - nesting.Peek().Item2 + 1).Insert(nesting.Peek().Item2,
-                                                                                                newstr);
-                        i += newstr.Length;
+                        s = s.Remove(nesting.Peek().Item2, length).Insert(nesting.Peek().Item2, newstr);
+                        i += newstr.Length - length;
                         nesting.Pop();
                     }
                     else {
@@ -281,11 +276,13 @@ namespace Petri.Editor.Code
                 }
                 ++i;
             }
+
             var newExprs = new List<Tuple<ExprType, string>>();
             foreach(var name in Code.Operator.Lex) {
                 s = s.Replace(Code.Operator.Properties[name].cpp,
                               Code.Operator.Properties[name].lexed);
             }
+
             foreach(var expr in subexprs) {
                 string val = expr.Item2;
                 switch(expr.Item1) {
@@ -302,14 +299,22 @@ namespace Petri.Editor.Code
                 }
                 newExprs.Add(Tuple.Create(expr.Item1, val));
             }
+
             subexprs.Clear();
             foreach(var expr in newExprs) {
-                subexprs.Add(Tuple.Create(expr.Item1,
-                                          expr.Item2.Replace("\t", "").Replace(" ",
-                                                                               "")));
+                var value = expr.Item2;
+                if(expr.Item1 != ExprType.DoubleQuote) {
+                    value = expr.Item2.Replace("\t", "").Replace(" ", "");
+                }
+                else {
+                    value = value.Trim();
+                }
+                subexprs.Add(Tuple.Create(expr.Item1, value));
             }
+
             s = s.Replace("\t", "");
             s = s.Replace(" ", "");
+
             return Tuple.Create(s, subexprs);
         }
 
