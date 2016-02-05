@@ -74,7 +74,7 @@ namespace Petri.Runtime
             Handle = Interop.Action.PetriAction_createWithParam(id, name, c, requiredTokens);
         }
 
-        ~Action()
+        protected override void Clean()
         {
             Interop.Action.PetriAction_destroy(Handle);
         }
@@ -82,7 +82,9 @@ namespace Petri.Runtime
         Transition AddTransition(Action next)
         {
             IntPtr handle = Interop.Action.PetriAction_addEmptyTransition(Handle, next.Handle);
-            return new Transition(handle, (TransitionCallableDel)null);
+            var t = new Transition(handle, (TransitionCallableDel)null);
+            t.Release();
+            return t;
         }
 
         /**
@@ -98,14 +100,16 @@ namespace Petri.Runtime
                                         Action next,
                                         TransitionCallableDel cond)
         {
-            var c = WrapForNative.Wrap(cond, Name);
+            var c = WrapForNative.Wrap(cond, name);
 
             var handle = Interop.Action.PetriAction_addTransition(Handle,
                                                                   id,
                                                                   name,
                                                                   next.Handle,
                                                                   c);
-            return new Transition(handle, c);
+            var t = new Transition(handle, c);
+            t.Release();
+            return t;
         }
 
         public Transition AddTransition(UInt64 id,
@@ -113,14 +117,16 @@ namespace Petri.Runtime
                                         Action next,
                                         ParametrizedTransitionCallableDel cond)
         {
-            var c = WrapForNative.Wrap(cond, Name);
+            var c = WrapForNative.Wrap(cond, name);
 
             var handle = Interop.Action.PetriAction_addTransitionWithParam(Handle,
                                                                            id,
                                                                            name,
                                                                            next.Handle,
                                                                            c);
-            return new Transition(handle, c);
+            var t = new Transition(handle, c);
+            t.Release();
+            return t;
         }
 
         /**

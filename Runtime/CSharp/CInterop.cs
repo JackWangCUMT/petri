@@ -23,14 +23,13 @@
 using System;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Petri.Generated")]
-
 namespace Petri.Runtime
 {
-    public class CInterop : MarshalByRefObject
+    public abstract class CInterop : MarshalByRefObject
     {
         internal CInterop()
         {
+            Owning = true;
         }
 
         internal IntPtr Handle {
@@ -38,15 +37,33 @@ namespace Petri.Runtime
             set;
         }
 
+        ~CInterop() {
+            if(Owning) {
+                Clean();
+            }
+        }
+
         /// <summary>
-        /// Release this instance. Call at your own risk, as accessing one of the object's methods afterwards will probably segfault.
-        /// The destructor however will be invoked without risk.
+        /// Release the native handle.
+        /// </summary>
+        protected abstract void Clean();
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="Petri.Runtime.CInterop"/> is owning the native handle.
+        /// </summary>
+        /// <value><c>true</c> if owning; otherwise, <c>false</c>.</value>
+        public bool Owning {
+            get;
+            protected set;
+        }
+
+        /// <summary>
+        /// Release this instance. The instance can still be used afterwards, but the destructor will not clean the native handle upon call.
         /// </summary>
         public IntPtr Release()
         {
-            var h = Handle;
-            Handle = IntPtr.Zero;
-            return h;
+            Owning = false;
+            return Handle;
         }
     }
 }

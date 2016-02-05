@@ -52,7 +52,7 @@ namespace Petri.Runtime
          * object will wait for the connected client to end the debug session to continue the
          * program exectution.
          */
-        ~DebugServer()
+        protected override void Clean()
         {
             Interop.DebugServer.PetriDebugServer_destroy(Handle);
         }
@@ -87,7 +87,9 @@ namespace Petri.Runtime
             get {
                 IntPtr handle = Interop.DebugServer.PetriDebugServer_currentPetriNet(Handle);
                 if(handle != IntPtr.Zero) {
-                    return new PetriDebug(handle, false);
+                    var pn = new PetriDebug(handle);
+                    pn.Release();
+                    return pn;
                 }
 
                 return null;

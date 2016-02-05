@@ -27,10 +27,16 @@ namespace Petri.Runtime
 {
     public class PetriNet : CInterop
     {
-        public PetriNet(IntPtr handle, bool owns = true)
+        protected PetriNet()
+        {
+        }
+
+        public PetriNet(IntPtr handle, bool owning = true) : this()
         {
             Handle = handle;
-            _owns = owns;
+            if(!owning) {
+                Release();
+            }
             if(Handle == IntPtr.Zero) {
                 throw new Exception("The petri net could not be loaded!");
             }
@@ -40,16 +46,14 @@ namespace Petri.Runtime
          * Creates the PetriNet, assigning it a name which serves debug purposes (see ThreadPool constructor).
          * @param name the name to assign to the PetriNet or a designated one if left empty
          */
-        public PetriNet(string name = "")
+        public PetriNet(string name) : this()
         {
             Handle = Interop.PetriNet.PetriNet_create(name);
         }
 
-        ~PetriNet()
+        protected override void Clean()
         {
-            if(_owns) {
-                Interop.PetriNet.PetriNet_destroy(Handle);
-            }
+            Interop.PetriNet.PetriNet_destroy(Handle);
         }
 
         /**
@@ -60,6 +64,7 @@ namespace Petri.Runtime
         public virtual void AddAction(Action action, bool active = false)
         {
             Interop.PetriNet.PetriNet_addAction(Handle, action.Handle, active);
+            action.Release();
         }
 
         /**
@@ -120,8 +125,6 @@ namespace Petri.Runtime
                 return System.Runtime.InteropServices.Marshal.PtrToStringAuto(Interop.PetriNet.PetriNet_getName(Handle));
             }
         }
-
-        bool _owns = true;
     }
 }
 

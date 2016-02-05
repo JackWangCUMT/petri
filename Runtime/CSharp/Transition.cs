@@ -41,7 +41,7 @@ namespace Petri.Runtime
             _parametrizedCallback = del;
         }
 
-        ~Transition()
+        protected override void Clean()
         {
             Interop.Transition.PetriTransition_destroy(Handle);
         }

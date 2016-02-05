@@ -351,12 +351,8 @@ namespace Petri.Editor
         /// </summary>
         /// <value><c>true</c> if run in editor; otherwise, <c>false</c>.</value>
         public bool RunInEditor {
-            get {
-                return _runInEditor;
-            }
-            set {
-                _runInEditor = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -565,7 +561,6 @@ namespace Petri.Editor
 
         Code.Language _language;
         HeadlessDocument _document;
-        bool _runInEditor;
     }
 }
 

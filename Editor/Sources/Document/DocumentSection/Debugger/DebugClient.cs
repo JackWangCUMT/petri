@@ -433,7 +433,8 @@ namespace Petri.Editor
                         if(_debugServer == null && expression.GetVariables().Count > 0) {
                             throw new Exception("Expressions containing variables can only evaluated when the petri net is running in the editor.");
                         }
-                        var libProxy = new GeneratedDynamicLibProxy(_document.Settings.Language, System.IO.Directory.GetParent(libName).FullName,
+                        var libProxy = new GeneratedDynamicLibProxy(_document.Settings.Language,
+                                                                    System.IO.Directory.GetParent(libName).FullName,
                                                                     System.IO.Path.GetFileName(libName),
                                                                     _document.CodePrefix + "Evaluator");
                         var dylib = libProxy.Load<Runtime.Evaluator>();
@@ -470,7 +471,7 @@ namespace Petri.Editor
                     try {
                         this.SendObject(new JObject(new JProperty("type", "evaluate"),
                                                     new JProperty("payload",
-                                                              new JObject(new JProperty("lib",
+                                                                  new JObject(new JProperty("lib",
                                                                                         libName),
                                                                           new JProperty("language",
                                                                                         _document.Settings.LanguageName())))));

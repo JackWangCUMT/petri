@@ -26,11 +26,11 @@ namespace Petri.Runtime
 {
     public class PetriDebug : PetriNet
     {
-        internal PetriDebug(IntPtr handle, bool owns = true) : base(handle, owns)
+        internal PetriDebug(IntPtr handle) : base(handle)
         {
         }
 
-        public PetriDebug(string name)
+        public PetriDebug(string name) : base()
         {
             Handle = Interop.PetriNet.PetriNet_createDebug(name);
         }
