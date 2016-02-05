@@ -39,6 +39,7 @@ namespace Petri {
             : _internals(std::move(internals)) {}
 
     PetriNet::~PetriNet() {
+        std::cout << "Destroyed" << std::endl;
         this->stop();
     }
 

@@ -52,6 +52,7 @@ namespace Petri {
     }
 
     DynamicLib::~DynamicLib() {
+        std::cout << "unload" << std::endl;
         this->unload();
         if(_wd >= 0) {
             close(_wd);

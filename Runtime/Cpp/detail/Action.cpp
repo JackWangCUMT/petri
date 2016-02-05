@@ -85,7 +85,9 @@ namespace Petri {
         }
     }
 
-    Action::~Action() = default;
+    Action::~Action() {
+        std::cout << "Petri::Action::~Action()" << std::endl;
+    }
 
     Transition &Action::addTransition(Transition t) {
         _internals->_transitions.push_back(std::move(t));

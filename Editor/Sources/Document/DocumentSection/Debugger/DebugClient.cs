@@ -91,19 +91,7 @@ namespace Petri.Editor
                         }
                     }
                     catch(Exception e) {
-                        GLib.Timeout.Add(0, () => {
-                            MessageDialog d = new MessageDialog(_document.Window,
-                                                                DialogFlags.Modal,
-                                                                MessageType.Question,
-                                                                ButtonsType.None,
-                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger when pausing the petri net:") + " " + e.Message));
-                            d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                            d.Run();
-                            d.Destroy();
-
-                            return false;
-                        });
-
+                        NotifyUnrecoverableError(Configuration.GetLocalized("An error occurred in the debugger when pausing the petri net:") + " " + e.Message);
                         this.Detach();
                     }
                 }
@@ -205,18 +193,7 @@ namespace Petri.Editor
             }
             catch(Exception e) {
                 UnloadLibAndStopServer();
-                GLib.Timeout.Add(0, () => {
-                    MessageDialog d = new MessageDialog(_document.Window,
-                                                        DialogFlags.Modal,
-                                                        MessageType.Question,
-                                                        ButtonsType.None,
-                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger when loading the lib:") + " " + e.Message));
-                    d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                    d.Run();
-                    d.Destroy();
-
-                    return false;
-                });
+                NotifyUnrecoverableError(Configuration.GetLocalized("An error occurred in the debugger when loading the lib:") + " " + e.Message);
 
                 return false;
             }
@@ -300,19 +277,7 @@ namespace Petri.Editor
                 }
             }
             catch(Exception e) {
-                GLib.Timeout.Add(0, () => {
-                    MessageDialog d = new MessageDialog(_document.Window,
-                                                        DialogFlags.Modal,
-                                                        MessageType.Question,
-                                                        ButtonsType.None,
-                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger when starting the petri net:") + " " + e.Message));
-                    d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                    d.Run();
-                    d.Destroy();
-
-                    return false;
-                });
-
+                NotifyUnrecoverableError(Configuration.GetLocalized("An error occurred in the debugger when starting the petri net:") + " " + e.Message);
                 this.Detach();
             }
         }
@@ -329,19 +294,7 @@ namespace Petri.Editor
                 }
             }
             catch(Exception e) {
-                GLib.Timeout.Add(0, () => {
-                    MessageDialog d = new MessageDialog(_document.Window,
-                                                        DialogFlags.Modal,
-                                                        MessageType.Question,
-                                                        ButtonsType.None,
-                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger when stopping the petri net:") + " " + e.Message));
-                    d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                    d.Run();
-                    d.Destroy();
-
-                    return false;
-                });
-
+                NotifyUnrecoverableError(Configuration.GetLocalized("An error occurred in the debugger when stopping the petri net:") + " " + e.Message);
                 this.Detach();
             }
         }
@@ -363,18 +316,7 @@ namespace Petri.Editor
                         this.SendObject(new JObject(new JProperty("type", "reload")));
                     }
                     catch(Exception e) {
-                        GLib.Timeout.Add(0, () => {
-                            MessageDialog d = new MessageDialog(_document.Window,
-                                                                DialogFlags.Modal,
-                                                                MessageType.Question,
-                                                                ButtonsType.None,
-                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger when reloading the petri net:") + " " + e.Message));
-                            d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                            d.Run();
-                            d.Destroy();
-
-                            return false;
-                        });
+                        NotifyUnrecoverableError(Configuration.GetLocalized("An error occurred in the debugger when reloading the petri net:") + " " + e.Message);
                         this.Detach();
                     }
                 }
@@ -450,18 +392,7 @@ namespace Petri.Editor
                         });
                     }
                     catch(Exception e) {
-                        GLib.Timeout.Add(0, () => {
-                            MessageDialog d = new MessageDialog(_document.Window,
-                                                                DialogFlags.Modal,
-                                                                MessageType.Question,
-                                                                ButtonsType.None,
-                                                                Application.SafeMarkupFromString(Configuration.GetLocalized("Evaluation error:") + " " + e.Message));
-                            d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                            d.Run();
-                            d.Destroy();
-
-                            return false;
-                        });
+                        NotifyUnrecoverableError(Configuration.GetLocalized("Evaluation error:") + " " + e.Message);
                     }
                     if(libName != "") {
                         System.IO.File.Delete(libName);
@@ -472,9 +403,9 @@ namespace Petri.Editor
                         this.SendObject(new JObject(new JProperty("type", "evaluate"),
                                                     new JProperty("payload",
                                                                   new JObject(new JProperty("lib",
-                                                                                        libName),
-                                                                          new JProperty("language",
-                                                                                        _document.Settings.LanguageName())))));
+                                                                                            libName),
+                                                                              new JProperty("language",
+                                                                                            _document.Settings.LanguageName())))));
                     }
                     catch(Exception e) {
                         this.Detach();
@@ -484,6 +415,22 @@ namespace Petri.Editor
                 }
             }
             System.IO.File.Delete(sourceName);
+        }
+
+        void NotifyUnrecoverableError(string message)
+        {
+            GLib.Timeout.Add(0, () => {
+                MessageDialog d = new MessageDialog(_document.Window,
+                                                    DialogFlags.Modal,
+                                                    MessageType.Question,
+                                                    ButtonsType.None,
+                                                    Application.SafeMarkupFromString(message));
+                d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
+                d.Run();
+                d.Destroy();
+
+                return false;
+            });
         }
 
         /// <summary>
@@ -512,18 +459,7 @@ namespace Petri.Editor
                 throw new Exception(Configuration.GetLocalized("Invalid message received from debugger (expected ehlo).") + " " + ehlo);
             }
             catch(Exception e) {
-                GLib.Timeout.Add(0, () => {
-                    MessageDialog d = new MessageDialog(_document.Window,
-                                                        DialogFlags.Modal,
-                                                        MessageType.Question,
-                                                        ButtonsType.None,
-                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger during the handshake:") + " " + e.Message));
-                    d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                    d.Run();
-                    d.Destroy();
-
-                    return false;
-                });
+                NotifyUnrecoverableError(Configuration.GetLocalized("An error occurred in the debugger during the handshake:") + " " + e.Message);
                 this.Detach();
                 _document.Window.DebugGui.UpdateToolbar();
             }
@@ -549,19 +485,8 @@ namespace Petri.Editor
             }
             catch(Exception e) {
                 this.Detach();
+                NotifyUnrecoverableError(Configuration.GetLocalized("Unable to connect to the server:") + " " + e.Message);
 
-                GLib.Timeout.Add(0, () => {
-                    MessageDialog d = new MessageDialog(_document.Window,
-                                                        DialogFlags.Modal,
-                                                        MessageType.Question,
-                                                        ButtonsType.None,
-                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("Unable to connect to the server:") + " " + e.Message));
-                    d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                    d.Run();
-                    d.Destroy();
-
-                    return false;
-                });
                 return;
             }
 
@@ -701,18 +626,7 @@ namespace Petri.Editor
                 }
             }
             catch(Exception e) {
-                GLib.Timeout.Add(0, () => {
-                    MessageDialog d = new MessageDialog(_document.Window,
-                                                        DialogFlags.Modal,
-                                                        MessageType.Question,
-                                                        ButtonsType.None,
-                                                        Application.SafeMarkupFromString(Configuration.GetLocalized("An error occurred in the debugger client:") + " " + e.Message));
-                    d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
-                    d.Run();
-                    d.Destroy();
-
-                    return false;
-                });
+                NotifyUnrecoverableError(Configuration.GetLocalized("An error occurred in the debugger client:") + " " + e.Message);
                 this.Detach();
             }
 
