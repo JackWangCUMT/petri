@@ -84,6 +84,7 @@ namespace Petri.Runtime
             IntPtr handle = Interop.Action.PetriAction_addEmptyTransition(Handle, next.Handle);
             var t = new Transition(handle, (TransitionCallableDel)null);
             t.Release();
+            _transitions.Add(t);
             return t;
         }
 
@@ -109,6 +110,7 @@ namespace Petri.Runtime
                                                                   c);
             var t = new Transition(handle, c);
             t.Release();
+            _transitions.Add(t);
             return t;
         }
 
@@ -126,6 +128,7 @@ namespace Petri.Runtime
                                                                            c);
             var t = new Transition(handle, c);
             t.Release();
+            _transitions.Add(t);
             return t;
         }
 
@@ -204,6 +207,7 @@ namespace Petri.Runtime
         private ActionCallableDel _callback;
         private ParametrizedActionCallableDel _parametrizedCallback;
         #pragma warning restore 0414
+        List<Transition> _transitions = new List<Transition>();
     }
 }
 

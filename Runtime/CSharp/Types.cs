@@ -27,6 +27,8 @@ namespace Petri.Runtime
 {
     [return: MarshalAs(UnmanagedType.LPTStr)] public delegate string StringCallableDel();
     public delegate IntPtr PtrCallableDel();
+    public delegate PetriNet PetriNetCallableDel();
+    public delegate PetriDebug PetriDebugCallableDel();
 
     public delegate Int32 ActionCallableDel();
     public delegate Int32 ParametrizedActionCallableDel(IntPtr petriNet);

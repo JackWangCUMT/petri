@@ -65,6 +65,7 @@ namespace Petri.Runtime
         {
             Interop.PetriNet.PetriNet_addAction(Handle, action.Handle, active);
             action.Release();
+            _actions.Add(action);
         }
 
         /**
@@ -125,6 +126,8 @@ namespace Petri.Runtime
                 return System.Runtime.InteropServices.Marshal.PtrToStringAuto(Interop.PetriNet.PetriNet_getName(Handle));
             }
         }
+
+        List<Action> _actions = new List<Action>();
     }
 }
 
