@@ -58,6 +58,13 @@ namespace Petri.Editor
         /// <param name="docsToOpen">An optional list of documents to open at launch. May be <c>null</c>.</param>
         public static int GUIMain(string[] docsToOpen)
         {
+            GLib.ExceptionManager.UnhandledException += (GLib.UnhandledExceptionArgs args) => {
+                Console.Error.WriteLine(args.ExceptionObject);
+                if(args.ExceptionObject is Exception) {
+                    Exception e = (Exception)args.ExceptionObject;
+                    Console.Error.WriteLine(e.StackTrace);
+                }
+            };
             Gtk.Application.Init();
 
             MainWindow.InitGUI();
