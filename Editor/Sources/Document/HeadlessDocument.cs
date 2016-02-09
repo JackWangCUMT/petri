@@ -419,10 +419,11 @@ namespace Petri.Editor
             protected set;
         }
 
-        public string GetHash()
-        {
-            var generator = PetriGen.PetriGenFromLanguage(Settings.Language, this);
-            return generator.GetHash();
+        public string Hash {
+            get {
+                var generator = PetriGen.PetriGenFromLanguage(Settings.Language, this);
+                return generator.GetHash();
+            }
         }
 
         public Dictionary<Entity, string> Conflicting {
@@ -430,7 +431,8 @@ namespace Petri.Editor
             private set;
         }
 
-        public void AddConflicting(Entity entity, string message) {
+        public void AddConflicting(Entity entity, string message)
+        {
             string value;
             if(Conflicting.TryGetValue(entity, out value)) {
                 value = value + "\n\n" + message;

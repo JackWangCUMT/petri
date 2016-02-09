@@ -254,7 +254,6 @@ namespace Petri {
                     } else if(type == "reload") {
                         this->clearPetri();
                         _petriNetFactory.reload();
-                        _petriNetFactory.hash();
                         _petri = _petriNetFactory.createDebug();
                         _petri->setObserver(&_that);
                         std::cout << "Reloaded Petri Net." << std::endl;

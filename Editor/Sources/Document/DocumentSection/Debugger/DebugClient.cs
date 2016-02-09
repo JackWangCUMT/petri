@@ -208,6 +208,7 @@ namespace Petri.Editor
                 _debugServer.Stop();
                 _debugServer = null;
             }
+            _dynamicLib = null;
             if(_libProxy != null) {
                 _libProxy.Unload();
                 _libProxy = null;
@@ -271,7 +272,7 @@ namespace Petri.Editor
                     this.SendObject(new JObject(new JProperty("type", "start"),
                                                 new JProperty("payload",
                                                               new JObject(new JProperty("hash",
-                                                                                        _document.GetHash())))));
+                                                                                        _document.Hash)))));
                 }
             }
             catch(Exception e) {
@@ -308,8 +309,15 @@ namespace Petri.Editor
                 this.StopPetri();
                 if(_document.Compile(true)) {
                     try {
-                        _startAfterFix = startAfterReload;
-                        this.SendObject(new JObject(new JProperty("type", "reload")));
+                        if(_document.Settings.RunInEditor && _document.Settings.Language == Code.Language.CSharp) {
+                            Detach();
+                            Attach();
+                            StartPetri();
+                        }
+                        else {
+                            _startAfterFix = startAfterReload;
+                            this.SendObject(new JObject(new JProperty("type", "reload")));
+                        }
                     }
                     catch(Exception e) {
                         NotifyUnrecoverableError(Configuration.GetLocalized("An error occurred in the debugger when reloading the petri net:") + " " + e.Message);
