@@ -163,7 +163,7 @@ namespace Petri.Editor
                 var dylib = _libProxy.Load<Petri.Runtime.GeneratedDynamicLib>();
 
                 if(dylib == null) {
-                    GLib.Timeout.Add(0, () => {
+                    Application.RunOnUIThread(() => {
                         MessageDialog d = new MessageDialog(_document.Window,
                                                             DialogFlags.Modal,
                                                             MessageType.Question,
@@ -180,8 +180,6 @@ namespace Petri.Editor
                         else {
                             d.Destroy();
                         }
-
-                        return false;
                     });
 
                     return false;
@@ -304,11 +302,9 @@ namespace Petri.Editor
         /// </summary>
         public void ReloadPetri(bool startAfterReload = false)
         {
-            GLib.Timeout.Add(0, () => {
+            Application.RunOnUIThread(() => {
                 _document.Window.DebugGui.Status = Configuration.GetLocalized("Reloading the petri net…");
-                return false;
-            });
-            GLib.Timeout.Add(1, () => {
+
                 this.StopPetri();
                 if(_document.Compile(true)) {
                     try {
@@ -320,8 +316,6 @@ namespace Petri.Editor
                         this.Detach();
                     }
                 }
-
-                return false;
             });
         }
 
@@ -386,9 +380,8 @@ namespace Petri.Editor
                         }
                         string value = dylib.Evaluate(_debugServer.CurrentPetriNet);
                         libProxy.Unload();
-                        GLib.Timeout.Add(0, () => {
+                        Application.RunOnUIThread(() => {
                             _document.Window.DebugGui.OnEvaluate(value);
-                            return false;
                         });
                     }
                     catch(Exception e) {
@@ -419,7 +412,7 @@ namespace Petri.Editor
 
         void NotifyUnrecoverableError(string message)
         {
-            GLib.Timeout.Add(0, () => {
+            Application.RunOnUIThread(() => {
                 MessageDialog d = new MessageDialog(_document.Window,
                                                     DialogFlags.Modal,
                                                     MessageType.Question,
@@ -428,8 +421,6 @@ namespace Petri.Editor
                 d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                 d.Run();
                 d.Destroy();
-
-                return false;
             });
         }
 
@@ -446,9 +437,8 @@ namespace Petri.Editor
 		
                 var ehlo = this.ReceiveObject();
                 if(ehlo != null && ehlo["type"].ToString() == "ehlo") {
-                    GLib.Timeout.Add(0, () => {
+                    Application.RunOnUIThread(() => {
                         _document.Window.DebugGui.Status = Configuration.GetLocalized("Sucessfully connected.");
-                        return false;
                     });
                     _document.Window.DebugGui.UpdateToolbar();
                     return;
@@ -503,9 +493,8 @@ namespace Petri.Editor
                             _petriRunning = true;
                             _document.Window.DebugGui.UpdateToolbar();
                             this.UpdateBreakpoints();
-                            GLib.Timeout.Add(0, () => {
+                            Application.RunOnUIThread(() => {
                                 _document.Window.DebugGui.Status = Configuration.GetLocalized("The petri net is running…");
-                                return false;
                             });
                         }
                         else if(msg["payload"].ToString() == "end_exec") {
@@ -518,41 +507,37 @@ namespace Petri.Editor
                                 _document.DebugController.ActiveStates.Clear();
                             }
                             _document.Window.DebugGui.View.Redraw();
-                            GLib.Timeout.Add(0, () => {
+                            Application.RunOnUIThread(() => {
                                 _document.Window.DebugGui.Status = Configuration.GetLocalized("The petri net execution has ended.");
-                                return false;
                             });
                         }
                         else if(msg["payload"].ToString() == "reload") {
                             _document.Window.DebugGui.UpdateToolbar();
-                            GLib.Timeout.Add(0, () => {
+                            Application.RunOnUIThread(() => {
                                 _document.Window.DebugGui.Status = Configuration.GetLocalized("The Petri net has been successfully reloaded.");
                                 if(_startAfterFix) {
                                     StartPetri();
                                 }
-                                return false;
                             });
                         }
                         else if(msg["payload"].ToString() == "pause") {
                             _pause = true;
                             _document.Window.DebugGui.UpdateToolbar();
-                            GLib.Timeout.Add(0, () => {
+                            Application.RunOnUIThread(() => {
                                 _document.Window.DebugGui.Status = Configuration.GetLocalized("Paused.");
-                                return false;
                             });
                         }
                         else if(msg["payload"].ToString() == "resume") {
                             _pause = false;
                             _document.Window.DebugGui.UpdateToolbar();
-                            GLib.Timeout.Add(0, () => {
+                            Application.RunOnUIThread(() => {
                                 _document.Window.DebugGui.Status = Configuration.GetLocalized("The petri net is running…");
-                                return false;
                             });
                         }
                     }
                     else if(msg["type"].ToString() == "error") {
                         _startAfterFix = false;
-                        GLib.Timeout.Add(0, () => {
+                        Application.RunOnUIThread(() => {
                             MessageDialog d = new MessageDialog(_document.Window,
                                                                 DialogFlags.Modal,
                                                                 MessageType.Question,
@@ -567,8 +552,6 @@ namespace Petri.Editor
                                 ReloadPetri(true);
                             }
                             d.Destroy();
-
-                            return false;
                         });
 
                         if(_petriRunning) {
@@ -580,9 +563,8 @@ namespace Petri.Editor
                             _sessionRunning = false;
                             _petriRunning = false;
                             _document.Window.DebugGui.UpdateToolbar();
-                            GLib.Timeout.Add(0, () => {
+                            Application.RunOnUIThread(() => {
                                 _document.Window.DebugGui.Status = Configuration.GetLocalized("Disconnected.");
-                                return false;
                             });
                         }
                         else {
@@ -615,9 +597,8 @@ namespace Petri.Editor
                         if(lib != "") {
                             System.IO.File.Delete(lib);
                         }
-                        GLib.Timeout.Add(0, () => {
+                        Application.RunOnUIThread(() => {
                             _document.Window.DebugGui.OnEvaluate(msg["payload"]["eval"].ToString());
-                            return false;
                         });
                     }
                 }

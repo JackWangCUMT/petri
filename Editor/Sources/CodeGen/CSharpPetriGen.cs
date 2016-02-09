@@ -117,20 +117,19 @@ namespace Petri.Editor
             System.Security.Cryptography.SHA1 sha = new System.Security.Cryptography.SHA1CryptoServiceProvider(); 
             Hash = BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(toHash))).Replace("-",
                                                                                                               "");
-            
-            CodeGen += "static IntPtr Create() {";
+            CodeGen += "static PetriNet Create() {";
             CodeGen += "var petriNet = new PetriNet(\"" + Document.Settings.Name + "\");";
             CodeGen += "Populate(petriNet);";
-            CodeGen += "return petriNet.Release();";
+            CodeGen += "return petriNet;";
             CodeGen += "}"; // create()
 
             CodeGen += "";
 
-            CodeGen += "static IntPtr CreateDebug() {";
+            CodeGen += "static PetriDebug CreateDebug() {";
             CodeGen += "var petriNet = new PetriDebug(\"" + Document.Settings.Name + "\");";
             CodeGen += "Populate(petriNet);";
-            CodeGen += "return petriNet.Release();";
-            CodeGen += "}"; // create()
+            CodeGen += "return petriNet;";
+            CodeGen += "}"; // createDebug()
 
             CodeGen += "";
 

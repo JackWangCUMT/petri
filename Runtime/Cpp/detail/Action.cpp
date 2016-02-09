@@ -85,10 +85,7 @@ namespace Petri {
         }
     }
 
-    Action::~Action() {
-        std::cout << "Petri::Action::~Action()" << std::endl;
-    }
-
+    Action::~Action() = default;
     Transition &Action::addTransition(Transition t) {
         _internals->_transitions.push_back(std::move(t));
 
@@ -112,9 +109,10 @@ namespace Petri {
     Action::addTransition(uint64_t id, std::string const &name, Action &next, TransitionCallableBase const &cond) {
         auto copy = cond.copy_ptr();
         auto shared_copy = std::shared_ptr<TransitionCallableBase>(copy.release());
-        return this->addTransition(id, name, next, make_param_transition_callable([shared_copy](PetriNet &, actionResult_t a) {
-                                       return shared_copy->operator()(a);
-                                   }));
+        return this->addTransition(
+        id, name, next, make_param_transition_callable(std::move([shared_copy](PetriNet &, actionResult_t a) {
+            return shared_copy->operator()(a);
+        })));
     }
     Transition &Action::addTransition(uint64_t id, std::string const &name, Action &next, bool (*cond)(actionResult_t)) {
         return addTransition(id, name, next, make_transition_callable(cond));
@@ -140,8 +138,8 @@ namespace Petri {
     void Action::setAction(ActionCallableBase const &action) {
         auto copy = action.copy_ptr();
         auto shared_copy = std::shared_ptr<ActionCallableBase>(copy.release());
-        this->setAction(
-        make_param_action_callable([shared_copy](PetriNet &) { return shared_copy->operator()(); }));
+        this->setAction(make_param_action_callable(
+        std::move([shared_copy](PetriNet &) { return shared_copy->operator()(); })));
     }
     void Action::setAction(actionResult_t (*action)()) {
         this->setAction(make_action_callable(action));
@@ -170,7 +168,6 @@ namespace Petri {
     /**
      * Changes the required tokens of the Action to be activated.
      * @param requiredTokens The new required tokens count
-     * @return The required tokens of the Action
      */
     void Action::setRequiredTokens(size_t requiredTokens) noexcept {
         _internals->_requiredTokens = requiredTokens;
@@ -210,7 +207,6 @@ namespace Petri {
 
     /**
      * Returns the transitions exiting the Action.
-     * @param name The exiting transitions of the Action
      */
     std::list<Transition> const &Action::transitions() const noexcept {
         return _internals->_transitions;

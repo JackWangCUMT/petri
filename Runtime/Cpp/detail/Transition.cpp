@@ -56,7 +56,11 @@ namespace Petri {
             : Entity(0)
             , _internals(std::make_unique<Internals>(previous, next)) {}
 
-    Transition::Transition(uint64_t id, std::string const &name, Action &previous, Action &next, ParametrizedTransitionCallableBase const &cond)
+    Transition::Transition(uint64_t id,
+                           std::string const &name,
+                           Action &previous,
+                           Action &next,
+                           ParametrizedTransitionCallableBase const &cond)
             : Entity(id)
             , _internals(std::make_unique<Internals>(name, previous, next, cond)) {}
 
@@ -81,8 +85,8 @@ namespace Petri {
     void Transition::setCondition(TransitionCallableBase const &test) {
         auto copy = test.copy_ptr();
         auto shared_copy = std::shared_ptr<TransitionCallableBase>(copy.release());
-        this->setCondition(
-                        make_param_transition_callable([shared_copy](PetriNet &, actionResult_t a) { return shared_copy->operator()(a); }));
+        this->setCondition(make_param_transition_callable(
+        std::move([shared_copy](PetriNet &, actionResult_t a) { return shared_copy->operator()(a); })));
     }
 
     void Transition::setCondition(ParametrizedTransitionCallableBase const &test) {

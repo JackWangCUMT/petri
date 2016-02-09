@@ -771,14 +771,14 @@ namespace Petri.Editor
                 var c = new Compiler(this);
                 var o = c.CompileSource(Settings.RelativeSourcePath, Settings.RelativeLibPath);
                 if(o != "") {
-                    GLib.Timeout.Add(0, () => {
+                    Application.RunOnUIThread(() => {
                         ParseCompilationErrors(o);
 
                         MessageDialog d = new MessageDialog(Window,
-                                                        DialogFlags.Modal,
-                                                        MessageType.Warning,
-                                                        ButtonsType.None,
-                                                        Configuration.GetLocalized("The compilation has failed. Do you want to see the generated errors?"));
+                                                            DialogFlags.Modal,
+                                                            MessageType.Warning,
+                                                            ButtonsType.None,
+                                                            Configuration.GetLocalized("The compilation has failed. Do you want to see the generated errors?"));
                         d.AddButton(Configuration.GetLocalized("No"), ResponseType.Cancel);
                         d.AddButton(Configuration.GetLocalized("Yes"), ResponseType.Accept);
                         d.DefaultResponse = ResponseType.Accept;
@@ -788,21 +788,18 @@ namespace Petri.Editor
                         d.Destroy();
                         if(result == ResponseType.Accept) {
                             o = Configuration.GetLocalized("Compiler invocation:") + "\n" + Settings.Compiler + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
-                                                                                                                                             Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Compilation errors:") + "\n" + o;
+                                                                                                                                                 Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Compilation errors:") + "\n" + o;
                             new CompilationErrorPresenter(this, o).Show();
                         }
 
                         Window.Gui.Status = Configuration.GetLocalized("The compilation has failed.");
-
-                        return false;
                     });
 
                     return false;
                 }
                 else {
-                    GLib.Timeout.Add(0, () => { 
+                    Application.RunOnUIThread(() => { 
                         Window.Gui.Status = Configuration.GetLocalized("The compilation has been successful.");
-                        return false;
                     });
 
                     return true;

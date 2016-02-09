@@ -129,6 +129,21 @@ namespace Petri.Editor
             return System.Web.HttpUtility.HtmlEncode(s).Replace("{", "{{").Replace("}", "}}");
         }
 
+        public static void RunOnUIThread(System.Action action)
+        {
+            GLib.Timeout.Add(0, () => {
+                try {
+                    action.Invoke();
+                }
+                catch(Exception ee) {
+                    Console.WriteLine(ee);
+                    Console.WriteLine("ee");
+                }
+                return false;
+
+            });
+        }
+
         /// <summary>
         /// Entry validation delegate.
         /// </summary>

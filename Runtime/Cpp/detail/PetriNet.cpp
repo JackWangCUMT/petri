@@ -39,13 +39,12 @@ namespace Petri {
             : _internals(std::move(internals)) {}
 
     PetriNet::~PetriNet() {
-        std::cout << "Destroyed" << std::endl;
         this->stop();
     }
 
     Action &PetriNet::addAction(Action action, bool active) {
         if(this->running()) {
-            throw std::runtime_error("Cannot modify running state chart!");
+            throw std::runtime_error("Cannot modify running petri net!");
         }
 
         _internals->_states.emplace_back(std::move(action), active);
@@ -136,7 +135,6 @@ namespace Petri {
                     bool isFulfilled = false;
 
                     if((now - lastTest) >= (*it)->delayBetweenEvaluation()) {
-                        // Testing the transition
                         {
                             std::vector<std::unique_lock<std::mutex>> locks;
                             locks.reserve((*it)->getVariables().size());
@@ -146,6 +144,7 @@ namespace Petri {
 
                             lock(locks.begin(), locks.end());
 
+                            // Testing the transition
                             isFulfilled = (*it)->isFulfilled(_this, res);
                         }
 

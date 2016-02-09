@@ -159,7 +159,7 @@ namespace Petri.Editor
 
         public override void UpdateToolbar()
         {
-            GLib.Timeout.Add(0, () => {
+            Application.RunOnUIThread(() => {
                 if(_document.DebugController.Client.SessionRunning) {
                     _startStopPetri.Sensitive = true;
                     _reload.Sensitive = true;
@@ -204,8 +204,6 @@ namespace Petri.Editor
                     _playPause.Label = Configuration.GetLocalized("Pause");
                     _playPause.StockId = Stock.MediaPause;
                 }
-
-                return false;
             });
         }
 
@@ -280,15 +278,13 @@ namespace Petri.Editor
 
         public bool Compilation {
             set {
-                GLib.Timeout.Add(0, () => { 
+                Application.RunOnUIThread(() => { 
                     if(value) {
                         _reload.Sensitive = false;
                     }
                     else {
                         _reload.Sensitive = true;
                     }
-
-                    return false;
                 });
             }
         }

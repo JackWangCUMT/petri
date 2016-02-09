@@ -405,15 +405,13 @@ namespace Petri.Editor
 
         public bool Compilation {
             set {
-                GLib.Timeout.Add(0, () => { 
+                Application.RunOnUIThread(() => { 
                     if(value) {
                         _compile.Sensitive = false;
                     }
                     else {
                         _compile.Sensitive = true;
                     }
-
-                    return false;
                 });
             }
         }
