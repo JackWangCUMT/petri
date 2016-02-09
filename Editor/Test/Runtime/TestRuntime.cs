@@ -107,6 +107,38 @@ namespace Petri.Test
             Assert.IsEmpty(stderr);
         }
 
+        [Test()]
+        public void TestRuntime3()
+        {
+            // GIVEN an action created with a custom name
+            string name = "Test12345";
+            Action a = new Action(3, name, Action1, 1);
+
+            // WHEN we read the name of the action
+            string actual = a.Name;
+
+            // THEN we get an equivalent value
+            Assert.AreNotSame(name, actual);
+            Assert.AreEqual(name, actual);
+        }
+
+        [Test()]
+        public void TestRuntime4()
+        {
+            // GIVEN a transition created with a custom name
+            string name = "Test12345";
+            Action a = new Action(3, "", Action1, 1);
+            Transition t = a.AddTransition(4, name, a, Transition1);
+
+            // WHEN we read the name of the transition
+            string actual = t.Name;
+
+            // THEN we get an equivalent value
+            Assert.AreNotSame(name, actual);
+            Assert.AreEqual(name, actual);
+        }
+
+
         static volatile int counter;
     }
 }
