@@ -140,6 +140,7 @@ namespace Petri.Runtime
         {
             var c = WrapForNative.Wrap(action, Name);
             _callback = c;
+            _parametrizedCallback = null;
             Interop.Action.PetriAction_setAction(Handle, c);
         }
 
@@ -151,6 +152,7 @@ namespace Petri.Runtime
         {
             var c = WrapForNative.Wrap(action, Name);
             _parametrizedCallback = c;
+            _callback = null;
             Interop.Action.PetriAction_setActionParam(Handle, c);
         }
 
