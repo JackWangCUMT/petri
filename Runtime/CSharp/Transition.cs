@@ -100,7 +100,7 @@ namespace Petri.Runtime
          */
         public string Name {
             get {
-                return System.Runtime.InteropServices.Marshal.PtrToStringAuto(Interop.Transition.PetriTransition_getNext(Handle));
+                return System.Runtime.InteropServices.Marshal.PtrToStringAuto(Interop.Transition.PetriTransition_getName(Handle));
             }
             set {
                 Interop.Transition.PetriTransition_setName(Handle, value);
