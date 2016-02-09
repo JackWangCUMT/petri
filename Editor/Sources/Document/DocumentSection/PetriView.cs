@@ -131,6 +131,10 @@ namespace Petri.Editor
             return base.OnButtonReleaseEvent(ev);
         }
 
+        protected void ResetDoubleClick() {
+            _lastClickPosition.X = Double.MinValue;
+        }
+
         protected override bool OnMotionNotifyEvent(Gdk.EventMotion ev)
         {
             _nextPetriNet = null;
@@ -357,7 +361,7 @@ namespace Petri.Editor
         protected PointD _originalPosition;
 
         PointD _lastClickPosition;
-        System.DateTime _lastClickDate;
+        DateTime _lastClickDate;
 
         private PetriNet _nextPetriNet;
         private double pathSeparatorLenth;

@@ -470,6 +470,8 @@ namespace Petri.Editor
         [GLib.ConnectBefore()]
         protected override bool OnKeyPressEvent(Gdk.EventKey ev)
         {
+            ResetDoubleClick();
+
             if(ev.Key == Gdk.Key.Escape) {
                 if(CurrentAction == EditorAction.CreatingTransition) {
                     CurrentAction = EditorAction.None;
