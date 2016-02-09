@@ -108,7 +108,7 @@ namespace Petri.Editor
         /// <value>The version.</value>
         public static string Version {
             get {
-                return "1.3.2";
+                return "1.3.3";
             }
         }
 
@@ -240,10 +240,10 @@ namespace Petri.Editor
 
                 try {
                     if(stop) {
-                        this.SendObject(new JObject(new JProperty("type", "exitSession")));
+                        this.SendObject(new JObject(new JProperty("type", "detachAndExit")));
                     }
                     else {
-                        this.SendObject(new JObject(new JProperty("type", "exit")));
+                        this.SendObject(new JObject(new JProperty("type", "detach")));
                     }
                 }
                 catch(Exception) {
@@ -497,7 +497,7 @@ namespace Petri.Editor
                                 _document.Window.DebugGui.Status = Configuration.GetLocalized("The petri net is running…");
                             });
                         }
-                        else if(msg["payload"].ToString() == "end_exec") {
+                        else if(msg["payload"].ToString() == "stopped") {
                             StopPetri();
                         }
                         else if(msg["payload"].ToString() == "stop") {
@@ -558,7 +558,7 @@ namespace Petri.Editor
                             this.StopPetri();
                         }
                     }
-                    else if(msg["type"].ToString() == "exit" || msg["type"].ToString() == "exitSession") {
+                    else if(msg["type"].ToString() == "detach" || msg["type"].ToString() == "detachAndExit") {
                         if(msg["payload"].ToString() == "kbye") {
                             _sessionRunning = false;
                             _petriRunning = false;

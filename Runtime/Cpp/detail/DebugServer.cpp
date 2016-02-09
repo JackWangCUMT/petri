@@ -102,7 +102,7 @@ namespace Petri {
     };
 
     std::string const &DebugServer::getVersion() {
-        static auto const version = "1.3.2"s;
+        static auto const version = "1.3.3"s;
         return version;
     }
 
@@ -181,7 +181,7 @@ namespace Petri {
     }
 
     void DebugServer::Internals::notifyStop() {
-        this->sendObject(this->json("ack", "end_exec"));
+        this->sendObject(this->json("ack", "stopped"));
     }
 
     void DebugServer::Internals::serverCommunication() {
@@ -231,14 +231,14 @@ namespace Petri {
                         }
                     } else if(type == "start") {
                         this->startPetri(root["payload"]);
-                    } else if(type == "exit") {
+                    } else if(type == "detach") {
                         this->clearPetri();
-                        this->sendObject(this->json("exit", "kbye"));
+                        this->sendObject(this->json("detach", "kbye"));
 
                         break;
-                    } else if(type == "exitSession") {
+                    } else if(type == "detachAndExit") {
                         this->clearPetri();
-                        this->sendObject(this->json("exitSession", "kbye"));
+                        this->sendObject(this->json("detachAndExit", "kbye"));
                         _running = false;
 
                         break;
@@ -267,8 +267,8 @@ namespace Petri {
                     }
                 }
             } catch(std::exception const &e) {
-                this->sendObject(this->json("exit", e.what()));
-                std::cerr << "Caught exception, exiting debugger: " << e.what() << std::endl;
+                this->sendObject(this->json("detach", e.what()));
+                std::cerr << "Caught exception, detaching from client: " << e.what() << std::endl;
             }
             _client.shutdown();
             _stateChangeCondition.notify_all();
