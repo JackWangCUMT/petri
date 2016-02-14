@@ -41,7 +41,7 @@ namespace Petri.Editor
         {
             if(_document.Window.EditorGui.View.SelectedEntities.Count > 0) {
                 Application.Clipboard = new HashSet<Entity>(CloneEntities(_document.Window.EditorGui.View.SelectedEntities,
-                                                                          _document));
+                                                                          _document.Window.EditorGui.View.CurrentPetriNet));
                 Application.PasteCount = 0;
 
                 this.UpdateMenuItems();
@@ -268,7 +268,7 @@ namespace Petri.Editor
         {
             var actionList = new List<GuiAction>();
 
-            var newEntities = this.CloneEntities(Application.Clipboard, _document);
+            var newEntities = CloneEntities(Application.Clipboard, _document.Window.EditorGui.View.CurrentPetriNet);
             var states = from e in newEntities
                                   where e is State
                                   select (e as State);
@@ -297,16 +297,17 @@ namespace Petri.Editor
             foreach(Transition t in transitions) {
                 // Change entity's owner
                 t.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
-                t.Position = new Cairo.PointD(t.Position.X + 20 * Application.PasteCount,
-                                              t.Position.Y + 20 * Application.PasteCount);
                 actionList.Add(new AddTransitionAction(t, false));
             }
 
             return new GuiActionList(actionList, Configuration.GetLocalized("Paste the entities"));
         }
 
-        private List<Entity> CloneEntities(IEnumerable<Entity> entities, Document destination)
+        internal static List<Entity> CloneEntities(IEnumerable<Entity> entities,
+                                                   PetriNet newParent)
         {
+            var destination = newParent.Document;
+
             var cloned = new List<Entity>();
 
             var states = from e in entities
@@ -327,17 +328,17 @@ namespace Petri.Editor
             var statesTable = new Dictionary<UInt64, State>();
             foreach(State s in states) {
                 var xml = s.GetXML();
-                var newState = Entity.EntityFromXml(_document,
+                var newState = Entity.EntityFromXml(destination,
                                                     xml,
-                                                    _document.Window.EditorGui.View.CurrentPetriNet,
+                                                    newParent,
                                                     null) as State;
                 statesTable.Add(newState.ID, newState);
             }
             foreach(Comment c in comments) {
                 var xml = c.GetXML();
-                var newComment = Entity.EntityFromXml(_document,
+                var newComment = Entity.EntityFromXml(destination,
                                                       xml,
-                                                      _document.Window.EditorGui.View.CurrentPetriNet,
+                                                      newParent,
                                                       null) as Comment;
                 newComment.Document = destination;
                 newComment.ID = destination.IDManager.Consume();
@@ -348,15 +349,15 @@ namespace Petri.Editor
                 var xml = t.GetXML();
                 Transition newTransition = (Transition)Entity.EntityFromXml(destination,
                                                                             xml,
-                                                                            _document.Window.EditorGui.View.CurrentPetriNet,
+                                                                            newParent,
                                                                             statesTable);
 
                 // Reassigning an ID to the transitions to keep a unique one for each entity
-                newTransition.ID = _document.IDManager.Consume();
+                newTransition.ID = destination.IDManager.Consume();
                 cloned.Add(newTransition);
 
-                newTransition.Before.AddTransitionAfter(t);
-                newTransition.After.AddTransitionBefore(t);
+                newTransition.Before.AddTransitionAfter(newTransition);
+                newTransition.After.AddTransitionBefore(newTransition);
             }
 
             foreach(State s in statesTable.Values) {
@@ -385,7 +386,7 @@ namespace Petri.Editor
                 _document.Window.EditorGui.View.SelectedEntity = focus as Entity;
         }
 
-        private static void UpdateID(State s, Document d)
+        private static void UpdateID(State s, HeadlessDocument d)
         {
             s.Document = d;
             s.ID = s.Document.IDManager.Consume();
