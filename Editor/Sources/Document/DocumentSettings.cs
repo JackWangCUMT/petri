@@ -109,7 +109,7 @@ namespace Petri.Editor
         /// </summary>
         /// <param name="doc">Document.</param>
         /// <param name="elem">An XML element that may be null.</param>
-        private DocumentSettings(HeadlessDocument doc, XElement elem)
+        DocumentSettings(HeadlessDocument doc, XElement elem)
         {
             _document = doc;
 
@@ -338,7 +338,7 @@ namespace Petri.Editor
             set {
                 _language = value;
 
-                if(_document.Settings != null && _document is Document) {
+                if(_document?.Settings != null && _document is Document) {
                     ((Document)_document).OnLanguageChanged();
                 }
             }

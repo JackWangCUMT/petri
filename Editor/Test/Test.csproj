@@ -38,6 +38,9 @@
     <Reference Include="nunit.framework">
       <HintPath>nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cairo" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cpp\TestLiterals.cs" />
@@ -52,6 +55,7 @@
     <Compile Include="Examples\Basic\TestCompilation.cs" />
     <Compile Include="Examples\Basic\TestExecution.cs" />
     <Compile Include="Examples\Sync\TestSync.cs" />
+    <Compile Include="Editor\EditorController\TestEditorController.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -72,5 +76,7 @@
     <Folder Include="Examples\Variables\" />
     <Folder Include="Examples\Basic\" />
     <Folder Include="Examples\Sync\" />
+    <Folder Include="Editor\" />
+    <Folder Include="Editor\EditorController\" />
   </ItemGroup>
 </Project>

@@ -38,7 +38,9 @@ namespace Petri.Editor
         {
             this.Position = pos;
             this.Name = Configuration.GetLocalized("DefaultCommentName");
-            this.SizeToFit();
+            if(Application.HasGUI) {
+                this.SizeToFit();
+            }
 
             this.Color = new Color(1, 1, 0.7, 1);
         }

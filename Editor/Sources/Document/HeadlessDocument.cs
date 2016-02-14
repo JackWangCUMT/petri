@@ -73,6 +73,11 @@ namespace Petri.Editor
 
     public class HeadlessDocument
     {
+        internal HeadlessDocument(string path, DocumentSettings settings) : this(path)
+        {
+            Settings = settings;
+        }
+
         public HeadlessDocument(string path)
         {
             LastHeadersUpdate = DateTime.MinValue;

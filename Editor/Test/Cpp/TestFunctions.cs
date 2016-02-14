@@ -128,8 +128,8 @@ namespace Petri.Test.Cpp
         {
 
             // GIVEN a function list
-            var functions = new List<Editor.Code.Function>();
-            var f = new Editor.Code.Function(new Editor.Code.Type(Language.CSharp, "void"), null, "f", false);
+            var functions = new List<Petri.Editor.Code.Function>();
+            var f = new Petri.Editor.Code.Function(new Petri.Editor.Code.Type(Language.CSharp, "void"), null, "f", false);
             functions.Add(f);
 
             // AND a function invocation string

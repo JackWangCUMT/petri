@@ -58,6 +58,8 @@ namespace Petri.Editor
         /// <param name="docsToOpen">An optional list of documents to open at launch. May be <c>null</c>.</param>
         public static int GUIMain(string[] docsToOpen)
         {
+            HasGUI = true;
+
             GLib.ExceptionManager.UnhandledException += (GLib.UnhandledExceptionArgs args) => {
                 Console.Error.WriteLine(args.ExceptionObject);
                 if(args.ExceptionObject is Exception) {
@@ -95,6 +97,15 @@ namespace Petri.Editor
             Gtk.Application.Run();
 
             return 0;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the application runs in GUI mode.
+        /// </summary>
+        /// <value><c>true</c> if in GUI mode; otherwise, <c>false</c>.</value>
+        public static bool HasGUI {
+            get;
+            private set;
         }
 
         /// <summary>
