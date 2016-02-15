@@ -1,16 +1,9 @@
 # Petri
 
-A C# Petri Net editor and compiler with a C++ runtime. The editor/compiler is built against the Mono framework, see below for execution and compilation of the editor.
+A C# Petri Net editor and compiler with a C, C++ and C# runtime. The editor/compiler is built against the Mono framework, see below for compiling and running of the editor.
 
 ## Bootstrapping a fresh repository
 Simply run the `bootstrap.sh` script at the root of the repository. It currently initializes the Git submodules.
-
-## Running the editor/compiler
-### Linux
-Install the Mono runtime by following the instructions found here: http://www.mono-project.com/docs/getting-started/install/linux/
-
-### OS X
-Install the Mono runtime by following the instructions found here: http://www.mono-project.com/docs/getting-started/install/mac/
 
 ## Compilation of the petri net editor/compiler
 Although you can get the running executables at https://github.com/rems4e/petri/releases, you may want to compile the source code.
@@ -21,12 +14,14 @@ The mono distribution that comes with Debian (tested on Debian 8) or Ubuntu (tes
 
 I recommend that you follow the instructions found at http://www.mono-project.com/docs/getting-started/install/linux/, and then install the `mono-devel` and `gtk-sharp2` packages (at least on Debian based distros, the actual package may be different for others).
 
-Alternatively, you can install the `monodevelop` package that will give you a full fledged IDE.
+Alternatively, you can install the `monodevelop` package. This will give you a complete IDE.
 
 #### OS X
-The simplest method to install mono is by first installing Homebrew, the awesome package manager. For that, just follow the instructions at http://brew.sh, and then run the command `brew install mono`.
+There are two simple methods to install mono on OS X:
+* By following the instructions at http://www.mono-project.com/docs/getting-started/install/mac/.
+* By first installing Homebrew, the awesome package manager. For that, just follow the instructions at http://brew.sh, and then run the command `brew install mono`.
 
-Alternatively, you can install the binary release of Xamarin Studio for OS X, found here: http://www.monodevelop.com/download/. This will give you a complete IDE.
+Alternatively, you can install Xamarin Studio for OS X from here: http://www.monodevelop.com/download/. This will give you a complete IDE.
 
 ### The compilation process
 ``` bash
@@ -39,11 +34,11 @@ make test
 ```
 This command will run the unit tests. It requires the `nunit-console` package.
 
-### Running the editor/compiler
+## Running the editor/compiler
 Once compiled, the editor is available in the Editor/bin directory, for command-line invocation and GUI on Linux.
 On OS X, you will find a `Petri.app` application in the Editor directory, which is a lot more practical/friendly.
 
-#### Editor
+### Editor
 ``` bash
 path_to_repo/petri/Editor $ mono bin/Petri.exe
 ```
@@ -52,7 +47,7 @@ This command will spawn the GUI editor.
 
 On Linux, you can simply double click on the `Petri.exe` file, whereas on OS X simply open the `Petri.app` application.
 
-#### Compiler
+### Compiler
 The compiler is the same executable as before, simply invoked with additional arguments.
 ``` bash
 path_to/_repo/petri/Editor $ mono bin/Petri.exe --help
