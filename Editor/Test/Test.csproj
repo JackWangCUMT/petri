@@ -55,7 +55,7 @@
     <Compile Include="Examples\Basic\TestCompilation.cs" />
     <Compile Include="Examples\Basic\TestExecution.cs" />
     <Compile Include="Examples\Sync\TestSync.cs" />
-    <Compile Include="Editor\EditorController\TestEditorController.cs" />
+    <Compile Include="Editor\EditorController\TestCloneEntities.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
