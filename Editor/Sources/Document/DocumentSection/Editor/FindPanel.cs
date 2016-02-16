@@ -25,7 +25,7 @@ using Gtk;
 
 namespace Petri.Editor
 {
-    public class Find
+    public class FindPanel
     {
         public enum FindType
         {
@@ -68,7 +68,7 @@ namespace Petri.Editor
             protected set;
         }
 
-        public Find(Document doc)
+        public FindPanel(Document doc)
         {
             _document = doc;
 

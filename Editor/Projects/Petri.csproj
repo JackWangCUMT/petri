@@ -160,7 +160,6 @@
     <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorGui.cs" />
     <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorView.cs" />
     <Compile Include="..\Sources\Document\DocumentSection\Editor\EntityEditor.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\Find.cs" />
     <Compile Include="..\Sources\Model\Action.cs" />
     <Compile Include="..\Sources\Model\Comment.cs" />
     <Compile Include="..\Sources\Model\Entity.cs" />
@@ -173,6 +172,7 @@
     <Compile Include="..\Sources\Application\Application.cs" />
     <Compile Include="..\Sources\Document\DocumentSection\Editor\RuntimeFunctions.cs" />
     <Compile Include="..\Sources\Application\CLI.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Editor\FindPanel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="CSRuntime.csproj">

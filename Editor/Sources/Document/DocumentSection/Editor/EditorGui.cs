@@ -33,7 +33,7 @@ namespace Petri.Editor
         {
             _document = doc;
 
-            _find = new Find(doc);
+            _find = new FindPanel(doc);
 
             _toolbar = new Toolbar();
             _toolbar.ToolbarStyle = ToolbarStyle.Both;
@@ -314,7 +314,7 @@ namespace Petri.Editor
             }
         }
 
-        public void PerformFind(string what, Find.FindType type)
+        public void PerformFind(string what, FindPanel.FindType type)
         {
             _document.SwitchToEditor();
             _findResults.Clear();
@@ -322,7 +322,7 @@ namespace Petri.Editor
 
             var list = _document.PetriNet.BuildEntitiesList();
             foreach(var ee in list) {
-                if(ee is Action && (type == Petri.Editor.Find.FindType.All || type == Petri.Editor.Find.FindType.Action)) {
+                if(ee is Action && (type == Petri.Editor.FindPanel.FindType.All || type == Petri.Editor.FindPanel.FindType.Action)) {
                     var e = (Action)ee;
                     if(e.Function.MakeUserReadable().Contains(what)) {
                         _findResults.Add(e);
@@ -332,7 +332,7 @@ namespace Petri.Editor
                                                 e.Function.MakeUserReadable());
                     }
                 }
-                else if(ee is Transition && (type == Petri.Editor.Find.FindType.All || type == Petri.Editor.Find.FindType.Transition)) {
+                else if(ee is Transition && (type == Petri.Editor.FindPanel.FindType.All || type == Petri.Editor.FindPanel.FindType.Transition)) {
                     var e = (Transition)ee;
                     if(e.Condition.MakeUserReadable().Contains(what)) {
                         _findResults.Add(e);
@@ -342,7 +342,7 @@ namespace Petri.Editor
                                                 e.Condition.MakeUserReadable());
                     }
                 }
-                else if(ee is Comment && (type == Petri.Editor.Find.FindType.All || type == Petri.Editor.Find.FindType.Comment)) {
+                else if(ee is Comment && (type == Petri.Editor.FindPanel.FindType.All || type == Petri.Editor.FindPanel.FindType.Comment)) {
                     var e = (Comment)ee;
                     if(e.Name.Contains(what)) {
                         _findResults.Add(e);
@@ -416,7 +416,7 @@ namespace Petri.Editor
             }
         }
 
-        Find _find;
+        FindPanel _find;
         List<Entity> _findResults = new List<Entity>();
 
         EditorView _petriView;
