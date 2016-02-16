@@ -24,7 +24,7 @@ using NUnit.Framework;
 using System;
 using Petri.Editor.Code;
 
-namespace Petri.Test.Cpp
+namespace Petri.Test.Code
 {
     [TestFixture()]
     public class TestLiterals

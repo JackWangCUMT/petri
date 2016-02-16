@@ -43,11 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cpp\TestLiterals.cs" />
-    <Compile Include="Cpp\TestPrecedence.cs" />
-    <Compile Include="Cpp\Utility.cs" />
-    <Compile Include="Cpp\TestFunctions.cs" />
-    <Compile Include="Cpp\TestExpressionToString.cs" />
     <Compile Include="Invocation\TestInvocation.cs" />
     <Compile Include="Runtime\TestRuntime.cs" />
     <Compile Include="Utility.cs" />
@@ -56,6 +51,11 @@
     <Compile Include="Examples\Basic\TestExecution.cs" />
     <Compile Include="Examples\Sync\TestSync.cs" />
     <Compile Include="Editor\EditorController\TestCloneEntities.cs" />
+    <Compile Include="Code\TestExpressionToString.cs" />
+    <Compile Include="Code\TestFunctions.cs" />
+    <Compile Include="Code\TestLiterals.cs" />
+    <Compile Include="Code\TestPrecedence.cs" />
+    <Compile Include="Code\Utility.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -69,7 +69,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Cpp\" />
     <Folder Include="Invocation\" />
     <Folder Include="Runtime\" />
     <Folder Include="Examples\" />

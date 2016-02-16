@@ -25,7 +25,7 @@ using System;
 using Petri.Editor.Code;
 using System.Collections.Generic;
 
-namespace Petri.Test.Cpp
+namespace Petri.Test.Code
 {
     [TestFixture()]
     public class TestFunctions
@@ -129,12 +129,18 @@ namespace Petri.Test.Cpp
 
             // GIVEN a function list
             var functions = new List<Petri.Editor.Code.Function>();
-            var f = new Petri.Editor.Code.Function(new Petri.Editor.Code.Type(Language.CSharp, "void"), null, "f", false);
+            var f = new Petri.Editor.Code.Function(new Petri.Editor.Code.Type(Language.CSharp,
+                                                                              "void"),
+                                                   null,
+                                                   "f",
+                                                   false);
             functions.Add(f);
 
             // AND a function invocation string
             // WHEN an invocation is created from the string and uses the functions list
-            var e = Expression.CreateFromString<FunctionInvocation>("f()", Language.CSharp, functions);
+            var e = Expression.CreateFromString<FunctionInvocation>("f()",
+                                                                    Language.CSharp,
+                                                                    functions);
 
             // THEN the function is created with the right number of parameters, and the number of arguments passed to it is recognized.
             Assert.IsInstanceOf<FunctionInvocation>(e);

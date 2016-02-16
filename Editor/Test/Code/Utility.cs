@@ -22,7 +22,7 @@
 
 using System;
 
-namespace Petri.Test.Cpp
+namespace Petri.Test.Code
 {
     public class Utility
     {

@@ -220,7 +220,6 @@ namespace Petri.Editor
             _scroll.SetPolicy(PolicyType.Automatic, PolicyType.Automatic);
 
             Viewport viewport2 = new Viewport();
-
             viewport2.Add(_petriView);
 
             _petriView.SizeRequested += (o, args) => {
