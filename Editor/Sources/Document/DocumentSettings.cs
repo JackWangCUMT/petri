@@ -105,6 +105,15 @@ namespace Petri.Editor
         }
 
         /// <summary>
+        /// Clone this instance, and return the cloned instance whose <c>Modified</c> property has been set to <c>true</c>.
+        /// </summary>
+        public DocumentSettings GetModifiedClone() {
+            var settings = new DocumentSettings(_document, GetXml());
+            settings.Modified = true;
+            return settings;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Petri.Editor.DocumentSettings"/> class with a sensible set of default values if <paramref name="elem"/> is <c>null</c>, and to the values contained in the Xml element otherwise.
         /// </summary>
         /// <param name="doc">Document.</param>

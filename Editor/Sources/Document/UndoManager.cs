@@ -417,7 +417,7 @@ namespace Petri.Editor
 
         public override string Description {
             get {
-                return Configuration.GetLocalized("Change requested tokens count");
+                return Configuration.GetLocalized("Change required tokens count");
             }
         }
 
@@ -1062,6 +1062,51 @@ namespace Petri.Editor
         }
 
         State _state;
+    }
+
+    /// <summary>
+    /// Change the settings of a document.
+    /// </summary>
+    public class ChangeSettingsAction : GuiAction
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.ChangeSettingsAction"/> class.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="newSettings">The new settings.</param>
+        public ChangeSettingsAction(Document document, DocumentSettings newSettings)
+        {
+            _document = document;
+            _newSettings = newSettings;
+            _oldSettings = _document.Settings;
+        }
+
+        public override void Apply()
+        {
+            _document.Settings = _newSettings;
+        }
+
+        public override GuiAction Reverse()
+        {
+            return new ChangeSettingsAction(_document, _oldSettings); 
+        }
+
+        public override object Focus {
+            get {
+                // TODO: actual focus
+                return null;
+            }
+        }
+
+        public override string Description {
+            get {
+                return Configuration.GetLocalized("Change document settings");
+            }
+        }
+
+        Document _document;
+        DocumentSettings _newSettings;
+        DocumentSettings _oldSettings;
     }
 
     /// <summary>

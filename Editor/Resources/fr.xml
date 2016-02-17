@@ -181,7 +181,7 @@
 <Key>Change Name</Key>
 <Value>Changer le nom</Value>
 
-<Key>Changer required tokens count</Key>
+<Key>Change required tokens count</Key>
 <Value>Changer le nombre de jetons requis</Value>
 
 <Key>the state</Key>
@@ -234,6 +234,9 @@
 
 <Key>Remove the state</Key>
 <Value>Supprimer l'état</Value>
+
+<Key>Change document settings</Key>
+<Value>Changer les réglages du document</Value>
 
 <Key>Open Petri Net…</Key>
 <Value>Ouvrir le réseau de Pétri…</Value>

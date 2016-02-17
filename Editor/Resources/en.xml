@@ -181,8 +181,8 @@
 <Key>Change Name</Key>
 <Value>Change Name</Value>
 
-<Key>Changer required tokens count</Key>
-<Value>Changer required tokens count</Value>
+<Key>Change required tokens count</Key>
+<Value>Change required tokens count</Value>
 
 <Key>the state</Key>
 <Value>the state</Value>
@@ -234,6 +234,9 @@
 
 <Key>Remove the state</Key>
 <Value>Remove the state</Value>
+
+<Key>Change document settings</Key>
+<Value>Change document settings</Value>
 
 <Key>Open Petri Net…</Key>
 <Value>Open Petri Net…</Value>

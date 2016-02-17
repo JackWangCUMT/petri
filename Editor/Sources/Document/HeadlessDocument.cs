@@ -421,7 +421,7 @@ namespace Petri.Editor
         /// <value>The settings.</value>
         public DocumentSettings Settings {
             get;
-            protected set;
+            set;
         }
 
         public string Hash {
