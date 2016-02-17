@@ -65,7 +65,13 @@ namespace Petri.Editor
             }
 
             CreateLabel(0, Configuration.GetLocalized("Evaluate expression:"));
-            Entry entry = CreateWidget<Entry>(true, 0, Configuration.GetLocalized("Expression"));
+            Entry entry = CreateWidget<Entry>(true, 0, _document.DebugController?.LastEvaluation ?? Configuration.GetLocalized("Expression"));
+            Application.RegisterValidation(entry,
+                                           true,
+                                           (e, args) => {
+                _document.DebugController.LastEvaluation = e.Text;
+            });
+
             if(_document.Settings?.Language == Code.Language.C) {
                 CreateLabel(0, Configuration.GetLocalized("With printf format:"));
                 _formatEntry = CreateWidget<Entry>(true, 0, "%d");
