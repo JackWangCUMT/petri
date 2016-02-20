@@ -104,32 +104,25 @@ namespace Petri.Editor
             private set;
         }
 
-        public virtual void AddHeader(string header)
-        {
-            AddHeaderNoUpdate(header);
-        }
-
         public void AddHeaderNoUpdate(string header)
         {
             if(header.Length == 0 || Headers.Contains(header))
                 return;
 
-            if(header.Length > 0) {
-                string filename = header;
+            string filename = header;
 
-                // If path is relative, then make it absolute
-                if(!System.IO.Path.IsPathRooted(header)) {
-                    filename = System.IO.Path.Combine(System.IO.Directory.GetParent(this.Path).FullName,
-                                                      filename);
-                }
-
-                var functions = Parser.Parse(Settings.Language, filename);
-                foreach(var func in functions) {
-                    AllFunctionsList.Add(func);
-                }
-
-                Headers.Add(header);
+            // If path is relative, then make it absolute
+            if(!System.IO.Path.IsPathRooted(header)) {
+                filename = System.IO.Path.Combine(System.IO.Directory.GetParent(this.Path).FullName,
+                                                  filename);
             }
+
+            var functions = Parser.Parse(Settings.Language, filename);
+            foreach(var func in functions) {
+                AllFunctionsList.Add(func);
+            }
+
+            Headers.Add(header);
         }
 
         public Dictionary<string, string> PreprocessorMacros {
@@ -294,8 +287,6 @@ namespace Petri.Editor
                 System.IO.File.Delete(this.Path);
             System.IO.File.Move(tempFileName, this.Path);
             tempFileName = "";
-
-            Settings.Modified = false;
         }
 
         /// <summary>

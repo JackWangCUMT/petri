@@ -167,7 +167,7 @@ namespace Petri.Editor
                     Conflicting.Remove(action);
                 }
             }
-            Modified = true;
+
             UndoManager.CommitGuiAction(a);
             UpdateUndo();
             if(a.Focus is Entity && CurrentController == EditorController) {
@@ -248,12 +248,10 @@ namespace Petri.Editor
         /// Adds a header to the document.
         /// </summary>
         /// <param name="header">The header's path.</param>
-        public override void AddHeader(string header)
+        public void AddHeader(string header)
         {
-            base.AddHeader(header);
-
             if(header.Length > 0) {
-                Modified = true;
+                CommitGuiAction(new AddHeaderAction(this, header));
             }
         }
 
@@ -263,17 +261,14 @@ namespace Petri.Editor
         /// <param name="header">The header's path.</param>
         public void RemoveHeader(string header)
         {
-            RemoveHeaderNoUpdate(header);
-            DispatchFunctions();
-
-            Modified = true;
+            CommitGuiAction(new RemoveHeaderAction(this, header));
         }
 
         /// <summary>
         /// Removes a header and removes the functions it contains from the known functions.
         /// </summary>
         /// <param name="header">The header's path.</param>
-        private void RemoveHeaderNoUpdate(string header)
+        public void RemoveHeaderNoUpdate(string header)
         {
             string filename = header;
 
@@ -326,33 +321,24 @@ namespace Petri.Editor
         {
             if(Path == "") {
                 if(SaveAs()) {
-                    Modified = false;
+                    // We require the current undo stack to represent an unmodified state
+                    _guiActionToMatchSave = UndoManager.NextUndo;
                 }
             }
             else {
                 base.Save();
-                Modified = false;
+                // We require the current undo stack to represent an unmodified state
+                _guiActionToMatchSave = UndoManager.NextUndo;
             }
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="Petri.Editor.Document"/> has been  modified since its last save.
+        /// Gets a value indicating whether this <see cref="Petri.Editor.Document"/> has been  modified since its last save.
         /// </summary>
         /// <value><c>true</c> if modified; otherwise, <c>false</c>.</value>
         public bool Modified {
             get {
-                return _modified || (Settings != null && Settings.Modified);
-            }
-            set {
-                _modified = value;
-                if(value == true) {
-                    this.Blank = false;
-                    _modifiedSinceGeneration = true;
-                }
-                else {
-                    // We require the current undo stack to represent an unmodified state
-                    _guiActionToMatchSave = UndoManager.NextUndo;
-                }
+                return _guiActionToMatchSave != UndoManager.NextUndo;
             }
         }
 
@@ -559,13 +545,16 @@ namespace Petri.Editor
                         }
                     }
                     Window.Title = prefix + docID.ToString();
-                    Modified = false;
+                    UndoManager.Clear();
+                    // We require the current undo stack to represent an unmodified state
+                    _guiActionToMatchSave = UndoManager.NextUndo;
                     Blank = true;
                 }
                 else {
                     this.Load();
-                    Blank = false;
-                    Modified = false;
+                    UndoManager.Clear();
+                    // We require the current undo stack to represent an unmodified state
+                    _guiActionToMatchSave = UndoManager.NextUndo;
                     Window.Title = System.IO.Path.GetFileName(this.Path).Split(new string[]{ ".petri" },
                                                                                StringSplitOptions.None)[0];
                 }
@@ -580,7 +569,9 @@ namespace Petri.Editor
                     PetriNet = new RootPetriNet(this);
                     Window.EditorGui.View.CurrentPetriNet = PetriNet;
                     Settings = null;
-                    Modified = false;
+                    // We require the current undo stack to represent an unmodified state
+                    UndoManager.Clear();
+                    _guiActionToMatchSave = UndoManager.NextUndo;
                     this.Blank = true;
                 }
 
@@ -640,9 +631,15 @@ namespace Petri.Editor
                     });
 
                     if(fc.Run() == (int)ResponseType.Accept) {
-                        string old = Settings.RelativeSourceOutputPath;
-                        this.Settings.RelativeSourceOutputPath = GetRelativeToDoc(fc.Filename);
-                        Modified = old != Settings.RelativeSourceOutputPath;
+                        string oldPath = Settings.RelativeSourceOutputPath;
+                        var newPath = GetRelativeToDoc(fc.Filename);
+
+                        if(newPath != oldPath) {
+                            var newSettings = Settings.Clone();
+                            newSettings.RelativeSourceOutputPath = newPath;
+                            CommitGuiAction(new ChangeSettingsAction(this,
+                                                                     newSettings));
+                        }
 
                         _codeRanges = this.GenerateCodeDontAsk();
                     }
@@ -868,8 +865,8 @@ namespace Petri.Editor
         /// </summary>
         private void UpdateUndo()
         {
-            // If we fall back to the state we consider unmodified, let it be considered so
-            Modified = UndoManager.NextUndo != this._guiActionToMatchSave;
+            this.Blank = false;
+            _modifiedSinceGeneration = true;
 
             Window.RevertItem.Sensitive = this.Modified;
 
@@ -896,7 +893,6 @@ namespace Petri.Editor
         HeadersManager _headersManager;
         MacrosManager _macrosManager;
         DocumentSettingsEditor _settingsEditor;
-        bool _modified;
         bool _modifiedSinceGeneration = true;
         Dictionary<Entity, CodeRange> _codeRanges = null;
         bool _saving = false;

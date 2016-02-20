@@ -91,5 +91,41 @@ namespace Petri.Editor
 
         Document _document;
     }
+
+    /// <summary>
+    /// Focus on the document's macros editor
+    /// </summary>
+    public class FocusableMacroEditor : IFocusable
+    {
+        public FocusableMacroEditor(Document doc)
+        {
+            _document = doc;
+        }
+
+        public void Focus()
+        {
+            _document.ManageMacros();
+        }
+
+        Document _document;
+    }
+
+    /// <summary>
+    /// Focus on the document's headers editor
+    /// </summary>
+    public class FocusableHeadersEditor : IFocusable
+    {
+        public FocusableHeadersEditor(Document doc)
+        {
+            _document = doc;
+        }
+
+        public void Focus()
+        {
+            _document.ManageHeaders();
+        }
+
+        Document _document;
+    }
 }
 

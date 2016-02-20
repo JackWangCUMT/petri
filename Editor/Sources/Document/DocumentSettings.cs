@@ -105,12 +105,11 @@ namespace Petri.Editor
         }
 
         /// <summary>
-        /// Clone this instance, and return the cloned instance whose <c>Modified</c> property has been set to <c>true</c>.
+        /// Clone this instance, and return the cloned instance.
         /// </summary>
-        public DocumentSettings GetModifiedClone() {
-            var settings = new DocumentSettings(_document, GetXml());
-            settings.Modified = true;
-            return settings;
+        public DocumentSettings Clone()
+        {
+            return new DocumentSettings(_document, GetXml());
         }
 
         /// <summary>
@@ -212,17 +211,6 @@ namespace Petri.Editor
                     }
                 }
             }
-
-            Modified = false;
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="Petri.Editor.DocumentSettings"/> has been modified since its last save.
-        /// </summary>
-        /// <value><c>true</c> if modified; otherwise, <c>false</c>.</value>
-        public bool Modified {
-            get;
-            set;
         }
 
         /// <summary>

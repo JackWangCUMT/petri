@@ -65,8 +65,7 @@ namespace Petri.Editor
                 valueCell.Edited += (object o, EditedArgs args) => {
                     TreeIter iter;
                     _dataStore.GetIterFromString(out iter, args.Path);
-                    _document.PreprocessorMacros[_dataStore.GetValue(iter, 0) as string] = args.NewText;
-                    _document.Modified = true;
+                    _document.CommitGuiAction(new ChangeMacroAction(_document, _dataStore.GetValue(iter, 0) as string, args.NewText));
                     this.BuildList();
                 };
                 c.PackStart(valueCell, true);
@@ -135,8 +134,7 @@ namespace Petri.Editor
                 d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                 if(d.Run() == (int)ResponseType.Accept) {
                     var key = _dataStore.GetValue(iter, 0) as string;
-                    _document.PreprocessorMacros.Remove(key);
-                    _document.Modified = true;
+                    _document.CommitGuiAction(new RemoveMacroAction(_document, key));
                 }
                 d.Destroy();
             }
@@ -165,8 +163,7 @@ namespace Petri.Editor
             d.VBox.PackEnd(entry, true, true, 0);
             d.ShowAll();
             if(d.Run() == (int)ResponseType.Accept) {
-                _document.PreprocessorMacros.Add(entry.Text, Configuration.GetLocalized("Value"));
-
+                _document.CommitGuiAction(new ChangeMacroAction(_document, entry.Text, Configuration.GetLocalized("Value")));
                 this.BuildList();
             }
             d.Destroy();

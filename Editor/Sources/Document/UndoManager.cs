@@ -64,6 +64,15 @@ namespace Petri.Editor
         }
 
         /// <summary>
+        /// Clear the undo/redo stacks, meaning that no action can be undone/redone after this call.
+        /// </summary>
+        public void Clear()
+        {
+            _undoStack.Clear();
+            _redoStack.Clear();
+        }
+
+        /// <summary>
         /// Gets the GUI action on top of the undo stack.
         /// </summary>
         /// <value>The next undo action, or <c>null</c> if the stack is empty.</value>
@@ -1108,6 +1117,189 @@ namespace Petri.Editor
         Document _document;
         DocumentSettings _newSettings;
         DocumentSettings _oldSettings;
+    }
+
+    /// <summary>
+    /// Change a preprocessor macro's value.
+    /// </summary>
+    public class ChangeMacroAction : GuiAction
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.ChangeMacroAction"/> class.
+        /// </summary>
+        /// <param name="doc">Document.</param>
+        /// <param name="key">The name of the macro.</param>
+        /// <param name="newValue">The new value of the macro.</param>
+        public ChangeMacroAction(Document doc, string key, string newValue)
+        {
+            _document = doc;
+            _key = key;
+            if(doc.PreprocessorMacros.ContainsKey(key)) {
+                _oldValue = doc.PreprocessorMacros[key];
+            }
+            _newValue = newValue;
+        }
+
+        public override void Apply()
+        {
+            _document.PreprocessorMacros[_key] = _newValue;
+        }
+
+        public override GuiAction Reverse()
+        {
+            if(_oldValue != null) {
+                return new ChangeMacroAction(_document, _key, _oldValue); 
+            }
+            else {
+                return new RemoveMacroAction(_document, _key);
+            }
+        }
+
+        public override IFocusable Focus {
+            get {
+                return new FocusableMacroEditor(_document);
+            }
+        }
+
+        public override string Description {
+            get {
+                return Configuration.GetLocalized("Change preprocessor macro's value");
+            }
+        }
+
+        string _key;
+        string _oldValue;
+        string _newValue;
+        Document _document;
+    }
+
+    /// <summary>
+    /// Remove a preprocessor macro.
+    /// </summary>
+    public class RemoveMacroAction : GuiAction
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.RemoveMacroAction"/> class.
+        /// </summary>
+        /// <param name="doc">Document.</param>
+        /// <param name="key">The name of the macro to remove.</param>
+        public RemoveMacroAction(Document doc, string key)
+        {
+            _document = doc;
+            _key = key;
+            _oldValue = doc.PreprocessorMacros[key];
+        }
+
+        public override void Apply()
+        {
+            _document.PreprocessorMacros.Remove(_key);
+        }
+
+        public override GuiAction Reverse()
+        {
+            return new ChangeMacroAction(_document, _key, _oldValue);
+        }
+
+        public override IFocusable Focus {
+            get {
+                return new FocusableMacroEditor(_document);
+            }
+        }
+
+        public override string Description {
+            get {
+                return Configuration.GetLocalized("Remove preprocessor macro");
+            }
+        }
+
+        string _key;
+        string _oldValue;
+        Document _document;
+    }
+
+    /// <summary>
+    /// Add a new header to the document.
+    /// </summary>
+    public class AddHeaderAction : GuiAction
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.AddHeaderAction"/> class.
+        /// </summary>
+        /// <param name="doc">Document.</param>
+        /// <param name="path">The path to the new header.</param>
+        public AddHeaderAction(Document doc, string path)
+        {
+            _document = doc;
+            _path = path;
+        }
+
+        public override void Apply()
+        {
+            _document.AddHeaderNoUpdate(_path);
+        }
+
+        public override GuiAction Reverse()
+        {
+            return new RemoveHeaderAction(_document, _path);
+        }
+
+        public override IFocusable Focus {
+            get {
+                return new FocusableHeadersEditor(_document);
+            }
+        }
+
+        public override string Description {
+            get {
+                return Configuration.GetLocalized("Add a header");
+            }
+        }
+
+        string _path;
+        Document _document;
+    }
+
+    /// <summary>
+    /// Remove a header from the document.
+    /// </summary>
+    public class RemoveHeaderAction : GuiAction
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Petri.Editor.RemoveHeaderAction"/> class.
+        /// </summary>
+        /// <param name="doc">Document.</param>
+        /// <param name="path">The path to the document to remove from the document.</param>
+        public RemoveHeaderAction(Document doc, string path)
+        {
+            _document = doc;
+            _path = path;
+        }
+
+        public override void Apply()
+        {
+            _document.RemoveHeaderNoUpdate(_path);
+            _document.DispatchFunctions();
+        }
+
+        public override GuiAction Reverse()
+        {
+            return new AddHeaderAction(_document, _path);
+        }
+
+        public override IFocusable Focus {
+            get {
+                return new FocusableHeadersEditor(_document);
+            }
+        }
+
+        public override string Description {
+            get {
+                return Configuration.GetLocalized("Remove a header");
+            }
+        }
+
+        string _path;
+        Document _document;
     }
 
     /// <summary>

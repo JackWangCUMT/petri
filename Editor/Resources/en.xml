@@ -238,6 +238,18 @@
 <Key>Change document settings</Key>
 <Value>Change document settings</Value>
 
+<Key>Change preprocessor macro's value</Key>
+<Value>Change preprocessor macro's value</Value>
+
+<Key>Remove preprocessor macro</Key>
+<Value>Remove preprocessor macro</Value>
+
+<Key>Add a header</Key>
+<Value>Add a header</Value>
+
+<Key>Remove a header</Key>
+<Value>Remove a header</Value>
+
 <Key>Open Petri Net…</Key>
 <Value>Open Petri Net…</Value>
 

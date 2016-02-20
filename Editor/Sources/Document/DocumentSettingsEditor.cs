@@ -72,7 +72,7 @@ namespace Petri.Editor
                     TreeIter it;
 
                     if(_languageCombo.GetActiveIter(out it)) {
-                        var newSettings = _document.Settings.GetModifiedClone();
+                        var newSettings = _document.Settings.Clone();
                         newSettings.Language = (Code.Language)int.Parse(_languageCombo.Model.GetStringFromIter(it));
                         _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                         UpdateGUIForLanguage();
@@ -84,7 +84,7 @@ namespace Petri.Editor
                         return;
                     }
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.RunInEditor = _runInEditor.Active;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 };
@@ -115,7 +115,7 @@ namespace Petri.Editor
                         (obj as Entry).Text = _document.Settings.Name;
                     }
                     else {
-                        var newSettings = _document.Settings.GetModifiedClone();
+                        var newSettings = _document.Settings.Clone();
                         newSettings.Name = (obj as Entry).Text;
                         _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                     }
@@ -139,7 +139,7 @@ namespace Petri.Editor
                     try {
                         Code.Enum e = new Code.Enum(_document.Settings.Language,
                                                     (obj as Entry).Text);
-                        var newSettings = _document.Settings.GetModifiedClone();
+                        var newSettings = _document.Settings.Clone();
                         newSettings.Enum = e;
                         _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                     }
@@ -172,7 +172,7 @@ namespace Petri.Editor
                     if((sender as RadioButton).Active) {
                         _customEnumEditor.Sensitive = false;
                         _customEnumEditor.Text = "";
-                        var newSettings = _document.Settings.GetModifiedClone();
+                        var newSettings = _document.Settings.Clone();
                         newSettings.Enum = _document.Settings.DefaultEnum;
                         _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                     }
@@ -207,7 +207,7 @@ namespace Petri.Editor
                         return;
                     }
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.Compiler = (obj as Entry).Text;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 });
@@ -226,7 +226,7 @@ namespace Petri.Editor
                         return;
                     }
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.CompilerFlags.Clear();
                     newSettings.CompilerFlags.AddRange((obj as Entry).Text.Split(new char[]{ ' ' },
                                                                                  StringSplitOptions.RemoveEmptyEntries));
@@ -245,7 +245,7 @@ namespace Petri.Editor
                         return;
                     }
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.RelativeSourceOutputPath = (obj as Entry).Text;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 });
@@ -269,7 +269,7 @@ namespace Petri.Editor
                         return;
                     }
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.RelativeLibOutputPath = (obj as Entry).Text;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 });
@@ -293,7 +293,7 @@ namespace Petri.Editor
                         return;
                     }
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.Hostname = (obj as Entry).Text;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 });
@@ -311,7 +311,7 @@ namespace Petri.Editor
                     }
 
                     try {
-                        var newSettings = _document.Settings.GetModifiedClone();
+                        var newSettings = _document.Settings.Clone();
                         newSettings.Port = UInt16.Parse((obj as Entry).Text);
                         _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                     }
@@ -345,7 +345,7 @@ namespace Petri.Editor
 
                     var tup = _document.Settings.IncludePaths[int.Parse(args.Path)];
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.IncludePaths[int.Parse(args.Path)] = Tuple.Create(args.NewText,
                                                                                   tup.Item2);
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
@@ -367,7 +367,7 @@ namespace Petri.Editor
 
                     var tup = _document.Settings.IncludePaths[int.Parse(args.Path)];
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.IncludePaths[int.Parse(args.Path)] = Tuple.Create(tup.Item1,
                                                                                   !tup.Item2);
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
@@ -412,7 +412,7 @@ namespace Petri.Editor
 
                     var tup = _document.Settings.LibPaths[int.Parse(args.Path)];
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.LibPaths[int.Parse(args.Path)] = Tuple.Create(args.NewText,
                                                                               tup.Item2);
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
@@ -433,7 +433,7 @@ namespace Petri.Editor
 
                     var tup = _document.Settings.LibPaths[int.Parse(args.Path)];
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.LibPaths[int.Parse(args.Path)] = Tuple.Create(tup.Item1,
                                                                               !tup.Item2);
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
@@ -475,7 +475,7 @@ namespace Petri.Editor
                         return;
                     }
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.Libs[int.Parse(args.Path)] = args.NewText;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
 
@@ -638,7 +638,7 @@ namespace Petri.Editor
 
             if(fc.Run() == (int)ResponseType.Accept) {
                 string relativePath = _document.GetRelativeToDoc(fc.Filename);
-                var newSettings = _document.Settings.GetModifiedClone();
+                var newSettings = _document.Settings.Clone();
 
                 if(sender == _addHeaderSearchPath) {
                     newSettings.IncludePaths.Add(Tuple.Create(relativePath, false));
@@ -682,7 +682,7 @@ namespace Petri.Editor
                 for(int i = treePath.Length; i > 0; i--) {
                     _headersSearchPathStore.GetIter(out iter, treePath[(i - 1)]);
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.IncludePaths.Remove(Tuple.Create(_headersSearchPathStore.GetValue(iter,
                                                                                                   0) as string,
                                                                  (bool)(_headersSearchPathStore.GetValue(iter,
@@ -699,7 +699,7 @@ namespace Petri.Editor
                 for(int i = treePath.Length; i > 0; i--) {
                     _libsSearchPathStore.GetIter(out iter, treePath[(i - 1)]);
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.LibPaths.Remove(Tuple.Create(_libsSearchPathStore.GetValue(iter, 0) as string,
                                                              (bool)(_libsSearchPathStore.GetValue(iter,
                                                                                                   1))));
@@ -715,7 +715,7 @@ namespace Petri.Editor
                 for(int i = treePath.Length; i > 0; i--) {
                     _libsStore.GetIter(out iter, treePath[(i - 1)]);
 
-                    var newSettings = _document.Settings.GetModifiedClone();
+                    var newSettings = _document.Settings.Clone();
                     newSettings.Libs.Remove(_libsStore.GetValue(iter, 0) as string);
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 }
