@@ -47,8 +47,9 @@ namespace Petri.Editor
             _cpp = new ToolButton("CppGen");
             _cpp.IconName = "CppGen";
             _cpp.Label = Configuration.GetLocalized("Generate <language>", "C++");
-            _document.LanguageChanged += (sender, e) => _cpp.Label = Configuration.GetLocalized("Generate <language>",
-                                                                                                DocumentSettings.LanguageName(e.NewLanguage));
+            // FIXME:
+            //_document.LanguageChanged += (sender, e) => _cpp.Label = Configuration.GetLocalized("Generate <language>",
+            //                                                                                    DocumentSettings.LanguageName(e.NewLanguage));
 
             buf = Pixbuf.LoadFromResource("build");
             IconTheme.AddBuiltinIcon("Build", (int)(buf.Width / 0.8), buf);

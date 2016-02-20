@@ -78,21 +78,6 @@ namespace Petri.Editor
         }
 
         /// <summary>
-        /// Occurs when the language is changed within the document's settings editor.
-        /// </summary>
-        public event LanguageChangeEventHandler LanguageChanged;
-
-        /// <summary>
-        /// Raises the language changed event.
-        /// </summary>
-        public void OnLanguageChanged()
-        {
-            if(LanguageChanged != null) {
-                LanguageChanged(this, new LanguageChangeEventArgs(Settings.Language));
-            }
-        }
-
-        /// <summary>
         /// Gets the associated windows of the document, such as the document settings window, the header/macro managers and the search dialog.
         /// </summary>
         /// <value>The associated windows.</value>
@@ -198,7 +183,7 @@ namespace Petri.Editor
         {
             UndoManager.Undo();
             var focus = UndoManager.NextRedo.Focus;
-            CurrentController.ManageFocus(focus);
+            focus.Focus();
 
             UpdateUndo();
             Window.Gui.Redraw();
@@ -211,7 +196,7 @@ namespace Petri.Editor
         {
             UndoManager.Redo();
             var focus = UndoManager.NextUndo.Focus;
-            CurrentController.ManageFocus(focus);
+            focus.Focus();
 
             UpdateUndo();
             Window.Gui.Redraw();
@@ -612,8 +597,6 @@ namespace Petri.Editor
             if(Settings == null) {
                 Settings = DocumentSettings.GetDefaultSettings(this);
             }
-
-            OnLanguageChanged();
 
             DebugController.DebugEditor = new DebugEditor(this, null);
 

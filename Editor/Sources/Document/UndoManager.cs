@@ -162,7 +162,7 @@ namespace Petri.Editor
         /// The object that is meant to gain the user's focus upon Apply()ing.
         /// </summary>
         /// <value>The focus.</value>
-        public abstract object Focus {
+        public abstract IFocusable Focus {
             get;
         }
 
@@ -201,7 +201,7 @@ namespace Petri.Editor
             return new GuiActionWrapper(_action.Reverse(), _description);
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
                 return _action.Focus;
             }
@@ -264,18 +264,20 @@ namespace Petri.Editor
         /// When an inner object's Focus returns a List<object>, then the list is flattened into the return value.
         /// </summary>
         /// <value>The focus.</value>
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                var l = new List<object>();
+                var l = new List<IFocusable>();
                 foreach(var a in _actions) {
                     var f = a.Focus;
-                    if(f is IEnumerable<object>)
-                        l.AddRange(f as IEnumerable<object>);
-                    else
+                    if(f is IEnumerable<IFocusable>) {
+                        l.AddRange(f as IEnumerable<IFocusable>);
+                    }
+                    else {
                         l.Add(f);
+                    }
                 }
 
-                return l.AsReadOnly();
+                return new FocusableList(l);
             }
         }
 
@@ -316,9 +318,9 @@ namespace Petri.Editor
             return new ChangeParentAction(_entity, _oldParent); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _entity;
+                return new FocusableEntity(_entity);
             }
         }
 
@@ -360,9 +362,9 @@ namespace Petri.Editor
             return new ChangeNameAction(_entity, _oldName); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _entity;
+                return new FocusableEntity(_entity);
             }
         }
 
@@ -409,9 +411,9 @@ namespace Petri.Editor
             return new ChangeRequiredTokensAction(_state, _oldCount); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _state;
+                return new FocusableEntity(_state);
             }
         }
 
@@ -481,9 +483,9 @@ namespace Petri.Editor
             return new MoveAction(_entity, new Cairo.PointD(-_delta.X, -_delta.Y), _oldGrid, _grid); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _entity;
+                return new FocusableEntity(_entity);
             }
         }
 
@@ -532,9 +534,9 @@ namespace Petri.Editor
             return new ToggleActiveAction(_entity); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _entity;
+                return new FocusableEntity(_entity);
             }
         }
 
@@ -574,9 +576,9 @@ namespace Petri.Editor
             return new ConditionChangeAction(Transition, _oldCondition); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return Transition;
+                return new FocusableEntity(Transition);
             }
         }
 
@@ -621,9 +623,9 @@ namespace Petri.Editor
             return new InvocationChangeAction(Action, _oldInvocation); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return Action;
+                return new FocusableEntity(Action);
             }
         }
 
@@ -661,9 +663,9 @@ namespace Petri.Editor
             return new RemoveCommentAction(_comment); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _comment;
+                return new FocusableEntity(_comment);
             }
         }
 
@@ -696,9 +698,9 @@ namespace Petri.Editor
             return new AddCommentAction(_comment); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _comment.Parent;
+                return new FocusableEntity(_comment.Parent);
             }
         }
 
@@ -741,9 +743,9 @@ namespace Petri.Editor
             return new ChangeCommentColorAction(_comment, _oldColor); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _comment;
+                return new FocusableEntity(_comment);
             }
         }
 
@@ -784,9 +786,9 @@ namespace Petri.Editor
             return new ResizeCommentAction(_comment, _oldSize); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _comment;
+                return new FocusableEntity(_comment);
             }
         }
 
@@ -826,9 +828,9 @@ namespace Petri.Editor
             return new RemoveTransitionAction(_transition, _incrementTokenCount); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _transition;
+                return new FocusableEntity(_transition);
             }
         }
 
@@ -932,9 +934,9 @@ namespace Petri.Editor
                                                  _decrementOld); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _transition;
+                return new FocusableEntity(_transition);
             }
         }
 
@@ -978,9 +980,9 @@ namespace Petri.Editor
             return new AddTransitionAction(_transition, _decrementTokenCount); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _transition.Parent;
+                return new FocusableEntity(_transition.Parent);
             }
         }
 
@@ -1014,9 +1016,9 @@ namespace Petri.Editor
             return new RemoveStateAction(_state); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _state;
+                return new FocusableEntity(_state);
             }
         }
 
@@ -1049,9 +1051,9 @@ namespace Petri.Editor
             return new AddStateAction(_state); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                return _state.Parent;
+                return new FocusableEntity(_state.Parent);
             }
         }
 
@@ -1091,10 +1093,9 @@ namespace Petri.Editor
             return new ChangeSettingsAction(_document, _oldSettings); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
-                // TODO: actual focus
-                return null;
+                return new FocusableSettings(_document);
             }
         }
 
@@ -1114,7 +1115,7 @@ namespace Petri.Editor
     /// </summary>
     public class DoNothingAction : GuiAction
     {
-        public DoNothingAction(object focus)
+        public DoNothingAction(IFocusable focus)
         {
             _focus = focus;
         }
@@ -1128,7 +1129,7 @@ namespace Petri.Editor
             return new DoNothingAction(_focus); 
         }
 
-        public override object Focus {
+        public override IFocusable Focus {
             get {
                 return _focus;
             }
@@ -1140,7 +1141,7 @@ namespace Petri.Editor
             }
         }
 
-        object _focus;
+        IFocusable _focus;
     }
 }
 

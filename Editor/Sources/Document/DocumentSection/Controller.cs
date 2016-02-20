@@ -26,7 +26,15 @@ namespace Petri.Editor
 {
     public abstract class Controller
     {
-        public abstract void ManageFocus(object focus);
+        protected Controller(Document document)
+        {
+            Document = document;
+        }
+
+        public Document Document {
+            get;
+            private set;
+        }
 
         public abstract void UpdateMenuItems();
 

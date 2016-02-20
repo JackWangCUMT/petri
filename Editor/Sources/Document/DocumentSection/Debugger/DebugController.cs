@@ -27,21 +27,14 @@ namespace Petri.Editor
 {
     public class DebugController : Controller
     {
-        public DebugController(Document doc)
+        public DebugController(Document doc) : base(doc)
         {
-            Document = doc;
-
             LastEvaluation = Configuration.GetLocalized("Expression");
 
             Client = new DebugClient(doc);
             ActiveStates = new Dictionary<State, int>();
             Breakpoints = new HashSet<Action>();
             DebugEditor = new DebugEditor(doc, null);
-        }
-
-        public Document Document {
-            get;
-            private set;
         }
 
         public DebugClient Client {
@@ -99,11 +92,6 @@ namespace Petri.Editor
         {
             Breakpoints.Remove(action);
             Client.UpdateBreakpoints();
-        }
-
-        public override void ManageFocus(object focus)
-        {
-
         }
 
         public override void UpdateMenuItems()

@@ -40,7 +40,6 @@ namespace Petri.Editor
             _window.DefaultHeight = 600;
             _window.SetSizeRequest(300, 600);
 
-
             _window.SetPosition(WindowPosition.Center);
             int x, y;
             _window.GetPosition(out x, out y);
@@ -59,51 +58,56 @@ namespace Petri.Editor
             _window.Add(scrolledWindow);
 
             {
-                ComboBox combo = ComboBox.NewText();
+                _languageCombo = ComboBox.NewText();
 
                 foreach(Code.Language l in Enum.GetValues(typeof(Code.Language))) {
-                    combo.AppendText(DocumentSettings.LanguageName(l));
+                    _languageCombo.AppendText(DocumentSettings.LanguageName(l));
                 }
 
-                TreeIter iter;
-                combo.Model.GetIterFirst(out iter);
-                combo.Model.GetIterFirst(out iter);
-                do {
-                    GLib.Value thisRow = new GLib.Value();
-                    combo.Model.GetValue(iter, 0, ref thisRow);
-                    if((thisRow.Val as string).Equals(_document.Settings.LanguageName())) {
-                        combo.SetActiveIter(iter);
-                        break;
+                _languageCombo.Changed += (object sender, EventArgs e) => {
+                    if(_updating) {
+                        return;
                     }
-                } while(combo.Model.IterNext(ref iter));
 
-                combo.Changed += (object sender, EventArgs e) => {
                     TreeIter it;
 
-                    if(combo.GetActiveIter(out it)) {
+                    if(_languageCombo.GetActiveIter(out it)) {
                         var newSettings = _document.Settings.GetModifiedClone();
-                        newSettings.Language = (Code.Language)int.Parse(combo.Model.GetStringFromIter(it));
+                        newSettings.Language = (Code.Language)int.Parse(_languageCombo.Model.GetStringFromIter(it));
                         _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
+                        UpdateGUIForLanguage();
                     }
                 };
                 _runInEditor = new CheckButton(Configuration.GetLocalized("Run the Petri net in the editor"));
-                _runInEditor.Active = _document.Settings.RunInEditor;
                 _runInEditor.Toggled += (sender, e) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     var newSettings = _document.Settings.GetModifiedClone();
                     newSettings.RunInEditor = _runInEditor.Active;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 };
 
-                Label labelName = new Label(Configuration.GetLocalized("<language> name of the Petri net:", _document.Settings.LanguageName()));
-                _document.LanguageChanged += (sender, e) => labelName.Text = Configuration.GetLocalized("<language> name of the Petri net:", _document.Settings.LanguageName());
+                _labelName = new Label(Configuration.GetLocalized("<language> name of the Petri net:",
+                                                                  _document.Settings.LanguageName()));
 
-                Entry entry = new Entry(_document.Settings.Name);
-                Application.RegisterValidation(entry, false, (obj, p) => {
+                _nameEntry = new Entry();
+                Application.RegisterValidation(_nameEntry, false, (obj, p) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     Regex name = new Regex(Code.Parser.NamePattern);
                     Match nameMatch = name.Match((obj as Entry).Text);
 
                     if(!nameMatch.Success || nameMatch.Value != (obj as Entry).Text) {
-                        MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, Configuration.GetLocalized("The Petri net's name is not a valid <language> identifier.", _document.Settings.LanguageName()));
+                        MessageDialog d = new MessageDialog(_window,
+                                                            DialogFlags.Modal,
+                                                            MessageType.Error,
+                                                            ButtonsType.None,
+                                                            Configuration.GetLocalized("The Petri net's name is not a valid <language> identifier.",
+                                                                                       _document.Settings.LanguageName()));
                         d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                         d.Run();
                         d.Destroy();
@@ -117,25 +121,34 @@ namespace Petri.Editor
                     }
                 });
 
-                vbox.PackStart(combo, false, false, 0);
+                vbox.PackStart(_languageCombo, false, false, 0);
                 vbox.PackStart(_runInEditor, false, false, 0);
                 var hbox = new HBox(false, 5);
-                hbox.PackStart(labelName, false, false, 0);
+                hbox.PackStart(_labelName, false, false, 0);
                 vbox.PackStart(hbox, false, false, 0);
-                vbox.PackStart(entry, false, false, 0);
+                vbox.PackStart(_nameEntry, false, false, 0);
 
                 Label labelEnum = new Label(Configuration.GetLocalized("Enum \"Action Result\":"));
                 _customEnumEditor = new Entry("");
 
                 Application.RegisterValidation(_customEnumEditor, false, (obj, p) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     try {
-                        Code.Enum e = new Code.Enum(_document.Settings.Language, (obj as Entry).Text);
+                        Code.Enum e = new Code.Enum(_document.Settings.Language,
+                                                    (obj as Entry).Text);
                         var newSettings = _document.Settings.GetModifiedClone();
                         newSettings.Enum = e;
                         _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                     }
                     catch(Exception) {
-                        MessageDialog d = new MessageDialog(_window, DialogFlags.Modal, MessageType.Error, ButtonsType.None, Configuration.GetLocalized("Invalid name for the enum or one of its values."));
+                        MessageDialog d = new MessageDialog(_window,
+                                                            DialogFlags.Modal,
+                                                            MessageType.Error,
+                                                            ButtonsType.None,
+                                                            Configuration.GetLocalized("Invalid name for the enum or one of its values."));
                         d.AddButton(Configuration.GetLocalized("Cancel"), ResponseType.Cancel);
                         d.Run();
                         d.Destroy();
@@ -152,6 +165,10 @@ namespace Petri.Editor
                 var radioVBox = new VBox(true, 2);
                 _defaultEnum = new RadioButton(Configuration.GetLocalized("Use the default enum (ActionResult)"));
                 _defaultEnum.Toggled += (object sender, EventArgs e) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     if((sender as RadioButton).Active) {
                         _customEnumEditor.Sensitive = false;
                         _customEnumEditor.Text = "";
@@ -160,8 +177,13 @@ namespace Petri.Editor
                         _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                     }
                 };
-                _customEnum = new RadioButton(_defaultEnum, Configuration.GetLocalized("Use the following enum (name, value1, value2…):"));
+                _customEnum = new RadioButton(_defaultEnum,
+                                              Configuration.GetLocalized("Use the following enum (name, value1, value2…):"));
                 _customEnum.Toggled += (object sender, EventArgs e) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     if((sender as RadioButton).Active) {
                         _customEnumEditor.Sensitive = true;
                         _customEnumEditor.Text = _document.Settings.Enum.ToString();
@@ -170,60 +192,59 @@ namespace Petri.Editor
                 radioVBox.PackStart(_defaultEnum, true, true, 2);
                 radioVBox.PackStart(_customEnum, true, true, 2);
 
-                if(_document.Settings.Enum.Equals(_document.Settings.DefaultEnum)) {
-                    _defaultEnum.Active = true;
-                    _customEnum.Active = false;
-                    _customEnumEditor.Sensitive = false;
-                }
-                else {
-                    _defaultEnum.Active = false;
-                    _customEnum.Active = true;
-                    _customEnumEditor.Sensitive = true;
-                    _customEnumEditor.Text = _document.Settings.Enum.ToString();
-                }
-
                 hbox = new HBox(false, 5);
                 hbox.PackStart(labelEnum, false, false, 0);
                 vbox.PackStart(hbox, false, false, 0);
                 vbox.PackStart(radioVBox, false, false, 0);
                 vbox.PackStart(_customEnumEditor, false, false, 0);
 
-                var pathLabel = new Label(Configuration.GetLocalized("Path to the <language> compiler:", _document.Settings.LanguageName()));
-                _document.LanguageChanged += (sender, e) => pathLabel.Text = Configuration.GetLocalized("Path to the <language> compiler:", _document.Settings.LanguageName());
-                _document.LanguageChanged += UpdateGUIForLanguage;
+                _labelCompiler = new Label(Configuration.GetLocalized("Path to the <language> compiler:",
+                                                                      _document.Settings.LanguageName()));
 
-                entry = new Entry(_document.Settings.Compiler);
-                Application.RegisterValidation(entry, false, (obj, p) => {
+                _compilerEntry = new Entry();
+                Application.RegisterValidation(_compilerEntry, false, (obj, p) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     var newSettings = _document.Settings.GetModifiedClone();
                     newSettings.Compiler = (obj as Entry).Text;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 });
 
                 hbox = new HBox(false, 5);
-                hbox.PackStart(pathLabel, false, false, 0);
+                hbox.PackStart(_labelCompiler, false, false, 0);
                 vbox.PackStart(hbox, false, false, 0);
-                vbox.PackStart(entry, false, false, 0);
+                vbox.PackStart(_compilerEntry, false, false, 0);
 
-                var flagsLabel = new Label(Configuration.GetLocalized("Flags forwarded to the <language> compiler:", _document.Settings.LanguageName()));
-                _document.LanguageChanged += (sender, e) => flagsLabel.Text = Configuration.GetLocalized("Flags forwarded to the <language> compiler:", _document.Settings.LanguageName());
+                _labelFlags = new Label(Configuration.GetLocalized("Flags forwarded to the <language> compiler:",
+                                                                   _document.Settings.LanguageName()));
 
-                entry = new Entry(String.Join(" ", _document.Settings.CompilerFlags));
-                Application.RegisterValidation(entry, false, (obj, p) => {
+                _compilerFlags = new Entry();
+                Application.RegisterValidation(_compilerFlags, false, (obj, p) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     var newSettings = _document.Settings.GetModifiedClone();
                     newSettings.CompilerFlags.Clear();
-                    newSettings.CompilerFlags.AddRange((obj as Entry).Text.Split(new char[]{ ' ' }, StringSplitOptions.RemoveEmptyEntries));
+                    newSettings.CompilerFlags.AddRange((obj as Entry).Text.Split(new char[]{ ' ' },
+                                                                                 StringSplitOptions.RemoveEmptyEntries));
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 });
 
                 hbox = new HBox(false, 5);
-                hbox.PackStart(flagsLabel, false, false, 0);
+                hbox.PackStart(_labelFlags, false, false, 0);
                 vbox.PackStart(hbox, false, false, 0);
-                vbox.PackStart(entry, false, false, 0);
-
+                vbox.PackStart(_compilerFlags, false, false, 0);
 
                 var outputLabel = new Label(Configuration.GetLocalized("Output path for the generated code (relative to the document):"));
-                _sourceOutputPath = new Entry(_document.Settings.RelativeSourceOutputPath);
+                _sourceOutputPath = new Entry();
                 Application.RegisterValidation(_sourceOutputPath, false, (obj, p) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     var newSettings = _document.Settings.GetModifiedClone();
                     newSettings.RelativeSourceOutputPath = (obj as Entry).Text;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
@@ -242,8 +263,12 @@ namespace Petri.Editor
                 vbox.PackStart(hbox, false, false, 0);
 
                 outputLabel = new Label(Configuration.GetLocalized("Output path for the dynamic library (relative to the document):"));
-                _libOutputPath = new Entry(_document.Settings.RelativeLibOutputPath);
+                _libOutputPath = new Entry();
                 Application.RegisterValidation(_libOutputPath, false, (obj, p) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     var newSettings = _document.Settings.GetModifiedClone();
                     newSettings.RelativeLibOutputPath = (obj as Entry).Text;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
@@ -261,22 +286,30 @@ namespace Petri.Editor
                 hbox.PackStart(_selectLibOutputPath, false, false, 0);
                 vbox.PackStart(hbox, false, false, 0);
 
-                var hostLabel = new Label(Configuration.GetLocalized("Host name for the debugger:"));
-                entry = new Entry(_document.Settings.Hostname);
-                Application.RegisterValidation(entry, false, (obj, p) => {
+                var label = new Label(Configuration.GetLocalized("Host name for the debugger:"));
+                _hostnameEntry = new Entry(_document.Settings.Hostname);
+                Application.RegisterValidation(_hostnameEntry, false, (obj, p) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     var newSettings = _document.Settings.GetModifiedClone();
                     newSettings.Hostname = (obj as Entry).Text;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 });
 
                 hbox = new HBox(false, 5);
-                hbox.PackStart(hostLabel, false, false, 0);
+                hbox.PackStart(label, false, false, 0);
                 vbox.PackStart(hbox, false, false, 0);
-                vbox.PackStart(entry, false, false, 0);
+                vbox.PackStart(_hostnameEntry, false, false, 0);
 
-                hostLabel = new Label(Configuration.GetLocalized("TCP Port for the debugger communication:"));
-                entry = new Entry(_document.Settings.Port.ToString());
-                Application.RegisterValidation(entry, false, (obj, p) => {
+                label = new Label(Configuration.GetLocalized("TCP Port for the debugger communication:"));
+                _portEntry = new Entry(_document.Settings.Port.ToString());
+                Application.RegisterValidation(_portEntry, false, (obj, p) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     try {
                         var newSettings = _document.Settings.GetModifiedClone();
                         newSettings.Port = UInt16.Parse((obj as Entry).Text);
@@ -288,9 +321,9 @@ namespace Petri.Editor
                 });
 
                 hbox = new HBox(false, 5);
-                hbox.PackStart(hostLabel, false, false, 0);
+                hbox.PackStart(label, false, false, 0);
                 vbox.PackStart(hbox, false, false, 0);
-                vbox.PackStart(entry, false, false, 0);
+                vbox.PackStart(_portEntry, false, false, 0);
             }
 
             {
@@ -306,10 +339,15 @@ namespace Petri.Editor
                 var pathCell = new Gtk.CellRendererText();
                 pathCell.Editable = true;
                 pathCell.Edited += (object o, EditedArgs args) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     var tup = _document.Settings.IncludePaths[int.Parse(args.Path)];
 
                     var newSettings = _document.Settings.GetModifiedClone();
-                    newSettings.IncludePaths[int.Parse(args.Path)] = Tuple.Create(args.NewText, tup.Item2);
+                    newSettings.IncludePaths[int.Parse(args.Path)] = Tuple.Create(args.NewText,
+                                                                                  tup.Item2);
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
 
                     this.BuildHeadersSearchPath();
@@ -323,10 +361,15 @@ namespace Petri.Editor
                 c.Title = "Recursive";
                 var recursivityCell = new Gtk.CellRendererToggle();
                 recursivityCell.Toggled += (object o, ToggledArgs args) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     var tup = _document.Settings.IncludePaths[int.Parse(args.Path)];
 
                     var newSettings = _document.Settings.GetModifiedClone();
-                    newSettings.IncludePaths[int.Parse(args.Path)] = Tuple.Create(tup.Item1, !tup.Item2);
+                    newSettings.IncludePaths[int.Parse(args.Path)] = Tuple.Create(tup.Item1,
+                                                                                  !tup.Item2);
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
 
                     this.BuildHeadersSearchPath();
@@ -363,10 +406,15 @@ namespace Petri.Editor
                 var pathCell = new Gtk.CellRendererText();
                 pathCell.Editable = true;
                 pathCell.Edited += (object o, EditedArgs args) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     var tup = _document.Settings.LibPaths[int.Parse(args.Path)];
 
                     var newSettings = _document.Settings.GetModifiedClone();
-                    newSettings.LibPaths[int.Parse(args.Path)] = Tuple.Create(args.NewText, tup.Item2);
+                    newSettings.LibPaths[int.Parse(args.Path)] = Tuple.Create(args.NewText,
+                                                                              tup.Item2);
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
 
                     this.BuildLibsSearchPath();
@@ -379,10 +427,15 @@ namespace Petri.Editor
                 c.Title = Configuration.GetLocalized("Recursive");
                 var recursivityCell = new Gtk.CellRendererToggle();
                 recursivityCell.Toggled += (object o, ToggledArgs args) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     var tup = _document.Settings.LibPaths[int.Parse(args.Path)];
 
                     var newSettings = _document.Settings.GetModifiedClone();
-                    newSettings.LibPaths[int.Parse(args.Path)] = Tuple.Create(tup.Item1, !tup.Item2);
+                    newSettings.LibPaths[int.Parse(args.Path)] = Tuple.Create(tup.Item1,
+                                                                              !tup.Item2);
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
 
                     this.BuildLibsSearchPath();
@@ -418,6 +471,10 @@ namespace Petri.Editor
                 var pathCell = new Gtk.CellRendererText();
                 pathCell.Editable = true;
                 pathCell.Edited += (object o, EditedArgs args) => {
+                    if(_updating) {
+                        return;
+                    }
+
                     var newSettings = _document.Settings.GetModifiedClone();
                     newSettings.Libs[int.Parse(args.Path)] = args.NewText;
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
@@ -444,18 +501,64 @@ namespace Petri.Editor
             }
 
             _window.DeleteEvent += this.OnDeleteEvent;
-
-            this.BuildHeadersSearchPath();
-            this.BuildLibsSearchPath();
-            this.BuildLibs();
         }
 
         public void Show()
         {
-            UpdateGUIForLanguage(this, null);
+            UpdateUI();
 
             _window.Present();
             _document.AssociatedWindows.Add(_window);
+        }
+
+        public void UpdateUI()
+        {
+            _updating = true;
+
+            TreeIter iter;
+            _languageCombo.Model.GetIterFirst(out iter);
+            _languageCombo.Model.GetIterFirst(out iter);
+            do {
+                GLib.Value thisRow = new GLib.Value();
+                _languageCombo.Model.GetValue(iter, 0, ref thisRow);
+                if((thisRow.Val as string).Equals(_document.Settings.LanguageName())) {
+                    _languageCombo.SetActiveIter(iter);
+                    break;
+                }
+            } while(_languageCombo.Model.IterNext(ref iter));
+
+            _runInEditor.Active = _document.Settings.RunInEditor;
+
+            _nameEntry.Text = _document.Settings.Name;
+
+            if(_document.Settings.Enum.Equals(_document.Settings.DefaultEnum)) {
+                _defaultEnum.Active = true;
+                _customEnum.Active = false;
+                _customEnumEditor.Sensitive = false;
+            }
+            else {
+                _defaultEnum.Active = false;
+                _customEnum.Active = true;
+                _customEnumEditor.Sensitive = true;
+                _customEnumEditor.Text = _document.Settings.Enum.ToString();
+            }
+
+            _compilerEntry.Text = _document.Settings.Compiler;
+            _compilerFlags.Text = String.Join(" ", _document.Settings.CompilerFlags);
+
+            _sourceOutputPath.Text = _document.Settings.RelativeSourceOutputPath;
+            _libOutputPath.Text = _document.Settings.RelativeLibOutputPath;
+
+            _hostnameEntry.Text = _document.Settings.Hostname;
+            _portEntry.Text = _document.Settings.Port.ToString();
+
+            this.BuildHeadersSearchPath();
+            this.BuildLibsSearchPath();
+            this.BuildLibs();
+
+            UpdateGUIForLanguage();
+
+            _updating = false;
         }
 
         public void Hide()
@@ -464,7 +567,15 @@ namespace Petri.Editor
             _window.Hide();
         }
 
-        void UpdateGUIForLanguage(object sender, LanguageChangeEventArgs e) {
+        void UpdateGUIForLanguage()
+        {
+            _labelName.Text = Configuration.GetLocalized("<language> name of the Petri net:",
+                                                         _document.Settings.LanguageName());
+            _labelCompiler.Text = Configuration.GetLocalized("Path to the <language> compiler:",
+                                                             _document.Settings.LanguageName());
+            _labelFlags.Text = Configuration.GetLocalized("Flags forwarded to the <language> compiler:",
+                                                          _document.Settings.LanguageName());
+            
             _window.ShowAll();
 
             if(_document.Settings.Language == Code.Language.CSharp) {
@@ -507,7 +618,8 @@ namespace Petri.Editor
                 filter.AddPattern("*.dll");
             }
             else if(sender == _selectSourceOutputPath) {
-                title = Configuration.GetLocalized("Select the directory where to generate the <language> source code…", _document.Settings.LanguageName());
+                title = Configuration.GetLocalized("Select the directory where to generate the <language> source code…",
+                                                   _document.Settings.LanguageName());
                 action = FileChooserAction.SelectFolder;
             }
             else if(sender == _selectLibOutputPath) {
@@ -516,10 +628,10 @@ namespace Petri.Editor
             }
 
             var fc = new Gtk.FileChooserDialog(title, _window,
-                action,
-                new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
-                    Configuration.GetLocalized("Open"), ResponseType.Accept
-                });
+                                               action,
+                                               new object[] {Configuration.GetLocalized("Cancel"), ResponseType.Cancel,
+                Configuration.GetLocalized("Open"), ResponseType.Accept
+            });
             if(filter != null) {
                 fc.AddFilter(filter);
             }
@@ -571,7 +683,10 @@ namespace Petri.Editor
                     _headersSearchPathStore.GetIter(out iter, treePath[(i - 1)]);
 
                     var newSettings = _document.Settings.GetModifiedClone();
-                    newSettings.IncludePaths.Remove(Tuple.Create(_headersSearchPathStore.GetValue(iter, 0) as string, (bool)(_headersSearchPathStore.GetValue(iter, 1))));
+                    newSettings.IncludePaths.Remove(Tuple.Create(_headersSearchPathStore.GetValue(iter,
+                                                                                                  0) as string,
+                                                                 (bool)(_headersSearchPathStore.GetValue(iter,
+                                                                                                         1))));
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 }
 
@@ -585,7 +700,9 @@ namespace Petri.Editor
                     _libsSearchPathStore.GetIter(out iter, treePath[(i - 1)]);
 
                     var newSettings = _document.Settings.GetModifiedClone();
-                    newSettings.LibPaths.Remove(Tuple.Create(_libsSearchPathStore.GetValue(iter, 0) as string, (bool)(_libsSearchPathStore.GetValue(iter, 1))));
+                    newSettings.LibPaths.Remove(Tuple.Create(_libsSearchPathStore.GetValue(iter, 0) as string,
+                                                             (bool)(_libsSearchPathStore.GetValue(iter,
+                                                                                                  1))));
                     _document.CommitGuiAction(new ChangeSettingsAction(_document, newSettings));
                 }
 
@@ -658,6 +775,18 @@ namespace Petri.Editor
         ListStore _libsStore;
         Button _addLib;
         Button _removeLib;
+
+        ComboBox _languageCombo;
+        Entry _nameEntry;
+        Entry _compilerEntry;
+        Entry _compilerFlags;
+        Entry _hostnameEntry;
+        Entry _portEntry;
+        Label _labelName;
+        Label _labelCompiler;
+        Label _labelFlags;
+
+        bool _updating;
     }
 }
 

@@ -346,10 +346,6 @@ namespace Petri.Editor
             }
             set {
                 _language = value;
-
-                if(_document?.Settings != null && _document is Document) {
-                    ((Document)_document).OnLanguageChanged();
-                }
             }
         }
 

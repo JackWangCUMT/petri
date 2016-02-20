@@ -29,19 +29,17 @@ namespace Petri.Editor
 {
     public class EditorController : Controller
     {
-        public EditorController(Document doc)
+        public EditorController(Document doc) : base(doc)
         {
-            _document = doc;
-
             EntityEditor = EntityEditor.GetEditor(null, doc);
             this.UpdateMenuItems();
         }
 
         public override void Copy()
         {
-            if(_document.Window.EditorGui.View.SelectedEntities.Count > 0) {
-                Application.Clipboard = new HashSet<Entity>(CloneEntities(_document.Window.EditorGui.View.SelectedEntities,
-                                                                          _document.Window.EditorGui.View.CurrentPetriNet));
+            if(Document.Window.EditorGui.View.SelectedEntities.Count > 0) {
+                Application.Clipboard = new HashSet<Entity>(CloneEntities(Document.Window.EditorGui.View.SelectedEntities,
+                                                                          Document.Window.EditorGui.View.CurrentPetriNet));
                 Application.PasteCount = 0;
 
                 this.UpdateMenuItems();
@@ -54,11 +52,11 @@ namespace Petri.Editor
                 ++Application.PasteCount;
 
                 var action = PasteAction();
-                _document.CommitGuiAction(action);
+                Document.CommitGuiAction(action);
 
                 var pasted = (action.Focus as IEnumerable<object>).OfType<Entity>();
-                _document.Window.EditorGui.View.SelectedEntities.Clear();
-                _document.Window.EditorGui.View.SelectedEntities.UnionWith(pasted);
+                Document.Window.EditorGui.View.SelectedEntities.Clear();
+                Document.Window.EditorGui.View.SelectedEntities.UnionWith(pasted);
 
                 this.UpdateSelection();
             }
@@ -66,17 +64,17 @@ namespace Petri.Editor
 
         public override void Cut()
         {
-            if(_document.Window.EditorGui.View.SelectedEntities.Count > 0) {
+            if(Document.Window.EditorGui.View.SelectedEntities.Count > 0) {
                 Copy();
 
-                _document.CommitGuiAction(new GuiActionWrapper(this.RemoveSelection(),
-                                                               Configuration.GetLocalized("Cut the entities")));
+                Document.CommitGuiAction(new GuiActionWrapper(this.RemoveSelection(),
+                                                              Configuration.GetLocalized("Cut the entities")));
             }
         }
 
         public void EmbedInMacro()
         {
-            var selected = _document.Window.EditorGui.View.SelectedEntities;
+            var selected = Document.Window.EditorGui.View.SelectedEntities;
             if(selected.Count > 0) {
                 var toRemove = new List<Entity>();
                 foreach(var e in selected) {
@@ -101,7 +99,7 @@ namespace Petri.Editor
                 }
 
                 if(toRemove.Count > 0) {
-                    MessageDialog d = new MessageDialog(_document.Window,
+                    MessageDialog d = new MessageDialog(Document.Window,
                                                         DialogFlags.Modal,
                                                         MessageType.Error,
                                                         ButtonsType.None,
@@ -122,8 +120,8 @@ namespace Petri.Editor
                         pos.Y = Math.Min(pos.Y, e.Position.Y);
                     }
                 }
-                var macro = new InnerPetriNet(_document,
-                                              _document.Window.EditorGui.View.CurrentPetriNet,
+                var macro = new InnerPetriNet(Document,
+                                              Document.Window.EditorGui.View.CurrentPetriNet,
                                               false,
                                               pos);
 
@@ -161,8 +159,8 @@ namespace Petri.Editor
 
                 actions.Add(new AddStateAction(macro));
 
-                _document.CommitGuiAction(new GuiActionList(actions,
-                                                            Configuration.GetLocalized("Wrap into a macro")));
+                Document.CommitGuiAction(new GuiActionList(actions,
+                                                           Configuration.GetLocalized("Wrap into a macro")));
             }
         }
 
@@ -171,7 +169,7 @@ namespace Petri.Editor
             var states = new List<State>();
             var comments = new List<Comment>();
             var transitions = new HashSet<Transition>();
-            foreach(var e in _document.Window.EditorGui.View.SelectedEntities) {
+            foreach(var e in Document.Window.EditorGui.View.SelectedEntities) {
                 if(e is State) {
                     if(!(e is ExitPoint)) { // Do not erase exit point!
                         states.Add(e as State);
@@ -205,7 +203,7 @@ namespace Petri.Editor
                 deleteEntities.Add(new RemoveCommentAction(c));
             }
 
-            _document.Window.EditorGui.View.ResetSelection();
+            Document.Window.EditorGui.View.ResetSelection();
 
             return new GuiActionList(deleteEntities,
                                      Configuration.GetLocalized("Remove the entities"));
@@ -213,27 +211,27 @@ namespace Petri.Editor
 
         public override void SelectAll()
         {
-            var selected = _document.Window.EditorGui.View.SelectedEntities;
+            var selected = Document.Window.EditorGui.View.SelectedEntities;
             selected.Clear();
-            foreach(var s in _document.Window.EditorGui.View.CurrentPetriNet.States) {
+            foreach(var s in Document.Window.EditorGui.View.CurrentPetriNet.States) {
                 selected.Add(s);
             }
-            foreach(var t in _document.Window.EditorGui.View.CurrentPetriNet.Transitions) {
+            foreach(var t in Document.Window.EditorGui.View.CurrentPetriNet.Transitions) {
                 selected.Add(t);
             }
-            foreach(var c in _document.Window.EditorGui.View.CurrentPetriNet.Comments) {
+            foreach(var c in Document.Window.EditorGui.View.CurrentPetriNet.Comments) {
                 selected.Add(c);
             }
-            _document.Window.EditorGui.View.Redraw();
+            Document.Window.EditorGui.View.Redraw();
 
             UpdateSelection();
         }
 
         public void UpdateSelection()
         {
-            _document.UpdateMenuItems();
-            if(_document.Window.EditorGui.View.SelectedEntities.Count == 1) {
-                this.EditedObject = _document.Window.EditorGui.View.SelectedEntity;
+            Document.UpdateMenuItems();
+            if(Document.Window.EditorGui.View.SelectedEntities.Count == 1) {
+                this.EditedObject = Document.Window.EditorGui.View.SelectedEntity;
             }
             else {
                 this.EditedObject = null;
@@ -242,10 +240,10 @@ namespace Petri.Editor
 
         public override void UpdateMenuItems()
         {
-            _document.Window.CopyItem.Sensitive = _document.Window.EditorGui.View.SelectedEntities.Count > 0;
-            _document.Window.CutItem.Sensitive = _document.Window.EditorGui.View.SelectedEntities.Count > 0;
-            _document.Window.PasteItem.Sensitive = Application.Clipboard.Count > 0;
-            _document.Window.EmbedItem.Sensitive = _document.Window.EditorGui.View.SelectedEntities.Count > 0;
+            Document.Window.CopyItem.Sensitive = Document.Window.EditorGui.View.SelectedEntities.Count > 0;
+            Document.Window.CutItem.Sensitive = Document.Window.EditorGui.View.SelectedEntities.Count > 0;
+            Document.Window.PasteItem.Sensitive = Application.Clipboard.Count > 0;
+            Document.Window.EmbedItem.Sensitive = Document.Window.EditorGui.View.SelectedEntities.Count > 0;
         }
 
         public EntityEditor EntityEditor {
@@ -259,7 +257,7 @@ namespace Petri.Editor
             }
             set {
                 if(EntityEditor.Entity != value) {
-                    EntityEditor = EntityEditor.GetEditor(value, _document);
+                    EntityEditor = EntityEditor.GetEditor(value, Document);
                 }
             }
         }
@@ -268,7 +266,8 @@ namespace Petri.Editor
         {
             var actionList = new List<GuiAction>();
 
-            var newEntities = CloneEntities(Application.Clipboard, _document.Window.EditorGui.View.CurrentPetriNet);
+            var newEntities = CloneEntities(Application.Clipboard,
+                                            Document.Window.EditorGui.View.CurrentPetriNet);
             var states = from e in newEntities
                                   where e is State
                                   select (e as State);
@@ -281,14 +280,14 @@ namespace Petri.Editor
 
             foreach(State s in states) {
                 // Change entity's owner
-                s.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
+                s.Parent = Document.Window.EditorGui.View.CurrentPetriNet;
                 s.Position = new Cairo.PointD(s.Position.X + 20 * Application.PasteCount,
                                               s.Position.Y + 20 * Application.PasteCount);
                 actionList.Add(new AddStateAction(s));
             }
             foreach(Comment c in comments) {
                 // Change entity's owner
-                c.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
+                c.Parent = Document.Window.EditorGui.View.CurrentPetriNet;
                 c.Position = new Cairo.PointD(c.Position.X + 20 * Application.PasteCount,
                                               c.Position.Y + 20 * Application.PasteCount);
                 actionList.Add(new AddCommentAction(c));
@@ -296,7 +295,7 @@ namespace Petri.Editor
 
             foreach(Transition t in transitions) {
                 // Change entity's owner
-                t.Parent = _document.Window.EditorGui.View.CurrentPetriNet;
+                t.Parent = Document.Window.EditorGui.View.CurrentPetriNet;
                 actionList.Add(new AddTransitionAction(t, false));
             }
 
@@ -375,17 +374,6 @@ namespace Petri.Editor
             return cloned;
         }
 
-        public override void ManageFocus(object focus)
-        {
-            if(focus is List<Entity>) {
-                _document.Window.EditorGui.View.SelectedEntities.Clear();
-                _document.Window.EditorGui.View.SelectedEntities.UnionWith(focus as List<Entity>);
-                this.UpdateSelection();
-            }
-            else
-                _document.Window.EditorGui.View.SelectedEntity = focus as Entity;
-        }
-
         private static void UpdateID(State s, HeadlessDocument d)
         {
             s.Document = d;
@@ -405,8 +393,6 @@ namespace Petri.Editor
                 }
             }
         }
-
-        Document _document;
     }
 }
 
