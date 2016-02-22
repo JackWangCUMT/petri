@@ -166,7 +166,7 @@ namespace Petri.Editor.Code
 
         public static string FunctionPattern {
             get {
-                return @"^" + VisibilityPattern + " ?" + Function.StaticInlinePattern + " ?" + Type.RegexPattern + @" ?" + Parser.NamePattern + " ?" + Function.ParameterPattern + " ?" + Function.QualifiersPattern;// + Parser.DeclarationEndPattern;
+                return @"^" + VisibilityPattern + " ?" + Function.StaticInlinePattern + " ?" + Type.RegexPattern + @" ?" + Parser.GetNamePattern(false) + " ?" + Function.ParameterPattern + " ?" + Function.QualifiersPattern;// + Parser.DeclarationEndPattern;
             }
         }
 

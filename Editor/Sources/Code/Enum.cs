@@ -43,7 +43,7 @@ namespace Petri.Editor.Code
             commaSeparatedList = commaSeparatedList.Replace(" ", "");
             commaSeparatedList = commaSeparatedList.Replace("\t", "");
             var lst = commaSeparatedList.Split(new char[]{ ',' }, StringSplitOptions.None);
-            Regex name = new Regex(Code.Parser.NamePattern);
+            Regex name = new Regex(Code.Parser.GetNamePattern(true));
 
             bool ok = lst.Length >= 2;
             if(ok) {

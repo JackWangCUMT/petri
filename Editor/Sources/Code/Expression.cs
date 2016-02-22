@@ -597,7 +597,7 @@ namespace Petri.Editor.Code
                                                            functions,
                                                            macros);
             if(Scope.GetSeparator(language) == Code.Operator.Properties[Code.Operator.Name.SelectionRef].cpp && Regex.Match(that,
-                                                                                                                            "(" + Parser.NamePattern + Scope.GetSeparator(language) + ")*" + Parser.NamePattern).Success) {
+                                                                                                                            "(" + Parser.GetNamePattern(false) + Scope.GetSeparator(language) + ")*" + Parser.GetNamePattern(false)).Success) {
                 var scopes = that.Split(new string[]{ Scope.GetSeparator(language) },
                                         StringSplitOptions.None);
                 Scope outerScope = null;

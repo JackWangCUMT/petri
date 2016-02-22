@@ -224,10 +224,13 @@ namespace Petri.Editor
                 return functions;
             }
 
-            public static string NamePattern {
-                get {
-                    return "(?<name>[a-zA-Z_][a-zA-Z0-9_]*)";
+            public static string GetNamePattern(bool strict)
+            {
+                var pattern = "(?<name>[a-zA-Z_][a-zA-Z0-9_]*)";
+                if(strict) {
+                    pattern = "^" + pattern + "$";
                 }
+                return pattern;
             }
 
             public static string VariablePattern {
@@ -258,13 +261,13 @@ namespace Petri.Editor
 
             public static string ClassDeclaration {
                 get {
-                    return "^(class|struct) " + NamePattern;
+                    return "^(class|struct) " + GetNamePattern(false);
                 }
             }
 
             public static string NamespaceDeclaration {
                 get {
-                    return "^(namespace) " + NamePattern;
+                    return "^(namespace) " + GetNamePattern(false);
                 }
             }
 
@@ -278,7 +281,7 @@ namespace Petri.Editor
                                                  match.Groups["name"].Value,
                                                  match.Groups["template"].Value != "");
 
-                Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + NamePattern + ")?");
+                Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + GetNamePattern(false) + ")?");
                 string[] parameters = match.Groups["parameters"].Value.Split(',');
 
                 foreach(string parameter in parameters) {
@@ -306,7 +309,7 @@ namespace Petri.Editor
                                       match.Groups["attributes"].Value,
                                       match.Groups["template"].Value != "");
 
-                Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + NamePattern + ")?");
+                Regex param = new Regex(@" ?" + Type.RegexPattern + @" ?(" + GetNamePattern(false) + ")?");
                 string[] parameters = match.Groups["parameters"].Value.Split(',');
 
                 foreach(string parameter in parameters) {

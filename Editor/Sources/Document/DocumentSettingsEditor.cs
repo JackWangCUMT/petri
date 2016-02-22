@@ -98,7 +98,7 @@ namespace Petri.Editor
                         return;
                     }
 
-                    Regex name = new Regex(Code.Parser.NamePattern);
+                    Regex name = new Regex(Code.Parser.GetNamePattern(true));
                     Match nameMatch = name.Match((obj as Entry).Text);
 
                     if(!nameMatch.Success || nameMatch.Value != (obj as Entry).Text) {

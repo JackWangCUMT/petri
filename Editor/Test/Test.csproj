@@ -58,6 +58,7 @@
     <Compile Include="CompilerUtility.cs" />
     <Compile Include="TestUtility.cs" />
     <Compile Include="CodeUtility.cs" />
+    <Compile Include="Code\TestParser.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -186,7 +186,7 @@ namespace Petri.Editor.Code
         public VariableExpression(string expr, Language language) : base(language,
                                                                          expr)
         {
-            Regex name = new Regex(Parser.NamePattern);
+            Regex name = new Regex(Parser.GetNamePattern(true));
             Match nameMatch = name.Match(expr);
             if(!nameMatch.Success) {
                 throw new Exception(Configuration.GetLocalized("Invalid variable name specified!"));
