@@ -22,10 +22,11 @@
 
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Petri.Test
 {
-    public class Utility
+    public class CompilerUtility
     {
         public static TResult InvokeAndRedirectOutput<TResult>(System.Func<TResult> function,
                                                                out string stdout,
@@ -52,7 +53,9 @@ namespace Petri.Test
             return result;
         }
 
-        public static void InvokeAndRedirectOutput(System.Action function, out string stdout, out string stderr)
+        public static void InvokeAndRedirectOutput(System.Action function,
+                                                   out string stdout,
+                                                   out string stderr)
         {
             InvokeAndRedirectOutput(() => {
                 function();
@@ -62,11 +65,10 @@ namespace Petri.Test
 
         public static int InvokeCompiler(string[] args, out string stdout, out string stderr)
         {
-            return Utility.InvokeAndRedirectOutput(() => {
+            return CompilerUtility.InvokeAndRedirectOutput(() => {
                 return Petri.Editor.Application.Main(args);
             }, out stdout, out stderr);
         }
-
     }
 }
 

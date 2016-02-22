@@ -33,7 +33,7 @@ namespace Petri.Test.Code
         public void TestLiteral()
         {
             // GIVEN a random literal string
-            var literal = Utility.RandomLiteral();
+            var literal = CodeUtility.RandomLiteral();
 
             // WHEN we create an expression from it
             var e = Expression.CreateFromString(literal, Language.CSharp);
@@ -207,7 +207,7 @@ namespace Petri.Test.Code
         public void TestLiteralsLiterals()
         {
             // GIVEN a random literal string
-            var literal = Utility.RandomLiteral();
+            var literal = CodeUtility.RandomLiteral();
 
             // WHEN we create an expression from it
             var e = Expression.CreateFromString(literal, Language.CSharp);

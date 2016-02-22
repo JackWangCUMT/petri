@@ -38,7 +38,7 @@ namespace Petri.Test.Examples.Sync
             string stdout, stderr;
 
             // WHEN the invocation is made
-            int result = Utility.InvokeCompiler(args, out stdout, out stderr);
+            int result = CompilerUtility.InvokeCompiler(args, out stdout, out stderr);
 
             // THEN no error is returned.
             Assert.AreEqual("", stderr);

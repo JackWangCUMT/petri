@@ -45,7 +45,6 @@
   <ItemGroup>
     <Compile Include="Invocation\TestInvocation.cs" />
     <Compile Include="Runtime\TestRuntime.cs" />
-    <Compile Include="Utility.cs" />
     <Compile Include="Examples\Variables\TestVariables.cs" />
     <Compile Include="Examples\Basic\TestCompilation.cs" />
     <Compile Include="Examples\Basic\TestExecution.cs" />
@@ -55,7 +54,10 @@
     <Compile Include="Code\TestFunctions.cs" />
     <Compile Include="Code\TestLiterals.cs" />
     <Compile Include="Code\TestPrecedence.cs" />
-    <Compile Include="Code\Utility.cs" />
+    <Compile Include="Editor\DocumentSettings\TestCloneSettings.cs" />
+    <Compile Include="CompilerUtility.cs" />
+    <Compile Include="TestUtility.cs" />
+    <Compile Include="CodeUtility.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -77,5 +79,6 @@
     <Folder Include="Examples\Sync\" />
     <Folder Include="Editor\" />
     <Folder Include="Editor\EditorController\" />
+    <Folder Include="Editor\DocumentSettings\" />
   </ItemGroup>
 </Project>

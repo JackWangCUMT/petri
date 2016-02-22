@@ -22,10 +22,11 @@
 
 using System;
 using System.Linq;
+using Petri.Editor.Code;
 
-namespace Petri.Test.Code
+namespace Petri.Test
 {
-    public class Utility
+    public class CodeUtility
     {
         static Random _random = new Random();
 
@@ -85,7 +86,7 @@ namespace Petri.Test.Code
 
         public static string RandomLiteral()
         {
-            var types = Enum.GetValues(typeof(LiteralType));
+            var types = System.Enum.GetValues(typeof(LiteralType));
             var type = (LiteralType)types.GetValue(_random.Next(types.Length));
             var lit = RandomLiteral(type);
 
@@ -104,6 +105,11 @@ namespace Petri.Test.Code
             }
 
             return result;
+        }
+
+        public static Language RandomLanguage() {
+            var languages = System.Enum.GetValues(typeof(Language));
+            return (Language)languages.GetValue(_random.Next(languages.Length));
         }
     }
 }

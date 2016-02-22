@@ -98,7 +98,7 @@ namespace Petri.Test
             counter = 2;
 
             string stdout, stderr;
-            Utility.InvokeAndRedirectOutput(() => {
+            CompilerUtility.InvokeAndRedirectOutput(() => {
                 pn.Run();
                 pn.Join();
             }, out stdout, out stderr);
