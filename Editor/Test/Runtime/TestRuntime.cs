@@ -23,25 +23,28 @@
 using NUnit.Framework;
 using Petri.Runtime;
 using System.IO;
+using Random = System.Random;
+using UInt64 = System.UInt64;
 
 namespace Petri.Test
 {
     [TestFixture()]
     public class TestRuntime
     {
+        Random _random = new Random();
+
         [Test()]
-        public void TestRuntime1()
+        public void TestRuntimePetriNetProperties()
         {
+            var name = CodeUtility.RandomLiteral(CodeUtility.LiteralType.String);
+
             // GIVEN a petri net created with a custom name
-            string name = "Test12345";
             PetriNet pn = new PetriNet(name);
 
-            // WHEN we read the name of the petri net
-            string actual = pn.Name;
-
+            // WHEN we read the properties of the action
             // THEN we get an equivalent value
-            Assert.AreNotSame(name, actual);
-            Assert.AreEqual(name, actual);
+            Assert.AreNotSame(name, pn.Name);
+            Assert.AreEqual(name, pn.Name);
         }
 
         public static System.Int32 Action1()
@@ -79,7 +82,7 @@ namespace Petri.Test
         }
 
         [Test()]
-        public void TestRuntime2()
+        public void TestRuntime1()
         {
             PetriNet pn = new PetriNet("Test");
 
@@ -107,35 +110,39 @@ namespace Petri.Test
             Assert.IsEmpty(stderr);
         }
 
-        [Test()]
-        public void TestRuntime3()
+        [Test(), Repeat(10)]
+        public void TestRuntimeActionProperties()
         {
-            // GIVEN an action created with a custom name
-            string name = "Test12345";
-            Action a = new Action(3, name, Action1, 1);
+            var name = CodeUtility.RandomLiteral(CodeUtility.LiteralType.String);
+            var id = (UInt64)_random.Next();
+            var requiredTokens = (UInt64)_random.Next();
 
-            // WHEN we read the name of the action
-            string actual = a.Name;
+            // GIVEN an action created with a custom name, id and required tokens count
+            Action a = new Action(id, name, Action1, requiredTokens);
 
+            // WHEN we read the properties of the action
             // THEN we get an equivalent value
-            Assert.AreNotSame(name, actual);
-            Assert.AreEqual(name, actual);
+            Assert.AreNotSame(name, a.Name);
+            Assert.AreEqual(name, a.Name);
+            Assert.AreEqual(id, a.ID);
+            Assert.AreEqual(requiredTokens, a.RequiredTokens);
+            Assert.AreEqual(0, a.CurrentTokens);
         }
 
         [Test()]
-        public void TestRuntime4()
+        public void TestRuntimeTransitionProperties()
         {
-            // GIVEN a transition created with a custom name
-            string name = "Test12345";
+            var name = CodeUtility.RandomLiteral(CodeUtility.LiteralType.String);
+            var id = (UInt64)_random.Next();
+            // GIVEN a transition created with a custom name and id
             Action a = new Action(3, "", Action1, 1);
-            Transition t = a.AddTransition(4, name, a, Transition1);
+            Transition t = a.AddTransition(id, name, a, Transition1);
 
             // WHEN we read the name of the transition
-            string actual = t.Name;
-
             // THEN we get an equivalent value
-            Assert.AreNotSame(name, actual);
-            Assert.AreEqual(name, actual);
+            Assert.AreNotSame(name, t.Name);
+            Assert.AreEqual(name, t.Name);
+            Assert.AreEqual(id, t.ID);
         }
 
 
