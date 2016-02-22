@@ -161,6 +161,7 @@ namespace Petri.Editor.Code
         protected static Tuple<string, List<Tuple<ExprType, string>>> Preprocess(string s)
         {
             s = Parser.RemoveParenthesis(s.Trim()).Trim();
+            s = s.Replace("@", "@at;");
             var subexprs = new List<Tuple<ExprType, string>>();
             string namePattern = Parser.VariablePattern;
             namePattern = namePattern.Substring(0, namePattern.Length - 1) + "\\s*)?.*";
@@ -507,9 +508,24 @@ namespace Petri.Editor.Code
             }
             int index;
             while(true) {
-                index = prep.IndexOf("@");
-                if(index == -1)
+                int searchPos = 0;
+                while(true) {
+                    index = prep.IndexOf("@", searchPos);
+                    if(index == -1) {
+                        break;
+                    }
+
+                    if(prep.IndexOf("@at;", searchPos) == index) {
+                        searchPos = index + 1;
+                    }
+                    else {
+                        break;
+                    }
+                }
+                if(index == -1) {
                     break;
+                }
+
                 int lastIndex = prep.Substring(index + 1).IndexOf("@") + index + 1;
                 int expr = int.Parse(prep.Substring(index + 1, lastIndex - (index + 1)));
                 switch(subexprs[expr].Item1) {
@@ -529,7 +545,7 @@ namespace Petri.Editor.Code
                     break;
                 }
             }
-            return prep;
+            return prep.Replace("@at;", "@");
         }
 
         private static Tuple<Scope, string, List<Expression>> ExtractScopeNameAndArgs(string invocation,

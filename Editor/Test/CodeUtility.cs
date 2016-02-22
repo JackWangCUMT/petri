@@ -90,8 +90,7 @@ namespace Petri.Test
             var type = (LiteralType)types.GetValue(_random.Next(types.Length));
             var lit = RandomLiteral(type);
 
-            // FIXME: manage @ symbol in GetStringFromPreprocessed
-            return lit.Replace("@", "AtToBeReplaced");
+            return lit;
         }
 
         public static string RandomIdentifier()

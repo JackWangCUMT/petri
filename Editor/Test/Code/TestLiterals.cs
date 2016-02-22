@@ -48,9 +48,7 @@ namespace Petri.Test.Code
             Assert.AreEqual(literal, lit.Expression);
         }
 
-        // FIXME: manage @ symbol in GetStringFromPreprocessed
         [Test()]
-        [Ignore("Need to fix \"@\" management first.")]
         public void TestLiteralWithAt()
         {
             // GIVEN a literal string with an @ symbol inside
