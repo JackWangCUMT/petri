@@ -112,6 +112,11 @@ namespace Petri.Editor.Code
 
             return false;
         }
+
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
     }
 }
 
