@@ -47,9 +47,6 @@ namespace Petri.Editor
             _cpp = new ToolButton("CppGen");
             _cpp.IconName = "CppGen";
             _cpp.Label = Configuration.GetLocalized("Generate <language>", "C++");
-            // FIXME:
-            //_document.LanguageChanged += (sender, e) => _cpp.Label = Configuration.GetLocalized("Generate <language>",
-            //                                                                                    DocumentSettings.LanguageName(e.NewLanguage));
 
             buf = Pixbuf.LoadFromResource("build");
             IconTheme.AddBuiltinIcon("Build", (int)(buf.Width / 0.8), buf);
@@ -414,6 +411,12 @@ namespace Petri.Editor
                     }
                 });
             }
+        }
+
+        public void UpdateGUIForLanguage()
+        {
+            _cpp.Label = Configuration.GetLocalized("Generate <language>",
+                                                    DocumentSettings.LanguageName(_document.Settings.Language));
         }
 
         FindPanel _find;

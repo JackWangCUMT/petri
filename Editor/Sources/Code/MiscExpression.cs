@@ -262,13 +262,21 @@ namespace Petri.Editor.Code
         public Expression Expression3 { get; private set; }
 
         public override string MakeCode()
-        {// TODO: tbd
-            throw new Exception(Configuration.GetLocalized("Operator not implemented!"));
+        {
+            return Parenthesize(this, Expression1, Expression1.MakeCode()) + " ? " + Parenthesize(this,
+                                                                                                  Expression1,
+                                                                                                  Expression2.MakeCode()) + " : " + Parenthesize(this,
+                                                                                                                                                 Expression3,
+                                                                                                                                                 Expression3.MakeCode());
         }
 
         public override string MakeUserReadable()
-        {// TODO: tbd
-            throw new Exception(Configuration.GetLocalized("Operator not implemented!"));
+        {
+            return Parenthesize(this, Expression1, Expression1.MakeUserReadable()) + " ? " + Parenthesize(this,
+                                                                                                          Expression1,
+                                                                                                          Expression2.MakeUserReadable()) + " : " + Parenthesize(this,
+                                                                                                                                                                 Expression3,
+                                                                                                                                                                 Expression3.MakeUserReadable());
         }
 
         public override List<LiteralExpression> GetLiterals()

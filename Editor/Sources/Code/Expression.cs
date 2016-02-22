@@ -638,6 +638,12 @@ namespace Petri.Editor.Code
                                         scopeNameAndArgs.Item3.ToArray());
         }
 
+        /// <summary>
+        /// Checks whether the child expression needs to be parenthesized, and adds the parens if needed.
+        /// </summary>
+        /// <param name="parent">The expression "wrapping" the expression to parenthesized.</param>
+        /// <param name="child">The expression to parenthesize.</param>
+        /// <param name="representation">The string that will be put into parentheses if some need to be added.</param>
         protected static string Parenthesize(Expression parent,
                                              Expression child,
                                              string representation)
@@ -666,10 +672,12 @@ namespace Petri.Editor.Code
                     }
                 }
             }
-            if(parenthesize)
+            if(parenthesize) {
                 return "(" + representation + ")";
-            else
+            }
+            else {
                 return representation;
+            }
         }
 
     }

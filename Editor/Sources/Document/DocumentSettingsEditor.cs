@@ -581,6 +581,8 @@ namespace Petri.Editor
             if(_document.Settings.Language == Code.Language.CSharp) {
                 _headersSearchPathBox.Hide();
             }
+
+            _document.Window.EditorGui.UpdateGUIForLanguage();
         }
 
         protected void OnDeleteEvent(object sender, DeleteEventArgs a)

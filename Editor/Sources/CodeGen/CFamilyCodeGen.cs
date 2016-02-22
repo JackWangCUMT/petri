@@ -28,6 +28,7 @@ namespace Petri.Editor
 {
     public class CFamilyCodeGen : CodeGen
     {
+        
         public CFamilyCodeGen(Code.Language language)
         {
             _lang = language;
@@ -161,15 +162,9 @@ namespace Petri.Editor
         }
 
 
-        // TODO: better complexity, please.
         static string GetNTab(int n)
         {
-            string s = "";
-            for(int i = 0; i < n; ++i) {
-                s += '\t';
-            }
-
-            return s;
+            return new string('\n', n);
         }
 
         private Code.Language _lang;
