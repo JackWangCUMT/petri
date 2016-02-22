@@ -90,17 +90,27 @@ namespace Petri.Editor.Code
             private set;
         }
 
-        public bool Equals(Enum e)
-        {
-            if(Name != e.Name || Members.Length != e.Members.Length)
+        public bool Equals(Enum e) {
+            if(Name != e.Name || Members.Length != e.Members.Length) {
                 return false;
+            }
 
             for(int i = 0; i < Members.Length; ++i) {
-                if(Members[i] != e.Members[i])
+                if(Members[i] != e.Members[i]) {
                     return false;
+                }
             }
 
             return true;
+        }
+
+        public override bool Equals(object e)
+        {
+            if(e is Enum) {
+                return Equals((Enum)e);
+            }
+
+            return false;
         }
     }
 }

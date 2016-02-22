@@ -21,6 +21,7 @@
  */
 
 using System;
+using System.Linq;
 
 namespace Petri.Test.Code
 {
@@ -28,8 +29,81 @@ namespace Petri.Test.Code
     {
         static Random _random = new Random();
 
-        public static string RandomLiteral() {
+        public enum LiteralType
+        {
+            Char,
+            String,
+            UInt,
+            ULong,
+            ULongLong,
+            Float,
+            Double,
+            LongDouble
+        }
+
+        public static string RandomChar(bool inString)
+        {
+            string c = new string((char)_random.Next(32, 128), 1);
+            if(c == @"\" || ((inString && c == "\"") || c == "'")) {
+                c = @"\" + c;
+            }
+            return c;
+        }
+
+        public static string RandomLiteral(LiteralType type)
+        {
+            switch(type) {
+            case LiteralType.Char:
+                return "'" + RandomChar(false) + "'";
+            case LiteralType.String:
+                int count = _random.Next(50);
+                string result = "";
+                for(int i = 0; i < count; ++i) {
+                    result += RandomChar(true);
+                }
+
+                return '"' + result + '"';
+
+            case LiteralType.UInt:
+                return _random.Next(1 << 16).ToString() + "U";
+            case LiteralType.ULong:
+                return _random.Next(1 << 16).ToString() + "UL";
+            case LiteralType.ULongLong:
+                return _random.Next(1 << 16).ToString() + "ULL";
+
+
+            case LiteralType.Float:
+                return (_random.NextDouble() * _random.Next(1, 30)).ToString(System.Globalization.CultureInfo.InvariantCulture) + "F";
+            case LiteralType.Double:
+                return (_random.NextDouble() * _random.Next(1, 30)).ToString(System.Globalization.CultureInfo.InvariantCulture);
+            case LiteralType.LongDouble:
+                return (_random.NextDouble() * _random.Next(1, 30)).ToString(System.Globalization.CultureInfo.InvariantCulture) + "L";
+            }
+
             return _random.Next().ToString();
+        }
+
+        public static string RandomLiteral()
+        {
+            var types = Enum.GetValues(typeof(LiteralType));
+            var type = (LiteralType)types.GetValue(_random.Next(types.Length));
+            var lit = RandomLiteral(type);
+
+            // FIXME: manage @ symbol in GetStringFromPreprocessed
+            return lit.Replace("@", "AtToBeReplaced");
+        }
+
+        public static string RandomIdentifier()
+        {
+            int length = _random.Next(1, 50);
+            string domain = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
+            var result = new string(Enumerable.Repeat(domain, length).Select(s => s[_random.Next(s.Length)]).ToArray());
+
+            if(Char.IsDigit(result[0])) {
+                result = domain[_random.Next(52)] + result.Substring(1);
+            }
+
+            return result;
         }
     }
 }

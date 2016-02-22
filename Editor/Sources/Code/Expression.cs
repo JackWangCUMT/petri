@@ -195,12 +195,14 @@ namespace Petri.Editor.Code
                 }
                 switch(s[i]) {
                 case '(':
-                    bool special = false;
-                    if(i > 0 && s[i - 1] == '@') {// It is a call operator invocation
-                        special = true;
-                    }
-                    nesting.Push(Tuple.Create(special ? ExprType.Invocation : ExprType.Parenthesis,
+                    if(nesting.Count == 0 || (nesting.Peek().Item1 != ExprType.DoubleQuote && nesting.Peek().Item1 != ExprType.Quote)) {
+                        bool special = false;
+                        if(i > 0 && s[i - 1] == '@') {// It is a call operator invocation
+                            special = true;
+                        }
+                        nesting.Push(Tuple.Create(special ? ExprType.Invocation : ExprType.Parenthesis,
                                               i));
+                    }
                     break;
                 case ')':
                     if(nesting.Count > 0 && (nesting.Peek().Item1 == ExprType.Invocation || nesting.Peek().Item1 == ExprType.Parenthesis)) {
@@ -208,15 +210,19 @@ namespace Petri.Editor.Code
                         subexprs.Add(Tuple.Create(nesting.Peek().Item1,
                                                   s.Substring(nesting.Peek().Item2, length)));
                         var newstr = "@" + (subexprs.Count - 1).ToString() + "@" + (nesting.Peek().Item1 == ExprType.Invocation ? "()" : "");
-                        s = s.Remove(nesting.Peek().Item2, length).Insert(nesting.Peek().Item2, newstr);
+                        s = s.Remove(nesting.Peek().Item2, length).Insert(nesting.Peek().Item2,
+                                                                          newstr);
                         i += newstr.Length - length;
                         nesting.Pop();
                     }
-                    else
+                    else if(nesting.Count == 0 || nesting.Peek().Item1 != ExprType.DoubleQuote && nesting.Peek().Item1 != ExprType.Quote) {
                         throw new Exception(Configuration.GetLocalized("Unexpected closing parenthesis found!"));
+                    }
                     break;
                 case '{':
-                    nesting.Push(Tuple.Create(ExprType.Brackets, i));
+                    if(nesting.Count == 0 || (nesting.Peek().Item1 != ExprType.DoubleQuote && nesting.Peek().Item1 != ExprType.Quote)) {
+                        nesting.Push(Tuple.Create(ExprType.Brackets, i));
+                    }
                     break;
                 case '}':
                     if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Brackets) {
@@ -224,15 +230,19 @@ namespace Petri.Editor.Code
                         subexprs.Add(Tuple.Create(ExprType.Brackets,
                                                   s.Substring(nesting.Peek().Item2, length)));
                         var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
-                        s = s.Remove(nesting.Peek().Item2, length).Insert(nesting.Peek().Item2, newstr);
+                        s = s.Remove(nesting.Peek().Item2, length).Insert(nesting.Peek().Item2,
+                                                                          newstr);
                         i += newstr.Length - length;
                         nesting.Pop();
                     }
-                    else
+                    else if(nesting.Count == 0 || nesting.Peek().Item1 != ExprType.DoubleQuote && nesting.Peek().Item1 != ExprType.Quote) {
                         throw new Exception(Configuration.GetLocalized("Unexpected closing bracket found!"));
+                    }
                     break;
                 case '[':
-                    nesting.Push(Tuple.Create(ExprType.Subscript, i));
+                    if(nesting.Count == 0 || (nesting.Peek().Item1 != ExprType.DoubleQuote && nesting.Peek().Item1 != ExprType.Quote)) {
+                        nesting.Push(Tuple.Create(ExprType.Subscript, i));
+                    }
                     break;
                 case ']':
                     if(nesting.Count > 0 && nesting.Peek().Item1 == ExprType.Subscript) {
@@ -240,12 +250,14 @@ namespace Petri.Editor.Code
                         subexprs.Add(Tuple.Create(nesting.Peek().Item1,
                                                   s.Substring(nesting.Peek().Item2, length)));
                         var newstr = "@" + (subexprs.Count - 1).ToString() + "@";
-                        s = s.Remove(nesting.Peek().Item2, length).Insert(nesting.Peek().Item2, newstr);
+                        s = s.Remove(nesting.Peek().Item2, length).Insert(nesting.Peek().Item2,
+                                                                          newstr);
                         i += newstr.Length - length;
                         nesting.Pop();
                     }
-                    else
+                    else if(nesting.Count == 0 || nesting.Peek().Item1 != ExprType.DoubleQuote && nesting.Peek().Item1 != ExprType.Quote) {
                         throw new Exception(Configuration.GetLocalized("Unexpected closing bracket found!"));
+                    }
                     break;
                 case '"':// First quote
                     if(nesting.Count == 0 || (nesting.Peek().Item1 != ExprType.DoubleQuote && nesting.Peek().Item1 != ExprType.Quote)) {
@@ -261,7 +273,7 @@ namespace Petri.Editor.Code
                         i += newstr.Length - length;
                         nesting.Pop();
                     }
-                    else {
+                    else if(nesting.Peek().Item1 != ExprType.Quote && s[i - 1] != '\\') {
                         throw new Exception(Configuration.GetLocalized("{0} expected, but \" found!",
                                                                        nesting.Peek().Item1));
                     }
@@ -280,7 +292,7 @@ namespace Petri.Editor.Code
                         i += newstr.Length - length;
                         nesting.Pop();
                     }
-                    else {
+                    else if(nesting.Peek().Item1 != ExprType.DoubleQuote && s[i - 1] != '\\') {
                         throw new Exception(Configuration.GetLocalized("{0} expected, but \' found!",
                                                                        nesting.Peek().Item1));
                     }

@@ -29,11 +29,166 @@ namespace Petri.Test.Code
     [TestFixture()]
     public class TestLiterals
     {
-        [Test()]
+        [Test(), Repeat(20)]
         public void TestLiteral()
         {
-            // GIVEN a random ltteral string
+            // GIVEN a random literal string
             var literal = Utility.RandomLiteral();
+
+            // WHEN we create an expression from it
+            var e = Expression.CreateFromString(literal, Language.CSharp);
+
+            // THEN it is a LiteralExpression
+            Assert.IsInstanceOf<LiteralExpression>(e);
+
+            var lit = e as LiteralExpression;
+
+            // AND the textual content of the expression is the same as the initial literal
+            Assert.AreNotSame(literal, lit.Expression);
+            Assert.AreEqual(literal, lit.Expression);
+        }
+
+        // FIXME: manage @ symbol in GetStringFromPreprocessed
+        [Test()]
+        [Ignore("Need to fix \"@\" management first.")]
+        public void TestLiteralWithAt()
+        {
+            // GIVEN a literal string with an @ symbol inside
+            var literal = "\"a string with a @ symbol…\"";
+
+            // WHEN we create an expression from it
+            var e = Expression.CreateFromString(literal, Language.CSharp);
+
+            // THEN it is a LiteralExpression
+            Assert.IsInstanceOf<LiteralExpression>(e);
+
+            var lit = e as LiteralExpression;
+
+            // AND the textual content of the expression is the same as the initial literal
+            Assert.AreNotSame(literal, lit.Expression);
+            Assert.AreEqual(literal, lit.Expression);
+        }
+
+        [Test()]
+        public void TestLiteralWithQuote1()
+        {
+            // GIVEN a literal string with a singly quoted character inside
+            var literal = "'a'";
+
+            // WHEN we create an expression from it
+            var e = Expression.CreateFromString(literal, Language.CSharp);
+
+            // THEN it is a LiteralExpression
+            Assert.IsInstanceOf<LiteralExpression>(e);
+
+            var lit = e as LiteralExpression;
+
+            // AND the textual content of the expression is the same as the initial literal
+            Assert.AreNotSame(literal, lit.Expression);
+            Assert.AreEqual(literal, lit.Expression);
+        }
+
+        [Test()]
+        public void TestLiteralWithQuote2()
+        {
+            // GIVEN a literal string with a singly quoted quote character inside
+            var literal = "'\\''";
+
+            // WHEN we create an expression from it
+            var e = Expression.CreateFromString(literal, Language.CSharp);
+
+            // THEN it is a LiteralExpression
+            Assert.IsInstanceOf<LiteralExpression>(e);
+
+            var lit = e as LiteralExpression;
+
+            // AND the textual content of the expression is the same as the initial literal
+            Assert.AreNotSame(literal, lit.Expression);
+            Assert.AreEqual(literal, lit.Expression);
+        }
+
+        [Test()]
+        public void TestLiteralWithQuote3()
+        {
+            // GIVEN a literal string with a singly quoted double quote character inside
+            var literal = "'\"'";
+
+            // WHEN we create an expression from it
+            var e = Expression.CreateFromString(literal, Language.CSharp);
+
+            // THEN it is a LiteralExpression
+            Assert.IsInstanceOf<LiteralExpression>(e);
+
+            var lit = e as LiteralExpression;
+
+            // AND the textual content of the expression is the same as the initial literal
+            Assert.AreNotSame(literal, lit.Expression);
+            Assert.AreEqual(literal, lit.Expression);
+        }
+
+        [Test()]
+        public void TestLiteralWithDoubleQuote1()
+        {
+            // GIVEN a literal string with a doubly quoted character inside
+            var literal = "\"a\"";
+
+            // WHEN we create an expression from it
+            var e = Expression.CreateFromString(literal, Language.CSharp);
+
+            // THEN it is a LiteralExpression
+            Assert.IsInstanceOf<LiteralExpression>(e);
+
+            var lit = e as LiteralExpression;
+
+            // AND the textual content of the expression is the same as the initial literal
+            Assert.AreNotSame(literal, lit.Expression);
+            Assert.AreEqual(literal, lit.Expression);
+        }
+
+        [Test()]
+        public void TestLiteralWithDoubleQuote2()
+        {
+            // GIVEN a literal string with a doubly quoted backslash character inside
+            var literal = "\"\\\"";
+
+            // WHEN we create an expression from it
+            var e = Expression.CreateFromString(literal, Language.CSharp);
+
+            // THEN it is a LiteralExpression
+            Assert.IsInstanceOf<LiteralExpression>(e);
+
+            var lit = e as LiteralExpression;
+
+            // AND the textual content of the expression is the same as the initial literal
+            // FIXME: ?
+            //Assert.AreNotSame(literal, lit.Expression);
+            Assert.AreEqual(literal, lit.Expression);
+        }
+
+        [Test()]
+        public void TestLiteralWithDoubleQuote3()
+        {
+            // GIVEN a literal string with a doubly quoted quote character inside
+            var literal = "\"'\"";
+
+            // WHEN we create an expression from it
+            var e = Expression.CreateFromString(literal, Language.CSharp);
+
+            // THEN it is a LiteralExpression
+            Assert.IsInstanceOf<LiteralExpression>(e);
+
+            var lit = e as LiteralExpression;
+
+            // AND the textual content of the expression is the same as the initial literal
+            Assert.AreNotSame(literal, lit.Expression);
+            Assert.AreEqual(literal, lit.Expression);
+        }
+
+        [Test()]
+        public void TestLiteralWithDoubleQuote4()
+        {
+            // GIVEN a literal string with a doubly quoted double quote character inside
+            var literal = "\"\\\"\"";
 
             // WHEN we create an expression from it
             var e = Expression.CreateFromString(literal, Language.CSharp);
