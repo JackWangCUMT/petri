@@ -312,7 +312,9 @@ namespace Petri.Editor
                         if(_document.Settings.RunInEditor && _document.Settings.Language == Code.Language.CSharp) {
                             Detach();
                             Attach();
-                            StartPetri();
+                            if(startAfterReload) {
+                                StartPetri();
+                            }
                         }
                         else {
                             _startAfterFix = startAfterReload;
