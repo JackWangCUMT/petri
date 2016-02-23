@@ -32,13 +32,11 @@ namespace Petri.Runtime
         internal Transition(IntPtr handle, TransitionCallableDel del)
         {
             Handle = handle;
-            _callback = del;
         }
 
         internal Transition(IntPtr handle, ParametrizedTransitionCallableDel del)
         {
             Handle = handle;
-            _parametrizedCallback = del;
         }
 
         protected override void Clean()
@@ -63,16 +61,12 @@ namespace Petri.Runtime
         public void SetCondition(TransitionCallableDel condition)
         {
             var c = WrapForNative.Wrap(condition, Name);
-            _callback = c;
-            _parametrizedCallback = null;
             Interop.Transition.PetriTransition_setCondition(Handle, c);
         }
 
         public void SetCondition(ParametrizedTransitionCallableDel condition)
         {
             var c = WrapForNative.Wrap(condition, Name);
-            _parametrizedCallback = c;
-            _callback = null;
             Interop.Transition.PetriTransition_setConditionWithParam(Handle, c);
         }
 
@@ -134,14 +128,6 @@ namespace Petri.Runtime
         public void AddVariable(UInt32 id) {
             Interop.Transition.PetriTransition_addVariable(Handle, id);
         }
-
-        // Ensures the callback's lifetime is the same as the instance's one to avoid unexpected GC during native code invocation.
-        // The warning CS0414 states that the value is never read from, and that's true.
-        // But the rationale here is to always keep a reference to the callback so that it is not GC'ed.
-        #pragma warning disable 0414
-        private TransitionCallableDel _callback;
-        private ParametrizedTransitionCallableDel _parametrizedCallback;
-        #pragma warning restore 0414
     }
 }
 

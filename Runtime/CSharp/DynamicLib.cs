@@ -48,14 +48,10 @@ namespace Petri.Runtime
             _createDebug = createDebug;
 
             _createPtr = () => {
-                var pn = _create();
-                _petriNets.Add(pn);
-                return pn.Release();
+                return _create().Release();
             };
             _createDebugPtr = () => {
-                var pn = _createDebug();
-                _petriNets.Add(pn);
-                return pn.Release();
+                return _createDebug().Release();
             };
             Handle = Interop.PetriDynamicLib.PetriDynamicLib_createWithPtr(_createPtr, _createDebugPtr, hash,
                                                                            name, prefix, port);
@@ -65,14 +61,6 @@ namespace Petri.Runtime
         protected override void Clean()
         {
             Interop.PetriDynamicLib.PetriDynamicLib_destroy(Handle);
-        }
-
-        /// <summary>
-        /// Release the specified petriNet, which must have been created before by a call to <c>Create()</c> or <c>CreateDebug</c>.
-        /// </summary>
-        /// <param name="petriNet">Petri net.</param>
-        public void Release(PetriNet petriNet) {
-            _petriNets.Remove(petriNet);
         }
 
         /**
@@ -136,8 +124,6 @@ namespace Petri.Runtime
         PetriDebugCallableDel _createDebug;
         PtrCallableDel _createPtr;
         PtrCallableDel _createDebugPtr;
-
-        HashSet<PetriNet> _petriNets = new HashSet<PetriNet>();
     };
 }
 

@@ -22,6 +22,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace Petri.Runtime
 {
@@ -39,7 +40,7 @@ namespace Petri.Runtime
     {
         public static ActionCallableDel Wrap(ActionCallableDel callable, string actionName)
         {
-            return () => {
+            var c = new ActionCallableDel(() => {
                 try {
                     return callable();
                 }
@@ -49,13 +50,16 @@ namespace Petri.Runtime
                                             e.Message);
                     return default(Int32);
                 }
-            };
+            });
+
+            _callbacks.Add(c);
+            return c;
         }
 
         public static ParametrizedActionCallableDel Wrap(ParametrizedActionCallableDel callable,
                                                          string actionName)
         {
-            return (IntPtr pn) => {
+            var c = new ParametrizedActionCallableDel((IntPtr pn) => {
                 try {
                     return callable(pn);
                 }
@@ -65,13 +69,16 @@ namespace Petri.Runtime
                                             e.Message);
                     return default(Int32);
                 }
-            };
+            });
+
+            _callbacks.Add(c);
+            return c;
         }
 
         public static TransitionCallableDel Wrap(TransitionCallableDel callable,
                                                  string transitionName)
         {
-            return (Int32 result) => {
+            var c = new TransitionCallableDel((Int32 result) => {
                 try {
                     return callable(result);
                 }
@@ -81,13 +88,16 @@ namespace Petri.Runtime
                                             e.Message);
                     return default(bool);
                 }
-            };
+            });
+
+            _callbacks.Add(c);
+            return c;
         }
 
         public static ParametrizedTransitionCallableDel Wrap(ParametrizedTransitionCallableDel callable,
                                                              string actionName)
         {
-            return (IntPtr pn, Int32 result) => {
+            var c = new ParametrizedTransitionCallableDel((IntPtr pn, Int32 result) => {
                 try {
                     return callable(pn, result);
                 }
@@ -97,8 +107,13 @@ namespace Petri.Runtime
                                             e.Message);
                     return default(bool);
                 }
-            };
+            });
+
+            _callbacks.Add(c);
+            return c;
         }
+
+        static List<object> _callbacks = new List<object>();
     }
 }
 
