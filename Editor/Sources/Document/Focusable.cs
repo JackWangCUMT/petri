@@ -22,7 +22,7 @@ namespace Petri.Editor
     {
         public FocusableList(List<IFocusable> focus)
         {
-            _focus = focus.AsReadOnly();
+            _focus = new HashSet<IFocusable>(focus);
         }
 
         public void Focus()
@@ -34,8 +34,12 @@ namespace Petri.Editor
                     break;
                 }
             }
-            if(isEntitiesList) {
-                var doc = (Document)((FocusableEntity)_focus[0]).Entity.Document;
+            if(isEntitiesList && _focus.Count > 1) {
+                Document doc = null;
+                foreach(var f in _focus) {
+                    doc = (Document)((FocusableEntity)f).Entity.Document;
+                    break;
+                }
                 doc.Window.EditorGui.View.SelectedEntities.Clear();
 
                 foreach(FocusableEntity e in _focus) {
@@ -50,7 +54,7 @@ namespace Petri.Editor
             }
         }
 
-        IReadOnlyList<IFocusable> _focus;
+        HashSet<IFocusable> _focus;
     }
 
     /// <summary>
@@ -71,6 +75,15 @@ namespace Petri.Editor
         public Entity Entity {
             get;
             private set;
+        }
+
+        public override bool Equals(object o) {
+            return o is FocusableEntity && ((FocusableEntity)o).Entity == Entity;
+        }
+
+        public override int GetHashCode()
+        {
+            return Entity.GetHashCode();
         }
     }
 

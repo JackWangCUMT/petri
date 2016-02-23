@@ -45,6 +45,7 @@ namespace Petri.Editor
             _redoStack.Clear();
             _undoStack.Push(new ActionDescription(action, action.Description));
             action.Apply();
+            action.Focus.Focus();
         }
 
         /// <summary>
@@ -145,6 +146,7 @@ namespace Petri.Editor
                 toPush.Push(new ActionDescription(actionDescription._action,
                                                   actionDescription._description));
                 actionDescription._action.Apply();
+                actionDescription._action.Focus.Focus();
             }
         }
 

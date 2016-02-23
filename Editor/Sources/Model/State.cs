@@ -34,7 +34,7 @@ namespace Petri.Editor
                      bool active,
                      int requiredTokens,
                      Cairo.PointD pos) : base(doc,
-                                                                                                                      parent)
+                                              parent)
         {
             this.TransitionsBefore = new List<Transition>();
             this.TransitionsAfter = new List<Transition>();

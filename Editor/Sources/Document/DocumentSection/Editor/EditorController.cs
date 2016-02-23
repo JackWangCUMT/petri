@@ -53,12 +53,6 @@ namespace Petri.Editor
 
                 var action = PasteAction();
                 Document.CommitGuiAction(action);
-
-                var pasted = (action.Focus as IEnumerable<object>).OfType<Entity>();
-                Document.Window.EditorGui.View.SelectedEntities.Clear();
-                Document.Window.EditorGui.View.SelectedEntities.UnionWith(pasted);
-
-                this.UpdateSelection();
             }
         }
 

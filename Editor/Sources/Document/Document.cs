@@ -170,9 +170,7 @@ namespace Petri.Editor
 
             UndoManager.CommitGuiAction(a);
             UpdateUndo();
-            if(a.Focus is Entity && CurrentController == EditorController) {
-                Window.EditorGui.View.SelectedEntity = (Entity)a.Focus;
-            }
+
             Window.Gui.BaseView.Redraw();
         }
 
@@ -182,8 +180,6 @@ namespace Petri.Editor
         public void Undo()
         {
             UndoManager.Undo();
-            var focus = UndoManager.NextRedo.Focus;
-            focus.Focus();
 
             UpdateUndo();
             Window.Gui.Redraw();
@@ -195,8 +191,6 @@ namespace Petri.Editor
         public void Redo()
         {
             UndoManager.Redo();
-            var focus = UndoManager.NextUndo.Focus;
-            focus.Focus();
 
             UpdateUndo();
             Window.Gui.Redraw();
