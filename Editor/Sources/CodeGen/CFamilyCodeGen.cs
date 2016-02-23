@@ -164,7 +164,7 @@ namespace Petri.Editor
 
         static string GetNTab(int n)
         {
-            return new string('\n', n);
+            return new string('\t', n);
         }
 
         private Code.Language _lang;
