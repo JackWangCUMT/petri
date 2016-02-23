@@ -601,7 +601,7 @@ namespace Petri.Editor
             if(Path != "") {
                 if(Settings.RelativeSourceOutputPath != "") {
                     try {
-                        _codeRanges = this.GenerateCodeDontAsk();
+                        this.GenerateCodeDontAsk();
                         _modifiedSinceGeneration = false;
                         Window.EditorGui.Status = Configuration.GetLocalized("The <language> code has been sucessfully generated.",
                                                                              Settings.LanguageName());
@@ -635,7 +635,7 @@ namespace Petri.Editor
                                                                      newSettings));
                         }
 
-                        _codeRanges = this.GenerateCodeDontAsk();
+                        this.GenerateCodeDontAsk();
                     }
 
                     fc.Destroy();
@@ -690,50 +690,6 @@ namespace Petri.Editor
         }
 
         /// <summary>
-        /// Parses the compilation errors and attempt to give a meaningful diagnostic.
-        /// </summary>
-        /// <param name="errors">The error string.</param>
-        protected override void ParseCompilationErrors(string errors)
-        {
-            string linePattern = "(?<line>(\\d+))", rowPattern = "(?<row>(\\d+))";
-            string pattern = "^" + Settings.RelativeSourcePath.Replace(".", "\\.") + "((:" + linePattern + ":" + rowPattern + ")|(\\(" + linePattern + "," + rowPattern + "\\))): error:? (?<msg>(.*))$";
-            var lines = errors.Split(new string[] { Environment.NewLine },
-                                     StringSplitOptions.RemoveEmptyEntries);
-
-            foreach(string line in lines) {
-                var match = System.Text.RegularExpressions.Regex.Match(line, pattern);
-                if(match.Success) {
-                    int lineNumber = int.Parse(match.Groups["line"].Value);
-                    if(_codeRanges != null) {
-                        // TODO: sort + binary search
-                        foreach(var entry in _codeRanges) {
-                            if(lineNumber >= entry.Value.FirstLine && lineNumber <= entry.Value.LastLine) {
-                                AddConflicting(entry.Key,
-                                               Configuration.GetLocalized("Line {0}, Row {1}:",
-                                                                          lineNumber,
-                                                                          match.Groups["row"].Value) + "\n" + match.Groups["msg"].Value);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if(Conflicting.Count > 1) {
-                Window.EditorGui.Status = Configuration.GetLocalized("{0} conflicting entities.",
-                                                                     Conflicting.Count);
-            }
-            else if(Conflicting.Count == 1) {
-                Window.EditorGui.Status = Configuration.GetLocalized("1 confliting entity.");
-            }
-            else {
-                Window.EditorGui.Status = Configuration.GetLocalized("No conflicting entity.");
-            }
-
-            Window.EditorGui.View.Redraw();
-        }
-
-        /// <summary>
         /// An method that is meant to be called asynchronously and that compiles the document's generated code.
         /// </summary>
         private bool CompileTask()
@@ -744,9 +700,21 @@ namespace Petri.Editor
             try {
                 var c = new Compiler(this);
                 var o = c.CompileSource(Settings.RelativeSourcePath, Settings.RelativeLibPath);
-                if(o != "") {
-                    Application.RunOnUIThread(() => {
-                        ParseCompilationErrors(o);
+                bool failure = ParseCompilationErrors(o);
+                Application.RunOnUIThread(() => {
+                    if(Conflicting.Count > 1) {
+                        Window.EditorGui.Status = Configuration.GetLocalized("{0} conflicting entities.",
+                                                                             Conflicting.Count);
+                    }
+                    else if(Conflicting.Count == 1) {
+                        Window.EditorGui.Status = Configuration.GetLocalized("1 confliting entity.");
+                    }
+                    else {
+                        Window.EditorGui.Status = Configuration.GetLocalized("No conflicting entity.");
+                    }
+
+                    if(failure) {
+                        Window.EditorGui.View.Redraw();
 
                         MessageDialog d = new MessageDialog(Window,
                                                             DialogFlags.Modal,
@@ -767,17 +735,13 @@ namespace Petri.Editor
                         }
 
                         Window.Gui.Status = Configuration.GetLocalized("The compilation has failed.");
-                    });
-
-                    return false;
-                }
-                else {
-                    Application.RunOnUIThread(() => { 
+                    }
+                    else {
                         Window.Gui.Status = Configuration.GetLocalized("The compilation has been successful.");
-                    });
+                    }
+                });
 
-                    return true;
-                }
+                return !failure;
             }
             finally {
                 Window.EditorGui.Compilation = false;
@@ -888,7 +852,6 @@ namespace Petri.Editor
         MacrosManager _macrosManager;
         DocumentSettingsEditor _settingsEditor;
         bool _modifiedSinceGeneration = true;
-        Dictionary<Entity, CodeRange> _codeRanges = null;
         bool _saving = false;
     }
 }

@@ -342,7 +342,7 @@ namespace Petri.Editor
         /// Generates the code without prompting the user. If no code have ever been generated for this document, meaning we don't know where to save it, then an Exception is thrown.
         /// <exception cref="Exception">When no save path has been defined for the document.</exception>
         /// </summary>
-        public Dictionary<Entity, CodeRange> GenerateCodeDontAsk()
+        public void GenerateCodeDontAsk()
         {
             if(this.Settings.RelativeSourceOutputPath.Length == 0) {
                 throw new Exception(Configuration.GetLocalized("No source output path defined. Please open the Petri net with the graphical editor and generate the <language> code once.",
@@ -352,7 +352,7 @@ namespace Petri.Editor
             var generator = PetriGen.PetriGenFromLanguage(Settings.Language, this);
             generator.WritePetriNet();
 
-            return generator.CodeRanges;
+            _codeRanges = generator.CodeRanges;
         }
 
         /// <summary>
@@ -363,27 +363,61 @@ namespace Petri.Editor
         {
             var c = new Compiler(this);
             var o = c.CompileSource(Settings.RelativeSourcePath, Settings.RelativeLibPath);
-            if(o != "") {
-                ParseCompilationErrors(o);
+            return !ParseCompilationErrors(o);
+        }
 
-                return false;
+        /// <summary>
+        /// Gets the error pattern that must recognize an error line among the compiler's output.
+        /// </summary>
+        /// <value>The error pattern.</value>
+        protected string ErrorPattern {
+            get {
+                string linePattern = "(?<line>(\\d+))", rowPattern = "(?<row>(\\d+))";
+                return "^" + Settings.RelativeSourcePath.Replace(".", "\\.") + "((:" + linePattern + ":" + rowPattern + ")|(\\(" + linePattern + "," + rowPattern + "\\))): error:? (?<msg>(.*))$";
             }
-
-            return true;
         }
 
         /// <summary>
         /// Parses the compilation errors and attempt to give a meaningful diagnostic.
         /// </summary>
         /// <param name="errors">The error string.</param>
-        protected virtual void ParseCompilationErrors(string errors)
+        /// <returns><c>true</c> if some errors were actually met, <c>false</c> otherwise.</returns>
+        protected bool ParseCompilationErrors(string errors)
         {
-            Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.")
-            + "\n" + Configuration.GetLocalized("Compiler invocation:")
-            + "\n" + Settings.Compiler
-            + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
-                                               Settings.RelativeLibPath) + "\n\n" + Configuration.GetLocalized("Compilation errors:") + "\n" + errors);
-        
+            bool error = false;
+            var lines = errors.Split(new string[] { Environment.NewLine },
+                                     StringSplitOptions.RemoveEmptyEntries);
+
+            var regex = new System.Text.RegularExpressions.Regex(ErrorPattern);
+            foreach(string line in lines) {
+                var match = regex.Match(line);
+                if(match.Success) {
+                    error = true;
+                    int lineNumber = int.Parse(match.Groups["line"].Value);
+                    if(_codeRanges != null) {
+                        // TODO: sort + binary search
+                        foreach(var entry in _codeRanges) {
+                            if(lineNumber >= entry.Value.FirstLine && lineNumber <= entry.Value.LastLine) {
+                                AddConflicting(entry.Key,
+                                               Configuration.GetLocalized("Line {0}, Row {1}:",
+                                                                          lineNumber,
+                                                                          match.Groups["row"].Value) + "\n" + match.Groups["msg"].Value);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if(error) {
+                Console.Error.WriteLine(Configuration.GetLocalized("Compilation failed.")
+                + "\n" + Configuration.GetLocalized("Compiler invocation:")
+                + "\n" + Settings.Compiler
+                + " " + Settings.CompilerArguments(Settings.RelativeSourcePath,
+                                                   Settings.RelativeLibPath));
+            }
+
+            return error;
         }
 
         /// <summary>
@@ -457,6 +491,7 @@ namespace Petri.Editor
         }
 
         int _wX, _wY, _wW, _wH;
+        Dictionary<Entity, CodeRange> _codeRanges = null;
     }
 }
 
