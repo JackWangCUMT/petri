@@ -80,7 +80,8 @@ namespace Petri.Editor
         /// <summary>
         /// Displays the entity's compilation error if any
         /// </summary>
-        protected void AddErrorIfAny() {
+        protected void AddErrorIfAny()
+        {
             if(_document.Conflicts(Entity)) {
                 CreateLabel(0, Configuration.GetLocalized("Compilation errors:"));
 
@@ -102,15 +103,14 @@ namespace Petri.Editor
 
     public class ActionEditor : EntityEditor
     {
-        private enum ActionType
+        enum ActionType
         {
             Nothing,
             Print,
             Pause,
             Manual,
-            Invocation}
-
-        ;
+            Invocation
+        }
 
         public ActionEditor(Action a, Document doc) : base(a, doc)
         {
@@ -151,7 +151,7 @@ namespace Petri.Editor
                 };
             }
 
-            // Manage C++ function
+            // Manage code invocation
             {
                 CreateLabel(0, Configuration.GetLocalized("Associated action:"));
 

@@ -137,11 +137,7 @@ namespace Petri.Editor
             Name = "MyPetriNet";
             Enum = DefaultEnum;
 
-            if(elem == null) {
-                CompilerFlags.Add("-std=c++1y");
-                CompilerFlags.Add("-g");
-            }
-            else {
+            if(elem != null) {
                 if(elem.Attribute("Name") != null) {
                     Name = elem.Attribute("Name").Value;
                 }

@@ -65,12 +65,11 @@ namespace Petri.Editor
             }
 
             CreateLabel(0, Configuration.GetLocalized("Evaluate expression:"));
-            Entry entry = CreateWidget<Entry>(true, 0, _document.DebugController?.LastEvaluation ?? Configuration.GetLocalized("Expression"));
-            Application.RegisterValidation(entry,
-                                           true,
-                                           (e, args) => {
-                _document.DebugController.LastEvaluation = e.Text;
-            });
+            string[] lastEvaluations = (_document.DebugController != null) ? _document.DebugController.LastEvaluations.ToArray() : new string[]{};
+            var combo = CreateWidget<ComboBoxEntry>(true, 0, new object[]{ lastEvaluations });
+            if(_document.DebugController != null && _document.DebugController.LastEvaluations.Count > 0) {
+                combo.Entry.Text = _document.DebugController.LastEvaluations[0];
+            }
 
             if(_document.Settings?.Language == Code.Language.C) {
                 CreateLabel(0, Configuration.GetLocalized("With printf format:"));
@@ -89,7 +88,16 @@ namespace Petri.Editor
 
             Evaluate.Clicked += (sender, ev) => {
                 if(_document.DebugController.Client.SessionRunning && (!_document.DebugController.Client.PetriRunning || _document.DebugController.Client.Pause)) {
-                    string str = entry.Text;
+                    string str = combo.Entry.Text;
+
+                    int pos = _document.DebugController.LastEvaluations.IndexOf(str);
+                    if(pos != -1) {
+                        _document.DebugController.LastEvaluations.RemoveAt(pos);
+                        combo.RemoveText(pos);
+                    }
+                    _document.DebugController.LastEvaluations.Insert(0, str);
+                    combo.PrependText(str);
+
                     try {
                         Code.Expression expr = Code.Expression.CreateFromStringAndEntity<Code.Expression>(str,
                                                                                                           _document.PetriNet);

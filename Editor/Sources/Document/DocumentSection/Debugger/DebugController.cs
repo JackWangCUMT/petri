@@ -29,8 +29,6 @@ namespace Petri.Editor
     {
         public DebugController(Document doc) : base(doc)
         {
-            LastEvaluation = Configuration.GetLocalized("Expression");
-
             Client = new DebugClient(doc);
             ActiveStates = new Dictionary<State, int>();
             Breakpoints = new HashSet<Action>();
@@ -48,13 +46,12 @@ namespace Petri.Editor
         }
 
         /// <summary>
-        /// Gets or sets the last evaluated expression of the debug editor.
+        /// Gets or sets the last evaluated expressions of the debug editor.
         /// </summary>
         /// <value>The last evaluation.</value>
-        public string LastEvaluation {
+        public List<string> LastEvaluations {
             get;
-            set;
-        }
+        } = new List<string>();
 
         /// <summary>
         /// Gets the active states.
