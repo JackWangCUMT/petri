@@ -92,6 +92,15 @@ namespace Petri.Editor
 
             Path = path;
             ResetID();
+
+            DebugClient client;
+            if(this is Document) {
+                client = new GUIDebugClient((Document)this);
+            }
+            else {
+                client = null;
+            }
+            DebugController = new DebugController(this, client);
         }
 
         public string Path {
@@ -174,6 +183,15 @@ namespace Petri.Editor
                     CodeConditions.Add(f);
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the debug controller.
+        /// </summary>
+        /// <value>The debug controller.</value>
+        public DebugController DebugController {
+            get;
+            private set;
         }
 
         public RootPetriNet PetriNet {

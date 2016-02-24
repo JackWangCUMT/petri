@@ -174,6 +174,7 @@
     <Compile Include="..\Sources\Application\CLI.cs" />
     <Compile Include="..\Sources\Document\DocumentSection\Editor\FindPanel.cs" />
     <Compile Include="..\Sources\Document\Focusable.cs" />
+    <Compile Include="..\Sources\Document\DocumentSection\Debugger\GUIDebugClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="CSRuntime.csproj">

@@ -29,10 +29,16 @@ namespace Petri.Editor
 {
     public class EditorController : Controller
     {
-        public EditorController(Document doc) : base(doc)
+        public EditorController(Document doc)
         {
+            Document = doc;
             EntityEditor = EntityEditor.GetEditor(null, doc);
             this.UpdateMenuItems();
+        }
+
+        Document Document {
+            get;
+            set;
         }
 
         public override void Copy()

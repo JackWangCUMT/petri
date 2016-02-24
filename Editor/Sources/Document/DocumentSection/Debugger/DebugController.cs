@@ -27,12 +27,17 @@ namespace Petri.Editor
 {
     public class DebugController : Controller
     {
-        public DebugController(Document doc) : base(doc)
+        public DebugController(HeadlessDocument doc, DebugClient client)
         {
-            Client = new DebugClient(doc);
+            Document = doc;
+            Client = client;
             ActiveStates = new Dictionary<State, int>();
             Breakpoints = new HashSet<Action>();
-            DebugEditor = new DebugEditor(doc, null);
+        }
+
+        HeadlessDocument Document {
+            get;
+            set;
         }
 
         public DebugClient Client {
@@ -93,7 +98,9 @@ namespace Petri.Editor
 
         public override void UpdateMenuItems()
         {
-            Document.Window.EmbedItem.Sensitive = false;
+            if(Document is Document) {
+                ((Document)Document).Window.EmbedItem.Sensitive = false;
+            }
         }
 
         public override void Copy()

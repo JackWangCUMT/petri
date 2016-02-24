@@ -26,16 +26,6 @@ namespace Petri.Editor
 {
     public abstract class Controller
     {
-        protected Controller(Document document)
-        {
-            Document = document;
-        }
-
-        public Document Document {
-            get;
-            private set;
-        }
-
         public abstract void UpdateMenuItems();
 
         public abstract void Copy();

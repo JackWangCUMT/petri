@@ -60,7 +60,6 @@ namespace Petri.Editor
             this.UndoManager = new UndoManager();
 
             EditorController = new EditorController(this);
-            DebugController = new DebugController(this);
 
             this.CurrentController = EditorController;
 
@@ -100,15 +99,6 @@ namespace Petri.Editor
         /// </summary>
         /// <value>The editor controller.</value>
         public EditorController EditorController {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// Gets the debug controller.
-        /// </summary>
-        /// <value>The debug controller.</value>
-        public DebugController DebugController {
             get;
             private set;
         }
