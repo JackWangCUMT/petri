@@ -74,7 +74,7 @@ namespace Petri.Editor
                 foreach(var e in selected) {
                     if(e is Transition) {
                         var t = (Transition)e;
-                        if(!selected.Contains(t.After) || !selected.Contains(t.After))
+                        if(!selected.Contains(t.Before) || !selected.Contains(t.After))
                             toRemove.Add(t);
                     }
                     else if(e is State) {
