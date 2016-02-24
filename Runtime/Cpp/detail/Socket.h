@@ -41,7 +41,7 @@ namespace Petri {
         // les donnees (obtenu via Accept())
         // -data : pointeur vers les donnees
         // -nb_bytes : taille des donnees a envoyer, en octets
-        ssize_t send(Socket &client_socket, const void *data, std::size_t nb_bytes);
+        ssize_t send(const void *data, std::size_t nb_bytes);
 
 
         // Reception de donnees (donnees allant d'un client vers un serveur) :
@@ -49,7 +49,7 @@ namespace Petri {
         // -buffer : pointeur vers l'endroit ou l'on doit stocker les donnees
         // -max_bytes : taille du buffer en octets, nombre maximal de donnees pouvant
         // etre retournees
-        ssize_t receive(Socket &client_socket, void *buffer, std::size_t max_bytes);
+        ssize_t receive(void *buffer, std::size_t max_bytes);
 
         // Envoi d'un paquet (d'un serveur vers un client) :
         // -client_socket : pointeur vers la Socket correspondant au client a qui envoyer
@@ -58,9 +58,9 @@ namespace Petri {
         // -nb_bytes : taille des donnees a envoyer, en octets
         // A la difference de Send(), on rajoute un header de 4 octets indiquant la taille
         // du paquet. Un SendMsg() correspond a un ReceiveMsg().
-        bool sendMsg(Socket &client_socket, const void *data, std::size_t nb_bytes);
+        bool sendMsg(const void *data, std::size_t nb_bytes);
 
-        std::vector<uint8_t> receiveNewMsg(Socket &client_socket);
+        std::vector<uint8_t> receiveNewMsg();
 
 
         // Mise sur ecoute (pour un serveur) :

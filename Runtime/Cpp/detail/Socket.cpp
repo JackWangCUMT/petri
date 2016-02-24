@@ -81,27 +81,19 @@ namespace Petri {
     }
 
     // Envoi de donnees (d'un serveur vers un client) :
-    ssize_t Socket::send(Socket &client_socket, const void *data, size_t nb_bytes) {
-        if(_state != SOCK_LISTENING) {
-            return -1;
-        }
-
-        return ::send(client_socket._fd, data, nb_bytes, 0);
+    ssize_t Socket::send(const void *data, size_t nb_bytes) {
+        return ::send(_fd, data, nb_bytes, 0);
     }
 
     // Reception de donnees (donnees allant d'un client vers un serveur) :
-    ssize_t Socket::receive(Socket &client_socket, void *buffer, size_t max_bytes) {
-        if(_state != SOCK_LISTENING) {
-            return -1;
-        }
-
-        return recv(client_socket._fd, buffer, max_bytes, 0);
+    ssize_t Socket::receive(void *buffer, size_t max_bytes) {
+        return recv(_fd, buffer, max_bytes, 0);
     }
 
     // Envoi d'un paquet (d'un serveur vers un client)
     // A la difference de Send(), on rajoute un header de 4 octets indiquant la taille
     // du paquet. Un SendMsg() correspond a un ReceiveMsg().
-    bool Socket::sendMsg(Socket &client_socket, const void *data, size_t nb_bytes) {
+    bool Socket::sendMsg(const void *data, size_t nb_bytes) {
         uint8_t header[4] = {uint8_t((nb_bytes >> 0 * 8) & 0xFF),
                              uint8_t((nb_bytes >> 1 * 8) & 0xFF),
                              uint8_t((nb_bytes >> 2 * 8) & 0xFF),
@@ -110,12 +102,12 @@ namespace Petri {
         ssize_t remaining = nb_bytes;
 
         ssize_t n = 0;
-        if((n = this->send(client_socket, (const void *)header, 4)) <= 0) {
+        if((n = this->send((const void *)header, 4)) <= 0) {
             return false;
         }
 
         while(remaining != 0) {
-            n = this->send(client_socket, (void *)(&((uint8_t *)data)[nb_bytes - remaining]), remaining);
+            n = this->send((void *)(&((uint8_t *)data)[nb_bytes - remaining]), remaining);
             if(n <= 0) {
                 return false;
             }
@@ -127,12 +119,12 @@ namespace Petri {
     }
 
     // Pareil que ReceiveMsg mais alloue la memoire necessaire
-    std::vector<uint8_t> Socket::receiveNewMsg(Socket &client_socket) {
+    std::vector<uint8_t> Socket::receiveNewMsg() {
         uint8_t header[4];
         size_t nb_bytes = 0; // Nombre d'octets dans le paquet
         size_t remaining;
 
-        ssize_t received = this->receive(client_socket, (void *)header, 4); // Lecture du header
+        ssize_t received = this->receive((void *)header, 4); // Lecture du header
 
         // Cas ou l'on n'a pas recu assez d'octets pour avoir un header complet :
         if(received < 4) {
@@ -149,7 +141,7 @@ namespace Petri {
         remaining = nb_bytes;
         while(remaining != 0) {
             remaining =
-            remaining - this->receive(client_socket, (void *)(&data[nb_bytes - remaining]), remaining);
+            remaining - this->receive((void *)(&data[nb_bytes - remaining]), remaining);
         }
 
         return data;

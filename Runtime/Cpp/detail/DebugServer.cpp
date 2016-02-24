@@ -56,7 +56,6 @@ namespace Petri {
     struct DebugServer::Internals {
         Internals(DebugServer &that, PetriDynamicLib &lib)
                 : _that(that)
-                , _socket()
                 , _client()
                 , _petriNetFactory(lib) {}
 
@@ -90,7 +89,6 @@ namespace Petri {
 
         std::thread _receptionThread;
         std::thread _heartBeat;
-        std::unique_ptr<Petri::Socket> _socket;
         Petri::Socket _client;
         std::atomic_bool _running = {false};
 
@@ -187,22 +185,20 @@ namespace Petri {
     void DebugServer::Internals::serverCommunication() {
         setThreadName("DebugServer " + _petriNetFactory.name());
 
-        _socket = std::make_unique<Socket>();
-        if(!_socket->listen(_petriNetFactory.port())) {
-            _running = false;
-        }
-
-        if(_running) {
-            std::cout << "Debug session for Petri net " << _petriNetFactory.name() << " started." << std::endl;
-        }
+        std::cout << "Debug session for Petri net " << _petriNetFactory.name() << " started." << std::endl;
 
         while(_running) {
-            std::cout << "Waiting for the debugger to attach…" << std::endl;
-            _socket->setBlocking(false);
-            while(_running && !_socket->accept(_client)) {
-                std::this_thread::sleep_for(20ms);
+            {
+                Socket serverSocket;
+                if(!serverSocket.listen(_petriNetFactory.port()) || !serverSocket.setBlocking(false)) {
+                    _running = false;
+                }
+
+                std::cout << "Waiting for the debugger to attach…" << std::endl;
+                while(_running && !serverSocket.accept(_client)) {
+                    std::this_thread::sleep_for(20ms);
+                }
             }
-            _socket->setBlocking(true);
             _client.setBlocking(true);
 
             if(!_running) {
@@ -280,7 +276,6 @@ namespace Petri {
         }
 
         _running = false;
-        _socket = nullptr;
         _stateChangeCondition.notify_all();
 
         if(_petri) {
@@ -438,7 +433,7 @@ namespace Petri {
     }
 
     Json::Value DebugServer::Internals::receiveObject() {
-        std::vector<uint8_t> vect = _socket->receiveNewMsg(_client);
+        std::vector<uint8_t> vect = _client.receiveNewMsg();
 
         std::string msg(vect.begin(), vect.end());
 
@@ -460,7 +455,7 @@ namespace Petri {
 
         std::string s = writer.write(o);
 
-        _socket->sendMsg(_client, s.c_str(), s.size());
+        _client.sendMsg(s.c_str(), s.size());
     }
 
     Json::Value DebugServer::Internals::json(std::string const &type, Json::Value const &payload) {
