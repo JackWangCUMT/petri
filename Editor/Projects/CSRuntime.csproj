@@ -10,7 +10,7 @@
     <RootNamespace>Petri.Runtime</RootNamespace>
     <AssemblyName>CSRuntime</AssemblyName>
     <BaseDirectory>..\..\Runtime\CSharp</BaseDirectory>
-    <ReleaseVersion>1.3.3</ReleaseVersion>
+    <ReleaseVersion>1.3.4</ReleaseVersion>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

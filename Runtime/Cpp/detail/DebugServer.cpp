@@ -100,7 +100,7 @@ namespace Petri {
     };
 
     std::string const &DebugServer::getVersion() {
-        static auto const version = "1.3.3"s;
+        static auto const version = "1.3.4"s;
         return version;
     }
 

@@ -108,7 +108,7 @@ namespace Petri.Editor
         /// <value>The version.</value>
         public static string Version {
             get {
-                return "1.3.3";
+                return "1.3.4";
             }
         }
 
