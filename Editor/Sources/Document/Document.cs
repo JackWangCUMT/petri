@@ -47,7 +47,7 @@ namespace Petri.Editor
     /// <summary>
     /// A document with all the GUI attached to it, including the editor and the debugger.
     /// </summary>
-    public class Document : HeadlessDocument
+    public class Document : HeadlessDocument, Debuggable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Petri.Editor.Document"/> class.
@@ -60,6 +60,7 @@ namespace Petri.Editor
             this.UndoManager = new UndoManager();
 
             EditorController = new EditorController(this);
+            DebugController = new GUIDebugController(this);
 
             this.CurrentController = EditorController;
 
@@ -108,6 +109,19 @@ namespace Petri.Editor
         /// </summary>
         /// <value>The current controller.</value>
         public Controller CurrentController {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the debug controller.
+        /// </summary>
+        /// <value>The debug controller.</value>
+        public DebugController BaseDebugController {
+            get { return DebugController; }
+        }
+
+        public GUIDebugController DebugController {
             get;
             private set;
         }

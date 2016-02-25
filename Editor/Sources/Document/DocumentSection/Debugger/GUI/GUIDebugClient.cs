@@ -27,7 +27,7 @@ namespace Petri.Editor
 {
     public class GUIDebugClient : DebugClient
     {
-        public GUIDebugClient(Document doc) : base(doc)
+        public GUIDebugClient(Document doc, Debuggable debuggable) : base(doc, debuggable)
         {
         }
 
@@ -108,7 +108,7 @@ namespace Petri.Editor
         }
 
         protected override void NotifyActiveStatesChanged() {
-
+            Document.Window.DebugGui.View.Redraw();
         }
     }
 }

@@ -47,8 +47,9 @@ namespace Petri.Editor
         /// Initializes a new instance of the <see cref="Petri.Editor.DebugClient"/> class.
         /// </summary>
         /// <param name="doc">Document.</param>
-        public DebugClient(HeadlessDocument doc)
+        public DebugClient(HeadlessDocument doc, Debuggable debuggable)
         {
+            _debuggable = debuggable;
             _document = doc;
             _sessionRunning = false;
             _petriRunning = false;
@@ -249,8 +250,8 @@ namespace Petri.Editor
                 _sessionRunning = false;
             }
 
-            lock(_document.DebugController.ActiveStates) {
-                _document.DebugController.ActiveStates.Clear();
+            lock(_debuggable.BaseDebugController.ActiveStates) {
+                _debuggable.BaseDebugController.ActiveStates.Clear();
             }
         }
 
@@ -326,7 +327,7 @@ namespace Petri.Editor
         {
             if(PetriRunning) {
                 var breakpoints = new JArray();
-                foreach(var p in _document.DebugController.Breakpoints) {
+                foreach(var p in _debuggable.BaseDebugController.Breakpoints) {
                     breakpoints.Add(new JValue(p.ID));
                 }
                 this.SendObject(new JObject(new JProperty("type", "breakpoints"),
@@ -489,8 +490,8 @@ namespace Petri.Editor
                         else if(msg["payload"].ToString() == "stop") {
                             _petriRunning = false;
                             NotifyStateChanged();
-                            lock(_document.DebugController.ActiveStates) {
-                                _document.DebugController.ActiveStates.Clear();
+                            lock(_debuggable.BaseDebugController.ActiveStates) {
+                                _debuggable.BaseDebugController.ActiveStates.Clear();
                             }
                             NotifyActiveStatesChanged();
                             NotifyStatusMessage(Configuration.GetLocalized("The petri net execution has ended."));
@@ -538,8 +539,8 @@ namespace Petri.Editor
                     else if(msg["type"].ToString() == "states") {
                         var states = msg["payload"].Select(t => t).ToList();
 
-                        lock(_document.DebugController.ActiveStates) {
-                            _document.DebugController.ActiveStates.Clear();
+                        lock(_debuggable.BaseDebugController.ActiveStates) {
+                            _debuggable.BaseDebugController.ActiveStates.Clear();
                             foreach(var s in states) {
                                 var id = UInt64.Parse(s["id"].ToString());
                                 var e = _document.EntityFromID(id);
@@ -547,7 +548,7 @@ namespace Petri.Editor
                                     throw new Exception(Configuration.GetLocalized("Entity sent from runtime doesn't exist on our side! (id: {0})",
                                                                                    id));
                                 }
-                                _document.DebugController.ActiveStates[e as State] = int.Parse(s["count"].ToString());
+                                _debuggable.BaseDebugController.ActiveStates[e as State] = int.Parse(s["count"].ToString());
                             }
                         }
 
@@ -673,6 +674,7 @@ namespace Petri.Editor
         object _upLock = new object();
         object _downLock = new object();
 
+        protected Debuggable _debuggable;
         protected HeadlessDocument _document;
     }
 }

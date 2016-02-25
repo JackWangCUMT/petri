@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Petri.Editor
 {
-    public class DebugController : Controller
+    public abstract class DebugController : Controller
     {
         public DebugController(HeadlessDocument doc, DebugClient client)
         {
@@ -35,7 +35,7 @@ namespace Petri.Editor
             Breakpoints = new HashSet<Action>();
         }
 
-        HeadlessDocument Document {
+        protected HeadlessDocument Document {
             get;
             set;
         }
@@ -43,11 +43,6 @@ namespace Petri.Editor
         public DebugClient Client {
             get;
             private set;
-        }
-
-        public DebugEditor DebugEditor {
-            get;
-            set;
         }
 
         /// <summary>
@@ -98,9 +93,6 @@ namespace Petri.Editor
 
         public override void UpdateMenuItems()
         {
-            if(Document is Document) {
-                ((Document)Document).Window.EmbedItem.Sensitive = false;
-            }
         }
 
         public override void Copy()

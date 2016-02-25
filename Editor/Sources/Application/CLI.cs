@@ -8,7 +8,7 @@ namespace Petri.Editor
          * The following string constants are the possible console output when invoked in compiler mode.
          * The string are used in the units tests as well.
          */
-        internal static readonly string HelpString = "Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--run|-r] [--clean|-k] [--arch|-a (32|64)] [--verbose|-v] [--open|-o] [--] \"Path/To/Document.petri\"";
+        internal static readonly string HelpString = "Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--run|-r] [--clean|-k] [--arch|-a (32|64)] [--verbose|-v] [--open|-o] [--debug|-d] [--] \"Path/To/Document.petri\"";
 
         internal static readonly string MissingPetriDocument = "The path to the Petri document must be specified as the last program argument!";
         internal static readonly string MissingGenerateOrCompileOrRunOrClean = "Must specify one or more of \"--generate\", \"--compile\", \"clean\", and \"--run\"!";
@@ -79,6 +79,23 @@ namespace Petri.Editor
                     docs[i - 1] = System.IO.Path.GetFullPath(args[i]);
                 }
                 return Application.GUIMain(docs);
+            }
+            else if(args[0] == "--debug" || args[0] == "-d") {
+                if(args.Length != 2) {
+                    return PrintUsage(ArgumentError);
+                }
+
+                DebuggableHeadlessDocument document;
+                try {
+                    document = new DebuggableHeadlessDocument(args[1]);
+                    document.Load();
+                }
+                catch(Exception e) {
+                    Console.Error.WriteLine("Could not load the document: " + e.Message);
+                    return RunFailure;
+                }
+
+                document.Debug();
             }
 
             for(int i = 0; i < args.Length; ++i) {
