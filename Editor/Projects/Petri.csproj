@@ -113,8 +113,15 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="CSRuntime.csproj">
+      <Project>{6DBF358B-A63A-4A5C-8853-C1C7017A5DC9}</Project>
+      <Name>CSRuntime</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Sources\Application\Application.cs" />
+    <Compile Include="..\Sources\Application\CLI.cs" />
     <Compile Include="..\Sources\Application\Configuration.cs" />
-    <Compile Include="..\Sources\Application\IgeMacMenuGlobal.cs" />
     <Compile Include="..\Sources\Code\BinaryExpression.cs" />
     <Compile Include="..\Sources\Code\Enum.cs" />
     <Compile Include="..\Sources\Code\Expression.cs" />
@@ -133,33 +140,42 @@
     <Compile Include="..\Sources\CodeGen\CppPetriGen.cs" />
     <Compile Include="..\Sources\CodeGen\PetriGen.cs" />
     <Compile Include="..\Sources\Document\Compiler.cs" />
-    <Compile Include="..\Sources\Document\Document.cs" />
+    <Compile Include="..\Sources\Document\Controller.cs" />
     <Compile Include="..\Sources\Document\DocumentSettings.cs" />
-    <Compile Include="..\Sources\Document\DocumentSettingsEditor.cs" />
-    <Compile Include="..\Sources\Document\HeadersManager.cs" />
     <Compile Include="..\Sources\Document\HeadlessDocument.cs" />
-    <Compile Include="..\Sources\Document\MacrosManager.cs" />
-    <Compile Include="..\Sources\Document\MainWindow.cs" />
-    <Compile Include="..\Sources\Document\UndoManager.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Controller.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\EntityDraw.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Gui.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\PaneEditor.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\PetriView.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\RenderEntityDraw.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\RenderView.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugClient.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugController.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugEditor.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugEntityDraw.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\GUI\DebugGui.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\DebugView.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\GeneratedDynamicLibProxy.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorController.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorEntityDraw.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorGui.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\EditorView.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\EntityEditor.cs" />
+    <Compile Include="..\Sources\Document\CLI\DebuggableHeadlessDocument.cs" />
+    <Compile Include="..\Sources\Document\CLI\Debugger\CLIDebugClient.cs" />
+    <Compile Include="..\Sources\Document\CLI\Debugger\CLIDebutController.cs" />
+    <Compile Include="..\Sources\Document\Debugger\DebugClient.cs" />
+    <Compile Include="..\Sources\Document\Debugger\DebugController.cs" />
+    <Compile Include="..\Sources\Document\Debugger\Debuggable.cs" />
+    <Compile Include="..\Sources\Document\Debugger\GeneratedDynamicLibProxy.cs" />
+    <Compile Include="..\Sources\Document\GUI\Document.cs" />
+    <Compile Include="..\Sources\Document\GUI\DocumentSettingsEditor.cs" />
+    <Compile Include="..\Sources\Document\GUI\EntityDraw.cs" />
+    <Compile Include="..\Sources\Document\GUI\Gui.cs" />
+    <Compile Include="..\Sources\Document\GUI\HeadersManager.cs" />
+    <Compile Include="..\Sources\Document\GUI\MacrosManager.cs" />
+    <Compile Include="..\Sources\Document\GUI\MainWindow.cs" />
+    <Compile Include="..\Sources\Document\GUI\PaneEditor.cs" />
+    <Compile Include="..\Sources\Document\GUI\PetriView.cs" />
+    <Compile Include="..\Sources\Document\GUI\RenderEntityDraw.cs" />
+    <Compile Include="..\Sources\Document\GUI\RenderView.cs" />
+    <Compile Include="..\Sources\Document\GUI\Debugger\DebugEditor.cs" />
+    <Compile Include="..\Sources\Document\GUI\Debugger\DebugEntityDraw.cs" />
+    <Compile Include="..\Sources\Document\GUI\Debugger\DebugGui.cs" />
+    <Compile Include="..\Sources\Document\GUI\Debugger\DebugView.cs" />
+    <Compile Include="..\Sources\Document\GUI\Debugger\GUIDebugClient.cs" />
+    <Compile Include="..\Sources\Document\GUI\Debugger\GUIDebugController.cs" />
+    <Compile Include="..\Sources\Document\GUI\Editor\EditorController.cs" />
+    <Compile Include="..\Sources\Document\GUI\Editor\EditorEntityDraw.cs" />
+    <Compile Include="..\Sources\Document\GUI\Editor\EditorGui.cs" />
+    <Compile Include="..\Sources\Document\GUI\Editor\EditorView.cs" />
+    <Compile Include="..\Sources\Document\GUI\Editor\EntityEditor.cs" />
+    <Compile Include="..\Sources\Document\GUI\Editor\FindPanel.cs" />
+    <Compile Include="..\Sources\Document\GUI\Editor\RuntimeFunctions.cs" />
+    <Compile Include="..\Sources\Document\GUI\Undo\Focusable.cs" />
+    <Compile Include="..\Sources\Document\GUI\Undo\UndoManager.cs" />
     <Compile Include="..\Sources\Model\Action.cs" />
     <Compile Include="..\Sources\Model\Comment.cs" />
     <Compile Include="..\Sources\Model\Entity.cs" />
@@ -169,27 +185,6 @@
     <Compile Include="..\Sources\Model\RootPetriNet.cs" />
     <Compile Include="..\Sources\Model\State.cs" />
     <Compile Include="..\Sources\Model\Transition.cs" />
-    <Compile Include="..\Sources\Application\Application.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\RuntimeFunctions.cs" />
-    <Compile Include="..\Sources\Application\CLI.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Editor\FindPanel.cs" />
-    <Compile Include="..\Sources\Document\Focusable.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\GUI\GUIDebugClient.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\CLI\CLIDebugClient.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\GUI\GUIDebugController.cs" />
-    <Compile Include="..\Sources\Document\DocumentSection\Debugger\CLI\CLIDebutController.cs" />
-    <Compile Include="..\Sources\Document\Debuggable.cs" />
-    <Compile Include="..\Sources\Document\DebuggableHeadlessDocument.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="CSRuntime.csproj">
-      <Project>{6DBF358B-A63A-4A5C-8853-C1C7017A5DC9}</Project>
-      <Name>CSRuntime</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="..\Sources\Document\DocumentSection\Debugger\GUI\" />
-    <Folder Include="..\Sources\Document\DocumentSection\Debugger\CLI\" />
-    <Folder Include="..\Sources\Document\DocumentSection\Debugger\" />
+    <Compile Include="..\Sources\Application\IgeMacMenuGlobal.cs" />
   </ItemGroup>
 </Project>
