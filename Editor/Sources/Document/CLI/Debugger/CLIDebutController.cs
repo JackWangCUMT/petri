@@ -25,45 +25,130 @@ using System.Collections.Generic;
 
 namespace Petri.Editor
 {
-    public class CLIDebugController : DebugController
+    public delegate void DebuggerActionDel();
+
+    public class DebuggerAction
     {
-        public CLIDebugController(DebuggableHeadlessDocument doc) : base(doc, new CLIDebugClient(doc, doc))
+        public DebuggerAction(DebuggerActionDel action,
+                              string description,
+                              string invocation,
+                              params string[] aliases)
         {
-            Console.CancelKeyPress += InterruptHandler;
+            Description = description;
+            Action = action;
+
+            var list = new List<string>();
+            list.Add(invocation);
+            list.AddRange(aliases);
+
+            Invocations = list;
         }
 
-        public int Debug() {
-            while(true) {
+        public string Description {
+            get;
+            private set;
+        }
+
+        public void Execute()
+        {
+            Action();
+        }
+
+        public DebuggerActionDel Action {
+            get;
+            private set;
+        }
+
+        public IReadOnlyList<string> Invocations {
+            get;
+            private set;
+        }
+    }
+
+    public class CLIDebugController : DebugController
+    {
+        public CLIDebugController(DebuggableHeadlessDocument doc) : base(doc,
+                                                                         new CLIDebugClient(doc,
+                                                                                            doc))
+        {
+            Console.CancelKeyPress += InterruptHandler;
+
+            _actions.Add(new DebuggerAction(Exit, "Quit", "quit", "exit", "q"));
+            _actions.Add(new DebuggerAction(PrintHelp, "Show help", "help", "h"));
+
+            foreach(var action in _actions) {
+                _maxHelpWidth = Math.Max(_maxHelpWidth, action.Invocations[0].Length);
+                _actionsMapping[action.Invocations[0]] = action;
+
+                for(int i = 1; i < action.Invocations.Count; ++i) {
+                    _maxHelpAliasWidth = Math.Max(_maxHelpAliasWidth, action.Invocations[i].Length);
+                    _actionsMapping[action.Invocations[i]] = action;
+                }
+            }
+        }
+
+        public int Debug()
+        {
+            while(_alive) {
                 try {
                     Prompt();
                     string line = TryReadLine();
                     if(line != null) {
-                        if(line == "q") {
-                            return 0;
+                        try {
+                            var action = _actionsMapping[line];
+                            action.Execute();
+                        }
+                        catch(KeyNotFoundException) {
+                            Console.WriteLine("Unrecognized command '{0}'.", line);
                         }
                     }
                 }
                 catch(Exception e) {
-                    Console.WriteLine("An error occurred in the debugger loop: " + e.Message);
+                    Console.WriteLine("An error occurred in the debugger loop: " + e.GetType() + " - " + e.Message);
                 }
             }
 
-            return 0;
+            return _returnCode;
         }
 
-        void Prompt() {
+        void Prompt()
+        {
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write("(petri) ");
             Console.ResetColor();
         }
-            
-        void InterruptHandler(object sender, ConsoleCancelEventArgs args) {
+
+        void Exit()
+        {
+            _returnCode = 0;
+            _alive = false;
+        }
+
+        void PrintHelp()
+        {
+            Console.WriteLine("Debugger commands:");
+            foreach(DebuggerAction a in _actions) {
+                Console.WriteLine("  " + a.Invocations[0].PadRight(_maxHelpWidth) + " -- " + a.Description);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Current command aliases:");
+            foreach(DebuggerAction a in _actions) {
+                for(int i = 1; i < a.Invocations.Count; ++i) {
+                    Console.WriteLine("  " + a.Invocations[i].PadRight(_maxHelpAliasWidth) + " -- (" + a.Invocations[0] + ") " + a.Description);
+                }
+            }
+        }
+
+        void InterruptHandler(object sender, ConsoleCancelEventArgs args)
+        {
             Console.WriteLine("^C");
             args.Cancel = true;
             _interruptFlag = true;
         }
 
-        string TryReadLine() {
+        string TryReadLine()
+        {
             var buf = new System.Text.StringBuilder();
             while(!_interruptFlag) {
                 if(Console.KeyAvailable) {
@@ -91,6 +176,12 @@ namespace Petri.Editor
         }
 
         volatile bool _interruptFlag = false;
+        int _returnCode = 0;
+        bool _alive = true;
+
+        List<DebuggerAction> _actions = new List<DebuggerAction>();
+        Dictionary<string, DebuggerAction> _actionsMapping = new Dictionary<string, DebuggerAction>();
+        int _maxHelpWidth = 0, _maxHelpAliasWidth = 0;
     }
 }
 
