@@ -18,8 +18,8 @@ namespace Petri.Editor
             private set;
         }
 
-        public void Debug() {
-            DebugController.Debug();
+        public int Debug() {
+            return DebugController.Debug();
         }
     }
 }

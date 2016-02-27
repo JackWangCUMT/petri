@@ -95,7 +95,7 @@ namespace Petri.Editor
                     return RunFailure;
                 }
 
-                document.Debug();
+                return document.Debug();
             }
 
             for(int i = 0; i < args.Length; ++i) {
