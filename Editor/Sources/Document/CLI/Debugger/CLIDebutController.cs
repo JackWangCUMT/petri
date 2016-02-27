@@ -25,53 +25,13 @@ using System.Collections.Generic;
 
 namespace Petri.Editor
 {
-    public delegate void DebuggerActionDel();
-
-    public class DebuggerAction
-    {
-        public DebuggerAction(DebuggerActionDel action,
-                              string description,
-                              string invocation,
-                              params string[] aliases)
-        {
-            Description = description;
-            Action = action;
-
-            var list = new List<string>();
-            list.Add(invocation);
-            list.AddRange(aliases);
-
-            Invocations = list;
-        }
-
-        public string Description {
-            get;
-            private set;
-        }
-
-        public void Execute()
-        {
-            Action();
-        }
-
-        public DebuggerActionDel Action {
-            get;
-            private set;
-        }
-
-        public IReadOnlyList<string> Invocations {
-            get;
-            private set;
-        }
-    }
-
     public class CLIDebugController : DebugController
     {
         public CLIDebugController(DebuggableHeadlessDocument doc) : base(doc,
                                                                          new CLIDebugClient(doc,
                                                                                             doc))
         {
-            Console.CancelKeyPress += InterruptHandler;
+            _inputManager = new InputManager();
 
             _actions.Add(new DebuggerAction(Exit, "Quit", "quit", "exit", "q"));
             _actions.Add(new DebuggerAction(PrintHelp, "Show help", "help", "h"));
@@ -91,15 +51,14 @@ namespace Petri.Editor
         {
             while(_alive) {
                 try {
-                    Prompt();
-                    string line = TryReadLine();
+                    string line = _inputManager.TryReadCommand();
                     if(line != null) {
                         try {
                             var action = _actionsMapping[line];
                             action.Execute();
                         }
                         catch(KeyNotFoundException) {
-                            Console.WriteLine("Unrecognized command '{0}'.", line);
+                            Console.WriteLine("error: Unrecognized command '{0}'.", line);
                         }
                     }
                 }
@@ -109,13 +68,6 @@ namespace Petri.Editor
             }
 
             return _returnCode;
-        }
-
-        void Prompt()
-        {
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write("(petri) ");
-            Console.ResetColor();
         }
 
         void Exit()
@@ -140,48 +92,14 @@ namespace Petri.Editor
             }
         }
 
-        void InterruptHandler(object sender, ConsoleCancelEventArgs args)
-        {
-            Console.WriteLine("^C");
-            args.Cancel = true;
-            _interruptFlag = true;
-        }
-
-        string TryReadLine()
-        {
-            var buf = new System.Text.StringBuilder();
-            while(!_interruptFlag) {
-                if(Console.KeyAvailable) {
-                    var key = Console.ReadKey(true);
-                    if(key.Key == ConsoleKey.Enter) {
-                        Console.Write(key.KeyChar);
-                        return buf.ToString();
-                    }
-                    else if(key.Key == ConsoleKey.Backspace && buf.Length > 0) {
-                        buf.Remove(buf.Length - 1, 1);
-                        Console.Write("\b");
-                    }
-                    else if(key.KeyChar != 0) {
-                        buf.Append(key.KeyChar);
-                        Console.Write(key.KeyChar);
-                    }
-                }
-                else {
-                    System.Threading.Thread.Sleep(50);
-                }
-            }
-
-            _interruptFlag = false;
-            return null;
-        }
-
-        volatile bool _interruptFlag = false;
         int _returnCode = 0;
         bool _alive = true;
 
         List<DebuggerAction> _actions = new List<DebuggerAction>();
         Dictionary<string, DebuggerAction> _actionsMapping = new Dictionary<string, DebuggerAction>();
         int _maxHelpWidth = 0, _maxHelpAliasWidth = 0;
+
+        InputManager _inputManager;
     }
 }
 

@@ -186,5 +186,7 @@
     <Compile Include="..\Sources\Model\State.cs" />
     <Compile Include="..\Sources\Model\Transition.cs" />
     <Compile Include="..\Sources\Application\IgeMacMenuGlobal.cs" />
+    <Compile Include="..\Sources\Document\CLI\Debugger\DebuggerAction.cs" />
+    <Compile Include="..\Sources\Document\CLI\Debugger\InputManager.cs" />
   </ItemGroup>
 </Project>
