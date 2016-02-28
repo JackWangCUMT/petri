@@ -105,9 +105,6 @@ namespace Petri.Editor
                 var doc = new HeadlessDocument(args[2]);
                 doc.Load();
 
-                // Required for the Pango text rendering in Comments Entity
-                Gtk.Application.Init();
-
                 var renderView = new RenderView(doc);
                 renderView.Render(args[1]);
 

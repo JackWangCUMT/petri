@@ -79,20 +79,27 @@ namespace Petri.Editor
 
         protected virtual void DrawBackground(Comment c, Context context)
         {
-            _commentsLayout = new Pango.Layout(Gdk.PangoHelper.ContextGet());
+            var screen = Gdk.Screen.Default;
+            if(screen != null) {
+                var pangoContext = Gdk.PangoHelper.ContextGetForScreen(screen);
+                _commentsLayout = new Pango.Layout(pangoContext);
 
-            _commentsLayout.FontDescription = new Pango.FontDescription();
-            _commentsLayout.FontDescription.Family = "Arial";
-            _commentsLayout.FontDescription.Size = Pango.Units.FromPixels(12);
+                _commentsLayout.FontDescription = new Pango.FontDescription();
+                _commentsLayout.FontDescription.Family = "Arial";
+                _commentsLayout.FontDescription.Size = Pango.Units.FromPixels(12);
 
-            _commentsLayout.SetText(c.Name);
+                _commentsLayout.SetText(c.Name);
 
-            _commentsLayout.Width = (int)((c.Size.X - 13) * Pango.Scale.PangoScale);
-            _commentsLayout.Justify = true;
-            int width;
-            int height;
-            _commentsLayout.GetPixelSize(out width, out height);
-            c.Size = new PointD(Math.Max(c.Size.X, width + 13), height + 10);
+                _commentsLayout.Width = (int)((c.Size.X - 13) * Pango.Scale.PangoScale);
+                _commentsLayout.Justify = true;
+                int width;
+                int height;
+                _commentsLayout.GetPixelSize(out width, out height);
+                c.Size = new PointD(Math.Max(c.Size.X, width + 13), height + 10);
+            }
+            else {
+                c.Size = new PointD(135, 25);
+            }
 
             PointD point = new PointD(c.Position.X, c.Position.Y);
             point.X -= c.Size.X / 2 + context.LineWidth / 2;
@@ -129,7 +136,17 @@ namespace Petri.Editor
         protected virtual void DrawName(Comment c, Context context)
         {
             context.MoveTo(c.Position.X - c.Size.X / 2 + 5, c.Position.Y - c.Size.Y / 2 + 5);
-            Pango.CairoHelper.ShowLayout(context, _commentsLayout);
+            if(_commentsLayout == null) {
+                var xpos = context.CurrentPoint.X;
+                var ypos = context.CurrentPoint.Y;
+                context.MoveTo(xpos, ypos + 5);
+                context.ShowText("Comments are not available when");
+                context.MoveTo(xpos, ypos + 15);
+                context.ShowText("rendered from a headless server.");
+            }
+            else {
+                Pango.CairoHelper.ShowLayout(context, _commentsLayout);
+            }
             _commentsLayout = null;
         }
 
@@ -224,7 +241,7 @@ namespace Petri.Editor
                 PointD destination = TransitionDestination(t, direction);
 
                 direction = EntityDraw.Normalized(t.Position.X - t.Before.Position.X,
-                                                 t.Position.Y - t.Before.Position.Y);
+                                                  t.Position.Y - t.Before.Position.Y);
                 PointD origin = TransitionOrigin(t);
 
                 context.MoveTo(origin);
@@ -244,7 +261,7 @@ namespace Petri.Editor
                 context.Stroke();
 
                 direction = EntityDraw.Normalized(destination.X - t.Position.X,
-                                                 destination.Y - t.Position.Y);
+                                                  destination.Y - t.Position.Y);
                 EntityDraw.DrawArrow(context, direction, destination, arrowScale);
             }
         }
@@ -257,7 +274,7 @@ namespace Petri.Editor
         static protected PointD TransitionOrigin(Transition t)
         {
             var direction = EntityDraw.Normalized(t.Position.X - t.Before.Position.X,
-                                                 t.Position.Y - t.Before.Position.Y);
+                                                  t.Position.Y - t.Before.Position.Y);
             return new PointD(t.Before.Position.X + direction.X * t.Before.Radius,
                               t.Before.Position.Y + direction.Y * t.Before.Radius);
         }
