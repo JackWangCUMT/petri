@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI
 {
     /// <summary>
     /// An object that can gain the users focus.

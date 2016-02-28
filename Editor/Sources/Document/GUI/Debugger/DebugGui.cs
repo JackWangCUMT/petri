@@ -24,7 +24,7 @@ using System;
 using Gtk;
 using Gdk;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI.Debugger
 {
     public class DebugGui : Gui
     {
@@ -270,7 +270,7 @@ namespace Petri.Editor
             }
         }
 
-        protected DebugClient Client {
+        protected Petri.Editor.Debugger.DebugClient Client {
             get {
                 return _document.DebugController.Client;
             }

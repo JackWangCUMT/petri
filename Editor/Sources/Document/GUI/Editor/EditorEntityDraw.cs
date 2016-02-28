@@ -23,7 +23,7 @@
 using System;
 using Cairo;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI.Editor
 {
     public class EditorEntityDraw : EntityDraw
     {
@@ -176,12 +176,12 @@ namespace Petri.Editor
                 double radB = t.Before.Radius;
                 double radA = t.After.Radius;
 
-                if(PetriView.Norm(direction) > radB) {
-                    direction = PetriView.Normalized(direction);
+                if(EntityDraw.Norm(direction) > radB) {
+                    direction = EntityDraw.Normalized(direction);
                     PointD destination = TransitionDestination(t, direction);
 
                     PointD origin = TransitionOrigin(t);
-                    direction = PetriView.Normalized(t.Position.X - t.Before.Position.X,
+                    direction = EntityDraw.Normalized(t.Position.X - t.Before.Position.X,
                                                      t.Position.Y - t.Before.Position.Y);
 
                     context.Arc(origin.X + TransitionHandleRadius * direction.X,
@@ -192,7 +192,7 @@ namespace Petri.Editor
 
                     PointD direction2 = new PointD(destination.X - t.Position.X,
                                                    destination.Y - t.Position.Y);
-                    direction2 = PetriView.Normalized(direction2);
+                    direction2 = EntityDraw.Normalized(direction2);
                     context.Arc(destination.X - TransitionHandleRadius * direction2.X,
                                 destination.Y - TransitionHandleRadius * direction2.Y,
                                 TransitionHandleRadius,
@@ -207,7 +207,7 @@ namespace Petri.Editor
         static public PointD GetOriginHandle(Transition t)
         {
             PointD origin = TransitionOrigin(t);
-            PointD direction = PetriView.Normalized(t.Position.X - t.Before.Position.X,
+            PointD direction = EntityDraw.Normalized(t.Position.X - t.Before.Position.X,
                                                     t.Position.Y - t.Before.Position.Y);
 
             return new PointD(origin.X + TransitionHandleRadius * direction.X,
@@ -216,12 +216,12 @@ namespace Petri.Editor
 
         static public PointD GetDestinationHandle(Transition t)
         {
-            PointD direction = PetriView.Normalized(TransitionDirection(t));
+            PointD direction = EntityDraw.Normalized(TransitionDirection(t));
             PointD destination = TransitionDestination(t, direction);
 
             PointD direction2 = new PointD(destination.X - t.Position.X,
                                            destination.Y - t.Position.Y);
-            direction2 = PetriView.Normalized(direction2);
+            direction2 = EntityDraw.Normalized(direction2);
 
             return new PointD(destination.X - TransitionHandleRadius * direction2.X,
                               destination.Y - TransitionHandleRadius * direction2.Y);

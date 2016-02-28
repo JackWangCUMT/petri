@@ -26,7 +26,7 @@ using Gtk;
 using Cairo;
 using System.Linq;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI.Debugger
 {
     public class DebugView : PetriView
     {

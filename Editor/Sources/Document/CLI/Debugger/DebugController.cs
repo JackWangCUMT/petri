@@ -23,12 +23,12 @@
 using System;
 using System.Collections.Generic;
 
-namespace Petri.Editor
+namespace Petri.Editor.CLI.Debugger
 {
-    public class CLIDebugController : DebugController
+    public class DebugController : Petri.Editor.Debugger.DebugController
     {
-        public CLIDebugController(DebuggableHeadlessDocument doc) : base(doc,
-                                                                         new CLIDebugClient(doc,
+        public DebugController(DebuggableHeadlessDocument doc) : base(doc,
+                                                                         new DebugClient(doc,
                                                                                             doc))
         {
             _inputManager = new InputManager();

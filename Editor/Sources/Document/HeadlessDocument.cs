@@ -358,7 +358,7 @@ namespace Petri.Editor
                                                                Settings.LanguageName()));
             }
 
-            var generator = PetriGen.PetriGenFromLanguage(Settings.Language, this);
+            var generator = CodeGen.PetriGen.PetriGenFromLanguage(Settings.Language, this);
             generator.WritePetriNet();
 
             _codeRanges = generator.CodeRanges;
@@ -460,7 +460,7 @@ namespace Petri.Editor
 
         public string Hash {
             get {
-                var generator = PetriGen.PetriGenFromLanguage(Settings.Language, this);
+                var generator = CodeGen.PetriGen.PetriGenFromLanguage(Settings.Language, this);
                 return generator.GetHash();
             }
         }
@@ -500,7 +500,7 @@ namespace Petri.Editor
         }
 
         int _wX, _wY, _wW, _wH;
-        Dictionary<Entity, CodeRange> _codeRanges = null;
+        Dictionary<Entity, CodeGen.CodeRange> _codeRanges = null;
     }
 }
 

@@ -25,7 +25,7 @@ using Gtk;
 using IgeMacIntegration;
 using System.Collections.Generic;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI
 {
     public class MainWindow : Gtk.Window
     {
@@ -58,8 +58,8 @@ namespace Petri.Editor
 
             this.BuildMenus();
 
-            _editorGui = new EditorGui(_document);
-            _debugGui = new DebugGui(_document);
+            _editorGui = new Editor.EditorGui(_document);
+            _debugGui = new Debugger.DebugGui(_document);
 
             this.FocusInEvent += (o, args) => {
                 _document.UpdateMenuItems();
@@ -103,7 +103,7 @@ namespace Petri.Editor
         /// Gets the editor GUI.
         /// </summary>
         /// <value>The editor GUI.</value>
-        public EditorGui EditorGui {
+        public Editor.EditorGui EditorGui {
             get {
                 return _editorGui;
             }
@@ -113,7 +113,7 @@ namespace Petri.Editor
         /// Gets the debug GUI.
         /// </summary>
         /// <value>The debug GUI.</value>
-        public DebugGui DebugGui {
+        public Debugger.DebugGui DebugGui {
             get {
                 return _debugGui;
             }
@@ -823,8 +823,8 @@ namespace Petri.Editor
         AccelGroup _accelGroup;
         static AccelGroup _staticAccelGroup;
 
-        EditorGui _editorGui;
-        DebugGui _debugGui;
+        Editor.EditorGui _editorGui;
+        Debugger.DebugGui _debugGui;
     }
 }
 

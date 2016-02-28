@@ -379,7 +379,7 @@ namespace Petri.Editor
         public string RelativeSourcePath {
             get {
                 return System.IO.Path.Combine(RelativeSourceOutputPath,
-                                              this.Name + "." + PetriGen.SourceExtensionFromLanguage(Language));
+                                              this.Name + "." + CodeGen.PetriGen.SourceExtensionFromLanguage(Language));
             }
         }
 

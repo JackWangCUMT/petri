@@ -23,6 +23,7 @@
 using NUnit.Framework;
 using Petri;
 using Petri.Editor;
+using Petri.Editor.GUI;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -117,8 +118,8 @@ namespace Petri.Test.Editor.EditorController
         public void TestCloneEntitiesCount()
         {
             var allEntities = AllEntities();
-            var cloned = Petri.Editor.EditorController.CloneEntities(allEntities,
-                                                                     _document.PetriNet);
+            var cloned = Petri.Editor.GUI.Editor.EditorController.CloneEntities(allEntities,
+                                                                                _document.PetriNet);
 
             var clonedStates = from c in cloned
                                         where c is Action
@@ -142,8 +143,8 @@ namespace Petri.Test.Editor.EditorController
         public void TestCloneEntitiesActions()
         {
             var allEntities = AllEntities();
-            var cloned = Petri.Editor.EditorController.CloneEntities(allEntities,
-                                                                     _document.PetriNet);
+            var cloned = Petri.Editor.GUI.Editor.EditorController.CloneEntities(allEntities,
+                                                                                _document.PetriNet);
 
             var clonedStates = from c in cloned
                                         where c is Action
@@ -168,8 +169,8 @@ namespace Petri.Test.Editor.EditorController
         public void TestCloneEntitiesTransitions()
         {
             var allEntities = AllEntities();
-            var cloned = Petri.Editor.EditorController.CloneEntities(allEntities,
-                                                                     _document.PetriNet);
+            var cloned = Petri.Editor.GUI.Editor.EditorController.CloneEntities(allEntities,
+                                                                                _document.PetriNet);
 
             var clonedTransitions = from c in cloned
                                              where c is Transition
@@ -194,8 +195,8 @@ namespace Petri.Test.Editor.EditorController
         public void TestCloneEntitiesComments()
         {
             var allEntities = AllEntities();
-            var cloned = Petri.Editor.EditorController.CloneEntities(allEntities,
-                                                                     _document.PetriNet);
+            var cloned = Petri.Editor.GUI.Editor.EditorController.CloneEntities(allEntities,
+                                                                                _document.PetriNet);
 
             var clonedComments = from c in cloned
                                           where c is Comment
@@ -220,8 +221,8 @@ namespace Petri.Test.Editor.EditorController
         public void TestCloneEntitiesTransitionsBefore()
         {
             var allEntities = AllEntities();
-            var cloned = Petri.Editor.EditorController.CloneEntities(allEntities,
-                                                                     _document.PetriNet);
+            var cloned = Petri.Editor.GUI.Editor.EditorController.CloneEntities(allEntities,
+                                                                                _document.PetriNet);
 
             var clonedStates = from c in cloned
                                         where c is Action
@@ -255,8 +256,8 @@ namespace Petri.Test.Editor.EditorController
         public void TestCloneEntitiesTransitionsAfter()
         {
             var allEntities = AllEntities();
-            var cloned = Petri.Editor.EditorController.CloneEntities(allEntities,
-                                                                     _document.PetriNet);
+            var cloned = Petri.Editor.GUI.Editor.EditorController.CloneEntities(allEntities,
+                                                                                _document.PetriNet);
 
             var clonedStates = from c in cloned
                                         where c is Action
@@ -290,8 +291,8 @@ namespace Petri.Test.Editor.EditorController
         public void TestCloneEntitiesTransitionsEnds()
         {
             var allEntities = AllEntities();
-            var cloned = Petri.Editor.EditorController.CloneEntities(allEntities,
-                                                                     _document.PetriNet);
+            var cloned = Petri.Editor.GUI.Editor.EditorController.CloneEntities(allEntities,
+                                                                                _document.PetriNet);
 
             var clonedTransitions = new List<Transition>(from c in cloned
                                                                   where c is Transition

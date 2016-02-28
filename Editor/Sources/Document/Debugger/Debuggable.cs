@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Petri.Editor
+namespace Petri.Editor.Debugger
 {
     public interface Debuggable
     {

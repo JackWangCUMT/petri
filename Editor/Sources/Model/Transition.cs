@@ -51,7 +51,7 @@ namespace Petri.Editor
             }
 
             base.Position = new PointD(0, 0);
-            this.ShiftAmplitude = PetriView.Norm(Direction);
+            this.ShiftAmplitude = EntityDraw.Norm(Direction);
 
             this.Condition = Expression.CreateFromStringAndEntity<Expression>("true", this);
 
@@ -152,7 +152,7 @@ namespace Petri.Editor
         /// </summary>
         void UpdatePrivate()
         {
-            double norm = PetriView.Norm(Direction);
+            double norm = EntityDraw.Norm(Direction);
             PointD center = new PointD((Before.Position.X + After.Position.X) / 2,
                                        (Before.Position.Y + After.Position.Y) / 2);
             double amplitude = ((ShiftAmplitude > 1e-3) ? ShiftAmplitude : 1);
@@ -188,7 +188,7 @@ namespace Petri.Editor
 
                 // Prevents access during construction, where the Direction call would choke on a null member.
                 if(After != null) {
-                    ShiftAmplitude = PetriView.Norm(Direction);
+                    ShiftAmplitude = EntityDraw.Norm(Direction);
                     PointD center = new PointD((Before.Position.X + After.Position.X) / 2,
                                                (Before.Position.Y + After.Position.Y) / 2);
                     Shift = new PointD(value.X - center.X, value.Y - center.Y);

@@ -26,7 +26,7 @@ using Gtk;
 using Cairo;
 using System.Linq;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI.Editor
 {
     public class EditorView : PetriView
     {
@@ -600,8 +600,8 @@ namespace Petri.Editor
 
                 PointD direction = new PointD(_deltaClick.X - transitionEnd.Position.X,
                                               _deltaClick.Y - transitionEnd.Position.Y);
-                if(PetriView.Norm(direction) > transitionEnd.Radius) {
-                    direction = PetriView.Normalized(direction);
+                if(EntityDraw.Norm(direction) > transitionEnd.Radius) {
+                    direction = EntityDraw.Normalized(direction);
 
                     PointD origin = new PointD(transitionEnd.Position.X + direction.X * transitionEnd.Radius,
                                                transitionEnd.Position.Y + direction.Y * transitionEnd.Radius);

@@ -219,11 +219,11 @@ namespace Petri.Editor
             double radB = t.Before.Radius;
             double radA = t.After.Radius;
 
-            if(PetriView.Norm(direction) > radB) {
-                direction = PetriView.Normalized(direction);
+            if(EntityDraw.Norm(direction) > radB) {
+                direction = EntityDraw.Normalized(direction);
                 PointD destination = TransitionDestination(t, direction);
 
-                direction = PetriView.Normalized(t.Position.X - t.Before.Position.X,
+                direction = EntityDraw.Normalized(t.Position.X - t.Before.Position.X,
                                                  t.Position.Y - t.Before.Position.Y);
                 PointD origin = TransitionOrigin(t);
 
@@ -234,7 +234,7 @@ namespace Petri.Editor
 
                 PointD direction2 = new PointD(destination.X - t.Position.X,
                                                destination.Y - t.Position.Y);
-                direction2 = PetriView.Normalized(direction2);
+                direction2 = EntityDraw.Normalized(direction2);
 
                 context.CurveTo(c1,
                                 c2,
@@ -243,7 +243,7 @@ namespace Petri.Editor
 
                 context.Stroke();
 
-                direction = PetriView.Normalized(destination.X - t.Position.X,
+                direction = EntityDraw.Normalized(destination.X - t.Position.X,
                                                  destination.Y - t.Position.Y);
                 EntityDraw.DrawArrow(context, direction, destination, arrowScale);
             }
@@ -256,7 +256,7 @@ namespace Petri.Editor
 
         static protected PointD TransitionOrigin(Transition t)
         {
-            var direction = PetriView.Normalized(t.Position.X - t.Before.Position.X,
+            var direction = EntityDraw.Normalized(t.Position.X - t.Before.Position.X,
                                                  t.Position.Y - t.Before.Position.Y);
             return new PointD(t.Before.Position.X + direction.X * t.Before.Radius,
                               t.Before.Position.Y + direction.Y * t.Before.Radius);
@@ -341,6 +341,31 @@ namespace Petri.Editor
                            position.Y - direction.Y - normal.Y);
 
             context.Fill();
+        }
+
+        public static double Norm(PointD vec)
+        {
+            return Math.Sqrt(Math.Pow(vec.X, 2) + Math.Pow(vec.Y, 2));
+        }
+
+        public static double Norm(double x, double y)
+        {
+            return Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
+        }
+
+        public static PointD Normalized(PointD vec)
+        {
+            double norm = EntityDraw.Norm(vec);
+            if(norm < 1e-3) {
+                return new PointD(0, 0);
+            }
+
+            return new PointD(vec.X / norm, vec.Y / norm);
+        }
+
+        public static PointD Normalized(double x, double y)
+        {
+            return EntityDraw.Normalized(new PointD(x, y));
         }
 
         Pango.Layout _commentsLayout;

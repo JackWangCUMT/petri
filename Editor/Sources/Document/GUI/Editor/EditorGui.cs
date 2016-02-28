@@ -25,7 +25,7 @@ using Gtk;
 using Gdk;
 using System.Collections.Generic;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI.Editor
 {
     public class EditorGui : Gui
     {
@@ -319,7 +319,7 @@ namespace Petri.Editor
 
             var list = _document.PetriNet.BuildEntitiesList();
             foreach(var ee in list) {
-                if(ee is Action && (type == Petri.Editor.FindPanel.FindType.All || type == Petri.Editor.FindPanel.FindType.Action)) {
+                if(ee is Action && (type == FindPanel.FindType.All || type == FindPanel.FindType.Action)) {
                     var e = (Action)ee;
                     if(e.Function.MakeUserReadable().Contains(what)) {
                         _findResults.Add(e);
@@ -329,7 +329,7 @@ namespace Petri.Editor
                                                 e.Function.MakeUserReadable());
                     }
                 }
-                else if(ee is Transition && (type == Petri.Editor.FindPanel.FindType.All || type == Petri.Editor.FindPanel.FindType.Transition)) {
+                else if(ee is Transition && (type == FindPanel.FindType.All || type == FindPanel.FindType.Transition)) {
                     var e = (Transition)ee;
                     if(e.Condition.MakeUserReadable().Contains(what)) {
                         _findResults.Add(e);
@@ -339,7 +339,7 @@ namespace Petri.Editor
                                                 e.Condition.MakeUserReadable());
                     }
                 }
-                else if(ee is Comment && (type == Petri.Editor.FindPanel.FindType.All || type == Petri.Editor.FindPanel.FindType.Comment)) {
+                else if(ee is Comment && (type == FindPanel.FindType.All || type == FindPanel.FindType.Comment)) {
                     var e = (Comment)ee;
                     if(e.Name.Contains(what)) {
                         _findResults.Add(e);

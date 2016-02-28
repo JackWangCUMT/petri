@@ -1,19 +1,19 @@
 ﻿using System;
 
-namespace Petri.Editor
+namespace Petri.Editor.CLI
 {
-    public class DebuggableHeadlessDocument : HeadlessDocument, Debuggable
+    public class DebuggableHeadlessDocument : HeadlessDocument, Petri.Editor.Debugger.Debuggable
     {
         public DebuggableHeadlessDocument(string path) : base(path)
         {
-            DebugController = new CLIDebugController(this);
+            DebugController = new Debugger.DebugController(this);
         }
 
-        public DebugController BaseDebugController {
+        public Petri.Editor.Debugger.DebugController BaseDebugController {
             get { return DebugController; }
         }
 
-        public CLIDebugController DebugController {
+        public Debugger.DebugController DebugController {
             get;
             private set;
         }

@@ -23,11 +23,11 @@
 using System;
 using Gtk;
 
-namespace Petri.Editor
+namespace Petri.Editor.CLI.Debugger
 {
-    public class CLIDebugClient : DebugClient
+    public class DebugClient : Petri.Editor.Debugger.DebugClient
     {
-        public CLIDebugClient(HeadlessDocument doc, Debuggable debuggable) : base(doc, debuggable)
+        public DebugClient(HeadlessDocument doc, Petri.Editor.Debugger.Debuggable debuggable) : base(doc, debuggable)
         {
         }
 

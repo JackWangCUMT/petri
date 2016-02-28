@@ -22,7 +22,7 @@
 
 using System;
 
-namespace Petri.Editor
+namespace Petri.Editor.Debugger
 {
     /// <summary>
     /// Generated dynamic lib proxy. This class allows for loading and unloading a dynamic lib generated from a C# PetriNet project.

@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Petri.Editor
+namespace Petri.Editor.CodeGen
 {
     public abstract class CodeGen
     {

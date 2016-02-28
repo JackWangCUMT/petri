@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Petri.Editor
+namespace Petri.Editor.Debugger
 {
     public abstract class DebugController : Controller
     {

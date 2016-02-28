@@ -24,9 +24,9 @@ using System;
 
 namespace Petri.Editor
 {
-    public class RenderView : PetriView
+    public class RenderView : GUI.PetriView
     {
-        public RenderView(Document doc) : base(doc)
+        public RenderView(GUI.Document doc) : base(doc)
         {
             this.CurrentPetriNet = doc.PetriNet;
             this.EntityDraw = new RenderEntityDraw();

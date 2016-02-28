@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using ExprType = Petri.Editor.Code.Expression.ExprType;
 
-namespace Petri.Editor
+namespace Petri.Editor.CodeGen
 {
     public class CFamilyCodeGen : CodeGen
     {

@@ -27,7 +27,7 @@ using System.Net.Sockets;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 
-namespace Petri.Editor
+namespace Petri.Editor.Debugger
 {
     public abstract class DebugClient
     {
@@ -354,7 +354,7 @@ namespace Petri.Editor
 
             string sourceName = System.IO.Path.GetTempFileName();
 
-            var petriGen = PetriGen.PetriGenFromLanguage(_document.Settings.Language, _document);
+            var petriGen = CodeGen.PetriGen.PetriGenFromLanguage(_document.Settings.Language, _document);
             petriGen.WriteExpressionEvaluator(expression, sourceName, userData);
 
             string libName = System.IO.Path.GetTempFileName();

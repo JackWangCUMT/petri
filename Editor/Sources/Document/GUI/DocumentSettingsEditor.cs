@@ -25,7 +25,7 @@ using Gtk;
 using System.Text.RegularExpressions;
 using System.Linq;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI
 {
     public class DocumentSettingsEditor
     {

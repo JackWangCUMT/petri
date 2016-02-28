@@ -24,7 +24,7 @@ using System;
 using Petri.Editor.Code;
 using System.Collections.Generic;
 
-namespace Petri.Editor
+namespace Petri.Editor.CodeGen
 {
     /// <summary>
     /// A simple struct that represents a code range by its first and last lines.

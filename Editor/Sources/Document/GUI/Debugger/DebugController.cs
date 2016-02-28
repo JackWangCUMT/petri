@@ -23,11 +23,11 @@
 using System;
 using System.Collections.Generic;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI.Debugger
 {
-    public class GUIDebugController : DebugController
+    public class DebugController : Petri.Editor.Debugger.DebugController
     {
-        public GUIDebugController(Document doc) : base(doc, new GUIDebugClient(doc, doc))
+        public DebugController(Document doc) : base(doc, new DebugClient(doc, doc))
         {
         }
 

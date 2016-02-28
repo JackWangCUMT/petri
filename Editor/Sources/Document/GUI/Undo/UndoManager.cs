@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI
 {
     /// <summary>
     /// The undo manager of the application, one instance per document.

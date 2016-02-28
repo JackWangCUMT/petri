@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Petri.Editor
+namespace Petri.Editor.CLI.Debugger
 {
     public delegate void DebuggerActionDel();
 

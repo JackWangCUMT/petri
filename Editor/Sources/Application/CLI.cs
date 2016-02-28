@@ -2,7 +2,7 @@
 
 namespace Petri.Editor
 {
-    public class CLI
+    public class CLIMain
     {
         /*
          * The following string constants are the possible console output when invoked in compiler mode.
@@ -52,7 +52,7 @@ namespace Petri.Editor
         /// </summary>
         /// <returns>The return code of the program.</returns>
         /// <param name="args">Arguments.</param>
-        public static int CLIMain(string[] args)
+        public static int Main(string[] args)
         {
             bool generate = false;
             bool compile = false;
@@ -85,9 +85,9 @@ namespace Petri.Editor
                     return PrintUsage(ArgumentError);
                 }
 
-                DebuggableHeadlessDocument document;
+                CLI.DebuggableHeadlessDocument document;
                 try {
-                    document = new DebuggableHeadlessDocument(args[1]);
+                    document = new CLI.DebuggableHeadlessDocument(args[1]);
                     document.Load();
                 }
                 catch(Exception e) {
@@ -302,7 +302,7 @@ namespace Petri.Editor
                 Console.WriteLine("Preparing for the petri net's exection…\n");
                 Console.Write("Loading the assembly… ");
             }
-            var proxy = new GeneratedDynamicLibProxy(doc.Settings.Language, System.IO.Directory.GetParent(doc.Path).FullName,
+            var proxy = new Petri.Editor.Debugger.GeneratedDynamicLibProxy(doc.Settings.Language, System.IO.Directory.GetParent(doc.Path).FullName,
                                                      doc.Settings.RelativeLibPath,
                                                      doc.Settings.Name);            
             var dylib = proxy.Load<Runtime.GeneratedDynamicLib>();

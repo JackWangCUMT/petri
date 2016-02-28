@@ -27,7 +27,7 @@ using Gtk;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI
 {
     public class LanguageChangeEventArgs : EventArgs
     {
@@ -47,7 +47,7 @@ namespace Petri.Editor
     /// <summary>
     /// A document with all the GUI attached to it, including the editor and the debugger.
     /// </summary>
-    public class Document : HeadlessDocument, Debuggable
+    public class Document : HeadlessDocument, Petri.Editor.Debugger.Debuggable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Petri.Editor.Document"/> class.
@@ -59,8 +59,8 @@ namespace Petri.Editor
 
             this.UndoManager = new UndoManager();
 
-            EditorController = new EditorController(this);
-            DebugController = new GUIDebugController(this);
+            EditorController = new Editor.EditorController(this);
+            DebugController = new Debugger.DebugController(this);
 
             this.CurrentController = EditorController;
 
@@ -99,7 +99,7 @@ namespace Petri.Editor
         /// Gets the editor controller.
         /// </summary>
         /// <value>The editor controller.</value>
-        public EditorController EditorController {
+        public Editor.EditorController EditorController {
             get;
             private set;
         }
@@ -117,11 +117,11 @@ namespace Petri.Editor
         /// Gets the debug controller.
         /// </summary>
         /// <value>The debug controller.</value>
-        public DebugController BaseDebugController {
+        public Petri.Editor.Debugger.DebugController BaseDebugController {
             get { return DebugController; }
         }
 
-        public GUIDebugController DebugController {
+        public Debugger.DebugController DebugController {
             get;
             private set;
         }
@@ -587,7 +587,7 @@ namespace Petri.Editor
                 Settings = DocumentSettings.GetDefaultSettings(this);
             }
 
-            DebugController.DebugEditor = new DebugEditor(this, null);
+            DebugController.DebugEditor = new Debugger.DebugEditor(this, null);
 
             Window.EditorGui.View.CurrentPetriNet = PetriNet;
             Window.DebugGui.View.CurrentPetriNet = PetriNet;

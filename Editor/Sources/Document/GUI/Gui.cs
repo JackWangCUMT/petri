@@ -23,7 +23,7 @@
 using System;
 using Gtk;
 
-namespace Petri.Editor
+namespace Petri.Editor.GUI
 {
     public abstract class Gui : VBox
     {

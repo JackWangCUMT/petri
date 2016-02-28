@@ -44,7 +44,7 @@ namespace Petri.Editor
         public static int Main(string[] args)
         {
             if(args.Length > 0) {
-                return CLI.CLIMain(args);
+                return CLIMain.Main(args);
             }
             else {
                 return GUIMain(null);
@@ -69,7 +69,7 @@ namespace Petri.Editor
             };
             Gtk.Application.Init();
 
-            MainWindow.InitGUI();
+            GUI.MainWindow.InitGUI();
 
             var entries = JsonConvert.DeserializeObject<SerializableRecentDocumentEntry[]>(Configuration.RecentDocuments);
             if(entries != null) {
@@ -85,7 +85,7 @@ namespace Petri.Editor
             _recentDocuments.Sort((doc1, doc2) => doc2.Date.CompareTo(doc1.Date));
             TrimRecentDocuments();
 
-            var document = new Document("");
+            var document = new GUI.Document("");
             AddDocument(document);
 
             if(docsToOpen != null) {
@@ -199,7 +199,7 @@ namespace Petri.Editor
         /// Adds a document to the list of opened documents.
         /// </summary>
         /// <param name="doc">The document to register.</param>
-        public static void AddDocument(Document doc)
+        public static void AddDocument(GUI.Document doc)
         {
             _documents.Add(doc);
         }
@@ -208,7 +208,7 @@ namespace Petri.Editor
         /// Removes a document from the list of opened documents.
         /// </summary>
         /// <param name="doc">The document to unregister.</param>
-        public static void RemoveDocument(Document doc)
+        public static void RemoveDocument(GUI.Document doc)
         {
             _documents.Remove(doc);
             if(_documents.Count == 0) {
@@ -220,7 +220,7 @@ namespace Petri.Editor
         /// The list of opened documents
         /// </summary>
         /// <value>The documents.</value>
-        public static IReadOnlyList<Document> Documents {
+        public static IReadOnlyList<GUI.Document> Documents {
             get {
                 return _documents;
             }
@@ -286,7 +286,7 @@ namespace Petri.Editor
                 _documents[_documents.Count - 1].Window.Present();
             }
             else {
-                var doc = new Document(filename);
+                var doc = new GUI.Document(filename);
                 Application.AddDocument(doc);
             }
 
@@ -397,7 +397,7 @@ namespace Petri.Editor
             }
         }
 
-        static List<Document> _documents = new List<Document>();
+        static List<GUI.Document> _documents = new List<GUI.Document>();
         static List<RecentDocumentEntry> _recentDocuments = new List<RecentDocumentEntry>();
         static HashSet<Entity> _clipboard = new HashSet<Entity>();
         static bool _opening = false;
