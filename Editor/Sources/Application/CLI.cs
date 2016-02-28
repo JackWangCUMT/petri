@@ -8,7 +8,7 @@ namespace Petri.Editor
          * The following string constants are the possible console output when invoked in compiler mode.
          * The string are used in the units tests as well.
          */
-        internal static readonly string HelpString = "Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--run|-r] [--clean|-k] [--arch|-a (32|64)] [--verbose|-v] [--open|-o] [--debug|-d] [--] \"Path/To/Document.petri\"";
+        internal static readonly string HelpString = "Usage: mono Petri.exe [--generate|-g] [--compile|-c] [--run|-r] [--clean|-k] [--arch|-a (32|64)] [--verbose|-v] [--open|-o] [--debug|-d] [--exportPDF path.pdf] [--] \"Path/To/Document.petri\"";
 
         internal static readonly string MissingPetriDocument = "The path to the Petri document must be specified as the last program argument!";
         internal static readonly string MissingGenerateOrCompileOrRunOrClean = "Must specify one or more of \"--generate\", \"--compile\", \"clean\", and \"--run\"!";
@@ -96,6 +96,22 @@ namespace Petri.Editor
                 }
 
                 return document.Debug();
+            }
+            else if(args[0] == "--exportPDF") {
+                if(args.Length != 3) {
+                    return PrintUsage(ArgumentError);
+                }
+
+                var doc = new HeadlessDocument(args[2]);
+                doc.Load();
+
+                // Required for the Pango text rendering in Comments Entity
+                Gtk.Application.Init();
+
+                var renderView = new RenderView(doc);
+                renderView.Render(args[1]);
+
+                return 0;
             }
 
             for(int i = 0; i < args.Length; ++i) {
