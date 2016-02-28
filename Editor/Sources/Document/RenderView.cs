@@ -21,12 +21,13 @@
  */
 
 using System;
+using Cairo;
 
 namespace Petri.Editor
 {
-    public class RenderView : GUI.PetriView
+    public class RenderView : PetriView
     {
-        public RenderView(GUI.Document doc) : base(doc)
+        public RenderView(HeadlessDocument doc) : base(doc)
         {
             this.CurrentPetriNet = doc.PetriNet;
             this.EntityDraw = new RenderEntityDraw();
@@ -54,7 +55,8 @@ namespace Petri.Editor
             context.ShowPage();
             foreach(State s in petriNet.States) {
                 if(s is PetriNet) {
-                    this.RenderPetriNet(surface, context, s as PetriNet);
+                    CurrentPetriNet = (PetriNet)s;
+                    this.RenderPetriNet(surface, context, (PetriNet)s);
                 }
             }
         }
@@ -67,6 +69,17 @@ namespace Petri.Editor
         protected override void SpecializedDrawing(Cairo.Context context)
         {
 
+        }
+
+        protected override PointD PathPosition {
+            get {
+                return new PointD(0, 0);
+            }
+        }
+
+        protected override PointD GetExtents(PetriNet petriNet)
+        {
+            return new PointD(petriNet.Size.X, petriNet.Size.Y);
         }
     }
 }

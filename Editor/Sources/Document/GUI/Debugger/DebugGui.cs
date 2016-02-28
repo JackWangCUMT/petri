@@ -98,13 +98,6 @@ namespace Petri.Editor.GUI.Debugger
             };
 
             _view = new DebugView(doc);
-            _view.CanFocus = true;
-            _view.CanDefault = true;
-            _view.AddEvents((int)
-				(Gdk.EventMask.ButtonPressMask
-            | Gdk.EventMask.ButtonReleaseMask
-            | Gdk.EventMask.KeyPressMask
-            | Gdk.EventMask.PointerMotionMask));
 
             _scroll = new ScrolledWindow();
             _scroll.Hadjustment.ValueChanged += (object sender, EventArgs e) => {
@@ -117,9 +110,9 @@ namespace Petri.Editor.GUI.Debugger
 
             Viewport viewport = new Viewport();
 
-            viewport.Add(_view);
+            viewport.Add(_view.DrawingArea);
 
-            _view.SizeRequested += (o, args) => {
+            _view.DrawingArea.SizeRequested += (o, args) => {
                 viewport.WidthRequest = viewport.Child.Requisition.Width;
             };
 

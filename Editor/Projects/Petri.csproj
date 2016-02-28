@@ -140,7 +140,7 @@
     <Compile Include="..\Sources\CodeGen\CodeGen.cs" />
     <Compile Include="..\Sources\CodeGen\CppPetriGen.cs" />
     <Compile Include="..\Sources\CodeGen\PetriGen.cs" />
-    <Compile Include="..\Sources\Document\CompilationErrorPresenter.cs" />
+    <Compile Include="..\Sources\Document\GUI\CompilationErrorPresenter.cs" />
     <Compile Include="..\Sources\Document\Compiler.cs" />
     <Compile Include="..\Sources\Document\Controller.cs" />
     <Compile Include="..\Sources\Document\DocumentSettings.cs" />
@@ -190,5 +190,8 @@
     <Compile Include="..\Sources\Document\RenderEntityDraw.cs" />
     <Compile Include="..\Sources\Document\PetriView.cs" />
     <Compile Include="..\Sources\Document\GUI\PetriView.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="..\Sources\Document\" />
   </ItemGroup>
 </Project>

@@ -304,7 +304,7 @@ namespace Petri.Editor.GUI
             else if(sender == _copyItem) {
                 var w = CurrentFocusedWindow;
                 if(w != null) {
-                    if(w.Focus == Gui.BaseView)
+                    if(w.Focus == Gui.BaseView.DrawingArea)
                         _document.CurrentController.Copy();
                     else if(w.Focus is Editable) {
                         (w.Focus as Editable).CopyClipboard();
@@ -318,7 +318,7 @@ namespace Petri.Editor.GUI
             else if(sender == _cutItem) {
                 var w = CurrentFocusedWindow;
                 if(w != null) {
-                    if(w.Focus == Gui.BaseView)
+                    if(w.Focus == Gui.BaseView.DrawingArea)
                         _document.CurrentController.Cut();
                     else if(w.Focus is Editable) {
                         (w.Focus as Editable).CutClipboard();
@@ -332,7 +332,7 @@ namespace Petri.Editor.GUI
             else if(sender == _pasteItem) {
                 var w = CurrentFocusedWindow;
                 if(w != null) {
-                    if(w.Focus == Gui.BaseView)
+                    if(w.Focus == Gui.BaseView.DrawingArea)
                         _document.CurrentController.Paste();
                     else if(w.Focus is Editable) {
                         (w.Focus as Editable).PasteClipboard();
@@ -346,7 +346,7 @@ namespace Petri.Editor.GUI
             else if(sender == _selectAllItem) {
                 var w = CurrentFocusedWindow;
                 if(w != null) {
-                    if(w.Focus == Gui.BaseView)
+                    if(w.Focus == Gui.BaseView.DrawingArea)
                         _document.CurrentController.SelectAll();
                     else if(w.Focus is Editable) {
                         (w.Focus as Editable).SelectRegion(0, -1);

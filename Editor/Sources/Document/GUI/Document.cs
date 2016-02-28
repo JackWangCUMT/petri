@@ -424,6 +424,9 @@ namespace Petri.Editor.GUI
                 fc.SetCurrentFolder(System.IO.Directory.GetParent(Configuration.SavePath).FullName);
                 fc.CurrentName = System.IO.Path.GetFileName(Configuration.SavePath);
             }
+            else {
+                fc.CurrentName = System.IO.Path.GetFileNameWithoutExtension(Path) + ".pdf";
+            }
 
             fc.DoOverwriteConfirmation = true;
 

@@ -32,7 +32,8 @@ namespace Petri.Editor.GUI.Debugger
     {
         public DebugView(Document doc) : base(doc)
         {
-            this.EntityDraw = new DebugEntityDraw(_document);
+            this.EntityDraw = new DebugEntityDraw(Document);
+            DrawingArea.KeyPressEvent += OnKeyPressEvent;
         }
 
         public Entity SelectedEntity {
@@ -41,7 +42,13 @@ namespace Petri.Editor.GUI.Debugger
             }
             set {
                 _selection = value;
-                _document.DebugController.DebugEditor = new DebugEditor(_document, value);
+                Document.DebugController.DebugEditor = new DebugEditor(Document, value);
+            }
+        }
+
+        Document Document {
+            get {
+                return (Document)_document;
             }
         }
 
@@ -55,11 +62,11 @@ namespace Petri.Editor.GUI.Debugger
                 }
                 else if(entity is Action) {
                     var a = entity as Action;
-                    if(_document.DebugController.Breakpoints.Contains(a)) {
-                        _document.DebugController.RemoveBreakpoint(a);
+                    if(Document.DebugController.Breakpoints.Contains(a)) {
+                        Document.DebugController.RemoveBreakpoint(a);
                     }
                     else {
-                        _document.DebugController.AddBreakpoint(a);
+                        Document.DebugController.AddBreakpoint(a);
                     }
 
                     SelectedEntity = entity;
@@ -93,23 +100,16 @@ namespace Petri.Editor.GUI.Debugger
             }
         }
 
-        [GLib.ConnectBefore()]
-        protected override bool OnKeyPressEvent(Gdk.EventKey ev)
+        protected void OnKeyPressEvent(object o, KeyPressEventArgs ev)
         {
-            if(ev.Key == Gdk.Key.Escape) {
+            if(ev.Event.Key == Gdk.Key.Escape) {
                 if(this.CurrentPetriNet.Parent != null) {
                     this.CurrentPetriNet = this.CurrentPetriNet.Parent;
                 }
                 this.Redraw();
             }
 
-            return base.OnKeyPressEvent(ev);
-        }
-
-        [GLib.ConnectBefore()]
-        protected override bool OnKeyReleaseEvent(Gdk.EventKey ev)
-        {
-            return base.OnKeyReleaseEvent(ev);
+            //return base.OnKeyPressEvent(ev);
         }
 
         protected override EntityDraw EntityDraw {
