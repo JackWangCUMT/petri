@@ -25,12 +25,14 @@ using System.Collections.Generic;
 
 namespace Petri.Editor.CLI.Debugger
 {
-    public delegate void DebuggerActionDel();
+    public delegate void DebuggerActionDel(string args);
 
     public class DebuggerAction
     {
         public DebuggerAction(DebuggerActionDel action,
                               string description,
+                              string help,
+                              string syntax,
                               string invocation,
                               params string[] aliases)
         {
@@ -42,6 +44,9 @@ namespace Petri.Editor.CLI.Debugger
             list.AddRange(aliases);
 
             Invocations = list;
+
+            Help = help;
+            Syntax = syntax;
         }
 
         public string Description {
@@ -49,9 +54,9 @@ namespace Petri.Editor.CLI.Debugger
             private set;
         }
 
-        public void Execute()
+        public void Execute(string args)
         {
-            Action();
+            Action(args.Trim());
         }
 
         public DebuggerActionDel Action {
@@ -62,6 +67,27 @@ namespace Petri.Editor.CLI.Debugger
         public IReadOnlyList<string> Invocations {
             get;
             private set;
+        }
+
+        public string Help {
+            get;
+            private set;
+        }
+
+        public string Syntax {
+            get;
+            private set;
+        }
+
+        public void PrintHelp(string invocation) {
+            Console.WriteLine(Help);
+            Console.WriteLine();
+            Console.Write("Syntax: ");
+            Console.WriteLine(Syntax);
+
+            if(invocation != Invocations[0]) {
+                Console.WriteLine("\n'{0}' is an alias for '{1}'.", invocation, Invocations[0]);
+            }
         }
     }
 }

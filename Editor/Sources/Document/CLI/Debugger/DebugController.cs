@@ -28,13 +28,24 @@ namespace Petri.Editor.CLI.Debugger
     public class DebugController : Petri.Editor.Debugger.DebugController
     {
         public DebugController(DebuggableHeadlessDocument doc) : base(doc,
-                                                                         new DebugClient(doc,
-                                                                                            doc))
+                                                                      new DebugClient(doc,
+                                                                                      doc))
         {
             _inputManager = new InputManager();
 
-            _actions.Add(new DebuggerAction(Exit, "Quit", "quit", "exit", "q"));
-            _actions.Add(new DebuggerAction(PrintHelp, "Show help", "help", "h"));
+            _actions.Add(new DebuggerAction(Exit,
+                                            "Quit",
+                                            "Quit out of the petri net debugger.",
+                                            "quit",
+                                            "quit",
+                                            "exit",
+                                            "q"));
+            _actions.Add(new DebuggerAction(PrintHelp,
+                                            "Show help",
+                                            "Show a list of all debugger commands, or give details about specific commands.",
+                                            "help [<cmd-name>]",
+                                            "help",
+                                            "h"));
 
             foreach(var action in _actions) {
                 _maxHelpWidth = Math.Max(_maxHelpWidth, action.Invocations[0].Length);
@@ -53,13 +64,7 @@ namespace Petri.Editor.CLI.Debugger
                 try {
                     string line = _inputManager.TryReadCommand();
                     if(line != null) {
-                        try {
-                            var action = _actionsMapping[line];
-                            action.Execute();
-                        }
-                        catch(KeyNotFoundException) {
-                            Console.WriteLine("error: Unrecognized command '{0}'.", line);
-                        }
+                        ParseCommand(line);
                     }
                 }
                 catch(Exception e) {
@@ -70,24 +75,84 @@ namespace Petri.Editor.CLI.Debugger
             return _returnCode;
         }
 
-        void Exit()
+        void ParseCommand(string line)
+        {
+            string command, args;
+            int index = line.IndexOfAny(new char[]{ ' ', '\t' });
+            if(index == -1) {
+                command = line;
+                args = "";
+            }
+            else {
+                command = line.Substring(0, index);
+                args = line.Substring(index + 1);
+            }
+            try {
+                var action = _actionsMapping[command];
+                action.Execute(args);
+            }
+            catch(KeyNotFoundException) {
+                Console.WriteLine("error: Unrecognized command '{0}'.", command);
+            }
+        }
+
+        string GetCommandName(string line) {
+            string command;
+            int index = line.IndexOfAny(new char[]{ ' ', '\t' });
+            if(index == -1) {
+                command = line;
+            }
+            else {
+                command = line.Substring(0, index);
+            }
+
+            return command;
+        }
+
+        DebuggerAction GetCommandFromName(string line)
+        {
+            string command = GetCommandName(line);
+
+            try {
+                return _actionsMapping[command];
+            }
+            catch(KeyNotFoundException) {
+                return null;
+            }
+        }
+
+        void Exit(string args)
         {
             _returnCode = 0;
             _alive = false;
         }
 
-        void PrintHelp()
+        void PrintHelp(string args)
         {
-            Console.WriteLine("Debugger commands:");
-            foreach(DebuggerAction a in _actions) {
-                Console.WriteLine("  " + a.Invocations[0].PadRight(_maxHelpWidth) + " -- " + a.Description);
-            }
+            if(args != "") {
+                var cmd = GetCommandName(args);
+                var action = GetCommandFromName(cmd);
 
-            Console.WriteLine();
-            Console.WriteLine("Current command aliases:");
-            foreach(DebuggerAction a in _actions) {
-                for(int i = 1; i < a.Invocations.Count; ++i) {
-                    Console.WriteLine("  " + a.Invocations[i].PadRight(_maxHelpAliasWidth) + " -- (" + a.Invocations[0] + ") " + a.Description);
+                if(action == null) {
+                    Console.WriteLine("error: '{0}' is not a known command.", cmd);
+                    Console.WriteLine("Try 'help' to see a current list of commands.");
+                }
+                else {
+                    action.PrintHelp(cmd);
+                }
+            }
+            else {
+                Console.WriteLine("Debugger commands:");
+                foreach(DebuggerAction a in _actions) {
+                    Console.WriteLine("  " + a.Invocations[0].PadRight(_maxHelpWidth) + " -- " + a.Description);
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("Current command aliases:");
+                foreach(DebuggerAction a in _actions) {
+                    for(int i = 1; i < a.Invocations.Count; ++i) {
+                        Console.WriteLine("  " + a.Invocations[i].PadRight(_maxHelpAliasWidth) + " -- (" + a.Invocations[0] + ") " + a.Description);
+                    }
                 }
             }
         }
