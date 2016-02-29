@@ -56,56 +56,58 @@ namespace Petri.Editor
         /// </summary>
         public static Configuration Get()
         {
-            if(Configuration._instance == null) {
-                try {
-                    switch(Environment.OSVersion.Platform) {
-                    case PlatformID.Unix:
-                        if(Directory.Exists("/Applications") && Directory.Exists("/System") && Directory.Exists("/Users") && Directory.Exists("/Volumes")) {
-                            Configuration._platform = Platform.Mac;
-                        }
-                        else {
-                            Configuration._platform = Platform.Linux;
-                        }
-                        break;
-                    case PlatformID.MacOSX:
-                        Configuration._platform = Platform.Mac;
-                        break;
-                    default:
-                        Configuration._platform = Platform.Windows;
-                        break;
-                    }
-
-                    // Get the current configuration file.
-                    Configuration._config = System.Configuration.ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                }
-                catch(System.Xml.XmlException) {
-                    string s = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
-                    System.IO.File.Delete(s);
-                    System.Console.Error.WriteLine("Corrupted settings file, deleting…");
-                    return Configuration.Get();
-                }
-
-                try {
-                    Configuration._instance = Configuration._config.Sections["CustomSection"] as Configuration;
-                }
-                catch(System.Configuration.ConfigurationErrorsException err) {
+            lock(_lock) {
+                if(Configuration._instance == null) {
                     try {
+                        switch(Environment.OSVersion.Platform) {
+                        case PlatformID.Unix:
+                            if(Directory.Exists("/Applications") && Directory.Exists("/System") && Directory.Exists("/Users") && Directory.Exists("/Volumes")) {
+                                Configuration._platform = Platform.Mac;
+                            }
+                            else {
+                                Configuration._platform = Platform.Linux;
+                            }
+                            break;
+                        case PlatformID.MacOSX:
+                            Configuration._platform = Platform.Mac;
+                            break;
+                        default:
+                            Configuration._platform = Platform.Windows;
+                            break;
+                        }
+
+                        // Get the current configuration file.
+                        Configuration._config = System.Configuration.ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                    }
+                    catch(System.Xml.XmlException) {
                         string s = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
                         System.IO.File.Delete(s);
+                        System.Console.Error.WriteLine("Corrupted settings file, deleting…");
+                        return Configuration.Get();
                     }
-                    catch(System.Exception) {
-                    }
-                    Console.Error.WriteLine("CreateConfigurationFile: {0}", err.Message);
-                    return Configuration.Get();
-                }
-                if(Configuration._instance == null) {
-                    Configuration._instance = new Configuration();
-                    Configuration._config.Sections.Remove("CustomSection");
-                    Configuration._config.Sections.Add("CustomSection", Configuration._instance);
-                }
-            }
 
-            return Configuration._instance;
+                    try {
+                        Configuration._instance = Configuration._config.Sections["CustomSection"] as Configuration;
+                    }
+                    catch(System.Configuration.ConfigurationErrorsException err) {
+                        try {
+                            string s = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
+                            System.IO.File.Delete(s);
+                        }
+                        catch(System.Exception) {
+                        }
+                        Console.Error.WriteLine("CreateConfigurationFile: {0}", err.Message);
+                        return Configuration.Get();
+                    }
+                    if(Configuration._instance == null) {
+                        Configuration._instance = new Configuration();
+                        Configuration._config.Sections.Remove("CustomSection");
+                        Configuration._config.Sections.Add("CustomSection", Configuration._instance);
+                    }
+                }
+
+                return Configuration._instance;
+            }
         }
 
         /// <summary>
@@ -135,15 +137,17 @@ namespace Petri.Editor
         /// <param name="key">The key.</param>
         public static string GetLocalized(string key)
         {
-            if(Configuration._localizedStrings.Count == 0) {
-                Configuration.Get().LoadLanguage();
-            }
-            if(!Configuration._localizedStrings.ContainsKey(key)) {
-                Console.Error.WriteLine("No localization found for locale \"" + Language + "\" and key \"" + key + "\"");
-                return key;
-            }
-            else {
-                return Configuration._localizedStrings[key];
+            lock(_lock) {
+                if(Configuration._localizedStrings.Count == 0) {
+                    Configuration.Get().LoadLanguage();
+                }
+                if(!Configuration._localizedStrings.ContainsKey(key)) {
+                    Console.Error.WriteLine("No localization found for locale \"" + Language + "\" and key \"" + key + "\"");
+                    return key;
+                }
+                else {
+                    return Configuration._localizedStrings[key];
+                }
             }
         }
 
@@ -279,6 +283,7 @@ namespace Petri.Editor
         private static Configuration _instance = null;
         private static Platform _platform;
         private static Dictionary<string, string> _localizedStrings = new Dictionary<string, string>();
+        private static object _lock = new object();
     }
 }
 
