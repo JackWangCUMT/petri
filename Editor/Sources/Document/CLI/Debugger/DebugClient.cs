@@ -27,30 +27,37 @@ namespace Petri.Editor.CLI.Debugger
 {
     public class DebugClient : Petri.Editor.Debugger.DebugClient
     {
-        public DebugClient(HeadlessDocument doc, Petri.Editor.Debugger.Debuggable debuggable) : base(doc, debuggable)
+        public DebugClient(DebuggableHeadlessDocument doc) : base(doc,
+                                                                  doc)
         {
+        }
+
+        DebuggableHeadlessDocument Document {
+            get {
+                return (DebuggableHeadlessDocument)_document;
+            }
         }
 
         protected override void NotifyStateChanged()
         {
-            Console.WriteLine("State changed:");
+            Document.DebugController.NotifyStateChanged("State changed:");
             if(_debuggable.BaseDebugController.Client.SessionRunning) {
-                Console.WriteLine("Connected");
+                Document.DebugController.NotifyStateChanged("Connected");
                 if(_debuggable.BaseDebugController.Client.PetriRunning) {
-                    Console.WriteLine("Petri net launched");
+                    Document.DebugController.NotifyStateChanged("Petri net launched");
                     if(_debuggable.BaseDebugController.Client.Pause) {
-                        Console.WriteLine("Petri net paused");
+                        Document.DebugController.NotifyStateChanged("Petri net paused");
                     }
                     else {
-                        Console.WriteLine("Petri net running");
+                        Document.DebugController.NotifyStateChanged("Petri net running");
                     }
                 }
                 else {
-                    Console.WriteLine("Petri net stopped");
+                    Document.DebugController.NotifyStateChanged("Petri net stopped");
                 }
             }
             else {
-                Console.WriteLine("Disconnected");
+                Document.DebugController.NotifyStateChanged("Disconnected");
             }
         }
 
@@ -67,7 +74,7 @@ namespace Petri.Editor.CLI.Debugger
 
         protected override void NotifyUnrecoverableError(string message)
         {
-            Console.Error.WriteLine("Error: " + message);
+            Document.DebugController.NotifyUnrecoverableError("Error: " + message);
         }
 
         protected override void NotifyStatusMessage(string message)

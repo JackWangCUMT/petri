@@ -63,20 +63,40 @@ namespace Petri.Editor.Debugger
             }
         }
 
+        public enum SessionState {
+            Starting, Started, Stopping, Stopped
+        }
+
         /// <summary>
         /// Gets a value indicating whether this <see cref="Petri.Editor.DebugClient"/> is attached to a DebugServer instance.
         /// </summary>
         /// <value><c>true</c> if session running; otherwise, <c>false</c>.</value>
+        /*public SessionState CurrentSessionState {
+            get {
+                return _sessionRunning;
+            }
+        }*/
+
         public bool SessionRunning {
             get {
                 return _sessionRunning;
             }
         }
 
+        public enum PetriState {
+            Starting, Started, Pausing, Paused, Resuming, Stopping, Stopped
+        }
+
         /// <summary>
         /// Gets a value indicating whether the PetriNet enclosed in the DebugServer's dynamic library is running or not.
         /// </summary>
         /// <value><c>true</c> if the petri net running; otherwise, <c>false</c>.</value>
+        /*public PetriState CurrentPetriState {
+            get {
+                return _petriRunning;
+            }
+        }*/
+
         public bool PetriRunning {
             get {
                 return _petriRunning;

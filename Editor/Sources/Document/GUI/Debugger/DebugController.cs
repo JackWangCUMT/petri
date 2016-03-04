@@ -27,7 +27,7 @@ namespace Petri.Editor.GUI.Debugger
 {
     public class DebugController : Petri.Editor.Debugger.DebugController
     {
-        public DebugController(Document doc) : base(doc, new DebugClient(doc, doc))
+        public DebugController(Document doc) : base(doc, new DebugClient(doc))
         {
         }
 

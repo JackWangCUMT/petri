@@ -30,6 +30,7 @@ namespace Petri.Editor.CLI.Debugger
     public class DebuggerAction
     {
         public DebuggerAction(DebuggerActionDel action,
+                              bool isAsync,
                               string description,
                               string help,
                               string syntax,
@@ -38,6 +39,7 @@ namespace Petri.Editor.CLI.Debugger
         {
             Description = description;
             Action = action;
+            IsAsync = isAsync;
 
             var list = new List<string>();
             list.Add(invocation);
@@ -75,6 +77,11 @@ namespace Petri.Editor.CLI.Debugger
         }
 
         public string Syntax {
+            get;
+            private set;
+        }
+
+        public bool IsAsync {
             get;
             private set;
         }
