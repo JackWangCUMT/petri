@@ -346,7 +346,7 @@ namespace Petri.Editor.GUI
         /// <returns><c>true</c>, if the document was allowed to be closed, <c>false</c> otherwise.</returns>
         public bool CloseAndConfirm()
         {
-            if(this.DebugController.Client.SessionRunning) {
+            if(this.DebugController.Client.CurrentSessionState != Debugger.DebugClient.SessionState.Stopped) {
                 Window.Present();
                 MessageDialog d = new MessageDialog(Window,
                                                     DialogFlags.Modal,

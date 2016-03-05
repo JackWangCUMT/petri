@@ -51,40 +51,51 @@ namespace Petri.Editor.Debugger
         {
             _debuggable = debuggable;
             _document = doc;
-            _sessionRunning = false;
+            _sessionState = SessionState.Stopped;
             _petriRunning = false;
             _pause = false;
         }
 
         ~DebugClient()
         {
-            if(_petriRunning || _sessionRunning) {
+            if(_petriRunning || CurrentSessionState != SessionState.Stopped) {
                 throw new Exception(Configuration.GetLocalized("Debugger still running!"));
             }
         }
 
-        public enum SessionState {
-            Starting, Started, Stopping, Stopped
+        /// <summary>
+        /// The state of a debugger session.
+        /// </summary>
+        public enum SessionState
+        {
+            Starting,
+            Started,
+            Stopped
         }
 
         /// <summary>
-        /// Gets a value indicating whether this <see cref="Petri.Editor.DebugClient"/> is attached to a DebugServer instance.
+        /// Gets the current state of the debugger session.
         /// </summary>
-        /// <value><c>true</c> if session running; otherwise, <c>false</c>.</value>
-        /*public SessionState CurrentSessionState {
+        /// <value>The state of the current session.</value>
+        public SessionState CurrentSessionState {
             get {
-                return _sessionRunning;
+                return _sessionState;
             }
-        }*/
-
-        public bool SessionRunning {
-            get {
-                return _sessionRunning;
+            private set {
+                _sessionState = value;
+                NotifyStateChanged();
             }
         }
 
-        public enum PetriState {
-            Starting, Started, Pausing, Paused, Resuming, Stopping, Stopped
+        public enum PetriState
+        {
+            Starting,
+            Started,
+            Pausing,
+            Paused,
+            Resuming,
+            Stopping,
+            Stopped
         }
 
         /// <summary>
@@ -155,13 +166,14 @@ namespace Petri.Editor.Debugger
             }
 
             if(success) {
-                _sessionRunning = true;
+                CurrentSessionState = SessionState.Starting;
                 _receiverThread = new Thread(this.Receiver);
                 _pause = false;
                 _receiverThread.Start();
                 DateTime time = DateTime.Now.AddSeconds(1);
-                while(_socket == null && DateTime.Now.CompareTo(time) < 0)
+                while(_socket == null && DateTime.Now < time) {
                     System.Threading.Thread.Sleep(20);
+                }
             }
         }
 
@@ -244,7 +256,7 @@ namespace Petri.Editor.Debugger
         void StopOrDetach(bool stop)
         {
             _pause = false;
-            if(_sessionRunning) {
+            if(CurrentSessionState == SessionState.Started) {
                 if(PetriRunning) {
                     if(Pause) {
                         this.Pause = false;
@@ -267,7 +279,7 @@ namespace Petri.Editor.Debugger
                 if(_receiverThread != null && !_receiverThread.Equals(Thread.CurrentThread)) {
                     _receiverThread.Join();
                 }
-                _sessionRunning = false;
+                CurrentSessionState = SessionState.Stopped;
             }
 
             lock(_debuggable.BaseDebugController.ActiveStates) {
@@ -374,7 +386,8 @@ namespace Petri.Editor.Debugger
 
             string sourceName = System.IO.Path.GetTempFileName();
 
-            var petriGen = CodeGen.PetriGen.PetriGenFromLanguage(_document.Settings.Language, _document);
+            var petriGen = CodeGen.PetriGen.PetriGenFromLanguage(_document.Settings.Language,
+                                                                 _document);
             petriGen.WriteExpressionEvaluator(expression, sourceName, userData);
 
             string libName = System.IO.Path.GetTempFileName();
@@ -421,7 +434,6 @@ namespace Petri.Editor.Debugger
                     }
                     catch(Exception e) {
                         this.Detach();
-                        NotifyStateChanged();
                         throw e;
                     }
                 }
@@ -448,8 +460,8 @@ namespace Petri.Editor.Debugger
 		
                 var ehlo = this.ReceiveObject();
                 if(ehlo != null && ehlo["type"].ToString() == "ehlo") {
+                    CurrentSessionState = SessionState.Started;
                     NotifyStatusMessage(Configuration.GetLocalized("Sucessfully connected."));
-                    NotifyStateChanged();
                     return;
                 }
                 else if(ehlo != null && ehlo["type"].ToString() == "error") {
@@ -460,7 +472,6 @@ namespace Petri.Editor.Debugger
             catch(Exception e) {
                 NotifyUnrecoverableError(Configuration.GetLocalized("An error occurred in the debugger during the handshake:") + " " + e.Message);
                 this.Detach();
-                NotifyStateChanged();
             }
         }
 
@@ -492,7 +503,7 @@ namespace Petri.Editor.Debugger
             try {
                 this.Hello();
 
-                while(_sessionRunning && _socket.Connected) {
+                while(CurrentSessionState != SessionState.Stopped && _socket.Connected) {
                     JObject msg = this.ReceiveObject();
                     if(msg == null)
                         break;
@@ -544,13 +555,12 @@ namespace Petri.Editor.Debugger
                     }
                     else if(msg["type"].ToString() == "detach" || msg["type"].ToString() == "detachAndExit") {
                         if(msg["payload"].ToString() == "kbye") {
-                            _sessionRunning = false;
+                            CurrentSessionState = SessionState.Stopped;
                             _petriRunning = false;
-                            NotifyStateChanged();
                             NotifyStatusMessage(Configuration.GetLocalized("Disconnected."));
                         }
                         else {
-                            _sessionRunning = false;
+                            CurrentSessionState = SessionState.Stopped;
                             _petriRunning = false;
 
                             throw new Exception(Configuration.GetLocalized("Remote debugger requested a session termination for reason:") + " " + msg["payload"].ToString());
@@ -582,7 +592,7 @@ namespace Petri.Editor.Debugger
                         NotifyEvaluated(msg["payload"]["eval"].ToString());
                     }
                 }
-                if(_sessionRunning) {
+                if(CurrentSessionState != SessionState.Stopped) {
                     throw new Exception(Configuration.GetLocalized("Socket unexpectedly disconnected"));
                 }
             }
@@ -606,7 +616,7 @@ namespace Petri.Editor.Debugger
         JObject ReceiveObject()
         {
             int count = 0;
-            while(_sessionRunning) {
+            while(CurrentSessionState != SessionState.Stopped) {
                 string val = this.ReceiveString();
 
                 if(val.Length > 0)
@@ -687,7 +697,7 @@ namespace Petri.Editor.Debugger
 
         bool _startAfterFix = false;
         bool _petriRunning, _pause;
-        volatile bool _sessionRunning;
+        volatile SessionState _sessionState;
         Thread _receiverThread;
 
         volatile TcpClient _socket;

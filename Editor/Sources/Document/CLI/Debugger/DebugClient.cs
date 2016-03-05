@@ -41,7 +41,7 @@ namespace Petri.Editor.CLI.Debugger
         protected override void NotifyStateChanged()
         {
             Document.DebugController.NotifyStateChanged("State changed:");
-            if(_debuggable.BaseDebugController.Client.SessionRunning) {
+            if(CurrentSessionState == SessionState.Started) {
                 Document.DebugController.NotifyStateChanged("Connected");
                 if(_debuggable.BaseDebugController.Client.PetriRunning) {
                     Document.DebugController.NotifyStateChanged("Petri net launched");

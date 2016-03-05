@@ -153,7 +153,8 @@ namespace Petri.Editor.GUI.Debugger
         public override void UpdateToolbar()
         {
             Application.RunOnUIThread(() => {
-                if(_document.DebugController.Client.SessionRunning) {
+                if(_document.DebugController.Client.CurrentSessionState == Debugger.DebugClient.SessionState.Started) {
+                    _attachDetach.Sensitive = true;
                     _startStopPetri.Sensitive = true;
                     _reload.Sensitive = true;
                     _exit.Sensitive = true;
@@ -186,6 +187,7 @@ namespace Petri.Editor.GUI.Debugger
                     }
                 }
                 else {
+                    _attachDetach.Sensitive = _document.DebugController.Client.CurrentSessionState == Debugger.DebugClient.SessionState.Stopped;
                     _attachDetach.Label = Configuration.GetLocalized("Connection");
                     _startStopPetri.Label = Configuration.GetLocalized("Execute");
                     _startStopPetri.StockId = Stock.MediaPlay;
@@ -220,7 +222,7 @@ namespace Petri.Editor.GUI.Debugger
         protected void OnClick(object sender, EventArgs e)
         {
             if(sender == _attachDetach) {
-                if(Client.SessionRunning) {
+                if(Client.CurrentSessionState == Debugger.DebugClient.SessionState.Started) {
                     Client.Detach();
                 }
                 else {
