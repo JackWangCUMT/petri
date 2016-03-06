@@ -76,7 +76,9 @@ namespace Petri.Editor.GUI.Debugger
                 _formatEntry = CreateWidget<Entry>(true, 0, "%d");
             }
             Evaluate = CreateWidget<Button>(false, 0, Configuration.GetLocalized("Evaluate"));
-            Evaluate.Sensitive = _document.DebugController != null && (_document.DebugController.Client.CurrentSessionState == Debugger.DebugClient.SessionState.Started) && (!_document.DebugController.Client.PetriRunning || _document.DebugController.Client.Pause);
+            Evaluate.Sensitive = _document.DebugController != null
+                && (_document.DebugController.Client.CurrentSessionState == DebugClient.SessionState.Started)
+                && (_document.DebugController.Client.CurrentPetriState == DebugClient.PetriState.Stopped || _document.DebugController.Client.CurrentPetriState == DebugClient.PetriState.Paused);
            
             CreateLabel(0, Configuration.GetLocalized("Result:"));
 
@@ -87,7 +89,8 @@ namespace Petri.Editor.GUI.Debugger
             result.WrapMode = WrapMode.Word;
 
             Evaluate.Clicked += (sender, ev) => {
-                if(_document.DebugController.Client.CurrentSessionState == Debugger.DebugClient.SessionState.Started && (!_document.DebugController.Client.PetriRunning || _document.DebugController.Client.Pause)) {
+                if((_document.DebugController.Client.CurrentSessionState == DebugClient.SessionState.Started)
+                   && (_document.DebugController.Client.CurrentPetriState == DebugClient.PetriState.Stopped || _document.DebugController.Client.CurrentPetriState == DebugClient.PetriState.Paused)) {
                     string str = combo.Entry.Text;
 
                     int pos = _document.DebugController.LastEvaluations.IndexOf(str);

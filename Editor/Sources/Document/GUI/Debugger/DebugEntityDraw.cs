@@ -39,7 +39,7 @@ namespace Petri.Editor.GUI.Debugger
             int enableCount;
             lock(_document.DebugController.ActiveStates) {
                 if(_document.DebugController.ActiveStates.TryGetValue(s as State, out enableCount) == true && enableCount > 0) {
-                    if(_document.DebugController.Client.Pause) {
+                    if(_document.DebugController.Client.CurrentPetriState == DebugClient.PetriState.Paused) {
                         color.R = 0.4;
                         color.G = 0.7;
                         color.B = 0.4;
@@ -53,7 +53,7 @@ namespace Petri.Editor.GUI.Debugger
                 else if(s is InnerPetriNet) {
                     foreach(var a in _document.DebugController.ActiveStates) {
                         if((s as InnerPetriNet).EntityFromID(a.Key.ID) != null) {
-                            if(_document.DebugController.Client.Pause) {
+                            if(_document.DebugController.Client.CurrentPetriState == DebugClient.PetriState.Paused) {
                                 color.R = 0.7;
                                 color.G = 0.4;
                                 color.B = 0.7;

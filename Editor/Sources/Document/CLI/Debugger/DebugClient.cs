@@ -40,20 +40,24 @@ namespace Petri.Editor.CLI.Debugger
 
         protected override void NotifyStateChanged()
         {
-            Document.DebugController.NotifyStateChanged("State changed:");
             if(CurrentSessionState == SessionState.Started) {
                 Document.DebugController.NotifyStateChanged("Connected");
-                if(_debuggable.BaseDebugController.Client.PetriRunning) {
-                    Document.DebugController.NotifyStateChanged("Petri net launched");
-                    if(_debuggable.BaseDebugController.Client.Pause) {
-                        Document.DebugController.NotifyStateChanged("Petri net paused");
-                    }
-                    else {
-                        Document.DebugController.NotifyStateChanged("Petri net running");
-                    }
-                }
-                else {
+                switch(CurrentPetriState) {
+                case PetriState.Started:
+                case PetriState.Pausing:
+                    Document.DebugController.NotifyStateChanged("Petri net running");
+                    break;
+                case PetriState.Paused:
+                    Document.DebugController.NotifyStateChanged("Petri net paused");
+                    break;
+                case PetriState.Stopping:
+                    break;
+                case PetriState.Stopped:
+                case PetriState.Starting:
                     Document.DebugController.NotifyStateChanged("Petri net stopped");
+                    break;
+                default:
+                    break;
                 }
             }
             else {

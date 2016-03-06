@@ -155,35 +155,45 @@ namespace Petri.Editor.GUI.Debugger
             Application.RunOnUIThread(() => {
                 if(_document.DebugController.Client.CurrentSessionState == Debugger.DebugClient.SessionState.Started) {
                     _attachDetach.Sensitive = true;
-                    _startStopPetri.Sensitive = true;
+                    _startStopPetri.Sensitive = _document.DebugController.Client.CurrentPetriState == DebugClient.PetriState.Stopped || _document.DebugController.Client.PetriAlive;
                     _reload.Sensitive = true;
                     _exit.Sensitive = true;
 
                     _attachDetach.Label = Configuration.GetLocalized("Disconnect");
 
-                    if(_document.DebugController.Client.PetriRunning) {
+                    if(_document.DebugController.Client.PetriAlive) {
+                        _document.DebugController.DebugEditor.Evaluate.Sensitive = false;
                         _startStopPetri.Label = Configuration.GetLocalized("Stop");
                         _startStopPetri.StockId = Stock.Stop;
                         _playPause.Sensitive = true;
-                        _document.DebugController.DebugEditor.Evaluate.Sensitive = false;
-                        if(_document.DebugController.Client.Pause) {
-                            _playPause.Label = Configuration.GetLocalized("Continue");
-                            _playPause.StockId = Stock.MediaPlay;
-                            _document.DebugController.DebugEditor.Evaluate.Sensitive = true;
-                        }
-                        else {
-                            _playPause.Label = Configuration.GetLocalized("Pause");
-                            _playPause.StockId = Stock.MediaPause;
-                            _document.DebugController.DebugEditor.Evaluate.Sensitive = false;
-                        }
                     }
-                    else {
+
+                    switch(_document.DebugController.Client.CurrentPetriState) {
+                    case DebugClient.PetriState.Stopping:
+                        break;
+                    case DebugClient.PetriState.Starting:
+                    case DebugClient.PetriState.Stopped:
                         _startStopPetri.Label = Configuration.GetLocalized("Execute");
                         _startStopPetri.StockId = Stock.MediaPlay;
                         _playPause.Sensitive = false;
                         _document.DebugController.DebugEditor.Evaluate.Sensitive = true;
                         _playPause.Label = Configuration.GetLocalized("Pause");
                         _playPause.StockId = Stock.MediaPause;
+                        break;
+                    case DebugClient.PetriState.Pausing:
+                        _playPause.Sensitive = false;
+                        goto case DebugClient.PetriState.Started;
+                    case DebugClient.PetriState.Started:
+                        _playPause.Label = Configuration.GetLocalized("Pause");
+                        _playPause.StockId = Stock.MediaPause;
+                        _document.DebugController.DebugEditor.Evaluate.Sensitive = false;
+                        break;
+                    case DebugClient.PetriState.Paused:
+                        _document.DebugController.DebugEditor.Evaluate.Sensitive = true;
+                        _playPause.Label = Configuration.GetLocalized("Continue");
+                        _playPause.StockId = Stock.MediaPlay;
+                        _document.DebugController.DebugEditor.Evaluate.Sensitive = true;
+                        break;
                     }
                 }
                 else {
@@ -230,15 +240,15 @@ namespace Petri.Editor.GUI.Debugger
                 }
             }
             else if(sender == _startStopPetri) {
-                if(Client.PetriRunning) {
+                if(Client.PetriAlive) {
                     Client.StopPetri();
                 }
-                else {
+                else if(Client.CurrentPetriState == DebugClient.PetriState.Stopped) {
                     Client.StartPetri();
                 }
             }
             else if(sender == _playPause) {
-                Client.Pause = !Client.Pause;
+                Client.SetPause(Client.CurrentPetriState == DebugClient.PetriState.Started);
             }
             else if(sender == _reload) {
                 Client.ReloadPetri();

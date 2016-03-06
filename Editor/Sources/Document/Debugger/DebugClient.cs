@@ -52,13 +52,12 @@ namespace Petri.Editor.Debugger
             _debuggable = debuggable;
             _document = doc;
             _sessionState = SessionState.Stopped;
-            _petriRunning = false;
-            _pause = false;
+            _petriState = PetriState.Stopped;
         }
 
         ~DebugClient()
         {
-            if(_petriRunning || CurrentSessionState != SessionState.Stopped) {
+            if(CurrentPetriState != PetriState.Stopped || CurrentSessionState != SessionState.Stopped) {
                 throw new Exception(Configuration.GetLocalized("Debugger still running!"));
             }
         }
@@ -93,54 +92,50 @@ namespace Petri.Editor.Debugger
             Started,
             Pausing,
             Paused,
-            Resuming,
             Stopping,
             Stopped
         }
 
         /// <summary>
-        /// Gets a value indicating whether the PetriNet enclosed in the DebugServer's dynamic library is running or not.
+        /// Gets the state of the PetriNet enclosed in the DebugServer's dynamic library.
         /// </summary>
         /// <value><c>true</c> if the petri net running; otherwise, <c>false</c>.</value>
-        /*public PetriState CurrentPetriState {
+        public PetriState CurrentPetriState {
             get {
-                return _petriRunning;
+                return _petriState;
             }
-        }*/
+            set {
+                _petriState = value;
+                NotifyStateChanged();
+            }
+        }
 
-        public bool PetriRunning {
+        public bool PetriAlive {
             get {
-                return _petriRunning;
+                return CurrentPetriState == PetriState.Started || CurrentPetriState == PetriState.Pausing || CurrentPetriState == PetriState.Paused;
             }
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="Petri.Editor.DebugClient"/> is paused.
+        /// Sets a value indicating whether this <see cref="Petri.Editor.DebugClient"/> is paused.
         /// The pause will be effective just after the states of the petri net that are active when the message is received have finished their execution.
         /// </summary>
         /// <value><c>true</c> if pause; otherwise, <c>false</c>.</value>
-        public bool Pause {
-            get {
-                return _pause;
-            }
-            set {
-                if(PetriRunning) {
-                    try {
-                        if(value) {
-                            this.SendObject(new JObject(new JProperty("type", "pause")));
-                        }
-                        else {
-                            this.SendObject(new JObject(new JProperty("type", "resume")));
-                        }
+        public void SetPause(bool pause)
+        {
+            if(PetriAlive) {
+                try {
+                    if(pause) {
+                        this.SendObject(new JObject(new JProperty("type", "pause")));
+                        CurrentPetriState = PetriState.Pausing;
                     }
-                    catch(Exception e) {
-                        NotifyUnrecoverableError(Configuration.GetLocalized("An error occurred in the debugger when pausing the petri net:") + " " + e.Message);
-                        this.Detach();
+                    else {
+                        this.SendObject(new JObject(new JProperty("type", "resume")));
                     }
                 }
-                else {
-                    _pause = false;
-                    NotifyStateChanged();
+                catch(Exception e) {
+                    NotifyUnrecoverableError(Configuration.GetLocalized("An error occurred in the debugger when pausing the petri net:") + " " + e.Message);
+                    this.Detach();
                 }
             }
         }
@@ -168,7 +163,6 @@ namespace Petri.Editor.Debugger
             if(success) {
                 CurrentSessionState = SessionState.Starting;
                 _receiverThread = new Thread(this.Receiver);
-                _pause = false;
                 _receiverThread.Start();
                 DateTime time = DateTime.Now.AddSeconds(1);
                 while(_socket == null && DateTime.Now < time) {
@@ -255,14 +249,10 @@ namespace Petri.Editor.Debugger
         /// <param name="stop">If set to <c>true</c> then the DebugServer is stopped as well as the DebugClient and petri net, whereas only the DebugClient and petri net are stopped if <c>false</c>.</param>
         void StopOrDetach(bool stop)
         {
-            _pause = false;
             if(CurrentSessionState == SessionState.Started) {
-                if(PetriRunning) {
-                    if(Pause) {
-                        this.Pause = false;
-                    }
+                if(CurrentPetriState != PetriState.Stopped && CurrentPetriState != PetriState.Stopped) {
                     StopPetri();
-                    _petriRunning = false;
+                    CurrentPetriState = PetriState.Stopped;
                 }
 
                 try {
@@ -292,13 +282,13 @@ namespace Petri.Editor.Debugger
         /// </summary>
         public void StartPetri()
         {
-            _pause = false;
             try {
-                if(!_petriRunning) {
+                if(CurrentPetriState == PetriState.Stopped) {
                     this.SendObject(new JObject(new JProperty("type", "start"),
                                                 new JProperty("payload",
                                                               new JObject(new JProperty("hash",
                                                                                         _document.Hash)))));
+                    CurrentPetriState = PetriState.Starting;
                 }
             }
             catch(Exception e) {
@@ -312,10 +302,10 @@ namespace Petri.Editor.Debugger
         /// </summary>
         public void StopPetri()
         {
-            _pause = false;
             try {
-                if(_petriRunning) {
+                if(CurrentPetriState != PetriState.Stopped && CurrentPetriState != PetriState.Stopping) {
                     this.SendObject(new JObject(new JProperty("type", "stop")));
+                    CurrentPetriState = PetriState.Stopping;
                 }
             }
             catch(Exception e) {
@@ -357,7 +347,7 @@ namespace Petri.Editor.Debugger
         /// </summary>
         public void UpdateBreakpoints()
         {
-            if(PetriRunning) {
+            if(PetriAlive) {
                 var breakpoints = new JArray();
                 foreach(var p in _debuggable.BaseDebugController.Breakpoints) {
                     breakpoints.Add(new JValue(p.ID));
@@ -375,7 +365,7 @@ namespace Petri.Editor.Debugger
         /// <param name="userData">Additional and optional user data that will be used to generate the code.</param>
         public void Evaluate(Code.Expression expression, params object[] userData)
         {
-            if(!PetriRunning) {
+            if(!PetriAlive) {
                 var literals = expression.GetLiterals();
                 foreach(var l in literals) {
                     if(l is Code.VariableExpression) {
@@ -510,7 +500,7 @@ namespace Petri.Editor.Debugger
 
                     if(msg["type"].ToString() == "ack") {
                         if(msg["payload"].ToString() == "start") {
-                            _petriRunning = true;
+                            CurrentPetriState = PetriState.Started;
                             NotifyStateChanged();
                             this.UpdateBreakpoints();
                             NotifyStatusMessage(Configuration.GetLocalized("The petri net is running…"));
@@ -519,7 +509,7 @@ namespace Petri.Editor.Debugger
                             StopPetri();
                         }
                         else if(msg["payload"].ToString() == "stop") {
-                            _petriRunning = false;
+                            CurrentPetriState = PetriState.Stopped;
                             NotifyStateChanged();
                             lock(_debuggable.BaseDebugController.ActiveStates) {
                                 _debuggable.BaseDebugController.ActiveStates.Clear();
@@ -535,12 +525,12 @@ namespace Petri.Editor.Debugger
                             }
                         }
                         else if(msg["payload"].ToString() == "pause") {
-                            _pause = true;
+                            CurrentPetriState = PetriState.Paused;
                             NotifyStateChanged();
                             NotifyStatusMessage(Configuration.GetLocalized("Paused."));
                         }
                         else if(msg["payload"].ToString() == "resume") {
-                            _pause = false;
+                            CurrentPetriState = PetriState.Started;
                             NotifyStateChanged();
                             NotifyStatusMessage(Configuration.GetLocalized("The petri net is running…"));
                         }
@@ -549,19 +539,19 @@ namespace Petri.Editor.Debugger
                         _startAfterFix = false;
                         NotifyServerError(msg["payload"].ToString());
 
-                        if(_petriRunning) {
+                        if(PetriAlive) {
                             this.StopPetri();
                         }
                     }
                     else if(msg["type"].ToString() == "detach" || msg["type"].ToString() == "detachAndExit") {
                         if(msg["payload"].ToString() == "kbye") {
                             CurrentSessionState = SessionState.Stopped;
-                            _petriRunning = false;
+                            CurrentPetriState = PetriState.Stopped;
                             NotifyStatusMessage(Configuration.GetLocalized("Disconnected."));
                         }
                         else {
                             CurrentSessionState = SessionState.Stopped;
-                            _petriRunning = false;
+                            CurrentPetriState = PetriState.Stopped;
 
                             throw new Exception(Configuration.GetLocalized("Remote debugger requested a session termination for reason:") + " " + msg["payload"].ToString());
                         }
@@ -696,7 +686,7 @@ namespace Petri.Editor.Debugger
         Runtime.DynamicLib _dynamicLib;
 
         bool _startAfterFix = false;
-        bool _petriRunning, _pause;
+        volatile PetriState _petriState;
         volatile SessionState _sessionState;
         Thread _receiverThread;
 
