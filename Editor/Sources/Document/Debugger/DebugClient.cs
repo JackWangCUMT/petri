@@ -596,6 +596,8 @@ namespace Petri.Editor.Debugger
             }
             catch(Exception) {
             }
+
+            _socket = null;
             NotifyStateChanged();
         }
 

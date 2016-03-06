@@ -34,7 +34,6 @@ namespace Petri.Editor.CLI.Debugger
             _inputManager = new InputManager();
 
             _actions.Add(new DebuggerAction(Exit,
-                                            false,
                                             "Quit",
                                             "Quit out of the petri net debugger.",
                                             "quit",
@@ -42,19 +41,29 @@ namespace Petri.Editor.CLI.Debugger
                                             "exit",
                                             "q"));
             _actions.Add(new DebuggerAction(PrintHelp,
-                                            false,
                                             "Show help",
                                             "Show a list of all debugger commands, or give details about specific commands.",
                                             "help [<cmd-name>]",
                                             "help",
                                             "h"));
             _actions.Add(new DebuggerAction(Run,
-                                            true,
                                             "Runs the petri net",
                                             "Runs the petri net.",
                                             "run",
                                             "run",
                                             "r"));
+            _actions.Add(new DebuggerAction(Attach,
+                                            "Attach to the debug server",
+                                            "Attaches this client to an active debug server.",
+                                            "attach",
+                                            "attach",
+                                            "at"));
+            _actions.Add(new DebuggerAction(Detach,
+                                            "Detach from the debug server",
+                                            "Detaches this client from its debug server.",
+                                            "detach",
+                                            "detach",
+                                            "de"));
 
             foreach(var action in _actions) {
                 _maxHelpWidth = Math.Max(_maxHelpWidth, action.Invocations[0].Length);
@@ -102,13 +111,6 @@ namespace Petri.Editor.CLI.Debugger
             Console.WriteLine(error);
         }
 
-        /*public void NextPrompt()
-        {
-            lock(_promptLock) {
-                Monitor.PulseAll(_promptLock);
-            }
-        }*/
-
         void ParseCommand(string line)
         {
             string command, args;
@@ -124,12 +126,6 @@ namespace Petri.Editor.CLI.Debugger
             try {
                 var action = _actionsMapping[command];
                 action.Execute(args);
-                //_currentAction = action;
-                /*_currentAction.IsRunning = true;
-                lock(_watchDogLock) {
-                    Monitor.PulseAll(_watchDogLock);
-                }*/
-
             }
             catch(KeyNotFoundException) {
                 Console.WriteLine("error: Unrecognized command '{0}'.", command);
@@ -191,7 +187,7 @@ namespace Petri.Editor.CLI.Debugger
                 }
 
                 Console.WriteLine();
-                Console.WriteLine("Current command aliases:");
+                Console.WriteLine("Command aliases:");
                 foreach(DebuggerAction a in _actions) {
                     for(int i = 1; i < a.Invocations.Count; ++i) {
                         Console.WriteLine("  " + a.Invocations[i].PadRight(_maxHelpAliasWidth) + " -- (" + a.Invocations[0] + ") " + a.Description);
@@ -200,25 +196,40 @@ namespace Petri.Editor.CLI.Debugger
             }
         }
 
-        void Run(string args)
+        void Attach(string args)
         {
             Client.Attach();
-            Client.StartPetri();
+            WaitFor(o => {
+                return Client.CurrentSessionState != DebugClient.SessionState.Starting;
+            });
         }
 
-        /*void WatchDog() {
-            while(_alive) {
-                lock(_watchDogLock) {
-                    while(Monitor.Wait(_watchDogLock, 20)) {
-                        while(_currentAction.IsRunning) {
-                            Thread.Sleep(10);
-                        }
-                        _currentAction = null;
-                        Monitor.PulseAll(_promptLock);
-                    }
-                }
+        void Detach(string args)
+        {
+            Client.Detach();
+            WaitFor(o => {
+                return Client.CurrentSessionState == DebugClient.SessionState.Stopped;
+            });
+        }
+            
+        void Run(string args)
+        {
+            if(Client.CurrentSessionState != DebugClient.SessionState.Started) {
+                NotifyUnrecoverableError("The debugger must be attached to the debug server to be able to run the petri net.\nTry 'attach'.");
             }
-        }*/
+            else {
+                Client.StartPetri();
+                WaitFor(o => {
+                    return Client.CurrentPetriState == DebugClient.PetriState.Stopped || Client.CurrentPetriState == DebugClient.PetriState.Paused;
+                });
+            }
+        }
+
+        static void WaitFor(Predicate<object> pred) {
+            while(!pred.Invoke(null)) {
+                Thread.Sleep(50);
+            }
+        }
 
         int _returnCode = 0;
         volatile bool _alive = true;
@@ -228,11 +239,6 @@ namespace Petri.Editor.CLI.Debugger
         int _maxHelpWidth = 0, _maxHelpAliasWidth = 0;
 
         InputManager _inputManager;
-
-        //volatile DebuggerAction _currentAction = null;
-
-        //object _promptLock = new object();
-        //object _watchDogLock = new object();
     }
 }
 
